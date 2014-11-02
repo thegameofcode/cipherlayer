@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "cipherlayer ===========",
   "main": "cipherlayer.js",
-  "dependencies": {},
+  "dependencies": {
+    "ciphertoken": "git+https://github.com/thegameofcode/ciphertoken.git#v0.0.3"
+  },
   "devDependencies": {
     "assert": "^1.1.2",
     "cucumber": "^0.4.4",
