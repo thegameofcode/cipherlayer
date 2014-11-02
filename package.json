@@ -1,0 +1,26 @@
+{
+  "name": "cipherlayer",
+  "version": "1.0.0",
+  "description": "cipherlayer ===========",
+  "main": "cipherlayer.js",
+  "dependencies": {},
+  "devDependencies": {
+    "assert": "^1.1.2",
+    "cucumber": "^0.4.4",
+    "request": "^2.47.0",
+    "restify": "^2.8.3"
+  },
+  "scripts": {
+    "test": "cucumber-js --require step_definitions --require support -f pretty"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thegameofcode/cipherlayer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thegameofcode/cipherlayer/issues"
+  },
+  "homepage": "https://github.com/thegameofcode/cipherlayer"
+}
