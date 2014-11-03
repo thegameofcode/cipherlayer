@@ -22,23 +22,32 @@ describe('server control ', function(){
         done();
     });
 
+    it('clean crypto keys', function(done){
+        cipherlayer.cleanCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
+        done();
+    });
+
     it('start & stops', function(done){
-        cipherlayer.start(PORT, function() {
+        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
+        cipherlayer.start(PORT, function(err) {
+            assert.equal(err,null);
             var client = net.connect({port:PORT}, function(){
-                client.end();
+                client.destroy();
 
                 cipherlayer.stop(function () {
                     var free = true;
                     var tester = net.createServer();
                     tester.once('error', function(err){
+                        console.log(err.code);
                         if(err.code === 'EADDRINUSE'){
                             free = false;
                         }
                     });
 
                     tester.once('listening', function(){
-                        tester.close();
-                        if(free) done();
+                        tester.close(function(){
+                            if(free) done();
+                        });
                     });
 
                     tester.listen(PORT);

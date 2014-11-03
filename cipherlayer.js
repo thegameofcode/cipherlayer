@@ -74,11 +74,15 @@ function setCryptoKeys(cipherKey, signKey, expiration){
     cToken = ciphertoken.create(cipherKey,signKey, {
         accessTokenExpirationMinutes: accessTokenExpiration
     });
+}
 
+function cleanCryptoKeys(){
+    cToken = null;
 }
 
 module.exports = {
     start : start,
     stop : stop,
-    setCryptoKeys : setCryptoKeys
+    setCryptoKeys : setCryptoKeys,
+    cleanCryptoKeys : cleanCryptoKeys
 };
