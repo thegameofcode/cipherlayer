@@ -59,13 +59,16 @@ describe('/auth', function(){
     });
 
     it('/login OK', function(done){
+        var username = 'validuser';
+        var password = 'validpassword';
+
         var options = {
             url: 'http://localhost:3000/auth/login',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
             method:'POST',
-            body : JSON.stringify({username:'validuser',password:'validpassword'})
+            body : JSON.stringify({username:username,password:password})
         };
 
         request(options, function(err,res,body) {
@@ -77,12 +80,12 @@ describe('/auth', function(){
             assert.notEqual(body.accessToken,undefined);
             var accessTokenInfo = cToken.getAccessTokenSet(body.accessToken);
             assert.equal(accessTokenInfo.err,null);
-            assert.notEqual(accessTokenInfo.consummerId,undefined);
+            assert.equal(accessTokenInfo.consummerId,'validuser');
 
             assert.notEqual(body.refreshToken,undefined);
             var refreshTokenInfo = cToken.getAccessTokenSet(body.refreshToken);
             assert.equal(refreshTokenInfo.err,null);
-            assert.notEqual(refreshTokenInfo.consummerId,undefined);
+            assert.equal(refreshTokenInfo.consummerId,'validuser');
 
             assert.equal(body.expiresIn, EXPIRATION*60);
             done();

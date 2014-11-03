@@ -10,10 +10,12 @@ function start(port, cbk){
         name: 'test-server'
     });
 
+    server.use(restify.bodyParser());
+
     server.post('/auth/login',function(req,res,next){
         var tokens = {
-            accessToken : cToken.createAccessToken('0'),
-            refreshToken : cToken.createAccessToken('0'),
+            accessToken : cToken.createAccessToken(req.body.username),
+            refreshToken : cToken.createAccessToken(req.body.username),
             expiresIn : accessTokenExpiration * 60
         };
         res.send(200,tokens);

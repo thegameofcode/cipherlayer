@@ -1,4 +1,4 @@
-Feature: client application logins into a protected backend
+Feature: client application logs in into a protected backend
 
   Scenario: client app logs in successfully
     Given a user of client app with valid credentials
