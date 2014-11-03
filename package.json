@@ -4,6 +4,7 @@
   "description": "cipherlayer ===========",
   "main": "cipherlayer.js",
   "dependencies": {
+    "async": "^0.9.0",
     "ciphertoken": "git+https://github.com/thegameofcode/ciphertoken.git#v0.0.3"
   },
   "devDependencies": {

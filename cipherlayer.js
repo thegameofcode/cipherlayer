@@ -1,5 +1,6 @@
 var restify = require('restify');
 var ciphertoken = require('ciphertoken');
+var userDao = require('./dao');
 
 var server = null;
 var cToken = null;
@@ -20,6 +21,17 @@ function start(port, cbk){
         };
         res.send(200,tokens);
         return next();
+    });
+
+    server.post('/user', function(req,res,next){
+        userDao.addUser(req.body.username,req.body.password,function(err,createdUser){
+            if(err){
+                res.send(409,{err:err.message});
+            } else {
+                res.send(201,createdUser);
+            }
+            return next();
+        });
     });
 
     server.listen(port, function () {
