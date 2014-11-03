@@ -17,6 +17,11 @@ var cToken = ciphertoken.create(CIPHER_KEY,SIGN_KEY, {
 
 describe('server control ', function(){
 
+    it('set crypto keys', function(done){
+        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
+        done();
+    });
+
     it('start & stops', function(done){
         cipherlayer.start(PORT, function() {
             var client = net.connect({port:PORT}, function(){
@@ -40,11 +45,13 @@ describe('server control ', function(){
                 });
             });
         });
-    })
+    });
 
-    it('set crypto keys', function(done){
-        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        done();
+    it('fail if started without crypto keys', function(done){
+        cipherlayer.start(PORT, function(err){
+            assert.equal(err.message, 'started_without_crypto_keys');
+            done();
+        });
     });
 });
 
@@ -67,6 +74,13 @@ describe('API',function(){
 
     describe('/auth', function(){
         describe('/login',function(){
+
+            beforeEach(function(done){
+                var username = 'validuser';
+                var password = 'validpassword';
+                postUser(username,password,done);
+            });
+
             it('POST 200', function(done){
                 var username = 'validuser';
                 var password = 'validpassword';
@@ -84,7 +98,6 @@ describe('API',function(){
                     assert.equal(err,null);
                     assert.equal(res.statusCode, 200);
                     body = JSON.parse(body);
-                    assert.notEqual(body,undefined);
 
                     assert.notEqual(body.accessToken,undefined);
                     var accessTokenInfo = cToken.getAccessTokenSet(body.accessToken);
@@ -97,6 +110,28 @@ describe('API',function(){
                     assert.equal(refreshTokenInfo.consummerId,'validuser');
 
                     assert.equal(body.expiresIn, EXPIRATION*60);
+                    done();
+                });
+            });
+
+            it('POST 409 invalid_credentials', function(done){
+                var username = 'validuser';
+                var password = 'invalidpassword';
+
+                var options = {
+                    url: 'http://localhost:3000/auth/login',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method:'POST',
+                    body : JSON.stringify({username:username,password:password})
+                };
+
+                request(options,function(err,res,body){
+                    assert.equal(err,null);
+                    assert.equal(res.statusCode, 409);
+                    body = JSON.parse(body);
+                    assert.notEqual(body.err,'invalid_credentials');
                     done();
                 });
             });
@@ -126,6 +161,33 @@ describe('API',function(){
                     body = JSON.parse(body);
                     assert.equal(body.err,'username_already_exists');
                     done();
+                });
+            });
+        });
+
+        it('DELETE 204', function(done){
+            dao.addUser(username,password, function(err,createdUser){
+                assert.equal(err,null);
+                assert.notEqual(createdUser,null);
+
+                var options = {
+                    url: 'http://localhost:3000/user',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method:'DELETE'
+                };
+
+                request(options, function(err,res,body){
+                    assert.equal(err,null);
+                    assert.equal(res.statusCode, 204);
+                    assert.equal(body,'');
+
+                    dao.countUsers(function(err,count){
+                        assert.equal(err,null);
+                        assert.equal(count,0);
+                        done();
+                    });
                 });
             });
         });

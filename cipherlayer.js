@@ -6,7 +6,13 @@ var server = null;
 var cToken = null;
 var accessTokenExpiration = 0;
 
+var ERROR_STARTED_WITHOUT_KEYS = 'started_without_crypto_keys';
+
 function start(port, cbk){
+    if (cToken == null) {
+        return cbk(new Error(ERROR_STARTED_WITHOUT_KEYS));
+    }
+
     server = restify.createServer({
         name: 'test-server'
     });
@@ -14,13 +20,19 @@ function start(port, cbk){
     server.use(restify.bodyParser());
 
     server.post('/auth/login',function(req,res,next){
-        var tokens = {
-            accessToken : cToken.createAccessToken(req.body.username),
-            refreshToken : cToken.createAccessToken(req.body.username),
-            expiresIn : accessTokenExpiration * 60
-        };
-        res.send(200,tokens);
-        return next();
+        userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
+            if(err) {
+                res.send(409,{err:err.message});
+            } else {
+                var tokens = {
+                    accessToken : cToken.createAccessToken(req.body.username),
+                    refreshToken : cToken.createAccessToken(req.body.username),
+                    expiresIn : accessTokenExpiration * 60
+                };
+                res.send(200,tokens);
+            }
+            return next();
+        });
     });
 
     server.post('/user', function(req,res,next){
@@ -34,12 +46,24 @@ function start(port, cbk){
         });
     });
 
+    server.del('/user', function(req,res,next){
+        userDao.deleteAllUsers(function(err){
+            if(err){
+                res.send(500,{err:err.message});
+            } else {
+                res.send(204);
+            }
+            return next();
+        });
+    });
+
     server.listen(port, function () {
         cbk();
     });
 }
 
 function stop(cbk){
+    cToken = null;
     server.close(function(){
         cbk();
     });
