@@ -51,6 +51,7 @@ function getFromUsernamePassword(username, password, cbk){
         } else if(foundUser.password != password) {
             cbk(new Error(ERROR_USER_NOT_FOUND), null);
         } else {
+            delete(foundUser.password);
             cbk(null, foundUser);
         }
     });

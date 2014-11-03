@@ -59,7 +59,7 @@ describe('user dao', function(){
             dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){
                 assert.equal(err,null);
                 assert.equal(foundUser.username,expectedUser.username);
-                assert.equal(foundUser.password,expectedUser.password);
+                assert.equal(foundUser.password,undefined);
                 done();
             });
         });

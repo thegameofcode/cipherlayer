@@ -14,7 +14,7 @@
     "restify": "^2.8.3"
   },
   "scripts": {
-    "test": "cucumber-js --require step_definitions --require support -f pretty"
+    "test": "./node_modules/mocha/bin/mocha tests && ./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
   },
   "repository": {
     "type": "git",
