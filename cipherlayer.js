@@ -35,7 +35,7 @@ function start(port, cbk){
         });
     });
 
-    server.post('/user', function(req,res,next){
+    server.post('/auth/user', function(req,res,next){
         userDao.addUser(req.body.username,req.body.password,function(err,createdUser){
             if(err){
                 res.send(409,{err:err.message});
@@ -49,7 +49,7 @@ function start(port, cbk){
         });
     });
 
-    server.del('/user', function(req,res,next){
+    server.del('/auth/user', function(req,res,next){
         userDao.deleteAllUsers(function(err){
             if(err){
                 res.send(500,{err:err.message});

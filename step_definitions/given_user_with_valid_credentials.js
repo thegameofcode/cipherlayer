@@ -8,7 +8,7 @@ module.exports = function(){
         world.getUser().password = 'valid_password';
 
         var options = {
-            url: 'http://localhost:3000/user',
+            url: 'http://localhost:3000/auth/user',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },

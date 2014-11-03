@@ -16,7 +16,7 @@ module.exports = function(){
             assert.equal(err,null);
 
             var options = {
-                url: 'http://localhost:3000/user',
+                url: 'http://localhost:3000/auth/user',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },

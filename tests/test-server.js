@@ -149,59 +149,58 @@ describe('API',function(){
             });
         });
 
-    });
+        describe('/user', function(){
+            var username = 'validuser';
+            var password = 'validpassword';
 
-    describe('/user', function(){
-        var username = 'validuser';
-        var password = 'validpassword';
-
-        it('POST 201 created', function(done){
-            postUser(username,password, function(err,res,body){
-                assert.equal(err,null);
-                assert.equal(res.statusCode, 201);
-                body = JSON.parse(body);
-                assert.equal(body.username, username);
-                assert.equal(body.password, undefined);
-                done();
-            });
-        });
-
-        it('POST 409 already_exists', function(done){
-            postUser(username,password, function(err,res,body){
-                assert.equal(err,null);
-                assert.equal(res.statusCode, 201);
+            it('POST 201 created', function(done){
                 postUser(username,password, function(err,res,body){
                     assert.equal(err,null);
-                    assert.equal(res.statusCode, 409);
+                    assert.equal(res.statusCode, 201);
                     body = JSON.parse(body);
-                    assert.equal(body.err,'username_already_exists');
+                    assert.equal(body.username, username);
+                    assert.equal(body.password, undefined);
                     done();
                 });
             });
-        });
 
-        it('DELETE 204', function(done){
-            dao.addUser(username,password, function(err,createdUser){
-                assert.equal(err,null);
-                assert.notEqual(createdUser,null);
-
-                var options = {
-                    url: 'http://localhost:3000/user',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
-                    method:'DELETE'
-                };
-
-                request(options, function(err,res,body){
+            it('POST 409 already_exists', function(done){
+                postUser(username,password, function(err,res,body){
                     assert.equal(err,null);
-                    assert.equal(res.statusCode, 204);
-                    assert.equal(body,'');
-
-                    dao.countUsers(function(err,count){
+                    assert.equal(res.statusCode, 201);
+                    postUser(username,password, function(err,res,body){
                         assert.equal(err,null);
-                        assert.equal(count,0);
+                        assert.equal(res.statusCode, 409);
+                        body = JSON.parse(body);
+                        assert.equal(body.err,'username_already_exists');
                         done();
+                    });
+                });
+            });
+
+            it('DELETE 204', function(done){
+                dao.addUser(username,password, function(err,createdUser){
+                    assert.equal(err,null);
+                    assert.notEqual(createdUser,null);
+
+                    var options = {
+                        url: 'http://localhost:3000/auth/user',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        method:'DELETE'
+                    };
+
+                    request(options, function(err,res,body){
+                        assert.equal(err,null);
+                        assert.equal(res.statusCode, 204);
+                        assert.equal(body,'');
+
+                        dao.countUsers(function(err,count){
+                            assert.equal(err,null);
+                            assert.equal(count,0);
+                            done();
+                        });
                     });
                 });
             });
@@ -210,7 +209,7 @@ describe('API',function(){
 
     function postUser(username,password,cbk){
         var options = {
-            url: 'http://localhost:3000/user',
+            url: 'http://localhost:3000/auth/user',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
