@@ -15,7 +15,9 @@
     "mocha": "^2.0.1"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha tests && ./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
+    "test": "npm run-script mocha && npm run-script cucumber",
+    "mocha": "./node_modules/mocha/bin/mocha tests",
+    "cucumber":"./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
   },
   "repository": {
     "type": "git",
