@@ -27,32 +27,35 @@ describe('server control ', function(){
         done();
     });
 
-    it('start & stops', function(done){
+    it('start', function(done){
         cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
         cipherlayer.start(PORT, function(err) {
             assert.equal(err,null);
             var client = net.connect({port:PORT}, function(){
                 client.destroy();
+                done();
+            });
+        });
+    });
 
-                cipherlayer.stop(function () {
-                    var free = true;
-                    var tester = net.createServer();
-                    tester.once('error', function(err){
-                        console.log(err.code);
-                        if(err.code === 'EADDRINUSE'){
-                            free = false;
-                        }
-                    });
+    it('stop', function(done){
+        cipherlayer.stop(function () {
+            var free = true;
+            var tester = net.createServer();
+            tester.once('error', function(err){
+                console.log(err.code);
+                if(err.code === 'EADDRINUSE'){
+                    free = false;
+                }
+            });
 
-                    tester.once('listening', function(){
-                        tester.close(function(){
-                            if(free) done();
-                        });
-                    });
-
-                    tester.listen(PORT);
+            tester.once('listening', function(){
+                tester.close(function(){
+                    if(free) done();
                 });
             });
+
+            tester.listen(PORT);
         });
     });
 
@@ -152,10 +155,13 @@ describe('API',function(){
         var username = 'validuser';
         var password = 'validpassword';
 
-        it('POST 201', function(done){
+        it('POST 201 created', function(done){
             postUser(username,password, function(err,res,body){
                 assert.equal(err,null);
                 assert.equal(res.statusCode, 201);
+                body = JSON.parse(body);
+                assert.equal(body.username, username);
+                assert.equal(body.password, undefined);
                 done();
             });
         });

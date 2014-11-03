@@ -40,7 +40,10 @@ function start(port, cbk){
             if(err){
                 res.send(409,{err:err.message});
             } else {
-                res.send(201,createdUser);
+                var responseUser = {
+                    username: createdUser.username
+                };
+                res.send(201,responseUser);
             }
             return next();
         });
