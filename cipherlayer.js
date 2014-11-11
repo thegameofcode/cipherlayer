@@ -4,7 +4,7 @@ var userDao = require('./dao');
 
 var server = null;
 var cToken = null;
-var accessTokenExpiration = 0;
+var accessTokenExpiration = 10;
 
 var ERROR_STARTED_WITHOUT_KEYS = 'started_without_crypto_keys';
 

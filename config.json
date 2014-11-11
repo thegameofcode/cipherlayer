@@ -1,0 +1,8 @@
+{
+  "listen_port" : 3000,
+  "accessToken" : {
+    "cipherKey" : "zUTaFRu7raze",
+    "signKey" : "3aBuvuQatres",
+    "expiration" : 10
+  }
+}
