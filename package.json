@@ -10,14 +10,15 @@
   "devDependencies": {
     "assert": "^1.1.2",
     "cucumber": "^0.4.4",
+    "mocha": "^2.0.1",
+    "nock": "^0.48.2",
     "request": "^2.47.0",
-    "restify": "^2.8.3",
-    "mocha": "^2.0.1"
+    "restify": "^2.8.3"
   },
   "scripts": {
     "test": "npm run-script mocha && npm run-script cucumber",
     "mocha": "./node_modules/mocha/bin/mocha tests",
-    "cucumber":"./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
+    "cucumber": "./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
   },
   "repository": {
     "type": "git",

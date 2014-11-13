@@ -1,5 +1,6 @@
 {
-  "listen_port" : 3000,
+  "public_port" : 3000,
+  "private_port" : 3001,
   "accessToken" : {
     "cipherKey" : "zUTaFRu7raze",
     "signKey" : "3aBuvuQatres",

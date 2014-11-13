@@ -4,7 +4,9 @@ var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
 
-var PORT = 3000;
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+
 var CIPHER_KEY = 'zUTaFRu7raze';
 var SIGN_KEY = '3aBuvuQatres';
 var EXPIRATION = 10;
@@ -12,7 +14,7 @@ var EXPIRATION = 10;
 module.exports = function(){
     this.Before(function(done){
         cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        cipherlayer.start(PORT, function(err){
+        cipherlayer.start(config.public_port, config.private_port, function(err){
             assert.equal(err,null);
 
             var options = {

@@ -5,7 +5,8 @@ var request = require('request');
 var dao = require('../dao.js');
 var async = require('async');
 
-var PORT = 3000;
+var PUBLIC_PORT = 3000;
+var PRIVATE_PORT = 3001;
 var CIPHER_KEY = 'zUTaFRu7raze';
 var SIGN_KEY = '3aBuvuQatres';
 var EXPIRATION = 10;
@@ -29,9 +30,9 @@ describe('server control ', function(){
 
     it('start', function(done){
         cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        cipherlayer.start(PORT, function(err) {
+        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, function(err) {
             assert.equal(err,null);
-            var client = net.connect({port:PORT}, function(){
+            var client = net.connect({port:PUBLIC_PORT}, function(){
                 client.destroy();
                 done();
             });
@@ -55,12 +56,12 @@ describe('server control ', function(){
                 });
             });
 
-            tester.listen(PORT);
+            tester.listen(PUBLIC_PORT);
         });
     });
 
     it('fail if started without crypto keys', function(done){
-        cipherlayer.start(PORT, function(err){
+        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, function(err){
             assert.equal(err.message, 'started_without_crypto_keys');
             done();
         });
@@ -76,7 +77,7 @@ describe('/auth', function(){
                 dao.deleteAllUsers(done);
             },
             function(done){
-                cipherlayer.start(PORT, done);
+                cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, done);
             }
         ],done);
     });

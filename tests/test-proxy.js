@@ -19,7 +19,7 @@ describe('proxy', function(){
                 });
             },
             function(done){
-                var client = net.connect({port:config.listen_port}, function(){
+                var client = net.connect({port:config.public_port}, function(){
                     client.destroy();
                     cipherlayer.kill('SIGTERM');
                     done();

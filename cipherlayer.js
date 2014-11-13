@@ -1,6 +1,7 @@
 var restify = require('restify');
 var ciphertoken = require('ciphertoken');
 var userDao = require('./dao');
+var request = require('request');
 
 var server = null;
 var cToken = null;
@@ -8,7 +9,7 @@ var accessTokenExpiration = 10;
 
 var ERROR_STARTED_WITHOUT_KEYS = 'started_without_crypto_keys';
 
-function start(port, cbk){
+function start(public_port, private_port, cbk){
     if (cToken == null) {
         return cbk(new Error(ERROR_STARTED_WITHOUT_KEYS));
     }
@@ -22,7 +23,7 @@ function start(port, cbk){
     server.post('/auth/login',function(req,res,next){
         userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
             if(err) {
-                res.send(409,{err:err.message});
+                res.send(409,{err: err.message});
             } else {
                 var tokens = {
                     accessToken : cToken.createAccessToken(req.body.username),
@@ -31,7 +32,7 @@ function start(port, cbk){
                 };
                 res.send(200,tokens);
             }
-            return next();
+            return next(false);
         });
     });
 
@@ -45,7 +46,7 @@ function start(port, cbk){
                 };
                 res.send(201,responseUser);
             }
-            return next();
+            return next(false);
         });
     });
 
@@ -56,11 +57,34 @@ function start(port, cbk){
             } else {
                 res.send(204);
             }
-            return next();
+            return next(false);
         });
     });
 
-    server.listen(port, function () {
+    function handleAll(req,res,next){
+        var options = {
+            url: 'http://localhost:' + private_port + req.url,
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            method: req.method,
+            body : req.body
+        };
+
+        request(options, function(err,private_res,body) {
+            if(err) {
+                res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
+            } else {
+                res.send(Number(private_res.statusCode), JSON.parse(body));
+            }
+            next();
+        });
+    }
+
+    server.get(/(.*)/,handleAll);
+    server.post(/(.*)/,handleAll);
+
+    server.listen(public_port, function () {
         cbk();
     });
 }
