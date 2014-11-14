@@ -10,7 +10,8 @@ module.exports = function(){
         var options = {
             url: 'http://localhost:' + config.public_port + PATH,
             headers: {
-                'Content-Type': 'application/json; charset=utf-8'
+                'Content-Type': 'application/json; charset=utf-8',
+                'Authorization': 'bearer ' + world.getTokens().accessToken
             },
             method: METHOD
         };

@@ -62,10 +62,29 @@ function start(public_port, private_port, cbk){
     });
 
     function handleAll(req,res,next){
+        var type = 'bearer ';	// !! keep the space at the end for length
+        var auth = req.header('Authorization');
+        if ( !auth || auth.length <= type.length ){
+            res.send(401, {err:'unauthorized'});
+            return next();
+        }
+
+        var accessToken = auth.substring( type.length );
+        var token = cToken.getAccessTokenSet(accessToken);
+
+        if ( token.err ) {
+            if ( token.err.err === 'accesstoken_expired' ) {
+                res.send(401,{err:'access_token_expired'});
+            }
+            res.send(401,{err:'access_token_invalid'});
+            return next();
+        }
+
         var options = {
             url: 'http://localhost:' + private_port + req.url,
             headers: {
-                'Content-Type': 'application/json; charset=utf-8'
+                'Content-Type': 'application/json; charset=utf-8',
+                'x-user-id': token.consummerId
             },
             method: req.method,
             body : req.body

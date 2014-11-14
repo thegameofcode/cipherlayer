@@ -28,6 +28,5 @@ describe('proxy', function(){
         ],function(){
             done();
         });
-
     });
 });

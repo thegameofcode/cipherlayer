@@ -43,7 +43,11 @@ module.exports = function(){
                 request(options, function(err,res,body) {
                     assert.equal(err,null);
                     world.getResponse().statusCode = res.statusCode;
-                    world.getResponse().body = JSON.parse(body);
+                    body = JSON.parse(body);
+                    world.getResponse().body = body;
+                    world.getTokens().accessToken = body.accessToken;
+                    world.getTokens().refreshToken = body.refreshToken;
+                    world.getTokens().expiresIn = body.expiresIn;
                     done();
                 });
             }
