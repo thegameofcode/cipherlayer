@@ -1,7 +1,7 @@
 {
   "name": "cipherlayer",
-  "version": "1.0.0",
-  "description": "cipherlayer ===========",
+  "version": "0.0.1",
+  "description": "cipherlayer",
   "main": "cipherlayer.js",
   "dependencies": {
     "async": "^0.9.0",
@@ -24,7 +24,7 @@
     "type": "git",
     "url": "https://github.com/thegameofcode/cipherlayer.git"
   },
-  "author": "",
+  "author": "luismesas",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/thegameofcode/cipherlayer/issues"
