@@ -90,7 +90,7 @@ describe('/auth', function(){
         beforeEach(function(done){
             var username = 'validuser';
             var password = 'validpassword';
-            dao.addUser(username,password,done);
+            dao.addUser(null,username,password,done);
         });
 
         it('POST 200', function(done){
@@ -150,7 +150,6 @@ describe('/auth', function(){
     });
 
     describe('/user', function(){
-        var url = url + '/user';
         var username = 'validuser';
         var password = 'validpassword';
 
@@ -175,7 +174,7 @@ describe('/auth', function(){
         });
 
         it('POST 409 already_exists', function(done){
-            dao.addUser(username,password, function(err,createdUser){
+            dao.addUser(null,username,password, function(err,createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, null);
 
@@ -199,7 +198,7 @@ describe('/auth', function(){
         });
 
         it('DELETE 204', function(done){
-            dao.addUser(username,password, function(err,createdUser){
+            dao.addUser(null, username,password, function(err,createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser,null);
 

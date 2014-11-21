@@ -1,24 +1,20 @@
-var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
+var world = require('../support/world');
 
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
-    this.When(/^the application makes a (.*) with (.*) to a protected (.*)$/, function (METHOD, PAYLOAD, PATH, callback) {
+    this.When(/^the client makes a pass throught (.*) to (.*) with the following (.*) in the body$/, function (METHOD, PATH, PUBLIC_PAYLOAD, callback) {
         var options = {
             url: 'http://localhost:' + config.public_port + PATH,
             headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Authorization': 'bearer ' + world.getTokens().accessToken
+                'Content-Type': 'application/json; charset=utf-8'
             },
-            method: METHOD
+            method: METHOD,
+            body: PUBLIC_PAYLOAD //JSON.stringify(PUBLIC_PAYLOAD)
         };
-
-        if (METHOD == 'POST'){
-            options.body = PAYLOAD
-        }
 
         request(options, function(err,res,body) {
             assert.equal(err,null);
@@ -27,4 +23,4 @@ module.exports = function(){
             callback();
         });
     });
-};
+}

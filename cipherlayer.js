@@ -2,6 +2,7 @@ var restify = require('restify');
 var ciphertoken = require('ciphertoken');
 var userDao = require('./dao');
 var request = require('request');
+var clone = require('clone');
 
 var server = null;
 var cToken = null;
@@ -26,8 +27,8 @@ function start(public_port, private_port, cbk){
                 res.send(409,{err: err.message});
             } else {
                 var tokens = {
-                    accessToken : cToken.createAccessToken(req.body.username),
-                    refreshToken : cToken.createAccessToken(req.body.username),
+                    accessToken : cToken.createAccessToken(foundUser.username),
+                    refreshToken : cToken.createAccessToken(foundUser.username),
                     expiresIn : accessTokenExpiration * 60
                 };
                 res.send(200,tokens);
@@ -37,7 +38,7 @@ function start(public_port, private_port, cbk){
     });
 
     server.post('/auth/user', function(req,res,next){
-        userDao.addUser(req.body.username,req.body.password,function(err,createdUser){
+        userDao.addUser(null, req.body.username,req.body.password,function(err,createdUser){
             if(err){
                 res.send(409,{err:err.message});
             } else {
@@ -61,9 +62,62 @@ function start(public_port, private_port, cbk){
         });
     });
 
+    server.post('/api/profile', function(req,res,next){
+        var body = clone(req.body);
+        var user = {
+            username : body.email,
+            password : body.password
+        };
+        delete(body.password);
+
+        var options = {
+            url: 'http://localhost:' + private_port + req.url,
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            method: req.method,
+            body : JSON.stringify(body)
+        };
+
+        request(options, function (err, private_res, body) {
+            if (err) {
+                res.send(500, {
+                    err: 'auth_proxy_error',
+                    des: 'there was an internal error when redirecting the call to protected service'
+                });
+                return next(false);
+            } else {
+                user.id = body.id;
+
+                userDao.addUser(user.id, user.username, user.password, function (err, createdUser) {
+                    if (err) {
+                        res.send(409, {err: err.message});
+                        return next(false);
+                    } else {
+                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password,function(err,foundUser){
+                            if(err) {
+                                res.send(409,{err: err.message});
+                            } else {
+                                var tokens = {
+                                    accessToken : cToken.createAccessToken(foundUser.username),
+                                    refreshToken : cToken.createAccessToken(foundUser.username),
+                                    expiresIn : accessTokenExpiration * 60
+                                };
+                                res.send(201,tokens);
+                            }
+                            return next(false);
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+
     function handleAll(req,res,next){
         var type = 'bearer ';	// !! keep the space at the end for length
         var auth = req.header('Authorization');
+
         if ( !auth || auth.length <= type.length ){
             res.send(401, {err:'unauthorized'});
             return next();
@@ -87,7 +141,7 @@ function start(public_port, private_port, cbk){
                 'x-user-id': token.consummerId
             },
             method: req.method,
-            body : req.body
+            body : JSON.stringify(req.body)
         };
 
         request(options, function(err,private_res,body) {

@@ -5,6 +5,7 @@ describe('user dao', function(){
 
     var users = [
         {
+            id:'a1b2c3d4e5f6',
             username:'user1',
             password:'pass1'
         }
@@ -24,8 +25,9 @@ describe('user dao', function(){
 
     it('add', function(done){
         var expectedUser = users[0];
-        dao.addUser(expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(expectedUser.id, expectedUser.username, expectedUser.password, function(err,createdUser){
             assert.equal(err,null);
+            assert.equal(createdUser._id,expectedUser.id);
             assert.equal(createdUser.username,expectedUser.username);
             assert.equal(createdUser.password,expectedUser.password);
             dao.countUsers(function(err,count){
@@ -38,11 +40,11 @@ describe('user dao', function(){
 
     it('already exists', function(done){
         var expectedUser = users[0];
-        dao.addUser(expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser.username,expectedUser.username);
             assert.equal(createdUser.password,expectedUser.password);
-            dao.addUser(expectedUser.username,expectedUser.password,function(err,createdUser){
+            dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
                 assert.equal(err.message,'username_already_exists');
                 assert.equal(createdUser,null);
                 done();
@@ -53,7 +55,7 @@ describe('user dao', function(){
 
     it('getFromUsernamePassword', function(done){
         var expectedUser = users[0];
-        dao.addUser(expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){

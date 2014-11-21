@@ -5,11 +5,12 @@ var users = [];
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
 
-function addUser(username, password, cbk){
+function addUser(id, username, password, cbk){
     getFromUsername(username, function(err,foundUser){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
                 var user = {
+                    _id : id,
                     username: username,
                     password: password
                 };

@@ -5,25 +5,22 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
-    this.Given(/^protected service replies to a (.*) request to (.*) with status (.*) and a body (.*)$/, function (METHOD, PATH, STATUS, PAYLOAD, callback){
-        var scope = nock('http://localhost:'+config.private_port, {
+    this.Given(/^a protected service replies to a GET request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
+        nock('http://localhost:'+config.private_port, {
             reqheaders: {
-                'x-user-id': world.getUser().username
+                'Content-Type': 'application/json; charset=utf-8',
+                'x-user-id' : world.getUser().username
             }
-        });
+        }).get(PATH).reply(STATUS, JSON.parse(RESPONSE_PAYLOAD));
 
-        switch(METHOD){
-            case 'GET':
-                scope = scope.get(PATH);
-                break;
-            case 'POST':
-                scope = scope.post(PATH);
-                break;
-            default:
-                return callback.fail('method '+ METHOD +' is not defined in step_definition');
-        }
+        callback();
+    });
 
-        scope.reply(STATUS, JSON.parse(PAYLOAD));
+    this.Given(/^a protected service replies to a POST request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
+        nock('http://localhost:'+config.private_port)
+            .post(PATH, JSON.parse(REQUEST_PAYLOAD))
+            .reply(STATUS, JSON.parse(RESPONSE_PAYLOAD));
+
         callback();
     });
 };

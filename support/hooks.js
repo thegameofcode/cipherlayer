@@ -31,7 +31,6 @@ module.exports = function(){
                 assert.equal(body,'');
                 done();
             });
-
         });
     });
 
