@@ -1,6 +1,8 @@
 var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
     this.Given(/^a user of client app with valid credentials$/, function (callback) {
@@ -8,7 +10,7 @@ module.exports = function(){
         world.getUser().password = 'valid_password';
 
         var options = {
-            url: 'http://localhost:3000/auth/user',
+            url: 'http://localhost:'+config.public_port+'/auth/user',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },

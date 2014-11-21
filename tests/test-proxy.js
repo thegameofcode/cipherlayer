@@ -8,13 +8,9 @@ var nock = require('nock');
 var request = require('request');
 var cipherlayer = require('../cipherlayer');
 
-var CIPHER_KEY = 'zUTaFRu7raze';
-var SIGN_KEY = '3aBuvuQatres';
-var EXPIRATION = 10;
-
 var ciphertoken = require('ciphertoken');
-var cToken = ciphertoken.create(CIPHER_KEY,SIGN_KEY, {
-    accessTokenExpirationMinutes: EXPIRATION
+var cToken = ciphertoken.create(config.accessToken.cipherKey, config.accessToken.signKey, {
+    accessTokenExpirationMinutes: config.accessToken.expiration
 });
 
 describe('proxy', function(){
@@ -105,7 +101,7 @@ describe('proxy', function(){
                 assert.equal(refreshTokenInfo.err,null);
                 assert.equal(refreshTokenInfo.consummerId,expectedUserId);
 
-                assert.equal(body.expiresIn, EXPIRATION*60);
+                assert.equal(body.expiresIn, config.accessToken.expiration*60);
                 done();
             });
         });

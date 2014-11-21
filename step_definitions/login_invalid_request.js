@@ -1,13 +1,15 @@
 var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
     this.When(/^the client app requests log in the protected application with invalid credentials$/, function (callback) {
         world.getUser().password = '';
 
         var options = {
-            url: 'http://localhost:3000/auth/login',
+            url: 'http://localhost:'+config.public_port+'/auth/login',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },

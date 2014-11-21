@@ -1,6 +1,6 @@
 {
-  "public_port" : 3000,
-  "private_port" : 3001,
+  "public_port" : 3010,
+  "private_port" : 3011,
   "accessToken" : {
     "cipherKey" : "zUTaFRu7raze",
     "signKey" : "3aBuvuQatres",

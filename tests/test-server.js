@@ -3,35 +3,31 @@ var assert = require('assert');
 var net = require('net');
 var request = require('request');
 var dao = require('../dao.js');
-
-var PUBLIC_PORT = 3000;
-var PRIVATE_PORT = 3001;
-var CIPHER_KEY = 'zUTaFRu7raze';
-var SIGN_KEY = '3aBuvuQatres';
-var EXPIRATION = 10;
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 var ciphertoken = require('ciphertoken');
-var cToken = ciphertoken.create(CIPHER_KEY,SIGN_KEY, {
-    accessTokenExpirationMinutes: EXPIRATION
+var cToken = ciphertoken.create(config.accessToken.cipherKey, config.accessToken.signKey, {
+    accessTokenExpirationMinutes: config.accessToken.expiration
 });
 
 describe('server control ', function(){
 
     it('set crypto keys', function(done){
-        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
+        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
         done();
     });
 
     it('clean crypto keys', function(done){
-        cipherlayer.cleanCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
+        cipherlayer.cleanCryptoKeys();
         done();
     });
 
     it('start', function(done){
-        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, function(err) {
+        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
+        cipherlayer.start(config.public_port, config.private_port, function(err) {
             assert.equal(err,null);
-            var client = net.connect({port:PUBLIC_PORT}, function(){
+            var client = net.connect({port:config.public_port}, function(){
                 client.destroy();
                 done();
             });
@@ -55,12 +51,12 @@ describe('server control ', function(){
                 });
             });
 
-            tester.listen(PUBLIC_PORT);
+            tester.listen(config.public_port);
         });
     });
 
     it('fail if started without crypto keys', function(done){
-        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, function(err){
+        cipherlayer.start(config.public_port, config.private_port, function(err){
             assert.equal(err.message, 'started_without_crypto_keys');
             done();
         });
@@ -70,8 +66,8 @@ describe('server control ', function(){
 describe('/auth', function(){
 
     beforeEach(function(done){
-        cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, done);
+        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
+        cipherlayer.start(config.public_port, config.private_port, done);
     });
 
     afterEach(function(done){
@@ -95,7 +91,7 @@ describe('/auth', function(){
             var password = 'validpassword';
 
             var options = {
-                url: 'http://localhost:3000/auth/login',
+                url: 'http://localhost:'+config.public_port+'/auth/login',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
@@ -118,7 +114,7 @@ describe('/auth', function(){
                 assert.equal(refreshTokenInfo.err,null);
                 assert.equal(refreshTokenInfo.consummerId,'validuser');
 
-                assert.equal(body.expiresIn, EXPIRATION*60);
+                assert.equal(body.expiresIn, config.accessToken.expiration*60);
                 done();
             });
         });
@@ -128,7 +124,7 @@ describe('/auth', function(){
             var password = 'invalidpassword';
 
             var options = {
-                url: 'http://localhost:3000/auth/login',
+                url: 'http://localhost:'+config.public_port+'/auth/login',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
@@ -159,7 +155,7 @@ describe('/auth', function(){
 
         it('POST 201 created', function(done){
             var options = {
-                url: 'http://localhost:3000/auth/user',
+                url: 'http://localhost:'+config.public_port+'/auth/user',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
@@ -183,7 +179,7 @@ describe('/auth', function(){
                 assert.notEqual(createdUser, null);
 
                 var options = {
-                    url: 'http://localhost:3000/auth/user',
+                    url: 'http://localhost:'+config.public_port+'/auth/user',
                     headers: {
                         'Content-Type': 'application/json; charset=utf-8'
                     },
@@ -207,7 +203,7 @@ describe('/auth', function(){
                 assert.notEqual(createdUser,null);
 
                 var options = {
-                    url: 'http://localhost:3000/auth/user',
+                    url: 'http://localhost:'+config.public_port+'/auth/user',
                     headers: {
                         'Content-Type': 'application/json; charset=utf-8'
                     },
