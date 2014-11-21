@@ -7,7 +7,7 @@
     "async": "^0.9.0",
     "ciphertoken": "git+https://github.com/thegameofcode/ciphertoken.git#v0.0.3",
     "clone": "^0.1.18",
-    "debug": "^2.1.0"
+    "mongodb": "^1.4.22"
   },
   "devDependencies": {
     "assert": "^1.1.2",
@@ -20,7 +20,8 @@
   "scripts": {
     "test": "npm run-script mocha && npm run-script cucumber",
     "mocha": "./node_modules/mocha/bin/mocha tests",
-    "cucumber": "./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty"
+    "cucumber": "./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty",
+    "local": "node main.js"
   },
   "repository": {
     "type": "git",

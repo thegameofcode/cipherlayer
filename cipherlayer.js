@@ -3,6 +3,7 @@ var ciphertoken = require('ciphertoken');
 var userDao = require('./dao');
 var request = require('request');
 var clone = require('clone');
+var async = require('async');
 
 var server = null;
 var cToken = null;
@@ -10,11 +11,19 @@ var accessTokenExpiration = 10;
 
 var ERROR_STARTED_WITHOUT_KEYS = 'started_without_crypto_keys';
 
-function start(public_port, private_port, cbk){
-    if (cToken == null) {
-        return cbk(new Error(ERROR_STARTED_WITHOUT_KEYS));
-    }
+function startDaos(cbk){
+    userDao.connect(function(){
+        cbk();
+    });
+}
 
+function stopDaos(cbk){
+    userDao.disconnect(function(){
+        cbk();
+    });
+}
+
+function startListener(publicPort, privatePort, cbk){
     server = restify.createServer({
         name: 'test-server'
     });
@@ -71,7 +80,7 @@ function start(public_port, private_port, cbk){
         delete(body.password);
 
         var options = {
-            url: 'http://localhost:' + private_port + req.url,
+            url: 'http://localhost:' + privatePort + req.url,
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
@@ -87,6 +96,7 @@ function start(public_port, private_port, cbk){
                 });
                 return next(false);
             } else {
+                body = JSON.parse(body);
                 user.id = body.id;
 
                 userDao.addUser(user.id, user.username, user.password, function (err, createdUser) {
@@ -99,8 +109,8 @@ function start(public_port, private_port, cbk){
                                 res.send(409,{err: err.message});
                             } else {
                                 var tokens = {
-                                    accessToken : cToken.createAccessToken(foundUser.username),
-                                    refreshToken : cToken.createAccessToken(foundUser.username),
+                                    accessToken : cToken.createAccessToken(foundUser._id),
+                                    refreshToken : cToken.createAccessToken(foundUser._id),
                                     expiresIn : accessTokenExpiration * 60
                                 };
                                 res.send(201,tokens);
@@ -112,7 +122,6 @@ function start(public_port, private_port, cbk){
             }
         });
     });
-
 
     function handleAll(req,res,next){
         var type = 'bearer ';	// !! keep the space at the end for length
@@ -135,7 +144,7 @@ function start(public_port, private_port, cbk){
         }
 
         var options = {
-            url: 'http://localhost:' + private_port + req.url,
+            url: 'http://localhost:' + privatePort + req.url,
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
                 'x-user-id': token.consummerId
@@ -157,15 +166,40 @@ function start(public_port, private_port, cbk){
     server.get(/(.*)/,handleAll);
     server.post(/(.*)/,handleAll);
 
-    server.listen(public_port, function () {
+    server.listen(publicPort, function(){
         cbk();
     });
 }
 
-function stop(cbk){
+function stopListener(cbk){
     cToken = null;
     server.close(function(){
         cbk();
+    });
+}
+
+function start(publicPort, privatePort, cbk){
+
+    if (cToken == null) {
+        return cbk(new Error(ERROR_STARTED_WITHOUT_KEYS));
+    }
+
+    async.series([
+        startDaos,
+        function(done){
+            startListener(publicPort, privatePort, done);
+        }
+    ],function(err){
+        cbk(err);
+    });
+}
+
+function stop(cbk){
+    async.series([
+        stopDaos,
+        stopListener
+    ],function(err){
+        cbk(err);
     });
 }
 

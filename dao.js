@@ -1,9 +1,32 @@
 var async = require('async');
-
-var users = [];
+var mongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
+
+//db connection
+var url = config.db.conn;
+var db;
+var collection;
+
+function connect(cbk){
+    mongoClient.connect(url, function(err, connectedDb){
+        assert.equal(err,null);
+        db = connectedDb;
+
+        collection = connectedDb.collection('users');
+        cbk();
+    });
+}
+
+function disconnect(cbk){
+    db.close(function(err,result){
+        cbk(err);
+    });
+}
 
 function addUser(id, username, password, cbk){
     getFromUsername(username, function(err,foundUser){
@@ -14,8 +37,14 @@ function addUser(id, username, password, cbk){
                     username: username,
                     password: password
                 };
-                users.push(user);
-                cbk(null, user);
+
+                collection.insert(user, function(err, result){
+                    if(err) {
+                        return cbk(err, null);
+                    }
+
+                    cbk(null, result[0]);
+                });
             } else {
                 cbk(err,null);
             }
@@ -26,22 +55,50 @@ function addUser(id, username, password, cbk){
 }
 
 function countUsers(cbk){
-    cbk(null, users.length);
+    collection.count(function(err, count){
+        if(err){
+            return cbk(err, null);
+        }
+        cbk(null, count);
+    });
 }
 
 function getFromUsername(username, cbk){
-    var foundUser = null;
-    async.each(users, function(user,done){
-        if(user.username == username){
-            foundUser = user;
-            done('found');
+    //var foundUser = null;
+
+    collection.find({username: username}, function(err, users){
+        if(err) {
+            return cbk(err, null);
         }
-    },function(err){
-        if(err === 'found'){
-            cbk(null, foundUser);
-        } else {
-            cbk(new Error(ERROR_USER_NOT_FOUND), null);
-        }
+
+        users.nextObject(function(err, user){
+            if(err) {
+                return cbk(err);
+            }
+            if(user == null){
+                return cbk(new Error(ERROR_USER_NOT_FOUND), null);
+            }
+            if(user.username == username) {
+                found = true;
+                cbk(null, user);
+            }
+        });
+
+
+
+
+        //async.each(users, function(user,done){
+        //    if(user.username == username){
+        //        foundUser = user;
+        //        done('found');
+        //    }
+        //},function(err){
+        //    if(err === 'found'){
+        //        cbk(null, foundUser);
+        //    } else {
+        //        cbk(new Error(ERROR_USER_NOT_FOUND), null);
+        //    }
+        //});
     });
 }
 
@@ -59,11 +116,15 @@ function getFromUsernamePassword(username, password, cbk){
 }
 
 function deleteAllUsers(cbk){
-    users = [];
-    cbk();
+    collection.remove({},function(err,numberRemoved){
+        cbk();
+    });
 }
 
 module.exports = {
+    connect : connect,
+    disconnect : disconnect,
+
     addUser : addUser,
     countUsers : countUsers,
     getFromUsernamePassword : getFromUsernamePassword,

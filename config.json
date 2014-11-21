@@ -5,5 +5,8 @@
     "cipherKey" : "zUTaFRu7raze",
     "signKey" : "3aBuvuQatres",
     "expiration" : 10
+  },
+  "db": {
+    "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   }
 }

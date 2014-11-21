@@ -12,7 +12,17 @@ describe('user dao', function(){
     ];
 
     beforeEach(function(done){
-        dao.deleteAllUsers(done);
+        dao.connect(function(err){
+            assert.equal(err,null);
+            dao.deleteAllUsers(done);
+        });
+    });
+
+    afterEach(function(done){
+        dao.disconnect(function(err){
+            assert.equal(err,null);
+            done();
+        });
     });
 
     it('count', function(done){
@@ -38,6 +48,20 @@ describe('user dao', function(){
         });
     });
 
+    it('getFromUsernamePassword', function(done){
+        var expectedUser = users[0];
+        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+            assert.equal(err,null);
+            assert.notEqual(createdUser,null);
+            dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){
+                assert.equal(err,null);
+                assert.equal(foundUser.username,expectedUser.username);
+                assert.equal(foundUser.password,undefined);
+                done();
+            });
+        });
+    });
+
     it('already exists', function(done){
         var expectedUser = users[0];
         dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
@@ -51,20 +75,6 @@ describe('user dao', function(){
             });
         });
 
-    });
-
-    it('getFromUsernamePassword', function(done){
-        var expectedUser = users[0];
-        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
-            assert.equal(err,null);
-            assert.notEqual(createdUser,null);
-            dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){
-                assert.equal(err,null);
-                assert.equal(foundUser.username,expectedUser.username);
-                assert.equal(foundUser.password,undefined);
-                done();
-            });
-        });
     });
 
     it('delete all', function(done){

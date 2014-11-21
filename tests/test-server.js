@@ -3,7 +3,6 @@ var assert = require('assert');
 var net = require('net');
 var request = require('request');
 var dao = require('../dao.js');
-var async = require('async');
 
 var PUBLIC_PORT = 3000;
 var PRIVATE_PORT = 3001;
@@ -72,14 +71,7 @@ describe('/auth', function(){
 
     beforeEach(function(done){
         cipherlayer.setCryptoKeys(CIPHER_KEY, SIGN_KEY, EXPIRATION);
-        async.parallel([
-            function(done){
-                dao.deleteAllUsers(done);
-            },
-            function(done){
-                cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, done);
-            }
-        ],done);
+        cipherlayer.start(PUBLIC_PORT, PRIVATE_PORT, done);
     });
 
     afterEach(function(done){
@@ -88,9 +80,14 @@ describe('/auth', function(){
 
     describe('/login',function(){
         beforeEach(function(done){
-            var username = 'validuser';
-            var password = 'validpassword';
-            dao.addUser(null,username,password,done);
+            dao.deleteAllUsers(function(err){
+                var username = 'validuser';
+                var password = 'validpassword';
+                dao.addUser(null,username,password,function(err,createdUser){
+                    assert.equal(err, null);
+                    done();
+                });
+            });
         });
 
         it('POST 200', function(done){
@@ -152,6 +149,13 @@ describe('/auth', function(){
     describe('/user', function(){
         var username = 'validuser';
         var password = 'validpassword';
+
+        beforeEach(function(done){
+            dao.deleteAllUsers(function(err){
+                assert.equal(err,null);
+                done();
+            });
+        });
 
         it('POST 201 created', function(done){
             var options = {
