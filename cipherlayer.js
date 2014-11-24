@@ -27,7 +27,7 @@ function stopDaos(cbk){
 
 function startListener(publicPort, privatePort, cbk){
     server = restify.createServer({
-        name: 'test-server'
+        name: 'cipherlayer-server'
     });
 
     server.use(restify.bodyParser());
