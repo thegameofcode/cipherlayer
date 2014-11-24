@@ -4,6 +4,8 @@ var userDao = require('./dao');
 var request = require('request');
 var clone = require('clone');
 var async = require('async');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 var server = null;
 var cToken = null;
@@ -71,13 +73,30 @@ function startListener(publicPort, privatePort, cbk){
         });
     });
 
-    server.post('/api/profile', function(req,res,next){
+    server.post(config.passThroughEndpoint.path, function(req,res,next){
         var body = clone(req.body);
+
+        if (body[config.passThroughEndpoint.username] == undefined) {
+            res.send(400, {
+                err: 'auth_proxy_error',
+                des: 'invalid userinfo'
+            });
+            return next(false);
+        }
+
+        if (body[config.passThroughEndpoint.password] == undefined) {
+            res.send(400, {
+                err: 'auth_proxy_error',
+                des: 'invalid userinfo'
+            });
+            return next(false);
+        }
+
         var user = {
-            username : body.email,
-            password : body.password
+            username : body[config.passThroughEndpoint.username],
+            password : body[config.passThroughEndpoint.password]
         };
-        delete(body.password);
+        delete(body[config.passThroughEndpoint.password]);
 
         var options = {
             url: 'http://localhost:' + privatePort + req.url,

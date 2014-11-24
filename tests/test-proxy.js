@@ -7,6 +7,7 @@ var async = require('async');
 var nock = require('nock');
 var request = require('request');
 var cipherlayer = require('../cipherlayer');
+var clone = require('clone');
 
 var ciphertoken = require('ciphertoken');
 var cToken = ciphertoken.create(config.accessToken.cipherKey, config.accessToken.signKey, {
@@ -72,18 +73,24 @@ describe('proxy', function(){
 
         it('pass through', function(done){
             var expectedUserId = 'a1b2c3d4e5f6';
+            var expectedPublicRequest = {};
+            expectedPublicRequest[config.passThroughEndpoint.username]='valid@my-comms.com';
+            expectedPublicRequest[config.passThroughEndpoint.password]='12345678';
+
+            var expectedPrivateResponse = clone(expectedPublicRequest);
+            delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
             nock('http://localhost:'+config.private_port)
-                .post('/api/profile', {email:"valid@my-comms.com"})
+                .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .reply(201, {id:expectedUserId});
 
             var options = {
-                url: 'http://localhost:' + config.public_port + '/api/profile',
+                url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 method: 'POST',
-                body: JSON.stringify({email:"valid@my-comms.com", password:"12345678"})
+                body: JSON.stringify(expectedPublicRequest)
             };
 
             request(options, function(err,res,body) {

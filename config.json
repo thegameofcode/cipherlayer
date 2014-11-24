@@ -8,5 +8,10 @@
   },
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
+  },
+  "passThroughEndpoint" : {
+    "path": "/api/profile",
+    "username":"email",
+    "password":"password"
   }
 }
