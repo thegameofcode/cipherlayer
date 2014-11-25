@@ -27,11 +27,22 @@ describe('country codes', function(){
         }, done);
     });
 
-    it('not found', function(done){
+    it('country not found', function(done){
         countryCodes.countryFromPhone('696000000', function(err, country){
             assert.notEqual(err, null);
             assert.equal(country, undefined);
             done();
         });
+    });
+
+    it('country from ISO3166', function(done){
+        var countries =['US','ES','GB'];
+        async.each(countries, function(item, cbk){
+            countryCodes.countryFromIso(item, function(err, country){
+                assert.equal(err, null);
+                assert.equal(country['ISO3166-1-Alpha-2'],item);
+                cbk();
+            });
+        },done);
     });
 });
