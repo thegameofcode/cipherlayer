@@ -7,6 +7,7 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var nock = require('nock');
 var ciphertoken = require('ciphertoken');
+var countrycodes = require('../countrycodes');
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
@@ -321,7 +322,7 @@ describe('/auth', function(){
                 "addr_state": null,
                 "addr_country": null,
                 "addr_zip": null,
-                "mobile_phone": "+34696691984",
+                "mobile_phone": "+34696000000",
                 "mobile_phone_verified": true,
                 "status": {
                     "created_date": null,
@@ -367,12 +368,14 @@ describe('/auth', function(){
             };
 
             request(options, function(err,res,body){
+
                 assert.equal(err,null);
                 assert.equal(res.statusCode, 203);
                 body = JSON.parse(body);
-                assert.notEqual(body.name, undefined);
-                assert.notEqual(body.email, undefined);
-                assert.notEqual(body.phone, undefined);
+                assert.equal(body.name, 'Luis Mesas');
+                assert.equal(body.email, 'luis.mesas@igz.es');
+                assert.equal(body.phone, '696000000');
+                assert.equal(body.country, 'ES');
                 assert.notEqual(body.sf, undefined);
 
                 ciphertoken.getTokenSet(accessTokenSettings, body.sf, function(err, sfTokenInfo){
@@ -430,7 +433,7 @@ describe('/auth', function(){
                     "addr_state": null,
                     "addr_country": null,
                     "addr_zip": null,
-                    "mobile_phone": "+34696691984",
+                    "mobile_phone": "+34696000000",
                     "mobile_phone_verified": true,
                     "status": {
                         "created_date": null,

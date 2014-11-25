@@ -6,6 +6,7 @@ var clone = require('clone');
 var async = require('async');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var countrycodes = require('./countrycodes');
 
 var server;
 var accessTokenSettings;
@@ -126,16 +127,25 @@ function startListener(publicPort, privatePort, cbk){
                         refreshToken:data.refreshToken
                     };
                     ciphertoken.createToken(accessTokenSettings, profile.id, null, sfData, function(err, token){
-                        var returnProfile = {
-                            name: profile._raw.display_name,
-                            email: profile._raw.email,
-                            phone: profile._raw.mobile_phone,
-                            sf: token
-                        };
-                        res.send(203, returnProfile);
+                        countrycodes.countryFromPhone(profile._raw.mobile_phone, function(err, country){
+                            var returnProfile = {
+                                name: profile._raw.display_name,
+                                email: profile._raw.email,
+                                sf: token
+                            };
+
+                            if(err == null){
+                                returnProfile.country = country['ISO3166-1-Alpha-2'];
+                                returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'');
+                            }
+
+                            res.send(203, returnProfile);
+                            next(false);
+                        });
                     });
                 } else {
                     res.send(500, {err:'internal_error', des:'There was an internal error matching salesforce profile'});
+                    next(false);
                 }
             } else {
                 var tokens ={
