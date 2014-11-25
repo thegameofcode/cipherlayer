@@ -9,6 +9,9 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
     this.Before(function(done){
+
+        world.resetUser();
+
         cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
         cipherlayer.start(config.public_port, config.private_port, function(err){
             assert.equal(err,null);

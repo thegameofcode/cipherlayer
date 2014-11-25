@@ -64,8 +64,6 @@ function countUsers(cbk){
 }
 
 function getFromUsername(username, cbk){
-    //var foundUser = null;
-
     collection.find({username: username}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -83,22 +81,6 @@ function getFromUsername(username, cbk){
                 cbk(null, user);
             }
         });
-
-
-
-
-        //async.each(users, function(user,done){
-        //    if(user.username == username){
-        //        foundUser = user;
-        //        done('found');
-        //    }
-        //},function(err){
-        //    if(err === 'found'){
-        //        cbk(null, foundUser);
-        //    } else {
-        //        cbk(new Error(ERROR_USER_NOT_FOUND), null);
-        //    }
-        //});
     });
 }
 
@@ -127,6 +109,10 @@ module.exports = {
 
     addUser : addUser,
     countUsers : countUsers,
+    getFromUsername : getFromUsername,
     getFromUsernamePassword : getFromUsernamePassword,
-    deleteAllUsers : deleteAllUsers
+    deleteAllUsers : deleteAllUsers,
+
+    ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
+    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
 };

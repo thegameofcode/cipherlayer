@@ -1,15 +1,14 @@
 var dao = require('../dao.js');
 var assert = require('assert');
+var clone = require('clone');
 
 describe('user dao', function(){
 
-    var users = [
-        {
-            id:'a1b2c3d4e5f6',
-            username:'user1',
-            password:'pass1'
-        }
-    ];
+    var baseUser = {
+        id:'a1b2c3d4e5f6',
+        username:'user1',
+        password:'pass1'
+    };
 
     beforeEach(function(done){
         dao.connect(function(err){
@@ -34,7 +33,7 @@ describe('user dao', function(){
     });
 
     it('add', function(done){
-        var expectedUser = users[0];
+        var expectedUser = clone(baseUser);
         dao.addUser(expectedUser.id, expectedUser.username, expectedUser.password, function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser._id,expectedUser.id);
@@ -48,8 +47,21 @@ describe('user dao', function(){
         });
     });
 
+    it('getFromUsername', function(done){
+        var expectedUser = clone(baseUser);
+        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+            assert.equal(err,null);
+            assert.notEqual(createdUser,null);
+            dao.getFromUsername(expectedUser.username, function(err, foundUser){
+                assert.equal(err,null);
+                assert.equal(foundUser.username,expectedUser.username);
+                done();
+            });
+        });
+    });
+
     it('getFromUsernamePassword', function(done){
-        var expectedUser = users[0];
+        var expectedUser = clone(baseUser);
         dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
@@ -63,7 +75,7 @@ describe('user dao', function(){
     });
 
     it('already exists', function(done){
-        var expectedUser = users[0];
+        var expectedUser = clone(baseUser);
         dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser.username,expectedUser.username);

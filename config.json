@@ -1,6 +1,6 @@
 {
-  "public_port" : 3010,
-  "private_port" : 3011,
+  "public_port" : 3000,
+  "private_port" : 3001,
   "accessToken" : {
     "cipherKey" : "zUTaFRu7raze",
     "signKey" : "3aBuvuQatres",
@@ -13,5 +13,14 @@
     "path": "/api/profile",
     "username":"email",
     "password":"password"
+  },
+
+  "salesforce" : {
+    "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access"],
+    "clientId": "3MVG9dPGzpc3kWyciHo9hHsjSKttDD9LJjNEl7kScoocODugqAsq8yabMdxIvbgkK5_Ushooxl5I866A1utaR",
+    "clientSecret": "6469113850533241975",
+    "callbackURL": "http://localhost:3000/auth/sf/callback",
+    "authUrl": "https://test.salesforce.com/services/oauth2/authorize",
+    "tokenUrl": "https://test.salesforce.com/services/oauth2/token"
   }
 }

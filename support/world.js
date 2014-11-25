@@ -5,6 +5,10 @@ function getUser(){
     return user;
 }
 
+function resetUser(){
+    user = {};
+}
+
 // RESPONSE
 var response = {};
 
@@ -19,9 +23,9 @@ function getTokens(){
     return tokens;
 }
 
-
 module.exports = {
-    getUser : getUser,
-    getResponse : getResponse,
-    getTokens : getTokens
-}
+    getUser: getUser,
+    resetUser: resetUser,
+    getResponse: getResponse,
+    getTokens: getTokens
+};

@@ -10,13 +10,9 @@ Feature: A user logs in using SalesForce
     When the client app request to start SalesForce login process
     Then the response status code is 302
 
-  Scenario: existing user callback response
-    Given a user of client app with valid credentials linked to SalesForce
+  Scenario: invalid data on callback response
     When the client app receives the SalesForce callback response
-    Then the response status code is 200
-    And the response body contains json attribute "accessToken"
-    And the response body contains json attribute "refreshToken"
-    And the response body contains json attribute "expiresIn"
+    Then the response status code is 302
 
   Scenario: non-existing user callback response
     Given a user with valid credentials in SalesForce not linked to SalesForce
@@ -26,3 +22,11 @@ Feature: A user logs in using SalesForce
     And the response body contains json attribute "email"
     And the response body contains json attribute "phone"
     And the response body contains json attribute "sf"
+
+#  Scenario: existing user callback response
+#    Given a user with valid credentials in SalesForce linked to SalesForce
+#    When the client app receives the SalesForce callback response
+#    Then the response status code is 200
+#    And the response body contains json attribute "accessToken"
+#    And the response body contains json attribute "refreshToken"
+#    And the response body contains json attribute "expiresIn"
