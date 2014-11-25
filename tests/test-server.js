@@ -305,13 +305,13 @@ describe('/auth', function(){
                 "asserted_user": true,
                 "user_id": "005e0000001uNIyAAM",
                 "organization_id": "00De00000004cdeEAA",
-                "username": "luis.mesas@igz.es",
-                "nick_name": "luis.mesas.garcia",
-                "display_name": "Luis Mesas",
-                "email": "luis.mesas@igz.es",
+                "username": "name.lastname@email.com",
+                "nick_name": "nick",
+                "display_name": "Name Lastname",
+                "email": "name.lastname@email.com",
                 "email_verified": true,
-                "first_name": "Luis",
-                "last_name": "Mesas",
+                "first_name": "Name",
+                "last_name": "Lastname",
                 "timezone": "Europe/London",
                 "photos": {
                     "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
@@ -322,7 +322,7 @@ describe('/auth', function(){
                 "addr_state": null,
                 "addr_country": null,
                 "addr_zip": null,
-                "mobile_phone": "+34696000000",
+                "mobile_phone": "+34000000000",
                 "mobile_phone_verified": true,
                 "status": {
                     "created_date": null,
@@ -372,9 +372,9 @@ describe('/auth', function(){
                 assert.equal(err,null);
                 assert.equal(res.statusCode, 203);
                 body = JSON.parse(body);
-                assert.equal(body.name, 'Luis Mesas');
-                assert.equal(body.email, 'luis.mesas@igz.es');
-                assert.equal(body.phone, '696000000');
+                assert.equal(body.name, 'Name Lastname');
+                assert.equal(body.email, 'name.lastname@email.com');
+                assert.equal(body.phone, '000000000');
                 assert.equal(body.country, 'ES');
                 assert.notEqual(body.sf, undefined);
 
@@ -389,7 +389,7 @@ describe('/auth', function(){
         });
 
         it('200 OK', function(done){
-            dao.addUser(null, 'luis.mesas@igz.es', '12345678', function(err, createdUser){
+            dao.addUser(null, 'name.lastname@email.com', '12345678', function(err, createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, undefined);
 
@@ -416,13 +416,13 @@ describe('/auth', function(){
                     "asserted_user": true,
                     "user_id": "005e0000001uNIyAAM",
                     "organization_id": "00De00000004cdeEAA",
-                    "username": "luis.mesas@igz.es",
-                    "nick_name": "luis.mesas.garcia",
-                    "display_name": "Luis Mesas",
-                    "email": "luis.mesas@igz.es",
+                    "username": "name.lastname@email.com",
+                    "nick_name": "nick",
+                    "display_name": "Name Lastname",
+                    "email": "name.lastname@email.com",
                     "email_verified": true,
-                    "first_name": "Luis",
-                    "last_name": "Mesas",
+                    "first_name": "Name",
+                    "last_name": "Lastname",
                     "timezone": "Europe/London",
                     "photos": {
                         "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
@@ -433,7 +433,7 @@ describe('/auth', function(){
                     "addr_state": null,
                     "addr_country": null,
                     "addr_zip": null,
-                    "mobile_phone": "+34696000000",
+                    "mobile_phone": "+34000000000",
                     "mobile_phone_verified": true,
                     "status": {
                         "created_date": null,

@@ -129,6 +129,49 @@ describe('proxy', function(){
                     });
                 });
             });
+
+            it('409 already exists', function(done){
+                var expectedUserId = 'a1b2c3d4e5f6';
+                var expectedPublicRequest = {};
+                expectedPublicRequest[config.passThroughEndpoint.username]='valid@my-comms.com';
+                expectedPublicRequest[config.passThroughEndpoint.password]='12345678';
+
+                var expectedPrivateResponse = clone(expectedPublicRequest);
+                delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
+
+                nock('http://localhost:'+config.private_port)
+                    .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                    .reply(201, {id:expectedUserId});
+
+                var options = {
+                    url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(expectedPublicRequest)
+                };
+
+                request(options, function(err,res,body) {
+                    assert.equal(err,null);
+                    assert.equal(res.statusCode, 201);
+                    body = JSON.parse(body);
+
+                    assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);
+                    assert.notEqual(body.accessToken,undefined);
+                    ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function(err, accessTokenInfo){
+                        assert.equal(err,null);
+                        assert.equal(accessTokenInfo.userId,expectedUserId);
+
+                        assert.notEqual(body.refreshToken,undefined);
+                        ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function(err, refreshTokenInfo){
+                            assert.equal(err,null);
+                            assert.equal(refreshTokenInfo.userId,expectedUserId);
+                            done();
+                        });
+                    });
+                });
+            });
         });
     });
 

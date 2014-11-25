@@ -220,6 +220,8 @@ function startListener(publicPort, privatePort, cbk){
                 });
                 return next(false);
             } else {
+
+
                 body = JSON.parse(body);
                 user.id = body.id;
 
