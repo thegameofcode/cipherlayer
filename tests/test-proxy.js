@@ -143,7 +143,7 @@ describe('proxy', function(){
                 var expectedPublicRequest = {};
                 expectedPublicRequest[config.passThroughEndpoint.username]=expectedUsername;
 
-                ciphertoken.createToken(accessTokenSettings, expectedUserId, null, {accessToken:'acc', refreshToken:'ref', expiresIn:1234}, function(err, sfToken){
+                ciphertoken.createToken(accessTokenSettings, expectedUserId, null, {accessToken:'acc', refreshToken:'ref', expiresIn:accessTokenSettings.tokenExpirationMinutes * 60}, function(err, sfToken){
                     expectedPublicRequest.sf = sfToken;
 
                     var expectedPrivateResponse = clone(expectedPublicRequest);
@@ -164,7 +164,6 @@ describe('proxy', function(){
 
                     request(options, function(err,res,body) {
                         assert.equal(err,null);
-                        console.log(body);
                         assert.equal(res.statusCode, 201);
                         body = JSON.parse(body);
 
@@ -184,8 +183,8 @@ describe('proxy', function(){
                                     assert.notEqual(foundUser.platforms,undefined);
                                     assert.equal(foundUser.platforms.length, 1);
                                     assert.equal(foundUser.platforms[0].platform, 'sf');
-                                    assert.notEqual(foundUser.platforms[0].accessToken, undefined);
-                                    assert.notEqual(foundUser.platforms[0].refreshToken, undefined);
+                                    assert.equal(foundUser.platforms[0].accessToken, 'acc');
+                                    assert.equal(foundUser.platforms[0].refreshToken, 'ref');
                                     assert.notEqual(foundUser.platforms[0].expiry, undefined);
                                     done();
                                 });
