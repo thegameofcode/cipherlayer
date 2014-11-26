@@ -75,6 +75,20 @@ describe('user dao', function(){
         });
     });
 
+    it('getFromId', function(done){
+        var expectedUser = clone(baseUser);
+        dao.addUser(expectedUser, function(err,createdUser){
+            assert.equal(err,null);
+            assert.notEqual(createdUser,null);
+            dao.getFromId(createdUser._id, function(err, foundUser){
+                assert.equal(err,null);
+                assert.equal(foundUser.username,expectedUser.username);
+                assert.equal(foundUser.password,undefined);
+                done();
+            });
+        });
+    });
+
     it('already exists', function(done){
         var expectedUser = clone(baseUser);
         dao.addUser(expectedUser,function(err,createdUser){

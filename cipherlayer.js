@@ -312,27 +312,48 @@ function startListener(publicPort, privatePort, cbk){
                 if ( err.err === 'accesstoken_expired' ) {
                     res.send(401,{err:'access_token_expired'});
                 }
-                res.send(401,{err:'access_token_invalid'});
+                res.send(401,{err:'invalid_access_token'});
                 return next();
             }
 
-            var options = {
-                url: 'http://localhost:' + privatePort + req.url,
-                headers: {
-                    'Content-Type': 'application/json; charset=utf-8',
-                    'x-user-id': tokenInfo.userId
-                },
-                method: req.method,
-                body : JSON.stringify(req.body)
-            };
-
-            request(options, function(err,private_res,body) {
-                if(err) {
-                    res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
-                } else {
-                    res.send(Number(private_res.statusCode), JSON.parse(body));
+            userDao.getFromId(tokenInfo.userId, function(err, foundUser){
+                if(err){
+                    res.send(401,{err:'invalid_access_token'});
+                    return next();
                 }
-                next();
+
+                var options = {
+                    url: 'http://localhost:' + privatePort + req.url,
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'x-user-id': tokenInfo.userId
+                    },
+                    method: req.method,
+                    body : JSON.stringify(req.body)
+                };
+
+                if(foundUser.platforms && foundUser.platforms.length>0){
+                    foundUser.platforms.forEach(function(platform){
+                        if(platform.platform == 'sf'){
+                            options.headers['x-sf-data'] = JSON.stringify({
+                                userId: platform.accessToken.params.id,
+                                accessToken: platform.accessToken.params.access_token,
+                                instanceUrl: platform.accessToken.params.instance_url
+                            })
+                        }
+                    });
+                }
+
+                request(options, function(err,private_res,body) {
+                    if(err) {
+                        console.log(options);
+                        console.log(err);
+                        res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
+                    } else {
+                        res.send(Number(private_res.statusCode), JSON.parse(body));
+                    }
+                    next();
+                });
             });
         });
     }

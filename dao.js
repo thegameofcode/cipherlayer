@@ -30,6 +30,7 @@ function disconnect(cbk){
 
 function addUser(userToAdd, cbk){
     userToAdd = clone(userToAdd);
+
     getFromUsername(userToAdd.username, function(err,foundUser){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
@@ -62,7 +63,7 @@ function countUsers(cbk){
 }
 
 function getFromUsername(username, cbk){
-    collection.find({username: username}, function(err, users){
+    collection.find({username: username}, {password:0}, function(err, users){
         if(err) {
             return cbk(err, null);
         }
@@ -75,23 +76,29 @@ function getFromUsername(username, cbk){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
             if(user.username == username) {
-                found = true;
-                cbk(null, user);
+                return cbk(null, user);
             }
         });
     });
 }
 
 function getFromUsernamePassword(username, password, cbk){
-    getFromUsername(username, function(err, foundUser){
+    collection.find({username: username, password: password}, {password:0}, function(err, users){
         if(err) {
-            cbk(err, null);
-        } else if(foundUser.password != password) {
-            cbk(new Error(ERROR_USER_NOT_FOUND), null);
-        } else {
-            delete(foundUser.password);
-            cbk(null, foundUser);
+            return cbk(err, null);
         }
+
+        users.nextObject(function(err, user){
+            if(err) {
+                return cbk(err);
+            }
+            if(user == null){
+                return cbk(new Error(ERROR_USER_NOT_FOUND), null);
+            }
+            if(user.username == username) {
+                return cbk(null, user);
+            }
+        });
     });
 }
 
@@ -99,6 +106,27 @@ function deleteAllUsers(cbk){
     collection.remove({},function(err,numberRemoved){
         cbk();
     });
+}
+
+function getFromId(id, cbk){
+    collection.find({_id: id},{password:0}, function(err, users){
+        if(err) {
+            return cbk(err, null);
+        }
+
+        users.nextObject(function(err, user){
+            if(err) {
+                return cbk(err);
+            }
+            if(user == null){
+                return cbk(new Error(ERROR_USER_NOT_FOUND), null);
+            }
+            if(user._id == id) {
+                return cbk(null, user);
+            }
+        });
+    });
+
 }
 
 module.exports = {
@@ -110,6 +138,7 @@ module.exports = {
     getFromUsername : getFromUsername,
     getFromUsernamePassword : getFromUsernamePassword,
     deleteAllUsers : deleteAllUsers,
+    getFromId : getFromId,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
