@@ -84,6 +84,44 @@ describe('proxy', function(){
                     done();
                 });
             });
+
+            it('200 without platforms', function(done){
+                var user = {
+                    username:"valid@my-comms.com",
+                    password:"12345678"
+                };
+
+                dao.addUser(user, function(err, createdUser){
+                    assert.equal(err,null);
+
+                    ciphertoken.createToken(accessTokenSettings, createdUser.id, null, {}, function(err, loginToken){
+                        var expectedBody = {field1:'value1', field2:'value2'};
+
+                        nock('http://localhost:'+config.private_port)
+                            .post('/api/standard', expectedBody)
+                            .reply(200, {field3:'value3'});
+
+
+                        var options = {
+                            url: 'http://localhost:' + config.public_port + '/api/standard',
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8',
+                                'Authorization': 'bearer '+ loginToken
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(expectedBody)
+                        };
+
+                        request(options, function(err,res,body) {
+                            console.log(body);
+                            assert.equal(err,null);
+                            assert.equal(res.statusCode, 200);
+                            assert.notEqual(body, undefined);
+                            done();
+                        });
+                    });
+                });
+            });
         });
 
         describe('pass through', function(){
