@@ -86,9 +86,12 @@ describe('/auth', function(){
     describe('/login',function(){
         beforeEach(function(done){
             dao.deleteAllUsers(function(err){
-                var username = 'validuser';
-                var password = 'validpassword';
-                dao.addUser(null,username,password,function(err,createdUser){
+                assert.equal(err,null);
+                var user = {
+                    username : 'validuser',
+                    password : 'validpassword'
+                };
+                dao.addUser(user,function(err,createdUser){
                     assert.equal(err, null);
                     assert.notEqual(createdUser, undefined);
                     done();
@@ -185,7 +188,11 @@ describe('/auth', function(){
         });
 
         it('POST 409 already_exists', function(done){
-            dao.addUser(null,username,password, function(err,createdUser){
+            var user = {
+                username :username,
+                password: password
+            };
+            dao.addUser(user, function(err,createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, null);
 
@@ -209,7 +216,12 @@ describe('/auth', function(){
         });
 
         it('DELETE 204', function(done){
-            dao.addUser(null, username,password, function(err,createdUser){
+            var user = {
+                username :username,
+                password: password
+            };
+
+            dao.addUser(user, function(err,createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser,null);
 
@@ -389,7 +401,12 @@ describe('/auth', function(){
         });
 
         it('200 OK', function(done){
-            dao.addUser(null, 'name.lastname@email.com', '12345678', function(err, createdUser){
+            var user = {
+                username: 'name.lastname@email.com',
+                password: '12345678'
+            };
+
+            dao.addUser(user, function(err, createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, undefined);
 

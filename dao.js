@@ -1,4 +1,4 @@
-var async = require('async');
+var clone = require('clone');
 var mongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var fs = require('fs');
@@ -28,17 +28,15 @@ function disconnect(cbk){
     });
 }
 
-function addUser(id, username, password, cbk){
-    getFromUsername(username, function(err,foundUser){
+function addUser(userToAdd, cbk){
+    userToAdd = clone(userToAdd);
+    getFromUsername(userToAdd.username, function(err,foundUser){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
-                var user = {
-                    _id : id,
-                    username: username,
-                    password: password
-                };
+                userToAdd._id = userToAdd.id;
+                delete(userToAdd.id);
 
-                collection.insert(user, function(err, result){
+                collection.insert(userToAdd, function(err, result){
                     if(err) {
                         return cbk(err, null);
                     }

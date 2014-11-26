@@ -91,7 +91,11 @@ function startListener(publicPort, privatePort, cbk){
     });
 
     server.post('/auth/user', function(req,res,next){
-        userDao.addUser(null, req.body.username,req.body.password,function(err,createdUser){
+        var user = {
+            username:req.body.username,
+            password:req.body.password
+        };
+        userDao.addUser(user,function(err,createdUser){
             if(err){
                 res.send(409,{err:err.message});
             } else {
@@ -177,6 +181,69 @@ function startListener(publicPort, privatePort, cbk){
         });
     });
 
+    function createUser(req, body, res, next, user) {
+        var options = {
+            url: 'http://localhost:' + privatePort + req.url,
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            method: req.method,
+            body: JSON.stringify(body)
+        };
+
+        request(options, function (err, private_res, body) {
+            if (err) {
+                res.send(500, {
+                    err: 'auth_proxy_error',
+                    des: 'there was an internal error when redirecting the call to protected service'
+                });
+                return next(false);
+            } else {
+                body = JSON.parse(body);
+                user.id = body.id;
+
+                userDao.addUser(user, function (err, createdUser) {
+                    if (err) {
+                        res.send(409, {err: err.message});
+                        return next(false);
+                    } else {
+                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
+                            if (err) {
+                                res.send(409, {err: err.message});
+                                return next(false);
+                            } else {
+                                var tokens = {
+                                    expiresIn: accessTokenSettings.tokenExpirationMinutes * 60
+                                };
+                                async.parallel([
+                                    function (done) {
+                                        ciphertoken.createToken(accessTokenSettings, foundUser._id, null, {}, function (err, token) {
+                                            tokens.accessToken = token;
+                                            done(err);
+                                        });
+                                    },
+                                    function (done) {
+                                        ciphertoken.createToken(refreshTokenSettings, foundUser._id, null, {}, function (err, token) {
+                                            tokens.refreshToken = token;
+                                            done(err);
+                                        });
+                                    }
+                                ], function (err) {
+                                    if (err) {
+                                        res.send(409, {err: err.message});
+                                    } else {
+                                        res.send(201, tokens);
+                                    }
+                                    return next(false);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     server.post(config.passThroughEndpoint.path, function(req,res,next){
         var body = clone(req.body);
 
@@ -189,82 +256,45 @@ function startListener(publicPort, privatePort, cbk){
         }
 
         if (body[config.passThroughEndpoint.password] == undefined) {
-            res.send(400, {
-                err: 'auth_proxy_error',
-                des: 'invalid userinfo'
-            });
-            return next(false);
+            if(body.sf == undefined){
+                res.send(400, {
+                    err: 'invalid_security_token',
+                    des: 'you must provide a password or a salesforce token to create the user'
+                });
+                return next(false);
+            } else {
+                body[config.passThroughEndpoint.password] = '12345678';
+            }
         }
 
         var user = {
             username: body[config.passThroughEndpoint.username],
-            password: body[config.passThroughEndpoint.password],
-            platforms: []
+            password: body[config.passThroughEndpoint.password]
         };
         delete(body[config.passThroughEndpoint.password]);
 
-        var options = {
-            url: 'http://localhost:' + privatePort + req.url,
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8'
-            },
-            method: req.method,
-            body : JSON.stringify(body)
-        };
+        if(body.sf){
+            ciphertoken.getTokenSet(accessTokenSettings, body.sf, function(err, tokenInfo){
+                if(err){
+                    res.send(400, {
+                        err: 'invalid_platform_token',
+                        des: 'you must provide a valid salesforce token'
+                    });
+                    return next(false);
+                }
 
-        request(options, function (err, private_res, body) {
-            if (err) {
-                res.send(500, {
-                    err: 'auth_proxy_error',
-                    des: 'there was an internal error when redirecting the call to protected service'
-                });
-                return next(false);
-            } else {
+                user.platforms=[{
+                    platform:'sf',
+                    accessToken: tokenInfo.data.accessToken,
+                    refreshToken: tokenInfo.data.refreshToken,
+                    expiry: new Date().getTime() + tokenInfo.data.expiresIn * 1000
+                }];
 
-
-                body = JSON.parse(body);
-                user.id = body.id;
-
-                userDao.addUser(user.id, user.username, user.password, function (err, createdUser) {
-                    if (err) {
-                        res.send(409, {err: err.message});
-                        return next(false);
-                    } else {
-                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password,function(err,foundUser){
-                            if(err) {
-                                res.send(409,{err: err.message});
-                                return next(false);
-                            } else {
-                                var tokens ={
-                                    expiresIn: accessTokenSettings.tokenExpirationMinutes * 60
-                                };
-                                async.parallel([
-                                    function(done){
-                                        ciphertoken.createToken(accessTokenSettings, foundUser._id, null, {}, function(err, token){
-                                            tokens.accessToken = token;
-                                            done(err);
-                                        });
-                                    },
-                                    function(done){
-                                        ciphertoken.createToken(refreshTokenSettings, foundUser._id, null, {}, function(err, token){
-                                            tokens.refreshToken = token;
-                                            done(err);
-                                        });
-                                    }
-                                ], function(err){
-                                    if(err) {
-                                        res.send(409,{err: err.message});
-                                    } else {
-                                        res.send(201,tokens);
-                                    }
-                                    return next(false);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+                createUser(req, body, res, next, user);
+            });
+        } else {
+            createUser(req, body, res, next, user);
+        }
     });
 
     function handleAll(req,res,next){

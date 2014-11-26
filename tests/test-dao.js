@@ -34,7 +34,8 @@ describe('user dao', function(){
 
     it('add', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(expectedUser.id, expectedUser.username, expectedUser.password, function(err,createdUser){
+
+        dao.addUser(expectedUser, function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser._id,expectedUser.id);
             assert.equal(createdUser.username,expectedUser.username);
@@ -49,7 +50,7 @@ describe('user dao', function(){
 
     it('getFromUsername', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(expectedUser,function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromUsername(expectedUser.username, function(err, foundUser){
@@ -62,7 +63,7 @@ describe('user dao', function(){
 
     it('getFromUsernamePassword', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(expectedUser, function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){
@@ -76,11 +77,11 @@ describe('user dao', function(){
 
     it('already exists', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+        dao.addUser(expectedUser,function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser.username,expectedUser.username);
             assert.equal(createdUser.password,expectedUser.password);
-            dao.addUser(null, expectedUser.username,expectedUser.password,function(err,createdUser){
+            dao.addUser(expectedUser,function(err,createdUser){
                 assert.equal(err.message,'username_already_exists');
                 assert.equal(createdUser,null);
                 done();
