@@ -21,6 +21,7 @@ module.exports = function(){
         }
 
         request(options, function(err,res,body) {
+            console.log(body);
             assert.equal(err,null);
             world.getResponse().statusCode = res.statusCode;
             world.getResponse().body = JSON.parse(body);

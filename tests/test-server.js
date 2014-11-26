@@ -1,4 +1,5 @@
 var cipherlayer = require('../cipherlayer.js');
+var clone=require('clone');
 var assert = require('assert');
 var net = require('net');
 var request = require('request');
@@ -84,14 +85,18 @@ describe('/auth', function(){
     });
 
     describe('/login',function(){
+        var baseUser = {
+            id : 'a1b2c3d4e5f6',
+            username : 'validuser',
+            password : 'validpassword'
+        };
+
         beforeEach(function(done){
             dao.deleteAllUsers(function(err){
                 assert.equal(err,null);
-                var user = {
-                    username : 'validuser',
-                    password : 'validpassword'
-                };
-                dao.addUser(user,function(err,createdUser){
+                var userToCreate = clone(baseUser);
+
+                dao.addUser(userToCreate,function(err,createdUser){
                     assert.equal(err, null);
                     assert.notEqual(createdUser, undefined);
                     done();
@@ -100,8 +105,7 @@ describe('/auth', function(){
         });
 
         it('POST 200', function(done){
-            var username = 'validuser';
-            var password = 'validpassword';
+            var user = clone(baseUser);
 
             var options = {
                 url: 'http://localhost:'+config.public_port+'/auth/login',
@@ -109,7 +113,7 @@ describe('/auth', function(){
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 method:'POST',
-                body : JSON.stringify({username:username,password:password})
+                body : JSON.stringify(user)
             };
 
             request(options,function(err,res,body){
@@ -121,12 +125,12 @@ describe('/auth', function(){
                 assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                 ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function(err, accessTokenInfo){
                     assert.equal(err,null);
-                    assert.equal(accessTokenInfo.userId,'validuser');
+                    assert.equal(accessTokenInfo.userId,user.id);
 
                     assert.notEqual(body.refreshToken,undefined);
                     ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function(err, refreshTokenInfo){
                         assert.equal(err,null);
-                        assert.equal(refreshTokenInfo.userId,'validuser');
+                        assert.equal(refreshTokenInfo.userId,user.id);
                         done();
                     });
                 });
@@ -134,8 +138,8 @@ describe('/auth', function(){
         });
 
         it('POST 409 invalid_credentials', function(done){
-            var username = 'validuser';
-            var password = 'invalidpassword';
+            var user = clone(baseUser);
+            user.password = 'invalidpassword';
 
             var options = {
                 url: 'http://localhost:'+config.public_port+'/auth/login',
@@ -143,7 +147,7 @@ describe('/auth', function(){
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 method:'POST',
-                body : JSON.stringify({username:username,password:password})
+                body : JSON.stringify(user)
             };
 
             request(options,function(err,res,body){

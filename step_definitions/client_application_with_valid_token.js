@@ -12,6 +12,7 @@ module.exports = function(){
 
             // User post
             function(done){
+                world.getUser().id = 'a1b2c3d4e5f6';
                 world.getUser().username = 'valid_user';
                 world.getUser().password = 'valid_password';
 

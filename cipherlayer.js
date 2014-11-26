@@ -67,13 +67,13 @@ function startListener(publicPort, privatePort, cbk){
                 };
                 async.parallel([
                     function(done){
-                        ciphertoken.createToken(accessTokenSettings, foundUser.username, null, {}, function(err, token){
+                        ciphertoken.createToken(accessTokenSettings, foundUser._id, null, {}, function(err, token){
                             tokens.accessToken = token;
                             done(err);
                         });
                     },
                     function(done){
-                        ciphertoken.createToken(refreshTokenSettings, foundUser.username, null, {}, function(err, token){
+                        ciphertoken.createToken(refreshTokenSettings, foundUser._id, null, {}, function(err, token){
                             tokens.refreshToken = token;
                             done(err);
                         });
@@ -92,6 +92,7 @@ function startListener(publicPort, privatePort, cbk){
 
     server.post('/auth/user', function(req,res,next){
         var user = {
+            id:req.body.id,
             username:req.body.username,
             password:req.body.password
         };
@@ -310,15 +311,15 @@ function startListener(publicPort, privatePort, cbk){
         ciphertoken.getTokenSet(accessTokenSettings, accessToken, function(err, tokenInfo){
             if ( err ) {
                 if ( err.err === 'accesstoken_expired' ) {
-                    res.send(401,{err:'access_token_expired'});
+                    res.send(401,{err:'expired_access_token', des:'access token expired'});
                 }
-                res.send(401,{err:'invalid_access_token'});
+                res.send(401,{err:'invalid_access_token', des:'unable to read token info'});
                 return next();
             }
 
             userDao.getFromId(tokenInfo.userId, function(err, foundUser){
                 if(err){
-                    res.send(401,{err:'invalid_access_token'});
+                    res.send(401,{err:'invalid_access_token', des:'unknown user inside token'});
                     return next();
                 }
 

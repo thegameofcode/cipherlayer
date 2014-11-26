@@ -9,7 +9,7 @@ module.exports = function(){
         nock('http://localhost:'+config.private_port, {
             reqheaders: {
                 'Content-Type': 'application/json; charset=utf-8',
-                'x-user-id' : world.getUser().username
+                'x-user-id' : world.getUser().id
             }
         }).get(PATH).reply(STATUS, JSON.parse(RESPONSE_PAYLOAD));
 
