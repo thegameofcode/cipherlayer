@@ -171,7 +171,6 @@ describe('proxy', function(){
                         };
 
                         request(options, function(err,res,body) {
-                            console.log(body);
                             assert.equal(err,null);
                             assert.equal(res.statusCode, 200);
                             assert.notEqual(body, undefined);
