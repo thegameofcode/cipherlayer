@@ -37,26 +37,11 @@ function startListener(publicPort, privatePort, cbk){
                 res.send(409,{err: err.message});
                 return next(false);
             } else {
-                var tokens = {
-                    expiresIn: config.accessToken.expiration
-                };
-                async.parallel([
-                    function(done){
-                        tokenManager.createAccessToken(foundUser._id, function(err, token){
-                            tokens.accessToken = token;
-                            done(err);
-                        });
-                    },
-                    function(done){
-                        tokenManager.createRefreshToken(foundUser._id, function(err, token){
-                            tokens.refreshToken = token;
-                            done(err);
-                        });
-                    }
-                ], function(err){
+                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
                     if(err) {
                         res.send(409,{err: err.message});
                     } else {
+                        tokens.expiresIn = config.accessToken.expiration;
                         res.send(200,tokens);
                     }
                     next(false);
@@ -131,29 +116,14 @@ function startListener(publicPort, privatePort, cbk){
                                 res.send(409, {err: err.message});
                                 return next(false);
                             } else {
-                                var tokens = {
-                                    expiresIn: config.accessToken.expiration * 60
-                                };
-                                async.parallel([
-                                    function (done) {
-                                        tokenManager.createAccessToken(foundUser._id, function(err, token){
-                                            tokens.accessToken = token;
-                                            done(err);
-                                        });
-                                    },
-                                    function (done) {
-                                        tokenManager.createRefreshToken(foundUser._id, function(err, token){
-                                            tokens.refreshToken = token;
-                                            done(err);
-                                        });
-                                    }
-                                ], function (err) {
-                                    if (err) {
-                                        res.send(409, {err: err.message});
+                                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+                                    if(err) {
+                                        res.send(409,{err: err.message});
                                     } else {
-                                        res.send(201, tokens);
+                                        tokens.expiresIn = config.accessToken.expiration * 60;
+                                        res.send(201,tokens);
                                     }
-                                    return next(false);
+                                    next(false);
                                 });
                             }
                         });

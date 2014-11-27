@@ -1,3 +1,4 @@
+var async = require('async');
 var ciphertoken = require('ciphertoken');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -33,9 +34,34 @@ function createRefreshToken(userId, data, cbk){
     ciphertoken.createToken(refreshTokenSettings, userId, null, data, cbk);
 }
 
+function createBothTokens(userId, cbk){
+    var tokens = {};
+
+    async.parallel([
+        function(done){
+            createAccessToken(userId, function(err, token){
+                tokens.accessToken = token;
+                done(err);
+            });
+        },
+        function(done){
+            createRefreshToken(userId, function(err, token){
+                tokens.refreshToken = token;
+                done(err);
+            });
+        }
+    ], function(err){
+        if(err) {
+            cbk(err,null);
+        } else {
+            cbk(null, tokens);
+        }
+    });
+}
+
 module.exports={
     createAccessToken: createAccessToken,
     getAccessTokenInfo: getAccessTokenInfo,
-
-    createRefreshToken: createRefreshToken
+    createRefreshToken: createRefreshToken,
+    createBothTokens: createBothTokens
 };

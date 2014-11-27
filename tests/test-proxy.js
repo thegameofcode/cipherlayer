@@ -205,7 +205,7 @@ describe('proxy', function(){
 
                 request(options, function(err,res,body) {
                     assert.equal(err,null);
-                    assert.equal(res.statusCode, 201);
+                    assert.equal(res.statusCode, 201, body);
                     body = JSON.parse(body);
 
                     assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);

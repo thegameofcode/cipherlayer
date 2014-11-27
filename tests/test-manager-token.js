@@ -100,4 +100,25 @@ describe('token manager', function(){
         });
     });
 
+    describe('createBothTokens', function(){
+        it('userId, callback', function(done){
+            var expectedUserId = 'a1b2c3d4e5f6';
+            tokenManager.createBothTokens(expectedUserId, function(err, tokens){
+                assert.equal(err, null);
+                assert.notEqual(tokens, null);
+
+                ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function(err, accessTokenInfo){
+                    assert.equal(err, null);
+                    assert.equal(accessTokenInfo.userId, expectedUserId);
+
+                    ciphertoken.getTokenSet(refreshTokenSettings, tokens.refreshToken, function(err, refreshTokenInfo){
+                        assert.equal(err, null);
+                        assert.equal(refreshTokenInfo.userId, expectedUserId);
+
+                        done();
+                    });
+                });
+            })
+        });
+    });
 });
