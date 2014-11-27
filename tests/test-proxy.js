@@ -18,9 +18,9 @@ var accessTokenSettings = {
 };
 
 var refreshTokenSettings = {
-    cipherKey: config.accessToken.cipherKey,
-    firmKey: config.accessToken.signKey,
-    tokenExpirationMinutes: config.accessToken.expiration * 1000
+    cipherKey: config.refreshToken.cipherKey,
+    firmKey: config.refreshToken.signKey,
+    tokenExpirationMinutes: config.refreshToken.expiration * 1000
 };
 
 describe('proxy', function(){
@@ -50,7 +50,6 @@ describe('proxy', function(){
 
     describe('protected calls', function(){
         beforeEach(function(done){
-            cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
             cipherlayer.start(config.public_port, config.private_port, function(err){
                 assert.equal(err,null);
                 dao.deleteAllUsers(function(err){

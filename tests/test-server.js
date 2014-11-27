@@ -13,29 +13,18 @@ var countrycodes = require('../countrycodes');
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
     firmKey: config.accessToken.signKey,
-    tokenExpirationMinutes: config.accessToken.expiration * 60
+    tokenExpirationMinutes: config.accessToken.expiration
 };
 
 var refreshTokenSettings = {
-    cipherKey: config.accessToken.cipherKey,
-    firmKey: config.accessToken.signKey,
-    tokenExpirationMinutes: config.accessToken.expiration * 1000
+    cipherKey: config.refreshToken.cipherKey,
+    firmKey: config.refreshToken.signKey,
+    tokenExpirationMinutes: config.refreshToken.expiration
 };
 
 describe('server control ', function(){
 
-    it('set crypto keys', function(done){
-        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
-        done();
-    });
-
-    it('clean crypto keys', function(done){
-        cipherlayer.cleanCryptoKeys();
-        done();
-    });
-
     it('start', function(done){
-        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
         cipherlayer.start(config.public_port, config.private_port, function(err) {
             assert.equal(err,null);
             var client = net.connect({port:config.public_port}, function(){
@@ -64,19 +53,11 @@ describe('server control ', function(){
             tester.listen(config.public_port);
         });
     });
-
-    it('fail if started without crypto keys', function(done){
-        cipherlayer.start(config.public_port, config.private_port, function(err){
-            assert.equal(err.message, 'started_without_crypto_keys');
-            done();
-        });
-    });
 });
 
 describe('/auth', function(){
 
     beforeEach(function(done){
-        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
         cipherlayer.start(config.public_port, config.private_port, done);
     });
 
@@ -384,9 +365,8 @@ describe('/auth', function(){
             };
 
             request(options, function(err,res,body){
-
                 assert.equal(err,null);
-                assert.equal(res.statusCode, 203);
+                assert.equal(res.statusCode, 203, body);
                 body = JSON.parse(body);
                 assert.equal(body.name, 'Name Lastname');
                 assert.equal(body.email, 'name.lastname@email.com');
@@ -501,7 +481,7 @@ describe('/auth', function(){
 
                 request(options, function(err,res,body){
                     assert.equal(err,null);
-                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.statusCode, 200, body);
                     body = JSON.parse(body);
                     assert.notEqual(body.accessToken, undefined);
                     assert.notEqual(body.refreshToken, undefined);

@@ -12,7 +12,6 @@ module.exports = function(){
 
         world.resetUser();
 
-        cipherlayer.setCryptoKeys(config.accessToken.cipherKey, config.accessToken.signKey, config.accessToken.expiration);
         cipherlayer.start(config.public_port, config.private_port, function(err){
             assert.equal(err,null);
 

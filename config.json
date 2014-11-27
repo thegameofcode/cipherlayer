@@ -6,6 +6,11 @@
     "signKey" : "3aBuvuQatres",
     "expiration" : 10
   },
+  "refreshToken" : {
+    "cipherKey" : "g4H7hst5Rv3Q",
+    "signKey" : "c8Dw3g5Jr6q1",
+    "expiration" : 60
+  },
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },

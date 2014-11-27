@@ -1,40 +1,15 @@
 var restify = require('restify');
-var ciphertoken = require('ciphertoken');
-var userDao = require('./dao');
 var request = require('request');
 var clone = require('clone');
 var async = require('async');
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
-var countrycodes = require('./countrycodes');
+var path = require('path');
+var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+
+var userDao = require('./dao');
+var tokenManager = require('./managers/token');
 
 var server;
-var accessTokenSettings;
-var refreshTokenSettings;
-
-var ERROR_STARTED_WITHOUT_KEYS = 'started_without_crypto_keys';
-
-// PASSPORT
-var passport = require('passport');
-var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
-var salesforceStrategy = new forcedotcomStrategy({
-        clientID : config.salesforce.clientId,
-        clientSecret : config.salesforce.clientSecret,
-        scope : config.salesforce.scope,
-        callbackURL : config.salesforce.callbackURL,
-        authorizationURL : config.salesforce.authUrl,
-        tokenURL: config.salesforce.tokenUrl
-    },
-    function verify(accessToken, refreshToken, profile, done){
-        var data = {
-            accessToken:accessToken,
-            refreshToken:refreshToken,
-            profile:profile
-        };
-        done(null, data);
-    }
-);
-passport.use(salesforceStrategy);
 
 function startDaos(cbk){
     userDao.connect(function(){
@@ -62,18 +37,18 @@ function startListener(publicPort, privatePort, cbk){
                 res.send(409,{err: err.message});
                 return next(false);
             } else {
-                var tokens ={
-                    expiresIn: accessTokenSettings.tokenExpirationMinutes * 60
+                var tokens = {
+                    expiresIn: config.accessToken.expiration
                 };
                 async.parallel([
                     function(done){
-                        ciphertoken.createToken(accessTokenSettings, foundUser._id, null, {}, function(err, token){
+                        tokenManager.createAccessToken(foundUser._id, function(err, token){
                             tokens.accessToken = token;
                             done(err);
                         });
                     },
                     function(done){
-                        ciphertoken.createToken(refreshTokenSettings, foundUser._id, null, {}, function(err, token){
+                        tokenManager.createRefreshToken(foundUser._id, function(err, token){
                             tokens.refreshToken = token;
                             done(err);
                         });
@@ -125,68 +100,6 @@ function startListener(publicPort, privatePort, cbk){
         });
     });
 
-    server.get('/auth/sf', passport.authenticate('forcedotcom'));
-    server.get('/auth/sf/callback', passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), function(req,res,next){
-        var data = req.user;
-        var profile = data.profile;
-        userDao.getFromUsername(profile._raw.email, function(err, foundUser){
-            if(err){
-                if(err.message == userDao.ERROR_USER_NOT_FOUND){
-                    var sfData = {
-                        accessToken:data.accessToken,
-                        refreshToken:data.refreshToken
-                    };
-                    ciphertoken.createToken(accessTokenSettings, profile.id, null, sfData, function(err, token){
-                        countrycodes.countryFromPhone(profile._raw.mobile_phone, function(err, country){
-                            var returnProfile = {
-                                name: profile._raw.display_name,
-                                email: profile._raw.email,
-                                sf: token
-                            };
-
-                            if(err == null){
-                                returnProfile.country = country['ISO3166-1-Alpha-2'];
-                                returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'');
-                            }
-
-                            res.send(203, returnProfile);
-                            next(false);
-                        });
-                    });
-                } else {
-                    res.send(500, {err:'internal_error', des:'There was an internal error matching salesforce profile'});
-                    next(false);
-                }
-            } else {
-                var tokens ={
-                    expiresIn: accessTokenSettings.tokenExpirationMinutes * 60
-                };
-                async.parallel([
-                    function(done){
-                        ciphertoken.createToken(accessTokenSettings, foundUser.username, null, {}, function(err, token){
-                            tokens.accessToken = token;
-                            done(err);
-                        });
-                    },
-                    function(done){
-                        ciphertoken.createToken(refreshTokenSettings, foundUser.username, null, {}, function(err, token){
-                            tokens.refreshToken = token;
-                            done(err);
-                        });
-                    }
-                ], function(err){
-                    if(err) {
-                        res.send(409,{err: err.message});
-                    } else {
-                        res.send(200,tokens);
-                    }
-                    next(false);
-                });
-            }
-            next(false);
-        });
-    });
-
     function createUser(req, body, res, next, user) {
         var options = {
             url: 'http://localhost:' + privatePort + req.url,
@@ -219,17 +132,17 @@ function startListener(publicPort, privatePort, cbk){
                                 return next(false);
                             } else {
                                 var tokens = {
-                                    expiresIn: accessTokenSettings.tokenExpirationMinutes * 60
+                                    expiresIn: config.accessToken.expiration * 60
                                 };
                                 async.parallel([
                                     function (done) {
-                                        ciphertoken.createToken(accessTokenSettings, foundUser._id, null, {}, function (err, token) {
+                                        tokenManager.createAccessToken(foundUser._id, function(err, token){
                                             tokens.accessToken = token;
                                             done(err);
                                         });
                                     },
                                     function (done) {
-                                        ciphertoken.createToken(refreshTokenSettings, foundUser._id, null, {}, function (err, token) {
+                                        tokenManager.createRefreshToken(foundUser._id, function(err, token){
                                             tokens.refreshToken = token;
                                             done(err);
                                         });
@@ -280,7 +193,7 @@ function startListener(publicPort, privatePort, cbk){
         delete(body[config.passThroughEndpoint.password]);
 
         if(body.sf){
-            ciphertoken.getTokenSet(accessTokenSettings, body.sf, function(err, tokenInfo){
+            tokenManager.getAccessTokenInfo(body.sf, function(err, tokenInfo){
                 if(err){
                     res.send(400, {
                         err: 'invalid_platform_token',
@@ -303,6 +216,11 @@ function startListener(publicPort, privatePort, cbk){
         }
     });
 
+    var platformsPath = path.join(__dirname, '/platforms/');
+    fs.readdirSync(platformsPath).forEach(function(filename) {
+        require(platformsPath + filename)(server);
+    });
+
     function handleAll(req,res,next){
         var type = 'bearer ';	// !! keep the space at the end for length
         var auth = req.header('Authorization');
@@ -313,7 +231,7 @@ function startListener(publicPort, privatePort, cbk){
         }
 
         var accessToken = auth.substring( type.length );
-        ciphertoken.getTokenSet(accessTokenSettings, accessToken, function(err, tokenInfo){
+        tokenManager.getAccessTokenInfo(accessToken, function(err, tokenInfo){
             if ( err ) {
                 if ( err.err === 'accesstoken_expired' ) {
                     res.send(401,{err:'expired_access_token', des:'access token expired'});
@@ -373,20 +291,12 @@ function startListener(publicPort, privatePort, cbk){
 }
 
 function stopListener(cbk){
-    accessTokenSettings = null;
-    refreshTokenSettings = null;
-
     server.close(function(){
         cbk();
     });
 }
 
 function start(publicPort, privatePort, cbk){
-
-    if (accessTokenSettings == null) {
-        return cbk(new Error(ERROR_STARTED_WITHOUT_KEYS));
-    }
-
     async.series([
         startDaos,
         function(done){
@@ -406,30 +316,7 @@ function stop(cbk){
     });
 }
 
-function setCryptoKeys(cipherKey, signKey, expiration){
-    accessTokenExpiration = expiration;
-
-    accessTokenSettings = {
-        cipherKey: cipherKey,
-        firmKey: signKey,
-        tokenExpirationMinutes: expiration
-    };
-
-    refreshTokenSettings = {
-        cipherKey: cipherKey,
-        firmKey: signKey,
-        tokenExpirationMinutes: expiration * 1000
-    };
-}
-
-function cleanCryptoKeys(){
-    accessTokenSettings = null;
-    refreshTokenSettings = null;
-}
-
 module.exports = {
     start : start,
-    stop : stop,
-    setCryptoKeys : setCryptoKeys,
-    cleanCryptoKeys : cleanCryptoKeys
+    stop : stop
 };
