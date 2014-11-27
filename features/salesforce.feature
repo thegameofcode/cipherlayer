@@ -23,10 +23,10 @@ Feature: A user logs in using SalesForce
     And the response body contains json attribute "phone"
     And the response body contains json attribute "sf"
 
-#  Scenario: existing user callback response
-#    Given a user with valid credentials in SalesForce linked to SalesForce
-#    When the client app receives the SalesForce callback response
-#    Then the response status code is 200
-#    And the response body contains json attribute "accessToken"
-#    And the response body contains json attribute "refreshToken"
-#    And the response body contains json attribute "expiresIn"
+  Scenario: existing user callback response
+    Given a user with valid credentials in SalesForce linked to SalesForce
+    When the client app receives the SalesForce callback response
+    Then the response status code is 200
+    And the response body contains json attribute "accessToken"
+    And the response body contains json attribute "refreshToken"
+    And the response body contains json attribute "expiresIn"

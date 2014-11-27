@@ -96,6 +96,11 @@ function startListener(publicPort, privatePort, cbk){
             username:req.body.username,
             password:req.body.password
         };
+
+        if(req.body.platforms){
+            user.platforms = req.body.platforms;
+        }
+
         userDao.addUser(user,function(err,createdUser){
             if(err){
                 res.send(409,{err:err.message});

@@ -6,6 +6,7 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
     this.Given(/^a user with valid credentials in SalesForce not linked to SalesForce$/, function (callback) {
+        world.getUser().id = 'a1b2c3d4e5f6';
         world.getUser().username = 'valid_user';
         world.getUser().password = 'valid_password';
 
