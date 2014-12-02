@@ -47,7 +47,7 @@ function salesforceCallback(req, res, next){
 
                         if(err == null){
                             returnProfile.country = country['ISO3166-1-Alpha-2'];
-                            returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'');
+                            returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'').trim();
                         }
 
                         res.send(203, returnProfile);
