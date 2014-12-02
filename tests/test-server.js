@@ -386,6 +386,7 @@ describe('/auth', function(){
 
         it('200 OK', function(done){
             var user = {
+                id: 'a1b2c3d4e5f6',
                 username: 'name.lastname@email.com',
                 password: '12345678'
             };
@@ -483,10 +484,19 @@ describe('/auth', function(){
                     assert.equal(err,null);
                     assert.equal(res.statusCode, 200, body);
                     body = JSON.parse(body);
-                    assert.notEqual(body.accessToken, undefined);
                     assert.notEqual(body.refreshToken, undefined);
                     assert.notEqual(body.expiresIn, undefined);
-                    done();
+
+                    ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function(err, tokenInfo){
+                        assert.equal(err,null);
+                        assert.equal(tokenInfo.userId, createdUser._id, 'bad accessToken userId');
+
+                        ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function(err, tokenInfo){
+                            assert.equal(err,null);
+                            assert.equal(tokenInfo.userId, createdUser._id, 'bad refreshToken userId');
+                            done();
+                        });
+                    });
                 });
             });
         });

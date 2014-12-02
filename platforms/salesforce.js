@@ -59,7 +59,7 @@ function salesforceCallback(req, res, next){
                 next(false);
             }
         } else {
-            tokenManager.createBothTokens(foundUser.username, function(err, tokens){
+            tokenManager.createBothTokens(foundUser._id, function(err, tokens){
                 if(err) {
                     res.send(409,{err: err.message});
                 } else {
