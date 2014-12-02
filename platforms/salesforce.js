@@ -8,14 +8,19 @@ var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 // PASSPORT
 var passport = require('passport');
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
-var salesforceStrategy = new forcedotcomStrategy({
-        clientID : config.salesforce.clientId,
-        clientSecret : config.salesforce.clientSecret,
-        scope : config.salesforce.scope,
-        callbackURL : config.salesforce.callbackURL,
-        authorizationURL : config.salesforce.authUrl,
-        tokenURL: config.salesforce.tokenUrl
-    },
+var salesforceSettings = {
+    clientID : config.salesforce.clientId,
+    clientSecret : config.salesforce.clientSecret,
+    scope : config.salesforce.scope,
+    callbackURL : config.salesforce.callbackURL
+};
+if(config.salesforce.authUrl){
+    salesforceSettings.authorizationURL = config.salesforce.authUrl;
+}
+if(config.salesforce.tokenUrl){
+    salesforceSettings.tokenURL = config.salesforce.tokenUrl;
+}
+var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
         var data = {
             accessToken:accessToken,
@@ -25,6 +30,7 @@ var salesforceStrategy = new forcedotcomStrategy({
         done(null, data);
     }
 );
+
 passport.use(salesforceStrategy);
 
 function salesforceCallback(req, res, next){

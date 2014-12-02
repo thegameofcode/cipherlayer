@@ -22,8 +22,8 @@
 
   "salesforce" : {
     "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access"],
-    "clientId": "3MVG9dPGzpc3kWyciHo9hHsjSKttDD9LJjNEl7kScoocODugqAsq8yabMdxIvbgkK5_Ushooxl5I866A1utaR",
-    "clientSecret": "6469113850533241975",
+    "clientId": "{{SALESFORCE_CLIENT_ID}}",
+    "clientSecret": "{{SALESFORCE_CLIENT_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/sf/callback",
     "authUrl": "https://test.salesforce.com/services/oauth2/authorize",
     "tokenUrl": "https://test.salesforce.com/services/oauth2/token"
