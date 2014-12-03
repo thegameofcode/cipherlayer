@@ -2,13 +2,13 @@
   "public_port" : 3000,
   "private_port" : 3001,
   "accessToken" : {
-    "cipherKey" : "zUTaFRu7raze",
-    "signKey" : "3aBuvuQatres",
+    "cipherKey" : "unsecureKey1",
+    "signKey" : "unsecureKey2",
     "expiration" : 10
   },
   "refreshToken" : {
-    "cipherKey" : "g4H7hst5Rv3Q",
-    "signKey" : "c8Dw3g5Jr6q1",
+    "cipherKey" : "unsecureKey3",
+    "signKey" : "unsecureKey4",
     "expiration" : 60
   },
   "db": {
