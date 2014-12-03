@@ -244,7 +244,11 @@ function startListener(publicPort, privatePort, cbk){
                         console.log(err);
                         res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
                     } else {
-                        res.send(Number(private_res.statusCode), JSON.parse(body));
+                        try{
+                            body=JSON.parse(body);
+                        } catch(err) {
+                        }
+                        res.send(Number(private_res.statusCode), body);
                     }
                     next();
                 });
