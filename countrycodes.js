@@ -2,6 +2,10 @@ var async = require('async');
 var countries = JSON.parse(require('fs').readFileSync('countrycodes.json','utf8'));
 
 function countryFromPhone(phone, cbk){
+  if(!phone){
+    return cbk();
+  }
+
   async.each(countries, function(country, cbk){
     if(phone.indexOf('+'+country.Dial) > -1) {
       return cbk(country);

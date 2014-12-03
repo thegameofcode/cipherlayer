@@ -279,7 +279,7 @@ describe('/auth', function(){
         });
 
         it('203 not exists', function(done){
-            nock('https://test.salesforce.com')
+            nock('https://login.salesforce.com')
                 .filteringPath(function(path){
                     if(path.indexOf('/services/oauth2/authorize') > -1){
                         return '/services/oauth2/authorize';
@@ -394,8 +394,7 @@ describe('/auth', function(){
             dao.addUser(user, function(err, createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, undefined);
-
-                nock('https://test.salesforce.com')
+                nock('https://login.salesforce.com')
                     .filteringPath(function(path){
                         if(path.indexOf('/services/oauth2/authorize') > -1){
                             return '/services/oauth2/authorize';
@@ -414,7 +413,7 @@ describe('/auth', function(){
                     });
 
                 var sfProfile = {
-                    "id": "https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
+                    "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
                     "asserted_user": true,
                     "user_id": "005e0000001uNIyAAM",
                     "organization_id": "00De00000004cdeEAA",

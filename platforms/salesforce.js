@@ -51,7 +51,7 @@ function salesforceCallback(req, res, next){
                             sf: token
                         };
 
-                        if(err == null){
+                        if(err == null && country){
                             returnProfile.country = country['ISO3166-1-Alpha-2'];
                             returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'').trim();
                         }

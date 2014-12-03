@@ -27,6 +27,15 @@ describe('country codes', function(){
         }, done);
     });
 
+    it('country from null phone', function(done){
+        countryCodes.countryFromPhone(null, function(err, country){
+            assert.equal(err,null);
+            assert.equal(country,null);
+            done();
+        });
+    });
+
+
     it('country not found', function(done){
         countryCodes.countryFromPhone('696000000', function(err, country){
             assert.notEqual(err, null);
