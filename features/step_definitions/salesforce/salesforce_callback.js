@@ -4,11 +4,16 @@ var assert = require('assert');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var nock = require('nock');
+var url = require('url');
 
 module.exports = function(){
     this.When(/^the client app receives the SalesForce callback response$/, function (callback) {
 
-        nock('https://test.salesforce.com')
+        var sfAuthUrl = url.parse(config.salesforce.authUrl);
+        var sfAuthHost = sfAuthUrl.protocol + '//' + sfAuthUrl.host;
+        var sfTokenUrl = url.parse(config.salesforce.tokenUrl);
+
+        nock(sfAuthHost)
             .filteringPath(function(path){
                 if(path.indexOf('/services/oauth2/authorize') > -1){
                     return '/services/oauth2/authorize';
@@ -16,9 +21,9 @@ module.exports = function(){
                     return path;
                 }
             })
-            .get('/services/oauth2/authorize')
+            .get(sfAuthUrl.path)
             .reply(302, {accessToken:'sf1234'})
-            .post('/services/oauth2/token')
+            .post(sfTokenUrl.path)
             .reply(200,{
                 access_token:'a1b2c3d4e5f6',
                 refresh_token:'f6e5d4c3d2a1',

@@ -22,7 +22,7 @@
   "scripts": {
     "test": "npm run-script mocha && npm run-script cucumber",
     "mocha": "./node_modules/mocha/bin/mocha tests",
-    "cucumber": "./node_modules/cucumber/bin/cucumber.js --require step_definitions --require support -f pretty",
+    "cucumber": "./node_modules/cucumber/bin/cucumber.js -f pretty",
     "local": "node main.js"
   },
   "repository": {
