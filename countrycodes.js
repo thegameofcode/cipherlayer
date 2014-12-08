@@ -7,7 +7,7 @@ function countryFromPhone(phone, cbk){
   }
 
   async.each(countries, function(country, cbk){
-    if(phone.indexOf('+'+country.Dial) > -1) {
+    if(phone && phone.indexOf('+'+country.Dial) > -1) {
       return cbk(country);
     }
     cbk();

@@ -101,7 +101,6 @@ describe('proxy', function(){
                             .post('/api/standard', expectedBody)
                             .reply(200, {field3:'value3'});
 
-
                         var options = {
                             url: 'http://localhost:' + config.public_port + '/api/standard',
                             headers: {
@@ -213,7 +212,8 @@ describe('proxy', function(){
                             done();
                         });
                     });
-                });            });
+                });
+            });
         });
 
         describe('pass through', function(){

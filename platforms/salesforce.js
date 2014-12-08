@@ -1,12 +1,10 @@
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
-var async = require('async');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
 // PASSPORT
-var passport = require('passport');
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
 var salesforceSettings = {
     clientID : config.salesforce.clientId,
@@ -30,8 +28,6 @@ var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
         done(null, data);
     }
 );
-
-passport.use(salesforceStrategy);
 
 function salesforceCallback(req, res, next){
     var data = req.user;
@@ -79,7 +75,8 @@ function salesforceCallback(req, res, next){
     });
 }
 
-function addRoutes(server){
+function addRoutes(server, passport){
+    passport.use(salesforceStrategy);
     server.get('/auth/sf', passport.authenticate('forcedotcom'));
     server.get('/auth/sf/callback', passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
 }

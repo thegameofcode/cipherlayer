@@ -5,6 +5,7 @@ var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var passport = require('passport');
 
 var userDao = require('./dao');
 var tokenManager = require('./managers/token');
@@ -30,6 +31,12 @@ function startListener(publicPort, privatePort, cbk){
 
     server.use(restify.queryParser());
     server.use(restify.bodyParser());
+
+    /*server.pre(function (req, res, next) {
+        console.log('REQUEST', req);
+        console.log('RESPONSE', res);
+        next();
+    });*/
 
     server.post('/auth/login',function(req,res,next){
         userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
@@ -188,7 +195,7 @@ function startListener(publicPort, privatePort, cbk){
 
     var platformsPath = path.join(__dirname, '/platforms/');
     fs.readdirSync(platformsPath).forEach(function(filename) {
-        require(platformsPath + filename)(server);
+        require(platformsPath + filename)(server, passport);
     });
 
     function handleAll(req,res,next){

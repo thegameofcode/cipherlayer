@@ -21,11 +21,19 @@
   },
 
   "salesforce" : {
-    "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access"],
+    "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access", "api"],
     "clientId": "{{SALESFORCE_CLIENT_ID}}",
     "clientSecret": "{{SALESFORCE_CLIENT_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/sf/callback",
     "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
     "tokenUrl": "https://login.salesforce.com/services/oauth2/token"
+  },
+
+  "linkedin": {
+    "scope": ["r_network", "r_emailaddress", "r_basicprofile", "r_contactinfo", "r_fullprofile"],
+    "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
+    "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
+    "callbackURL": "http://int.my-comms.com/auth/in/callback"
   }
+
 }

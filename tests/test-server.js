@@ -279,16 +279,7 @@ describe('/auth', function(){
         });
 
         it('203 not exists', function(done){
-            nock('https://login.salesforce.com')
-                .filteringPath(function(path){
-                    if(path.indexOf('/services/oauth2/authorize') > -1){
-                        return '/services/oauth2/authorize';
-                    } else {
-                        return path;
-                    }
-                })
-                .get('/services/oauth2/authorize')
-                .reply(302, {accessToken:'sf1234'})
+            nock('https://test.salesforce.com')
                 .post('/services/oauth2/token')
                 .reply(200,{
                     access_token:'a1b2c3d4e5f6',
@@ -298,7 +289,7 @@ describe('/auth', function(){
                 });
 
             var sfProfile = {
-                "id": "https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
+                "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
                 "asserted_user": true,
                 "user_id": "005e0000001uNIyAAM",
                 "organization_id": "00De00000004cdeEAA",
@@ -394,16 +385,8 @@ describe('/auth', function(){
             dao.addUser(user, function(err, createdUser){
                 assert.equal(err,null);
                 assert.notEqual(createdUser, undefined);
-                nock('https://login.salesforce.com')
-                    .filteringPath(function(path){
-                        if(path.indexOf('/services/oauth2/authorize') > -1){
-                            return '/services/oauth2/authorize';
-                        } else {
-                            return path;
-                        }
-                    })
-                    .get('/services/oauth2/authorize')
-                    .reply(302, {accessToken:'sf1234'})
+
+                nock('https://test.salesforce.com')
                     .post('/services/oauth2/token')
                     .reply(200,{
                         access_token:'a1b2c3d4e5f6',
@@ -413,7 +396,7 @@ describe('/auth', function(){
                     });
 
                 var sfProfile = {
-                    "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
+                    "id": "https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
                     "asserted_user": true,
                     "user_id": "005e0000001uNIyAAM",
                     "organization_id": "00De00000004cdeEAA",
@@ -496,6 +479,52 @@ describe('/auth', function(){
                             done();
                         });
                     });
+                });
+            });
+        });
+    });
+
+    describe('/in', function(){
+        beforeEach(function(done){
+            dao.deleteAllUsers(function(err){
+                assert.equal(err,null);
+                done();
+            });
+        });
+
+        it('GET 302', function(done){
+            var options = {
+                url: 'http://localhost:'+config.public_port+'/auth/in',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                method:'GET',
+                followRedirect: false
+            };
+
+            request(options, function(err,res,body){
+                assert.equal(err,null);
+                assert.equal(res.statusCode, 302);
+                done();
+            });
+        });
+
+        describe('/callback', function(){
+            it('302 invalid data', function(done){
+
+                var options = {
+                    url: 'http://localhost:'+config.public_port+'/auth/in/callback',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method:'GET',
+                    followRedirect: false
+                };
+
+                request(options, function(err,res,body){
+                    assert.equal(err,null);
+                    assert.equal(res.statusCode, 302);
+                    done();
                 });
             });
         });
