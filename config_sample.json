@@ -35,5 +35,4 @@
     "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
     "callbackURL": "http://int.my-comms.com/auth/in/callback"
   }
-
 }
