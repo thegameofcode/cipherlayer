@@ -396,7 +396,7 @@ describe('/auth', function(){
                     });
 
                 var sfProfile = {
-                    "id": "https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
+                    "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
                     "asserted_user": true,
                     "user_id": "005e0000001uNIyAAM",
                     "organization_id": "00De00000004cdeEAA",
