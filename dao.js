@@ -129,6 +129,20 @@ function getFromId(id, cbk){
 
 }
 
+function updateById(userId, data, cbk){
+    if(util.isValidObjectID(userId)) {
+        var _id = new ObjectID(userId);
+        collection.update({_id: _id}, data, function(err, updatedUsers){
+            if(err) {
+                return cbk(err, null);
+            }
+            cbk(null, updatedUsers);
+        });
+    } else {
+        cbk({err:'not_valid_profile'},null);
+    }
+}
+
 module.exports = {
     connect : connect,
     disconnect : disconnect,
@@ -139,6 +153,8 @@ module.exports = {
     getFromUsernamePassword : getFromUsernamePassword,
     deleteAllUsers : deleteAllUsers,
     getFromId : getFromId,
+
+    updateById : updateById,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
