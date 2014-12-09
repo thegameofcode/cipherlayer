@@ -241,13 +241,13 @@ function startListener(publicPort, privatePort, cbk){
                                     userId: platform.accessToken.params.id,
                                     accessToken: platform.accessToken.params.access_token,
                                     instanceUrl: platform.accessToken.params.instance_url
-                                })
+                                });
                                 break;
 
                             case 'in':
                                 options.headers['x-in-data'] = JSON.stringify({
                                     accessToken: platform.accessToken
-                                })
+                                });
                                 break;
                             default:
                                 break;
