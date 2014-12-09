@@ -320,7 +320,8 @@ describe('proxy', function(){
                                 });
                             });
                         });
-                    });                });
+                    });
+                });
             });
 
             it('409 already exists', function(done){
