@@ -34,21 +34,14 @@ function linkedInCallback(req, res, next){
                     refreshToken:data.refreshToken
                 };
                 tokenManager.createAccessToken(profile.id, inData, function(err, token){
-                    countrycodes.countryFromPhone(profile._json.mobile_phone, function(err, country){
-                        var returnProfile = {
-                            name: profile._json.formattedName,
-                            email: profile._json.emailAddress,
-                            in: token
-                        };
+                    var returnProfile = {
+                        name: profile._json.formattedName,
+                        email: profile._json.emailAddress,
+                        in: token
+                    };
 
-                        if(!err){
-                            returnProfile.country = country['ISO3166-1-Alpha-2'];
-                            returnProfile.phone = profile._json.mobile_phone.replace('+'+country.Dial,'');
-                        }
-
-                        res.send(203, returnProfile);
-                        next(false);
-                    });
+                    res.send(203, returnProfile);
+                    next(false);
                 });
             } else {
                 res.send(500, {err:'internal_error', des:'There was an internal error matching linkedin profile'});

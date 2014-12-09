@@ -235,13 +235,24 @@ function startListener(publicPort, privatePort, cbk){
 
                 if(foundUser.platforms && foundUser.platforms.length>0){
                     foundUser.platforms.forEach(function(platform){
-                        if(platform.platform == 'sf'){
-                            options.headers['x-sf-data'] = JSON.stringify({
-                                userId: platform.accessToken.params.id,
-                                accessToken: platform.accessToken.params.access_token,
-                                instanceUrl: platform.accessToken.params.instance_url
-                            })
+                        switch(platform.platform){
+                            case 'sf':
+                                options.headers['x-sf-data'] = JSON.stringify({
+                                    userId: platform.accessToken.params.id,
+                                    accessToken: platform.accessToken.params.access_token,
+                                    instanceUrl: platform.accessToken.params.instance_url
+                                })
+                                break;
+
+                            case 'in':
+                                options.headers['x-in-data'] = JSON.stringify({
+                                    accessToken: platform.accessToken
+                                })
+                                break;
+                            default:
+                                break;
                         }
+
                     });
                 }
 
