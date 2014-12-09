@@ -128,7 +128,7 @@ function addUserPlatform(req, res, next){
 
 function addRoutes(server, passport){
     passport.use(linkedInStrategy);
-    server.get('/auth/in', passport.authenticate('linkedin', { state: ((yourDateObject.getTime() * 10000) + 621355968000000000) }));
+    server.get('/auth/in', passport.authenticate('linkedin', { state: ((new Date().getTime() * 10000) + 621355968000000000) }));
     server.post('/auth/in', addUserPlatform);
     server.get('/auth/in/callback', passport.authenticate('linkedin', { failureRedirect: '/auth/error', session: false} ), linkedInCallback);
 }
