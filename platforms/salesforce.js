@@ -32,6 +32,15 @@ var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
 function salesforceCallback(req, res, next){
     var data = req.user;
     var profile = data.profile;
+
+    var errorCode = req.query.error;
+    var errorDescription = req.query.error_description;
+
+    if(errorCode && errorDescription){
+        res.send(401, {error: errorDescription});
+        next(false);
+    }
+
     userDao.getFromUsername(profile._raw.email, function(err, foundUser){
         if(err){
             if(err.message == userDao.ERROR_USER_NOT_FOUND){
