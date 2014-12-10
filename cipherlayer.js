@@ -31,13 +31,7 @@ function startListener(publicPort, privatePort, cbk){
 
     server.use(restify.queryParser());
     server.use(restify.bodyParser());
-
-    /*server.pre(function (req, res, next) {
-        console.log('REQUEST', req);
-        console.log('RESPONSE', res);
-        next();
-    });*/
-
+    
     server.post('/auth/login',function(req,res,next){
         userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
             if(err) {
