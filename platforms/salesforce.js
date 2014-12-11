@@ -20,6 +20,7 @@ if(config.salesforce.tokenUrl){
 }
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
+        // TODO copy sf image to our file storage
         var data = {
             accessToken:accessToken,
             refreshToken:refreshToken,
