@@ -1,3 +1,4 @@
+var debug = require('debug')('cipherlayer:service');
 var restify = require('restify');
 var request = require('request');
 var clone = require('clone');
@@ -204,8 +205,6 @@ function startListener(publicPort, privatePort, cbk){
 
                 request(options, function(err,private_res,body) {
                     if(err) {
-                        console.log(options);
-                        console.log(err);
                         res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
                     } else {
                         try{

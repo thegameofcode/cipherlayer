@@ -1,7 +1,5 @@
-var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
-
 var userDao = require('../dao');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
