@@ -499,6 +499,25 @@ describe('/auth', function(){
                 });
             });
         });
+
+        it('401 deny permissions to SF', function(done){
+            var options = {
+                url: 'http://localhost:'+config.public_port+'/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                method:'GET'
+            };
+
+            request(options, function(err,res,body){
+                assert.equal(err,null);
+                assert.equal(res.statusCode, 401, body);
+                body = JSON.parse(body);
+                assert.deepEqual(body, {"err":"access_denied","des":"end-user denied authorization"});
+                done();
+            });
+        });
+
     });
 
     describe('/in', function(){

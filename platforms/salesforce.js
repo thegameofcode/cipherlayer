@@ -29,17 +29,21 @@ var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     }
 );
 
-function salesforceCallback(req, res, next){
-    var data = req.user;
-    var profile = data.profile;
-
+function salesforceDenyPermisionFilter(req, res, next){
     var errorCode = req.query.error;
     var errorDescription = req.query.error_description;
 
-    if(errorCode && errorDescription){
-        res.send(401, {error: errorDescription});
+    if(!errorCode || !errorDescription) {
+        return next();
+    } else {
+        res.send(401, {err:errorCode, des: errorDescription});
         next(false);
     }
+}
+
+function salesforceCallback(req, res, next){
+    var data = req.user;
+    var profile = data.profile;
 
     userDao.getFromUsername(profile._raw.email, function(err, foundUser){
         if(err){
@@ -87,7 +91,7 @@ function salesforceCallback(req, res, next){
 function addRoutes(server, passport){
     passport.use(salesforceStrategy);
     server.get('/auth/sf', passport.authenticate('forcedotcom'));
-    server.get('/auth/sf/callback', passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
+    server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
 }
 
 module.exports = addRoutes;
