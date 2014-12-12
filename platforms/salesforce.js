@@ -24,7 +24,8 @@ if(config.salesforce.tokenUrl){
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
 
-        if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture) {
+        if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
+            || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
             var data = {
                 accessToken:accessToken,
                 refreshToken:refreshToken,
@@ -38,7 +39,7 @@ var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
             var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
             var name = profile.id.substring(idPos) + '.jpg';
 
-            fileStoreMng.getPlatformAvatar(avatarPath, name, function(err, avatarUrl){
+            fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
                 if(!err) {
                     profile.avatar = avatarUrl;
                 }

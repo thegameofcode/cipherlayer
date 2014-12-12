@@ -3,43 +3,65 @@ var fs = require('fs');
 var https = require('https');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
-AWS.config.update({accessKeyId: config.aws.accessKeyId , secretAccessKey: config.aws.secretAccessKey, region: config.aws.region });
-var s3 = new AWS.S3();
+var s3;
 
-function uploadFile( bucket, fileName, binaryFile, cbk){
-    if(!bucket || bucket === '') {
-        return cbk({err:'invalid_bucket'});
-    } else if(!fileName || fileName === ''){
-        return cbk({err:'invalid_file_name'});
-    } else if(!binaryFile || binaryFile.length === 0) {
-        return cbk({err:'invalid_file_data'});
-    } else {
-        var data = {Key: fileName, Body: binaryFile, Bucket: bucket};
-        s3.putObject(data, function(err, data){
-            if (err) {
-                return cbk(err);
-            } else {
-                cbk(null, data);
-            }
-        });
+function initAWS(cbk){
+    if(!config.aws){
+        return cbk(false);
     }
+
+    AWS.config.update({accessKeyId: config.aws.accessKeyId , secretAccessKey: config.aws.secretAccessKey, region: config.aws.region });
+    s3 = new AWS.S3();
+    cbk(true);
+}
+
+function uploadFile( bucket, fileName, binaryFile, cbk) {
+    initAWS(function (started) {
+        if (!started) {
+            return cbk({err: 'cannot_initialize_AWS_service'});
+        } else {
+            if (!bucket || bucket === '') {
+                return cbk({err: 'invalid_bucket'});
+            } else if (!fileName || fileName === '') {
+                return cbk({err: 'invalid_file_name'});
+            } else if (!binaryFile || binaryFile.length === 0) {
+                return cbk({err: 'invalid_file_data'});
+            } else {
+                var data = {Key: fileName, Body: binaryFile, Bucket: bucket};
+                s3.putObject(data, function (err, data) {
+                    if (err) {
+                        return cbk(err);
+                    } else {
+                        cbk(null, data);
+                    }
+                });
+            }
+        }
+    });
 }
 
 function getFileURL( bucket, fileName, cbk){
-    if(!bucket || bucket === '') {
-        return cbk({err:'invalid_bucket'});
-    } else if(!fileName || fileName === ''){
-        return cbk({err:'invalid_file_name'});
-    } else {
-        var urlParams = {Bucket: bucket, Key: fileName};
-        s3.getSignedUrl('getObject', urlParams, function (err, url) {
-            if (err) {
-                return cbk(err);
+    initAWS( function (started){
+        if(!started) {
+            return cbk({err: 'cannot_initialize_AWS_service'});
+        } else {
+
+            if (!bucket || bucket === '') {
+                return cbk({err: 'invalid_bucket'});
+            } else if (!fileName || fileName === '') {
+                return cbk({err: 'invalid_file_name'});
             } else {
-                cbk(null, url);
+                var urlParams = {Bucket: bucket, Key: fileName};
+                s3.getSignedUrl('getObject', urlParams, function (err, url) {
+                    if (err) {
+                        return cbk(err);
+                    } else {
+                        cbk(null, url);
+                    }
+                });
             }
-        });
-    }
+        }
+    });
 }
 
 //TODO: to find objects in a bucket
@@ -76,7 +98,7 @@ function getFileURL( bucket, fileName, cbk){
 //    }
 //}
 
-function getPlatformAvatar(httpsAvatarUrl, avatarName, cbk){
+function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk){
 
     var validBucket = config.aws.buckets.avatars;
 
@@ -121,5 +143,5 @@ function getPlatformAvatar(httpsAvatarUrl, avatarName, cbk){
 module.exports = {
     uploadFile: uploadFile,
     getFileURL: getFileURL,
-    getPlatformAvatar: getPlatformAvatar
+    uploadAvatarToAWS: uploadAvatarToAWS
 };

@@ -34,5 +34,13 @@
     "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
     "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
     "callbackURL": "http://int.my-comms.com/auth/in/callback"
+  },
+  "aws":{
+    "accessKeyId": "{{AWS_ACCESKEYID}}",
+    "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
+    "region": "us-west-2",
+    "buckets": {
+      "avatars": "avatars"
+    }
   }
 }
