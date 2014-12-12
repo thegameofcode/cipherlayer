@@ -1,6 +1,10 @@
+var fs = require('fs');
+var https = require('https');
+
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
+var awsMng = require('../util/aws');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -20,15 +24,71 @@ if(config.salesforce.tokenUrl){
 }
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
-        // TODO copy sf image to our file storage
-        var data = {
-            accessToken:accessToken,
-            refreshToken:refreshToken,
-            profile:profile
-        };
-        done(null, data);
+
+        getPlatformAvatar(profile, accessToken, function(retProfile){
+            var data = {
+                accessToken:accessToken,
+                refreshToken:refreshToken,
+                profile:retProfile
+            };
+            done(null, data);
+        });
     }
 );
+
+function getPlatformAvatar(profile, accessToken, cbk){
+    if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture) {
+        //TODO line on debug with the error
+        return cbk(profile);
+    } else {
+        var oauthToken = "?oauth_token=" + accessToken.params.access_token;
+
+        var avatarPath = profile._raw.photos.picture + oauthToken;
+        var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/')+1 : 0;
+        var name = profile.id.substring(idPos) + '.jpg';
+
+        var validBucket = config.aws.buckets.avatars;
+
+        https.get(avatarPath, function (res) {
+            if (res.statusCode !== 200) {
+                //TODO line on debug with the error
+                return cbk(profile);
+            }
+            var data = [], dataLen = 0;
+
+            res.on("data", function (chunk) {
+                data.push(chunk);
+                dataLen += chunk.length;
+            });
+
+            res.on("end", function () {
+                var buf = new Buffer(dataLen);
+                for (var i=0,len=data.length,pos=0; i<len; i++) {
+                    data[i].copy(buf, pos);
+                    pos += data[i].length;
+                }
+
+                //Save in S3
+                awsMng.uploadFile(validBucket, name, buf, function (err, file) {
+                    if(err){
+                        //TODO line on debug with the error
+                        return cbk(profile);
+                    } else {
+                        awsMng.getFileURL(validBucket, name, function(err, fileURL){
+                            if(err){
+                                //TODO line on debug with the error
+                                return cbk(profile);
+                            } else {
+                                profile.avatar = fileURL;
+                                return cbk(profile);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+}
 
 function salesforceDenyPermisionFilter(req, res, next){
     var errorCode = req.query.error;
@@ -56,10 +116,15 @@ function salesforceCallback(req, res, next){
                 tokenManager.createAccessToken(profile.id, sfData, function(err, token){
                     countrycodes.countryFromPhone(profile._raw.mobile_phone, function(err, country){
                         var returnProfile = {
-                            name: profile._raw.display_name,
+                            name: profile._raw.first_name,
+                            lastname: profile._raw.last_name,
                             email: profile._raw.email,
                             sf: token
                         };
+
+                        if(profile.avatar){
+                            returnProfile.avatar = profile.avatar;
+                        }
 
                         if(err == null && country){
                             returnProfile.country = country['ISO3166-1-Alpha-2'];
