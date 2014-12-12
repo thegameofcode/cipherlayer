@@ -1,10 +1,9 @@
 var fs = require('fs');
-var https = require('https');
 
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
-var awsMng = require('../util/aws');
+var fileStoreMng = require('../managers/file_store');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -25,70 +24,35 @@ if(config.salesforce.tokenUrl){
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
 
-        getPlatformAvatar(profile, accessToken, function(retProfile){
+        if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture) {
             var data = {
                 accessToken:accessToken,
                 refreshToken:refreshToken,
-                profile:retProfile
+                profile:profile
             };
             done(null, data);
-        });
-    }
-);
+        } else {
+            var oauthToken = "?oauth_token=" + accessToken.params.access_token;
 
-function getPlatformAvatar(profile, accessToken, cbk){
-    if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture) {
-        //TODO line on debug with the error
-        return cbk(profile);
-    } else {
-        var oauthToken = "?oauth_token=" + accessToken.params.access_token;
+            var avatarPath = profile._raw.photos.picture + oauthToken;
+            var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
+            var name = profile.id.substring(idPos) + '.jpg';
 
-        var avatarPath = profile._raw.photos.picture + oauthToken;
-        var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/')+1 : 0;
-        var name = profile.id.substring(idPos) + '.jpg';
-
-        var validBucket = config.aws.buckets.avatars;
-
-        https.get(avatarPath, function (res) {
-            if (res.statusCode !== 200) {
-                //TODO line on debug with the error
-                return cbk(profile);
-            }
-            var data = [], dataLen = 0;
-
-            res.on("data", function (chunk) {
-                data.push(chunk);
-                dataLen += chunk.length;
-            });
-
-            res.on("end", function () {
-                var buf = new Buffer(dataLen);
-                for (var i=0,len=data.length,pos=0; i<len; i++) {
-                    data[i].copy(buf, pos);
-                    pos += data[i].length;
+            fileStoreMng.getPlatformAvatar(avatarPath, name, function(err, avatarUrl){
+                if(!err) {
+                    profile.avatar = avatarUrl;
                 }
 
-                //Save in S3
-                awsMng.uploadFile(validBucket, name, buf, function (err, file) {
-                    if(err){
-                        //TODO line on debug with the error
-                        return cbk(profile);
-                    } else {
-                        awsMng.getFileURL(validBucket, name, function(err, fileURL){
-                            if(err){
-                                //TODO line on debug with the error
-                                return cbk(profile);
-                            } else {
-                                profile.avatar = fileURL;
-                                return cbk(profile);
-                            }
-                        });
-                    }
-                });
+                var data = {
+                    accessToken:accessToken,
+                    refreshToken:refreshToken,
+                    profile:profile
+                };
+                done(null, data);
             });
-        });
+        }
     }
-}
+);
 
 function salesforceDenyPermisionFilter(req, res, next){
     var errorCode = req.query.error;

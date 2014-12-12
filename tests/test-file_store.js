@@ -1,4 +1,4 @@
-var awsMng = require('../../util/aws');
+var fileStoreMng = require('../managers/file_store');
 var assert = require('assert');
 var async = require('async');
 var fs = require('fs')
@@ -34,7 +34,7 @@ describe('AWS', function() {
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            awsMng.uploadFile('hola', uploadImage.name, file, function (err, file) {
+            fileStoreMng.uploadFile('hola', uploadImage.name, file, function (err, file) {
                 assert.notEqual(err, null);
                 done();
             });
@@ -45,7 +45,7 @@ describe('AWS', function() {
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            awsMng.uploadFile(validBucket, '', file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, '', file, function (err, file) {
                 assert.notEqual(err, null);
                 done();
             });
@@ -56,7 +56,7 @@ describe('AWS', function() {
         fs.readFile(emptyImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            awsMng.uploadFile(validBucket, emptyImage.name, file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, emptyImage.name, file, function (err, file) {
                 assert.notEqual(err, null);
                 done();
             });
@@ -67,7 +67,7 @@ describe('AWS', function() {
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            awsMng.uploadFile(validBucket, uploadImage.name, file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, uploadImage.name, file, function (err, file) {
                 assert.equal(err, null);
                 assert.notEqual(file, null);
                 done();
@@ -79,7 +79,7 @@ describe('AWS', function() {
         fs.readFile(uploadZip.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            awsMng.uploadFile(validBucket, uploadZip.name, file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, uploadZip.name, file, function (err, file) {
                 assert.equal(err, null);
                 assert.notEqual(file, null);
                 done();
@@ -88,7 +88,7 @@ describe('AWS', function() {
     });
 
     it('get URL', function (done) {
-        awsMng.getFileURL(validBucket, uploadImage.name, function(err, fileURL){
+        fileStoreMng.getFileURL(validBucket, uploadImage.name, function(err, fileURL){
             assert.equal(err, null);
             assert.notEqual(fileURL, null);
             done();
