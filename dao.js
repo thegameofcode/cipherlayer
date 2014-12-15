@@ -1,8 +1,8 @@
 var clone = require('clone');
-var mongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
-var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var mongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
 
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
@@ -14,7 +14,7 @@ var collection;
 
 function connect(cbk){
     mongoClient.connect(url, function(err, connectedDb){
-        assert.equal(err,null);
+        assert.equal(err,null, err);
         db = connectedDb;
 
         collection = connectedDb.collection('users');
@@ -29,9 +29,19 @@ function disconnect(cbk){
 }
 
 function addUser(userToAdd, cbk){
+    if(!userToAdd.id){
+        return cbk({err:'invalid_id'}, null);
+    }
+    if(!userToAdd.username){
+        return cbk({err:'invalid_username'}, null);
+    }
+    if(!userToAdd.password){
+        return cbk({err:'invalid_password'}, null);
+    }
+
     userToAdd = clone(userToAdd);
 
-    getFromUsername(userToAdd.username, function(err,foundUser){
+    getFromUsername(userToAdd.username, function(err, foundUser){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
                 userToAdd._id = userToAdd.id;
@@ -45,7 +55,7 @@ function addUser(userToAdd, cbk){
                     cbk(null, result[0]);
                 });
             } else {
-                cbk(err,null);
+                cbk(err, null);
             }
         } else {
             cbk(new Error(ERROR_USERNAME_ALREADY_EXISTS), null);
@@ -63,6 +73,10 @@ function countUsers(cbk){
 }
 
 function getFromUsername(username, cbk){
+    if(!username){
+        return cbk({err:'invalid_username'}, null);
+    }
+
     collection.find({username: username}, {password:0}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -126,21 +140,51 @@ function getFromId(id, cbk){
             }
         });
     });
-
 }
 
-function updateById(userId, data, cbk){
-    if(util.isValidObjectID(userId)) {
-        var _id = new ObjectID(userId);
-        collection.update({_id: _id}, data, function(err, updatedUsers){
-            if(err) {
-                return cbk(err, null);
+function updateField(userId, fieldName, fieldValue, cbk){
+    var data = {};
+    data[fieldName] = fieldValue;
+    collection.update({_id: userId}, {$set:data}, function(err, updatedUsers){
+        if(err) {
+            return cbk(err, null);
+        }
+        cbk(null, updatedUsers);
+    });
+}
+
+function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
+    var query = { _id: userId };
+    query[arrayName + '.' + itemKey] = itemValue[itemKey];
+
+    var data = {};
+    data[arrayName + '.$'] = itemValue;
+    var update = {$set:data};
+
+    //first tries to update array item if already exists
+    collection.update(query, update, {upsert:true} , function(err, updatedUsers){
+        if(err) {
+            if(err.code == 16836){
+                //item is not found, we add it
+                var update = {
+                    $addToSet:{}
+                };
+                update.$addToSet[arrayName] = itemValue;
+
+                collection.update({ _id: userId }, update, function(err, updatedUsers){
+                    if(err){
+                        return cbk(err, null);
+                    }
+                    cbk(null, updatedUsers);
+                });
+                return;
             }
+
+            cbk(err, null);
+        } else {
             cbk(null, updatedUsers);
-        });
-    } else {
-        cbk({err:'not_valid_profile'},null);
-    }
+        }
+    });
 }
 
 module.exports = {
@@ -154,7 +198,8 @@ module.exports = {
     deleteAllUsers : deleteAllUsers,
     getFromId : getFromId,
 
-    updateById : updateById,
+    updateField : updateField,
+    updateArrayItem : updateArrayItem,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS

@@ -101,7 +101,6 @@ describe('user dao', function(){
                 done();
             });
         });
-
     });
 
     it('delete all', function(done){
@@ -113,5 +112,125 @@ describe('user dao', function(){
                 done();
             });
         }) ;
+    });
+
+    it('updateField', function(done){
+        var expectedUser = clone(baseUser);
+        var expectedField = 'field1';
+        var expectedValue = 'value1';
+
+        dao.deleteAllUsers(function(err) {
+            assert.equal(err, null);
+            dao.addUser(expectedUser,function(err,createdUser) {
+                assert.equal(err, null);
+                assert.notEqual(createdUser, null);
+                assert.equal(createdUser._id, expectedUser.id);
+                dao.updateField(createdUser._id, expectedField, expectedValue, function(err, updates){
+                    assert.equal(err, null);
+                    assert.equal(updates, 1);
+                    dao.getFromId(createdUser._id, function(err, foundUser){
+                        assert.equal(err, null);
+                        assert.notEqual(foundUser, null);
+                        assert.equal(foundUser[expectedField], expectedValue);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
+    describe('updateArrayItem', function(){
+        it('Creates array if not exists', function(done){
+            var expectedUser = clone(baseUser);
+            var expectedField = 'fieldsArray';
+            var expectedKey = 'field1';
+            var expectedValue = { field1 : 'value1', field2: 'value2'};
+
+            dao.deleteAllUsers(function(err) {
+                assert.equal(err, null);
+                dao.addUser(expectedUser,function(err,createdUser) {
+                    assert.equal(err, null);
+                    assert.notEqual(createdUser, null);
+                    assert.equal(createdUser._id, expectedUser.id);
+                    dao.updateArrayItem(createdUser._id, expectedField, expectedKey, expectedValue, function(err, updates){
+                        assert.equal(err, null);
+                        assert.equal(updates, 1, 'incorrect number of objects updated');
+                        dao.getFromId(createdUser._id, function(err, foundUser){
+                            assert.equal(err, null);
+                            assert.notEqual(foundUser, null);
+                            assert.notEqual(foundUser[expectedField], null, 'attribute not added to object');
+                            assert.equal(Object.prototype.toString.call(foundUser[expectedField]), '[object Array]', 'attribute must be an array' );
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('Adds items to array', function(done){
+            var expectedUser = clone(baseUser);
+            var expectedField = 'fieldsArray';
+            var expectedKey = 'field1';
+            var expectedValue1 = { field1 : 'value1', field2: 'value1'};
+            var expectedValue2 = { field1 : 'value2', field2: 'value2'};
+            expectedUser[expectedField] = [];
+
+            dao.deleteAllUsers(function(err) {
+                assert.equal(err, null);
+                dao.addUser(expectedUser,function(err,createdUser) {
+                    assert.equal(err, null);
+                    assert.notEqual(createdUser, null);
+                    assert.equal(createdUser._id, expectedUser.id);
+                    dao.updateArrayItem(createdUser._id, expectedField, expectedKey, expectedValue1, function(err, updates){
+                        assert.equal(err, null);
+                        assert.equal(updates, 1, 'incorrect number of objects updated');
+                        dao.updateArrayItem(createdUser._id, expectedField, expectedKey, expectedValue2, function(err, updates){
+                            assert.equal(err, null);
+                            assert.equal(updates, 1, 'incorrect number of objects updated');
+                            dao.getFromId(createdUser._id, function(err, foundUser){
+                                assert.equal(err, null);
+                                assert.notEqual(foundUser, null);
+                                assert.notEqual(foundUser[expectedField], null, 'array attribute not added to object');
+                                assert.equal(foundUser[expectedField].length, 2, 'incorrect number of items added');
+                                assert.deepEqual(foundUser[expectedField][0], expectedValue1, 'invalid item added');
+                                assert.deepEqual(foundUser[expectedField][1], expectedValue2, 'invalid item added');
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('Updates item in array', function(done){
+            var expectedUser = clone(baseUser);
+            var expectedField = 'fieldsArray';
+            var expectedKey = 'field1';
+            var expectedValue1 = { field1 : 'value1', field2: 'value1'};
+            var expectedValue2 = { field1 : 'value2', field2: 'value2'};
+            expectedUser[expectedField] = [expectedValue1,expectedValue2];
+            var expectedNewValue = { field1: 'value2', field2: 'newvalue2'};
+
+            dao.deleteAllUsers(function(err) {
+                assert.equal(err, null);
+                dao.addUser(expectedUser,function(err, createdUser) {
+                    assert.equal(err, null);
+                    assert.notEqual(createdUser, null);
+                    assert.equal(createdUser._id, expectedUser.id);
+                    dao.updateArrayItem(createdUser._id, expectedField, expectedKey, expectedNewValue, function(err, updates){
+                        assert.equal(err, null);
+                        assert.equal(updates, 1, 'incorrect number of objects updated');
+                        dao.getFromId(createdUser._id, function(err, foundUser){
+                            assert.equal(err, null);
+                            assert.notEqual(foundUser, null);
+                            assert.notEqual(foundUser[expectedField], null, 'array attribute not added to object');
+                            assert.notEqual(foundUser[expectedField], null, 'array attribute not added to object');
+                            assert.deepEqual(foundUser[expectedField][1], expectedNewValue, 'invalid array item added');
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 });

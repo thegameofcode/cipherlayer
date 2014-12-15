@@ -1,3 +1,4 @@
+var debug = require('debug')('cipherlayer:platforms:salesforce');
 var fs = require('fs');
 
 var userDao = require('../dao');

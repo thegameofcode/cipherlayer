@@ -27,7 +27,8 @@
     "test": "npm run-script mocha && npm run-script cucumber",
     "mocha": "./node_modules/mocha/bin/mocha tests",
     "cucumber": "./node_modules/cucumber/bin/cucumber.js -f pretty",
-    "local": "node main.js"
+    "local": "DEBUG=cipherlayer* node main.js",
+    "int": "DEBUG=cipherlayer* node main.js"
   },
   "repository": {
     "type": "git",
