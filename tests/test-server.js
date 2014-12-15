@@ -4,11 +4,7 @@ var net = require('net');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
-var countrycodes = require('../countrycodes');
-
-
 describe('server control ', function(){
-
     it('start', function(done){
         cipherlayer.start(config.public_port, config.private_port, function(err) {
             assert.equal(err,null);
