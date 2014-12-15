@@ -1,7 +1,7 @@
 cipherlayer
 ===========
 
-Security layer based on [http://oauth.net/2/](OAuth 2.0) protocol.
+Security layer based on [OAuth 2.0](http://oauth.net/2/) protocol.
 Customers are given tokens to access protected client and these token have all the information about the session.
 That way no session information is stored in browsers or applications.
 
