@@ -70,7 +70,7 @@ function salesforceDenyPermisionFilter(req, res, next){
     if(!errorCode || !errorDescription) {
         return next();
     } else {
-        res.send(401, {err:errorCode, des: errorDescription});
+        res.send(401, {err:'access_denied', des: 'end-user denied authorization'});
         next(false);
     }
 }
