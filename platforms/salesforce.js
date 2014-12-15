@@ -1,5 +1,6 @@
 var debug = require('debug')('cipherlayer:platforms:salesforce');
 var fs = require('fs');
+var async = require('async');
 
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
@@ -25,34 +26,40 @@ if(config.salesforce.tokenUrl){
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
 
-        if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
-            || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
-            var data = {
-                accessToken:accessToken,
-                refreshToken:refreshToken,
-                profile:profile
-            };
-            done(null, data);
-        } else {
-            var oauthToken = "?oauth_token=" + accessToken.params.access_token;
+        async.series(
+            [
+                function(done){
+                    if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
+                        || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
+                        return done();
+                    }
 
-            var avatarPath = profile._raw.photos.picture + oauthToken;
-            var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
-            var name = profile.id.substring(idPos) + '.jpg';
+                    var oauthToken = "?oauth_token=" + accessToken.params.access_token;
 
-            fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
-                if(!err) {
-                    profile.avatar = avatarUrl;
+                    var avatarPath = profile._raw.photos.picture + oauthToken;
+                    //TODO change this to use 'path' framework
+                    var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
+                    var name = profile.id.substring(idPos) + '.jpg';
+
+                    fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
+                        if(!err) {
+                            profile.avatar = avatarUrl;
+                        }
+                        done();
+                    });
+                },
+                function(done){
+                    var data = {
+                        accessToken:accessToken,
+                        refreshToken:refreshToken,
+                        profile:profile
+                    };
+                    done(data);
                 }
-
-                var data = {
-                    accessToken:accessToken,
-                    refreshToken:refreshToken,
-                    profile:profile
-                };
+            ], function(data){
                 done(null, data);
-            });
-        }
+            }
+        );
     }
 );
 
