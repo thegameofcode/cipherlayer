@@ -22,7 +22,6 @@ var refreshTokenSettings = {
     tokenExpirationMinutes: config.refreshToken.expiration
 };
 
-
 describe('/auth', function(){
     beforeEach(function(done){
         cipherlayer.start(config.public_port, config.private_port, done);

@@ -1,7 +1,7 @@
 var fileStoreMng = require('../managers/file_store');
 var assert = require('assert');
 var async = require('async');
-var fs = require('fs')
+var fs = require('fs');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
 describe('AWS', function() {
