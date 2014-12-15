@@ -512,7 +512,7 @@ describe('/auth', function(){
                     assert.equal(body.name, 'Name');
                     assert.equal(body.lastname, 'Lastname');
                     assert.equal(body.email, 'name.lastname@email.com');
-                    assert.notEqual(body.avatar, null);
+                    assert.equal(body.avatar, undefined);
                     assert.equal(body.phone, '000000000');
                     assert.equal(body.country, 'ES');
                     assert.notEqual(body.sf, undefined);
