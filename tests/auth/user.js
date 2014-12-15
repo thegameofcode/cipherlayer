@@ -7,7 +7,7 @@ var dao = require('../../dao.js');
 
 module.exports = {
     describe: function(){
-        describe.only('/user', function(){
+        describe('/user', function(){
             var username = 'validuser';
             var password = 'validpassword';
 
