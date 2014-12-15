@@ -2,6 +2,7 @@ var debug = require('debug')('cipherlayer:routes:auth');
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var ObjectID = require('mongodb').ObjectID;
 
 function postAuthLogin(req,res,next){
     userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
@@ -29,13 +30,19 @@ function postAuthUser(req,res,next){
         password:req.body.password
     };
 
+    if(req.body.id){
+        user.id = req.body.id;
+    } else {
+        user.id = new ObjectID();
+    }
+
     if(req.body.platforms){
         user.platforms = req.body.platforms;
     }
 
     userDao.addUser(user,function(err,createdUser){
         if(err){
-            res.send(409,{err:err.message});
+            res.send(409, err);
         } else {
             var responseUser = {
                 username: createdUser.username

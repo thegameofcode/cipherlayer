@@ -58,7 +58,7 @@ function addUser(userToAdd, cbk){
                 cbk(err, null);
             }
         } else {
-            cbk(new Error(ERROR_USERNAME_ALREADY_EXISTS), null);
+            cbk({err:ERROR_USERNAME_ALREADY_EXISTS}, null);
         }
     });
 }
