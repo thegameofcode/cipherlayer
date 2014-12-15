@@ -96,7 +96,7 @@ describe('user dao', function(){
             assert.equal(createdUser.username,expectedUser.username);
             assert.equal(createdUser.password,expectedUser.password);
             dao.addUser(expectedUser,function(err,createdUser){
-                assert.equal(err.message,'username_already_exists');
+                assert.equal(err.err,'username_already_exists');
                 assert.equal(createdUser,null);
                 done();
             });
