@@ -12,7 +12,8 @@
     "mongodb": "^1.4.22",
     "passport": "^0.2.1",
     "passport-forcedotcom": "^0.1.1",
-    "passport-linkedin-oauth2": "^1.2.1"
+    "passport-linkedin-oauth2": "^1.2.1",
+    "redis": "^0.12.1"
   },
   "devDependencies": {
     "assert": "^1.1.2",

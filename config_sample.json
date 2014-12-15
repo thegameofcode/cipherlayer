@@ -42,5 +42,11 @@
     "buckets": {
       "avatars": "avatars"
     }
+  },
+  "redisKeys": {
+    "profile_phone_verify": {
+      "key":"profile.phone.verify.",
+      "expireInSec": 3000
+    }
   }
 }

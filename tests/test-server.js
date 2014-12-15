@@ -451,8 +451,8 @@ describe('/auth', function(){
                     "last_name": "Lastname",
                     "timezone": "Europe/London",
                     "photos": {
-                        "picture": "https://c.na16.content.force.com/profilephoto/729j0000000LB45/F", //__dirname + "/util/test_files/1234.jpg" ,
-                        "thumbnail": "https://c.na16.content.force.com/profilephoto/729j0000000LB45/T" //__dirname + "/util/test_files/1234.jpg"
+                        "picture": "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg",
+                        "thumbnail": "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg"
                     },
                     "addr_street": null,
                     "addr_city": null,

@@ -63,6 +63,8 @@ describe('AWS', function() {
     it('upload invalid bucket', function (done) {
         if(!configAWSParam) return done();
 
+        this.timeout(5000);
+
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
@@ -101,6 +103,8 @@ describe('AWS', function() {
 
     it('upload valid image', function (done) {
         if(!configAWSParam) return done();
+
+        this.timeout(10000);
 
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
