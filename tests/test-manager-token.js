@@ -118,7 +118,7 @@ describe('token manager', function(){
                         done();
                     });
                 });
-            })
+            });
         });
     });
 });

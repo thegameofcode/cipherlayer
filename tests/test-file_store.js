@@ -140,6 +140,4 @@ describe('AWS', function() {
             done();
         });
     });
-
-
 });
