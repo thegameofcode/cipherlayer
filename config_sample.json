@@ -45,8 +45,16 @@
   },
   "redisKeys": {
     "user_phone_verify": {
-      "key":"profile.phone.verify.",
-      "expireInSec": 3000
+      "key":"user.{username}.phone.{phone}",
+      "expireInSec": 2
     }
+  },
+  "userPIN": {
+    "size": 4,
+    "attempts": 3
+  },
+  "services":{
+    "notifications": "http://localhost:3002",
+    "search" : "http://localhost:3004"
   }
 }
