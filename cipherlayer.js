@@ -7,6 +7,7 @@ var fs = require('fs');
 var path = require('path');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var passport = require('passport');
+var crypto = require('crypto');
 
 var userDao = require('./dao');
 var tokenManager = require('./managers/token');
@@ -66,6 +67,9 @@ function startListener(publicPort, privatePort, cbk){
                 debug('<= '+ private_res.statusCode);
                 body = JSON.parse(body);
                 user.id = body.id;
+                if(!user.password){
+                    user.password = crypto.pseudoRandomBytes(12).toString('hex');
+                }
 
                 userDao.addUser(user, function (err, createdUser) {
                     if (err) {
