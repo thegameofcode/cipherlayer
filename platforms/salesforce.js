@@ -26,6 +26,7 @@ if(config.salesforce.tokenUrl){
 }
 var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
     function verify(accessToken, refreshToken, profile, done){
+        debug('user '+ profile.id +' logged in using salesforce');
 
         async.series(
             [
@@ -43,7 +44,9 @@ var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
                     var name = profile.id.substring(idPos) + '.jpg';
 
                     fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
-                        if(!err) {
+                        if(err){
+                            debug('Error uploading a profile picture to AWS');
+                        } else {
                             profile.avatar = avatarUrl;
                         }
                         done();

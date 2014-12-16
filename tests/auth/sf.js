@@ -53,7 +53,7 @@ var SF_PROFILE = {
 
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
-        describe.only('/sf', function(){
+        describe('/sf', function(){
             beforeEach(function(done){
                 dao.deleteAllUsers(function(err){
                     assert.equal(err,null);
