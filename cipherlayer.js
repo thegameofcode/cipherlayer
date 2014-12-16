@@ -33,7 +33,7 @@ function startListener(publicPort, privatePort, cbk){
     server.use(restify.queryParser());
     server.use(restify.bodyParser());
     server.use(function(req,res,next){
-        debug(req.method + ' ' + req.url);
+        debug('> ' + req.method + ' ' + req.url);
         next();
     });
 
@@ -53,14 +53,17 @@ function startListener(publicPort, privatePort, cbk){
             body: JSON.stringify(body)
         };
 
+        debug('=> '+ req.method + ' ' + options.url);
         request(options, function (err, private_res, body) {
             if (err) {
+                debug('<= error: '+ err);
                 res.send(500, {
                     err: 'auth_proxy_error',
                     des: 'there was an internal error when redirecting the call to protected service'
                 });
                 return next(false);
             } else {
+                debug('<= '+ private_res.statusCode);
                 body = JSON.parse(body);
                 user.id = body.id;
 
