@@ -69,16 +69,20 @@ function startListener(publicPort, privatePort, cbk){
 
                 userDao.addUser(user, function (err, createdUser) {
                     if (err) {
+                        debug('error adding user: ',err);
                         res.send(409, {err: err.message});
                         return next(false);
                     } else {
                         userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                             if (err) {
+                                debug('error obtaining user: ',err);
                                 res.send(409, {err: err.message});
                                 return next(false);
                             } else {
                                 tokenManager.createBothTokens(foundUser._id, function(err, tokens){
                                     if(err) {
+                                        debug('error creating tokens: ',err);
+                                        debug(err);
                                         res.send(409,{err: err.message});
                                     } else {
                                         tokens.expiresIn = config.accessToken.expiration * 60;
