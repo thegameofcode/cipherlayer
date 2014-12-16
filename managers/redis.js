@@ -67,11 +67,20 @@ function deleteKeyValue(key, cbk){
     });
 }
 
+function deleteAllKeys(cbk){
+    if(!redisClient){
+        return cbk({err:'redis_not_connected'});
+    };
+
+    redisClient.flushall(cbk);
+}
+
 module.exports = {
     connect: connect,
     disconnect: disconnect,
     insertKeyValue: insertKeyValue,
     updateKeyValue: updateKeyValue,
     getKeyValue: getKeyValue,
-    deleteKeyValue: deleteKeyValue
+    deleteKeyValue: deleteKeyValue,
+    deleteAllKeys: deleteAllKeys
 };

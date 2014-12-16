@@ -44,7 +44,7 @@
     }
   },
   "redisKeys": {
-    "profile_phone_verify": {
+    "user_phone_verify": {
       "key":"profile.phone.verify.",
       "expireInSec": 3000
     }

@@ -101,4 +101,29 @@ describe('Redis', function() {
             }
         ], done);
     });
+
+    it('delete all', function (done) {
+        async.series([
+            createKey = function(done){
+                redis.insertKeyValue(baseKey, baseValue, 10, function(err){
+                    assert.equal(err, null);
+                    done();
+                });
+            },
+            deleteAllKeys = function(done){
+                redis.deleteAllKeys(function (err) {
+                    assert.equal(err, null);
+                    done();
+                });
+            },
+            checkDelete = function(done){
+                redis.getKeyValue(baseKey, function (err, value) {
+                    assert.equal(err, null);
+                    assert.equal(value, null);
+                    done();
+                });
+            }
+
+        ], done);
+    });
 });

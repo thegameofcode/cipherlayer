@@ -131,6 +131,8 @@ function startListener(publicPort, privatePort, cbk){
         };
         delete(body[config.passThroughEndpoint.password]);
 
+
+
         if(body.sf){
             tokenManager.getAccessTokenInfo(body.sf, function(err, tokenInfo){
                 if(err){
