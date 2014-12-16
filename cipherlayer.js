@@ -232,6 +232,10 @@ function startListener(publicPort, privatePort, cbk){
 
     server.get(/(.*)/,handleAll);
     server.post(/(.*)/,handleAll);
+    server.use(function(req,res,next){
+        debug('< ' + res.statusCode);
+        next();
+    });
 
     server.listen(publicPort, function(){
         cbk();
