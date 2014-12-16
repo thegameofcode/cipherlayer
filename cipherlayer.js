@@ -32,6 +32,10 @@ function startListener(publicPort, privatePort, cbk){
 
     server.use(restify.queryParser());
     server.use(restify.bodyParser());
+    server.use(function(req,res,next){
+        debug(req.method + ' ' + req.url);
+        next();
+    });
 
     //routes
     var routesPath = path.join(__dirname, './routes/');
@@ -211,9 +215,9 @@ function startListener(publicPort, privatePort, cbk){
                     } else {
                         try{
                             body=JSON.parse(body);
-                            debug('<= ' + private_res.statusCode + 'json body');
+                            debug('<= ' + private_res.statusCode + ' json body');
                         } catch(err) {
-                            debug('<= ' + private_res.statusCode + 'no json body');
+                            debug('<= ' + private_res.statusCode + ' no json body');
                         }
                         res.send(Number(private_res.statusCode), body);
                     }
