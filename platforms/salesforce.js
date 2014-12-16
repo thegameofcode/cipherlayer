@@ -3,6 +3,7 @@ var fs = require('fs');
 var async = require('async');
 
 var userDao = require('../dao');
+var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
@@ -76,17 +77,17 @@ function salesforceDenyPermisionFilter(req, res, next){
 }
 
 function salesforceCallback(req, res, next){
-    var data = req.user;
-    var profile = data.profile;
+    var sfData = req.user;
+    var profile = sfData.profile;
 
     userDao.getFromUsername(profile._raw.email, function(err, foundUser){
         if(err){
             if(err.message == userDao.ERROR_USER_NOT_FOUND){
-                var sfData = {
-                    accessToken:data.accessToken,
-                    refreshToken:data.refreshToken
+                var tokenData = {
+                    accessToken:sfData.accessToken,
+                    refreshToken:sfData.refreshToken
                 };
-                tokenManager.createAccessToken(profile.id, sfData, function(err, token){
+                tokenManager.createAccessToken(profile.id, tokenData, function(err, token){
                     countrycodes.countryFromPhone(profile._raw.mobile_phone, function(err, country){
                         var returnProfile = {
                             name: profile._raw.first_name,
@@ -113,14 +114,29 @@ function salesforceCallback(req, res, next){
                 next(false);
             }
         } else {
-            tokenManager.createBothTokens(foundUser._id, function(err, tokens){
-                if(err) {
-                    res.send(409,{err: err.message});
-                } else {
-                    tokens.expiresIn = config.accessToken.expiration * 60;
-                    res.send(200,tokens);
+
+            var platform = {
+                platform:'sf',
+                accessToken: sfData.accessToken,
+                refreshToken: sfData.refreshToken,
+                expiry: new Date().getTime() + sfData.expiresIn * 1000
+            };
+
+            //TODO check if setPlatformData and createBothTokens call can be made in parallel
+            userManager.setPlatformData(foundUser._id, 'sf', platform, function(err){
+                if(err){
+                    debug('error updating sf tokens into user '+foundUser._id+':' + err);
+                    //TODO check if it's ok to ignore this error
                 }
-                next(false);
+                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+                    if(err) {
+                        res.send(409,{err: err.message});
+                    } else {
+                        tokens.expiresIn = config.accessToken.expiration * 60;
+                        res.send(200,tokens);
+                    }
+                    next(false);
+                });
             });
         }
         next(false);

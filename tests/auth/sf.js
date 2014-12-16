@@ -53,7 +53,7 @@ var SF_PROFILE = {
 
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
-        describe('/sf', function(){
+        describe.only('/sf', function(){
             beforeEach(function(done){
                 dao.deleteAllUsers(function(err){
                     assert.equal(err,null);
@@ -286,16 +286,24 @@ module.exports = {
                         assert.notEqual(body.refreshToken, undefined);
                         assert.notEqual(body.expiresIn, undefined);
 
-                        ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function(err, tokenInfo){
+                        dao.getFromId(createdUser._id, function(err, foundUser){
                             assert.equal(err,null);
-                            assert.equal(tokenInfo.userId, createdUser._id, 'bad accessToken userId');
+                            assert.notEqual(foundUser.platforms, undefined, 'stored user must contain a platforms array');
+                            assert.equal(foundUser.platforms.length, 1, 'stored user must contain 1 platform');
+                            assert.equal(foundUser.platforms[0].accessToken.params.access_token, 'a1b2c3d4e5f6', 'invalid access token stored');
 
-                            ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function(err, tokenInfo){
+                            ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function(err, tokenInfo){
                                 assert.equal(err,null);
-                                assert.equal(tokenInfo.userId, createdUser._id, 'bad refreshToken userId');
-                                done();
+                                assert.equal(tokenInfo.userId, createdUser._id, 'bad accessToken userId');
+
+                                ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function(err, tokenInfo){
+                                    assert.equal(err,null);
+                                    assert.equal(tokenInfo.userId, createdUser._id, 'bad refreshToken userId');
+                                    done();
+                                });
                             });
                         });
+
                     });
                 });
             });
