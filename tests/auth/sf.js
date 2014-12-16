@@ -3,6 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
+var clone = require('clone');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var dao = require('../../dao.js');
@@ -203,7 +204,7 @@ module.exports = {
                             id:'https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM'
                         });
 
-                    var sfProfile = SF_PROFILE;
+                    var sfProfile = clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
 
