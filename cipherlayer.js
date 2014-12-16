@@ -203,13 +203,17 @@ function startListener(publicPort, privatePort, cbk){
                     });
                 }
 
+                debug('=> '+ req.method + ' ' + options.url);
                 request(options, function(err,private_res,body) {
                     if(err) {
+                        debug('<= ' + private_res.statusCode + ' ' + err);
                         res.send(500, {err:'auth_proxy_error', des:'there was an internal error when redirecting the call to protected service'});
                     } else {
                         try{
                             body=JSON.parse(body);
+                            debug('<= ' + private_res.statusCode + 'json body');
                         } catch(err) {
+                            debug('<= ' + private_res.statusCode + 'no json body');
                         }
                         res.send(Number(private_res.statusCode), body);
                     }
