@@ -23,7 +23,7 @@ function postAuthLogin(req,res,next){
     });
 }
 
-function postAuthUser(req,res,next){
+function postAuthUser(req, res, next){
     var user = {
         id:req.body.id,
         username:req.body.username,
@@ -53,10 +53,10 @@ function postAuthUser(req,res,next){
     });
 }
 
-function delAuthUser(req,res,next){
+function delAuthUser(req, res, next){
     userDao.deleteAllUsers(function(err){
         if(err){
-            res.send(500,{err:err.message});
+            res.send(500,{err: err.message});
         } else {
             res.send(204);
         }
@@ -64,10 +64,20 @@ function delAuthUser(req,res,next){
     });
 }
 
+function checkAuthBasic(req, res, next){
+    var expectedAuthorizationBasic = new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64');
+    if (req.headers["authorization basic"] != expectedAuthorizationBasic) {
+        res.send(401, "Missing basic authorization");
+        return next(false);
+    } else {
+        return next();
+    }
+}
+
 function addRoutes(service) {
     service.post('/auth/login', postAuthLogin);
-    service.post('/auth/user', postAuthUser);
-    service.del('/auth/user', delAuthUser);
+    service.post('/auth/user', checkAuthBasic, postAuthUser);
+    service.del('/auth/user', checkAuthBasic, delAuthUser);
 
     debug('Auth routes added');
 }

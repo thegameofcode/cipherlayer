@@ -6,11 +6,18 @@
     "signKey" : "unsecureKey2",
     "expiration" : 10
   },
+
   "refreshToken" : {
     "cipherKey" : "unsecureKey3",
     "signKey" : "unsecureKey4",
     "expiration" : 60
   },
+
+  "management":{
+    "clientId": "Cipher Layer User",
+    "clientSecret": "Q0lQSEVSTEFZRVI"
+  },
+
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },

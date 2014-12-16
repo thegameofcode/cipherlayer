@@ -8,25 +8,27 @@ module.exports = function(){
     this.Given(/^a user with valid credentials in SalesForce linked to SalesForce$/, function (callback) {
         world.getUser().id = 'a1b2c3d4e5f6';
         world.getUser().username = 'name.lastname@email.com';
+        world.getUser().password = 'valid_password';
         world.getUser().platforms = [{
-            platform:'sf',
+            platform: 'sf',
             accessToken: 'a1b2c3...d4e5f6',
             refreshToken: 'a1b2c3...d4e5f6',
             expiry: new Date().getTime() + 60 * 1000
         }];
 
         var options = {
-            url: 'http://localhost:'+config.public_port+'/auth/user',
+            url: 'http://localhost:' + config.public_port + '/auth/user',
             headers: {
-                'Content-Type': 'application/json; charset=utf-8'
+                'Content-Type': 'application/json; charset=utf-8',
+                'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
             },
-            method:'POST',
+            method: 'POST',
             body : JSON.stringify(world.getUser())
         };
 
-        request(options, function(err,res,body) {
+        request(options, function(err, res, body) {
             assert.equal(err,null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 201, body);
             callback();
         });
     });

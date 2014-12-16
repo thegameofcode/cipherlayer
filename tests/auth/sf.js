@@ -26,9 +26,9 @@ var SF_PROFILE = {
     "last_name": "Lastname",
     "timezone": "Europe/London",
     "photos": {
-    "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
+        "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
         "thumbnail": "https://c.cs15.content.force.com/profilephoto/005/T"
-},
+    },
     "addr_street": null,
     "addr_city": null,
     "addr_state": null,
@@ -37,9 +37,9 @@ var SF_PROFILE = {
     "mobile_phone": "+34000000000",
     "mobile_phone_verified": true,
     "status": {
-    "created_date": null,
+        "created_date": null,
         "body": null
-},
+    },
     "urls": URLS,
     "active": true,
     "user_type": "STANDARD",

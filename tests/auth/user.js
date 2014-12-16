@@ -5,11 +5,27 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var dao = require('../../dao.js');
 
+var username = 'validuser';
+var password = 'validpassword';
+
+var USER = {
+    id: 'a1b2c3d4e5f6',
+    username: username,
+    password: password
+};
+
+var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
+    'Content-Type': 'application/json; charset=utf-8'
+};
+
+var HEADERS_WITH_AUTHORIZATION_BASIC = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
+};
+
 module.exports = {
     describe: function(){
         describe('/user', function(){
-            var username = 'validuser';
-            var password = 'validpassword';
 
             beforeEach(function(done){
                 dao.deleteAllUsers(function(err){
@@ -18,19 +34,16 @@ module.exports = {
                 });
             });
 
-            // TODO add Authorization basic as required header to protect this endpoint
             it('POST 201 created', function(done){
                 var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/user',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
+                    url: 'http://localhost:' + config.public_port + '/auth/user',
+                    headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                     method:'POST',
-                    body : JSON.stringify({username:username,password:password})
+                    body : JSON.stringify({username: username, password: password})
                 };
 
-                request(options, function(err,res,body){
-                    assert.equal(err,null);
+                request(options, function(err, res, body){
+                    assert.equal(err, null);
                     assert.equal(res.statusCode, 201, body);
                     body = JSON.parse(body);
                     assert.equal(body.username, username);
@@ -39,64 +52,115 @@ module.exports = {
                 });
             });
 
-            // TODO add Authorization basic as required header to protect this endpoint
-            it('POST 409 already exists', function(done){
-                var user = {
-                    id: 'a1b2c3d4e5f6',
-                    username: username,
-                    password: password
+            it('401 Not authorized when trying to POST to /auth/user without basic authorization', function(done){
+                var options = {
+                    url: 'http://localhost:' + config.public_port + '/auth/user',
+                    headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
+                    method:'POST',
+                    body : JSON.stringify({username: username, password: password})
                 };
-                dao.addUser(user, function(err,createdUser){
-                    assert.equal(err,null);
+
+                request(options, function(err, res){
+                    assert.equal(err, null);
+                    assert.equal(res.statusCode, 401);
+                    done();
+                });
+            });
+
+            it('POST 409 already exists', function(done){
+                dao.addUser(USER, function(err,createdUser){
+                    assert.equal(err, null);
                     assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:'+config.public_port+'/auth/user',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
+                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                         method:'POST',
-                        body : JSON.stringify({username:user.username,password:user.password})
+                        body : JSON.stringify({username: USER.username, password: USER.password})
                     };
 
-                    request(options, function(err,res,body){
-                        assert.equal(err,null);
+                    request(options, function(err, res, body){
+                        assert.equal(err, null);
                         assert.equal(res.statusCode, 409);
                         body = JSON.parse(body);
-                        assert.equal(body.err,'username_already_exists');
+                        assert.equal(body.err, 'username_already_exists');
                         done();
                     });
                 });
             });
 
-            // TODO add Authorization basic as required header to protect this endpoint
-            it('DELETE 204', function(done){
-                var user = {
-                    id: 'a1b2c3d4e5f6',
-                    username: username,
-                    password: password
-                };
-
-                dao.addUser(user, function(err,createdUser){
+            it('401 Not authorized when trying to POST an existing user without basic auth', function(done){
+                dao.addUser(USER, function(err,createdUser){
                     assert.equal(err,null);
-                    assert.notEqual(createdUser,null);
+                    assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:'+config.public_port+'/auth/user',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
+                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
+                        method:'POST',
+                        body : JSON.stringify({username: USER.username, password: USER.password})
+                    };
+
+                    request(options, function(err, res){
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 401);
+                        done();
+                    });
+                });
+            });
+
+            it('DELETE 204', function (done){
+                dao.addUser(USER, function(err, createdUser){
+                    assert.equal(err, null);
+                    assert.notEqual(createdUser, null);
+
+                    var options = {
+                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                         method:'DELETE'
                     };
 
-                    request(options, function(err,res,body){
-                        assert.equal(err,null);
+                    request(options, function(err, res, body){
+                        assert.equal(err, null);
                         assert.equal(res.statusCode, 204);
-                        assert.equal(body,'');
+                        assert.equal(body, '');
 
-                        dao.countUsers(function(err,count){
-                            assert.equal(err,null);
-                            assert.equal(count,0);
+                        dao.countUsers(function(err, count){
+                            assert.equal(err, null);
+                            assert.equal(count, 0);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('401 Not authorized when trying to delete without basic authorization', function(done) {
+                dao.addUser(USER, function(err, createdUser){
+                    assert.equal(err, null);
+                    assert.notEqual(createdUser, null);
+
+                    var options = {
+                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
+                        method:'DELETE'
+                    };
+
+                    request(options, function(err, res){
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 401);
+
+                        dao.countUsers(function(err, count){
+                            assert.equal(err, null);
+                            assert.equal(count, 1);
+                        });
+                    });
+
+                    options.headers = HEADERS_WITH_AUTHORIZATION_BASIC;
+                    request(options, function(err, res){
+                        assert.equal(err, null);
+                        dao.countUsers(function(err, count){
+                            assert.equal(err, null);
+                            assert.equal(count, 0);
                             done();
                         });
                     });
@@ -104,4 +168,6 @@ module.exports = {
             });
         });
     }
+
+    // TODO: if config.management does not exist or is incorrect POST and DELETE to /auth/user must return 404
 };

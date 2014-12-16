@@ -17,9 +17,10 @@ module.exports = function(){
                 world.getUser().password = 'valid_password';
 
                 var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/user',
+                    url: 'http://localhost:' + config.public_port+'/auth/user',
                     headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
                     },
                     method:'POST',
                     body : JSON.stringify(world.getUser())
@@ -37,7 +38,8 @@ module.exports = function(){
                 var options = {
                     url: 'http://localhost:'+config.public_port+'/auth/login',
                     headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
                     },
                     method:'POST',
                     body : JSON.stringify(world.getUser())
