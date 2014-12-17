@@ -64,7 +64,7 @@ module.exports = {
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);
-                        assert.equal(res.statusCode, 200);
+                        assert.equal(res.statusCode, 200, body);
                         assert.notEqual(body, undefined);
                         done();
                     });
@@ -127,7 +127,7 @@ module.exports = {
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);
-                        assert.equal(res.statusCode, 200);
+                        assert.equal(res.statusCode, 200, body);
                         assert.notEqual(body, undefined);
                         done();
                     });
@@ -171,7 +171,7 @@ module.exports = {
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);
-                        assert.equal(res.statusCode, 200);
+                        assert.equal(res.statusCode, 200, body);
                         assert.notEqual(body, undefined);
                         done();
                     });
