@@ -124,4 +124,6 @@ function addRoutes(server, passport){
     server.get('/auth/in/callback', passport.authenticate('linkedin', { failureRedirect: '/auth/error', session: false} ), linkedInCallback);
 }
 
-module.exports = addRoutes;
+module.exports = {
+    addRoutes: addRoutes
+};

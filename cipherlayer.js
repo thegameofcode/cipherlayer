@@ -218,7 +218,7 @@ function startListener(publicPort, privatePort, cbk){
 
     var platformsPath = path.join(__dirname, '/platforms/');
     fs.readdirSync(platformsPath).forEach(function(filename) {
-        require(platformsPath + filename)(server, passport);
+        require(platformsPath + filename).addRoutes(server, passport);
     });
 
     function handleAll(req,res,next){

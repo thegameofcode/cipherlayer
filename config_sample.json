@@ -33,7 +33,8 @@
     "clientSecret": "{{SALESFORCE_CLIENT_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/sf/callback",
     "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
-    "tokenUrl": "https://login.salesforce.com/services/oauth2/token"
+    "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
+    "expiration": 5
   },
 
   "linkedin": {

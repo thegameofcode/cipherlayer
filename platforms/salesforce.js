@@ -1,5 +1,4 @@
 var debug = require('debug')('cipherlayer:platforms:salesforce');
-var fs = require('fs');
 var async = require('async');
 
 var userDao = require('../dao');
@@ -24,53 +23,54 @@ if(config.salesforce.authUrl){
 if(config.salesforce.tokenUrl){
     salesforceSettings.tokenURL = config.salesforce.tokenUrl;
 }
-var salesforceStrategy = new forcedotcomStrategy(salesforceSettings,
-    function verify(accessToken, refreshToken, profile, done){
-        debug('user '+ profile.id +' logged in using salesforce');
 
-        async.series(
-            [
-                function(done){
-                    if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
-                        || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
-                        return done();
-                    }
-
-                    var oauthToken = "?oauth_token=" + accessToken.params.access_token;
-
-                    var avatarPath = profile._raw.photos.picture + oauthToken;
-                    //TODO change this to use 'path' framework
-                    var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
-                    var name = profile.id.substring(idPos) + '.jpg';
-
-                    fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
-                        if(err){
-                            debug('Error uploading a profile picture to AWS');
-                        } else {
-                            profile.avatar = avatarUrl;
-                        }
-                        done();
-                    });
-                },
-                function(done){
-                    var data = {
-                        accessToken:accessToken,
-                        refreshToken:refreshToken,
-                        profile:profile
-                    };
-                    done(data);
+function prepareSession(accessToken, refreshToken, profile, done){
+    debug('user '+ profile.id +' logged in using salesforce');
+    async.series(
+        [
+            function uploadAvatar(done){
+                if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
+                    || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
+                    return done();
                 }
-            ], function(data){
-                done(null, data);
+
+                var oauthToken = "?oauth_token=" + accessToken.params.access_token;
+
+                var avatarPath = profile._raw.photos.picture + oauthToken;
+                //TODO change this to use 'path' framework
+                var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
+                var name = profile.id.substring(idPos) + '.jpg';
+
+                fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
+                    if(err){
+                        debug('Error uploading a profile picture to AWS');
+                    } else {
+                        profile.avatar = avatarUrl;
+                    }
+                    done();
+                });
+            },
+            function returnSessionData(done){
+                var data = {
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    profile: profile,
+                    expiresAt: new Date().getTime() + config.salesforce.expiration * 60 * 1000
+                };
+                done(data);
             }
-        );
-    }
-);
+        ], function(data){
+            done(null, data);
+        }
+    );
+
+}
+var salesforceStrategy = new forcedotcomStrategy(salesforceSettings, prepareSession);
 
 function salesforceDenyPermisionFilter(req, res, next){
     var errorCode = req.query.error;
-    var errorDescription = req.query.error_description;
 
+    var errorDescription = req.query.error_description;
     if(!errorCode || !errorDescription) {
         return next();
     } else {
@@ -152,4 +152,7 @@ function addRoutes(server, passport){
     server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
 }
 
-module.exports = addRoutes;
+module.exports = {
+    addRoutes: addRoutes,
+    prepareSession: prepareSession
+};
