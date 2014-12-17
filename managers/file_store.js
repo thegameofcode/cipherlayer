@@ -27,7 +27,7 @@ function uploadFile( bucket, fileName, binaryFile, cbk) {
             } else if (!binaryFile || binaryFile.length === 0) {
                 return cbk({err: 'invalid_file_data'});
             } else {
-                var data = {Key: fileName, Body: binaryFile, Bucket: bucket};
+                var data = {Key: fileName, Body: binaryFile, Bucket: bucke, ACL: 'public-read'};
                 s3.putObject(data, function (err, data) {
                     if (err) {
                         return cbk(err);
@@ -56,6 +56,9 @@ function getFileURL( bucket, fileName, cbk){
                     if (err) {
                         return cbk(err);
                     } else {
+                        if(url.indexOf('?')> -1){
+                            url = url.substr(0,url.indexOf('?'));
+                        }
                         cbk(null, url);
                     }
                 });
