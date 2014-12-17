@@ -74,10 +74,24 @@ function checkAuthBasic(req, res, next){
     }
 }
 
+function renewToken(req, res, next){
+    var refreshToken = req.body.refreshToken;
+    tokenManager.getAccessTokenInfo(refreshToken, function(err, tokenSet){
+        tokenManager.createRefreshToken(tokenSet.userId, '', function(err, newToken){
+            var body = {
+                accessToken: newToken,
+                expiresIn: config.accessToken.expiration
+            };
+            res.send(200, body);
+        });
+    });
+}
+
 function addRoutes(service) {
     service.post('/auth/login', postAuthLogin);
     service.post('/auth/user', checkAuthBasic, postAuthUser);
     service.del('/auth/user', checkAuthBasic, delAuthUser);
+    service.post('/auth/renew', renewToken);
 
     debug('Auth routes added');
 }

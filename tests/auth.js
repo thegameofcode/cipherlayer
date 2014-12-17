@@ -9,6 +9,7 @@ var describeLogin = require('./auth/login.js');
 var describeUser = require('./auth/user.js');
 var describeSf = require('./auth/sf.js');
 var describeIn = require('./auth/in.js');
+var describeRenew = require('./auth/renew.js');
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
@@ -35,4 +36,5 @@ describe('/auth', function(){
     describeUser.describe();
     describeSf.describe(accessTokenSettings, refreshTokenSettings);
     describeIn.describe();
+    describeRenew.describe();
 });
