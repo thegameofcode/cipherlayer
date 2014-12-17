@@ -11,7 +11,6 @@ var nock = require('nock');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
 describe('Phone', function() {
-
     var baseUser = {
         id : 'a1b2c3d4e5f6',
         username : 'validuser',
@@ -181,9 +180,6 @@ describe('Phone', function() {
                     });
                 });
             });
-
         });
-
     });
-
 });

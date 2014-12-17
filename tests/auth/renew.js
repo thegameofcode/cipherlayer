@@ -7,23 +7,6 @@ var ciphertoken = require('ciphertoken');
 var dao = require('../../dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
-var USER = {
-    id: 'a1b2c3d4e5f6',
-    username: 'validUser',
-    password: 'validPassword123'
-};
-
-var OPTIONS_FOR_RENEW = {
-    url: 'http://localhost:' + config.public_port + '/auth/renew',
-    headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-    },
-    method: 'POST'
-};
-
-var OPTIONS_FOR_LOGIN = clone(OPTIONS_FOR_RENEW);
-OPTIONS_FOR_LOGIN.url = 'http://localhost:' + config.public_port + '/auth/login';
-
 
 module.exports = {
     describe: function(){
@@ -115,3 +98,21 @@ function getAccessToken(user, cbk){
         cbk(null, token);
     });
 }
+
+
+var USER = {
+    id: 'a1b2c3d4e5f6',
+    username: 'validUser',
+    password: 'validPassword123'
+};
+
+var OPTIONS_FOR_RENEW = {
+    url: 'http://localhost:' + config.public_port + '/auth/renew',
+    headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+    },
+    method: 'POST'
+};
+
+var OPTIONS_FOR_LOGIN = clone(OPTIONS_FOR_RENEW);
+OPTIONS_FOR_LOGIN.url = 'http://localhost:' + config.public_port + '/auth/login';

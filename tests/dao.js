@@ -3,7 +3,6 @@ var assert = require('assert');
 var clone = require('clone');
 
 describe('user dao', function(){
-
     var baseUser = {
         id:'a1b2c3d4e5f6',
         username:'user1',

@@ -3,17 +3,6 @@ var ciphertoken = require('ciphertoken');
 var tokenManager = require('../managers/token');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
-var accessTokenSettings = {
-    cipherKey: config.accessToken.cipherKey,
-    firmKey: config.accessToken.signKey,
-    tokenExpirationMinutes: config.accessToken.expiration * 60
-};
-
-var refreshTokenSettings = {
-    cipherKey: config.refreshToken.cipherKey,
-    firmKey: config.refreshToken.signKey,
-    tokenExpirationMinutes: config.refreshToken.expiration * 1000
-};
 
 describe('token manager', function(){
     describe('createAccessToken',function(){
@@ -122,3 +111,15 @@ describe('token manager', function(){
         });
     });
 });
+
+var accessTokenSettings = {
+    cipherKey: config.accessToken.cipherKey,
+    firmKey: config.accessToken.signKey,
+    tokenExpirationMinutes: config.accessToken.expiration * 60
+};
+
+var refreshTokenSettings = {
+    cipherKey: config.refreshToken.cipherKey,
+    firmKey: config.refreshToken.signKey,
+    tokenExpirationMinutes: config.refreshToken.expiration * 1000
+};

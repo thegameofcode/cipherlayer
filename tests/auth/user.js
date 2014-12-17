@@ -5,25 +5,6 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var dao = require('../../dao.js');
 
-var username = 'validuser';
-var password = 'validpassword';
-var phone = '111111111';
-
-var USER = {
-    id: 'a1b2c3d4e5f6',
-    username: username,
-    password: password,
-    phone: phone
-};
-
-var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
-    'Content-Type': 'application/json; charset=utf-8'
-};
-
-var HEADERS_WITH_AUTHORIZATION_BASIC = {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
-};
 
 module.exports = {
     describe: function(){
@@ -173,4 +154,25 @@ module.exports = {
 
     // TODO: if config.management does not exist or is incorrect POST and DELETE to /auth/user must return 404
     // for this test config should be edited, doing so a white box unit test or either change way of loading config file
+};
+
+
+var username = 'validuser';
+var password = 'validpassword';
+var phone = '111111111';
+
+var USER = {
+    id: 'a1b2c3d4e5f6',
+    username: username,
+    password: password,
+    phone: phone
+};
+
+var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
+    'Content-Type': 'application/json; charset=utf-8'
+};
+
+var HEADERS_WITH_AUTHORIZATION_BASIC = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
 };

@@ -14,7 +14,6 @@ describe('AWS', function() {
     });
 
     var configAWSParam = false;
-
     var validBucket;
 
     var uploadImage = {

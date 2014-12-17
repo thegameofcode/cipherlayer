@@ -13,67 +13,19 @@ var URLS = {
     "users": "https://cs15.salesforce.com/services/data/v{version}/chatter/users"
 };
 
-var SF_PROFILE = {
-    "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
-    "asserted_user": true,
-    "user_id": "005e0000001uNIyAAM",
-    "organization_id": "00De00000004cdeEAA",
-    "username": "name.lastname@email.com",
-    "nick_name": "nick",
-    "display_name": "Name Lastname",
-    "email": "name.lastname@email.com",
-    "email_verified": true,
-    "first_name": "Name",
-    "last_name": "Lastname",
-    "timezone": "Europe/London",
-    "photos": {
-        "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
-        "thumbnail": "https://c.cs15.content.force.com/profilephoto/005/T"
-    },
-    "addr_street": null,
-    "addr_city": null,
-    "addr_state": null,
-    "addr_country": null,
-    "addr_zip": null,
-    "mobile_phone": "+34000000000",
-    "mobile_phone_verified": true,
-    "status": {
-        "created_date": null,
-        "body": null
-    },
-    "urls": URLS,
-    "active": true,
-    "user_type": "STANDARD",
-    "language": "en_US",
-    "locale": "en_GB",
-    "utcOffset": 0,
-    "last_modified_date": "2014-10-02T15:20:43.000+0000",
-    "is_app_installed": true,
-    "_photo": null
-};
-
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
         describe('/sf', function(){
             beforeEach(function(done){
                 dao.deleteAllUsers(function(err){
-                    assert.equal(err,null);
+                    assert.equal(err, null);
                     done();
                 });
             });
 
             it('GET 302', function(done){
-                var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/sf',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
-                    method:'GET',
-                    followRedirect: false
-                };
-
-                request(options, function(err,res,body){
-                    assert.equal(err,null);
+                request(OPTIONS, function(err, res, body){
+                    assert.equal(err, null);
                     assert.equal(res.statusCode, 302);
                     done();
                 });
@@ -81,15 +33,8 @@ module.exports = {
 
             describe('/callback', function(){
                 it('302 invalid data', function(done){
-
-                    var options = {
-                        url: 'http://localhost:'+config.public_port+'/auth/sf/callback',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method:'GET',
-                        followRedirect: false
-                    };
+                    var options = clone(OPTIONS);
+                    options.url ='http://localhost:' + config.public_port + '/auth/sf/callback';
 
                     request(options, function(err,res,body){
                         assert.equal(err,null);
@@ -103,14 +48,8 @@ module.exports = {
                 nockSFLoginCall();
                 nockSFGetProfileCall(SF_PROFILE);
 
-                var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/sf/callback?code=a1b2c3d4e5f6',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
-                    method:'GET',
-                    followAllRedirects: true
-                };
+                var options = clone(OPTIONS);
+                options.url ='http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
 
                 request(options, function(err,res,body){
                     assert.equal(err,null);
@@ -168,20 +107,14 @@ module.exports = {
                     if(!configAWSParam) return done();
 
                     nockSFLoginCall();
+
                     var sfProfile = clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
-
                     nockSFGetProfileCall(sfProfile);
 
-                    var options = {
-                        url: 'http://localhost:'+config.public_port+'/auth/sf/callback?code=a1b2c3d4e5f6',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method:'GET',
-                        followAllRedirects: true
-                    };
+                    var options = clone(OPTIONS);
+                    options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
 
                     request(options, function(err,res,body){
                         assert.equal(err,null);
@@ -215,14 +148,9 @@ module.exports = {
                     nockSFLoginCall();
                     nockSFGetProfileCall(SF_PROFILE);
 
-                    var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method:'GET',
-                        followAllRedirects: true
-                    };
+                    var options = clone(OPTIONS);
+                    options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
+                    options.followAllRedirects = true;
 
                     request(options, function(err,res,body){
                         assert.equal(err,null);
@@ -254,13 +182,8 @@ module.exports = {
             });
 
             it('401 deny permissions to SF', function(done){
-                var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
-                    method:'GET'
-                };
+                var options = clone(OPTIONS);
+                options.url = 'http://localhost:'+config.public_port+'/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization';
 
                 request(options, function(err,res,body){
                     assert.equal(err,null);
@@ -273,6 +196,56 @@ module.exports = {
         });
     }
 };
+
+
+var SF_PROFILE = {
+    "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
+    "asserted_user": true,
+    "user_id": "005e0000001uNIyAAM",
+    "organization_id": "00De00000004cdeEAA",
+    "username": "name.lastname@email.com",
+    "nick_name": "nick",
+    "display_name": "Name Lastname",
+    "email": "name.lastname@email.com",
+    "email_verified": true,
+    "first_name": "Name",
+    "last_name": "Lastname",
+    "timezone": "Europe/London",
+    "photos": {
+        "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
+        "thumbnail": "https://c.cs15.content.force.com/profilephoto/005/T"
+    },
+    "addr_street": null,
+    "addr_city": null,
+    "addr_state": null,
+    "addr_country": null,
+    "addr_zip": null,
+    "mobile_phone": "+34000000000",
+    "mobile_phone_verified": true,
+    "status": {
+        "created_date": null,
+        "body": null
+    },
+    "urls": URLS,
+    "active": true,
+    "user_type": "STANDARD",
+    "language": "en_US",
+    "locale": "en_GB",
+    "utcOffset": 0,
+    "last_modified_date": "2014-10-02T15:20:43.000+0000",
+    "is_app_installed": true,
+    "_photo": null
+};
+
+var OPTIONS = {
+    url: 'http://localhost:' + config.public_port + '/auth/sf',
+    headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+    },
+    method: 'GET',
+    followRedirect: false
+};
+
 
 function nockSFLoginCall() {
     nock('https://login.salesforce.com')

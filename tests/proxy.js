@@ -13,6 +13,7 @@ var dao = require('../dao.js');
 var describeProtectedCallsStandard = require('./proxy/protectedCallsStandard.js');
 var describeProtectedCallsPassThrough = require('./proxy/protectedCallsPassThrough.js');
 
+
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
     firmKey: config.accessToken.signKey,
@@ -26,7 +27,6 @@ var refreshTokenSettings = {
 };
 
 describe('proxy', function(){
-
     it('launches', function(done){
         var cipherlayer;
         async.series([
