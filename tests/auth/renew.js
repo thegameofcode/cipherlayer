@@ -1,6 +1,7 @@
 var assert = require('assert');
 var fs = require('fs');
 var request = require('request');
+var clone = require('clone');
 
 var dao = require('../../dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
@@ -11,13 +12,24 @@ var USER = {
     password: 'validPassword123'
 };
 
+var OPTIONS_FOR_RENEW = {
+    url: 'http://localhost:' + config.public_port + '/auth/renew',
+    headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+    },
+    method: 'POST'
+};
+
+var OPTIONS_FOR_LOGIN = clone(OPTIONS_FOR_RENEW);
+OPTIONS_FOR_LOGIN.url = 'http://localhost:' + config.public_port + '/auth/login';
+
 
 module.exports = {
-describe: function(){
+    describe: function(){
         describe('/renew', function(){
 
-            beforeEach(function(done){
-                dao.deleteAllUsers(function(err){
+            beforeEach(function (done){
+                dao.deleteAllUsers(function (err){
                     assert.equal(err, null);
                     dao.addUser(USER, function (err, createdUser) {
                         assert.equal(err, null);
@@ -27,19 +39,13 @@ describe: function(){
                 });
             });
 
-            it('200 POST', function(done){
-                getAccessToken(USER, function(err, token){
+            it('POST - 200', function(done){
+                getAccessToken(USER, function (err, token){
                     assert.equal(err, null);
                     assert.notEqual(token, null);
 
-                    var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/renew',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method: 'POST',
-                        body: JSON.stringify({refreshToken: token})
-                    };
+                    var options = clone(OPTIONS_FOR_RENEW);
+                    options.body = JSON.stringify({refreshToken: token});
 
                     request(options, function (err, res, body){
                         assert.equal(err, null);
@@ -51,19 +57,28 @@ describe: function(){
                     });
                 });
             });
+
+            it.only('POST - 401 invalid token', function(done){
+                var invalidToken = 'not a valid token :( sorry';
+                var options = clone(OPTIONS_FOR_RENEW);
+                options.body = JSON.stringify({refreshToken: invalidToken});
+
+                request(options, function (err, res, body){
+                    assert.equal(err, null);
+                    assert.equal(res.statusCode, 401, body);
+                    body = JSON.parse(body);
+                    assert.equal(body.err, 'invalid_token');
+                    assert.equal(body.des, 'Invalid token');
+                    done();
+                });
+            });
         });
     }
 };
 
 function getAccessToken(user, cbk){
-    var options = {
-        url: 'http://localhost:' + config.public_port + '/auth/login',
-        headers: {
-            'Content-Type': 'application/json; charset=utf-8'
-        },
-        method: 'POST',
-        body: JSON.stringify(user)
-    };
+    var options = clone(OPTIONS_FOR_LOGIN);
+    options.body = JSON.stringify(user);
 
     request(options, function (err, res, body) {
         if (err){

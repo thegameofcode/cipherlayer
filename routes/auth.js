@@ -77,6 +77,13 @@ function checkAuthBasic(req, res, next){
 function renewToken(req, res, next){
     var refreshToken = req.body.refreshToken;
     tokenManager.getAccessTokenInfo(refreshToken, function(err, tokenSet){
+        if (err){
+            var body = {
+                "err" : "invalid_token",
+                "des" : "Invalid token"
+            };
+            res.send(401, body);
+        }
         tokenManager.createRefreshToken(tokenSet.userId, '', function(err, newToken){
             var body = {
                 accessToken: newToken,
