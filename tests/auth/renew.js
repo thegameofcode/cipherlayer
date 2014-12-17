@@ -58,7 +58,7 @@ module.exports = {
                 });
             });
 
-            it.only('POST - 401 invalid token', function(done){
+            it('POST - 401 invalid token', function(done){
                 var invalidToken = 'not a valid token :( sorry';
                 var options = clone(OPTIONS_FOR_RENEW);
                 options.body = JSON.stringify({refreshToken: invalidToken});
@@ -72,6 +72,8 @@ module.exports = {
                     done();
                 });
             });
+
+
         });
     }
 };
