@@ -2,6 +2,7 @@ var assert = require('assert');
 var fs = require('fs');
 var request = require('request');
 var clone = require('clone');
+var ciphertoken = require('ciphertoken');
 
 var dao = require('../../dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
@@ -66,6 +67,7 @@ module.exports = {
                 request(options, function (err, res, body){
                     assert.equal(err, null);
                     assert.equal(res.statusCode, 401, body);
+
                     body = JSON.parse(body);
                     assert.equal(body.err, 'invalid_token');
                     assert.equal(body.des, 'Invalid token');
@@ -73,7 +75,29 @@ module.exports = {
                 });
             });
 
+            it('POST - 401 expired token', function(done){
+                var accessTokenSettings = {
+                    cipherKey: config.accessToken.cipherKey,
+                    firmKey: config.accessToken.signKey,
+                    tokenExpirationMinutes: -1
+                };
+                ciphertoken.createToken(accessTokenSettings, 'id123', null, {}, function(err, token){
+                    assert.equal(err, null);
 
+                    var options = clone(OPTIONS_FOR_RENEW);
+                    options.body = JSON.stringify({refreshToken: token});
+
+                    request(options, function(err, res, body){
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 401, body);
+
+                        body = JSON.parse(body);
+                        assert.equal(body.err, 'expired_token');
+                        assert.equal(body.des, 'Expired token');
+                        done();
+                    });
+                });
+            });
         });
     }
 };
