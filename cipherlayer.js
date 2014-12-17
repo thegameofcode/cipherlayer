@@ -187,20 +187,28 @@ function startListener(publicPort, privatePort, cbk){
                     return next();
                 }
 
-                var bodyToSend = req.body;
-                if(req.header('Content-Type').indexOf('json') > -1){
-                    bodyToSend = JSON.stringify(req.body);
-                }
-
                 var options = {
                     url: 'http://localhost:' + privatePort + req.url,
                     headers: {
                         'Content-Type': req.header('Content-Type'),
                         'x-user-id': tokenInfo.userId
                     },
-                    method: req.method,
-                    body : bodyToSend
+                    method: req.method
                 };
+
+                if(req.header('Content-Type').indexOf('multipart/form-data') > -1){
+                    var formdata = {};
+                    var files = req.files;
+                    for(var fileKey in files){
+                        var file = files[fileKey];
+                        formdata[fileKey] = fs.createReadStream(file.path);
+                    }
+                    options.formdata = formdata;
+                } else {
+                    options.headers['Content-Type'] = req.header('Content-Type');
+                    options.body = JSON.stringify(req.body);
+                }
+
 
                 if(foundUser.platforms && foundUser.platforms.length>0){
                     foundUser.platforms.forEach(function(platform){
