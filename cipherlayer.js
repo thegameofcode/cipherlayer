@@ -196,14 +196,15 @@ function startListener(publicPort, privatePort, cbk){
                     method: req.method
                 };
 
+                // TODO pass all file data correctly
                 if(req.header('Content-Type').indexOf('multipart/form-data') > -1){
-                    var formdata = {};
+                    var formData = {};
                     var files = req.files;
                     for(var fileKey in files){
                         var file = files[fileKey];
-                        formdata[fileKey] = fs.createReadStream(file.path);
+                        formData[fileKey] = fs.createReadStream(file.path);
                     }
-                    options.formdata = formdata;
+                    options.formData = formData;
                 } else {
                     options.headers['Content-Type'] = req.header('Content-Type');
                     options.body = JSON.stringify(req.body);
