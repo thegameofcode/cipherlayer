@@ -172,4 +172,5 @@ module.exports = {
     }
 
     // TODO: if config.management does not exist or is incorrect POST and DELETE to /auth/user must return 404
+    // for this test config should be edited, doing so a white box unit test or either change way of loading config file
 };

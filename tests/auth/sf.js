@@ -100,27 +100,8 @@ module.exports = {
             });
 
             it('203 not exists (no avatar)', function(done){
-                nock('https://login.salesforce.com')
-                    .filteringPath(function(path){
-                        if(path.indexOf('/services/oauth2/authorize') > -1){
-                            return '/services/oauth2/authorize';
-                        } else {
-                            return path;
-                        }
-                    })
-                    .get('/services/oauth2/authorize')
-                    .reply(302, {accessToken:'sf1234'})
-                    .post('/services/oauth2/token')
-                    .reply(200,{
-                        access_token:'a1b2c3d4e5f6',
-                        refresh_token:'f6e5d4c3d2a1',
-                        instance_url:'https://cs15.salesforce.com',
-                        id:'https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM'
-                    });
-
-                nock('https://cs15.salesforce.com')
-                    .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
-                    .reply(200, SF_PROFILE);
+                nockSFLoginCall();
+                nockSFGetProfileCall(SF_PROFILE);
 
                 var options = {
                     url: 'http://localhost:'+config.public_port+'/auth/sf/callback?code=a1b2c3d4e5f6',
@@ -186,31 +167,12 @@ module.exports = {
                 it('203 not exists (valid avatar)', function(done){
                     if(!configAWSParam) return done();
 
-                    nock('https://login.salesforce.com')
-                        .filteringPath(function(path){
-                            if(path.indexOf('/services/oauth2/authorize') > -1){
-                                return '/services/oauth2/authorize';
-                            } else {
-                                return path;
-                            }
-                        })
-                        .get('/services/oauth2/authorize')
-                        .reply(302, {accessToken:'sf1234'})
-                        .post('/services/oauth2/token')
-                        .reply(200,{
-                            access_token:'00Dj0000000KvDQ!ARMAQGg1ryQ0MwEaNOe1fJlA1VIAMG35Lbc_X1Q5KRF7tF0_C6FN3e9In01TLHP9kjzAxlFtvnGGf2DFR8w2RgudBfMjM2ac',
-                            refresh_token:'f6e5d4c3d2a1',
-                            instance_url:'https://cs15.salesforce.com',
-                            id:'https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM'
-                        });
-
+                    nockSFLoginCall();
                     var sfProfile = clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
 
-                    nock('https://cs15.salesforce.com')
-                        .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
-                        .reply(200, sfProfile);
+                    nockSFGetProfileCall(sfProfile);
 
                     var options = {
                         url: 'http://localhost:'+config.public_port+'/auth/sf/callback?code=a1b2c3d4e5f6',
@@ -249,27 +211,9 @@ module.exports = {
                 dao.addUser(user, function(err, createdUser){
                     assert.equal(err,null);
                     assert.notEqual(createdUser, undefined);
-                    nock('https://login.salesforce.com')
-                        .filteringPath(function(path){
-                            if(path.indexOf('/services/oauth2/authorize') > -1){
-                                return '/services/oauth2/authorize';
-                            } else {
-                                return path;
-                            }
-                        })
-                        .get('/services/oauth2/authorize')
-                        .reply(302, {accessToken:'sf1234'})
-                        .post('/services/oauth2/token')
-                        .reply(200,{
-                            access_token:'a1b2c3d4e5f6',
-                            refresh_token:'f6e5d4c3d2a1',
-                            instance_url:'https://cs15.salesforce.com',
-                            id:'https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM'
-                        });
 
-                    nock('https://cs15.salesforce.com')
-                        .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
-                        .reply(200, SF_PROFILE);
+                    nockSFLoginCall();
+                    nockSFGetProfileCall(SF_PROFILE);
 
                     var options = {
                         url: 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6',
@@ -329,3 +273,29 @@ module.exports = {
         });
     }
 };
+
+function nockSFLoginCall() {
+    nock('https://login.salesforce.com')
+        .filteringPath(function (path) {
+            if (path.indexOf('/services/oauth2/authorize') > -1) {
+                return '/services/oauth2/authorize';
+            } else {
+                return path;
+            }
+        })
+        .get('/services/oauth2/authorize')
+        .reply(302, {accessToken: 'sf1234'})
+        .post('/services/oauth2/token')
+        .reply(200, {
+            access_token: 'a1b2c3d4e5f6',
+            refresh_token: 'f6e5d4c3d2a1',
+            instance_url: 'https://cs15.salesforce.com',
+            id: 'https://test.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM'
+        });
+}
+
+function nockSFGetProfileCall(profile){
+    nock('https://cs15.salesforce.com')
+        .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
+        .reply(200, profile);
+}
