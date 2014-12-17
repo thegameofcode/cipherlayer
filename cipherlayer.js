@@ -187,14 +187,19 @@ function startListener(publicPort, privatePort, cbk){
                     return next();
                 }
 
+                var bodyToSend = req.body;
+                if(req.header('Content-Type').indexOf('json') > -1){
+                    bodyToSend = JSON.stringify(req.body);
+                }
+
                 var options = {
                     url: 'http://localhost:' + privatePort + req.url,
                     headers: {
-                        'Content-Type': 'application/json; charset=utf-8',
+                        'Content-Type': req.header('Content-Type'),
                         'x-user-id': tokenInfo.userId
                     },
                     method: req.method,
-                    body : JSON.stringify(req.body)
+                    body : bodyToSend
                 };
 
                 if(foundUser.platforms && foundUser.platforms.length>0){
