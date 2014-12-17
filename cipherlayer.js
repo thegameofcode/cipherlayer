@@ -10,7 +10,9 @@ var passport = require('passport');
 var crypto = require('crypto');
 
 var userDao = require('./dao');
-var tokenManager = require('./managers/token');
+var tokenMng = require('./managers/token');
+var phoneMng = require('./managers/phone');
+var redisMng = require('./managers/redis');
 
 var server;
 
@@ -22,6 +24,18 @@ function startDaos(cbk){
 
 function stopDaos(cbk){
     userDao.disconnect(function(){
+        cbk();
+    });
+}
+
+function startRedis(cbk){
+    redisMng.connect(function(){
+        cbk();
+    });
+}
+
+function stopRedis(cbk){
+    redisMng.disconnect(function(){
         cbk();
     });
 }
@@ -83,7 +97,7 @@ function startListener(publicPort, privatePort, cbk){
                                 res.send(409, {err: err.message});
                                 return next(false);
                             } else {
-                                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+                                tokenMng.createBothTokens(foundUser._id, function(err, tokens){
                                     if(err) {
                                         debug('error creating tokens: ',err);
                                         debug(err);
@@ -131,30 +145,75 @@ function startListener(publicPort, privatePort, cbk){
         };
         delete(body[config.passThroughEndpoint.password]);
 
-
-
-        if(body.sf){
-            tokenManager.getAccessTokenInfo(body.sf, function(err, tokenInfo){
-                if(err){
-                    res.send(400, {
-                        err: 'invalid_platform_token',
-                        des: 'you must provide a valid salesforce token'
-                    });
-                    return next(false);
-                }
-
-                user.platforms=[{
-                    platform:'sf',
-                    accessToken: tokenInfo.data.accessToken,
-                    refreshToken: tokenInfo.data.refreshToken,
-                    expiry: new Date().getTime() + tokenInfo.data.expiresIn * 1000
-                }];
-
-                createUser(req, body, res, next, user);
+        var phone = body.phone;
+        if(!phone){
+            res.send(403, {
+                err: 'auth_proxy_error',
+                des: 'invalid userinfo (phone)'
             });
-        } else {
-            createUser(req, body, res, next, user);
+            return cbk();
         }
+
+        userDao.getFromUsername(user.username, function(err, foundUser) {
+            if(foundUser){
+                res.send(403, {
+                    err: 'auth_proxy_error',
+                    des: 'user already exists'
+                });
+                return next(false);
+            } else {
+                var pin = req.headers['x-otp-pin'];
+
+                if(!pin){
+                    phoneMng.createPIN(user.username, phone, function(err, createdPin){
+                        if(err){
+                            res.send(403, err);
+                            return next(false);
+                        } else {
+                            res.send(403, {
+                                err: 'auth_proxy_error',
+                                des: 'user phone not verified'
+                            });
+                            return next(false);
+                        }
+                    });
+                } else {
+                    phoneMng.verifyPhone(user.username, phone, pin, function (err, verified) {
+                        if(err){
+                            res.send(401, err);
+                            return next(false);
+                        } else {
+
+                            if(body.sf){
+                                tokenMng.getAccessTokenInfo(body.sf, function(err, tokenInfo){
+                                    if(err){
+                                        res.send(400, {
+                                            err: 'invalid_platform_token',
+                                            des: 'you must provide a valid salesforce token'
+                                        });
+                                        return next(false);
+                                    }
+
+                                    user.platforms=[{
+                                        platform:'sf',
+                                        accessToken: tokenInfo.data.accessToken,
+                                        refreshToken: tokenInfo.data.refreshToken,
+                                        expiry: new Date().getTime() + tokenInfo.data.expiresIn * 1000
+                                    }];
+
+                                    createUser(req, body, res, next, user);
+                                });
+                            } else {
+                                createUser(req, body, res, next, user);
+                            }
+
+                        }
+                    });
+                }
+            }
+        });
+
+
     });
 
     var platformsPath = path.join(__dirname, '/platforms/');
@@ -172,7 +231,7 @@ function startListener(publicPort, privatePort, cbk){
         }
 
         var accessToken = auth.substring( type.length );
-        tokenManager.getAccessTokenInfo(accessToken, function(err, tokenInfo){
+        tokenMng.getAccessTokenInfo(accessToken, function(err, tokenInfo){
             if ( err ) {
                 if ( err.err === 'accesstoken_expired' ) {
                     res.send(401,{err:'expired_access_token', des:'access token expired'});
@@ -275,6 +334,7 @@ function stopListener(cbk){
 function start(publicPort, privatePort, cbk){
     async.series([
         startDaos,
+        startRedis,
         function(done){
             startListener(publicPort, privatePort, done);
         }
@@ -286,6 +346,7 @@ function start(publicPort, privatePort, cbk){
 function stop(cbk){
     async.series([
         stopDaos,
+        stopRedis,
         stopListener
     ],function(err){
         cbk(err);

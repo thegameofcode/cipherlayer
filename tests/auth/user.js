@@ -7,11 +7,13 @@ var dao = require('../../dao.js');
 
 var username = 'validuser';
 var password = 'validpassword';
+var phone = '111111111';
 
 var USER = {
     id: 'a1b2c3d4e5f6',
     username: username,
-    password: password
+    password: password,
+    phone: phone
 };
 
 var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
@@ -39,7 +41,7 @@ module.exports = {
                     url: 'http://localhost:' + config.public_port + '/auth/user',
                     headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                     method:'POST',
-                    body : JSON.stringify({username: username, password: password})
+                    body : JSON.stringify({username: username, password: password, phone: phone})
                 };
 
                 request(options, function(err, res, body){

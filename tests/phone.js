@@ -184,34 +184,6 @@ describe('Phone', function() {
 
         });
 
-        //it('Expired pin data', function (done) {
-        //    this.timeout(5000);
-        //    var basePhone = '111111111';
-        //
-        //    nock(notifServiceURL)
-        //        .post('/notification/sms')
-        //        .reply(204);
-        //
-        //    phoneMng.createPIN(baseUser.username, basePhone, function (err, createdPIN) {
-        //        assert.equal(err, null);
-        //
-        //        setTimeout(
-        //            function(){
-        //                nock(notifServiceURL)
-        //                    .post('/notification/sms')
-        //                    .reply(204);
-        //
-        //                phoneMng.verifyPhone(baseUser.username, basePhone, createdPIN, function (err, verified) {
-        //                    assert.notEqual(err, null);
-        //                    assert.equal(err.err, 'validate_pin_error');
-        //                    assert.equal(verified, false);
-        //                    done();
-        //                });
-        //            }
-        //            , 2500);
-        //    });
-        //});
-
     });
 
 });
