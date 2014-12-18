@@ -24,7 +24,7 @@ module.exports = {
             it('GET 302', function(done){
                 request(OPTIONS, function(err, res, body){
                     assert.equal(err, null);
-                    assert.equal(res.statusCode, 302);
+                    assert.equal(res.statusCode, 302, body);
                     done();
                 });
             });

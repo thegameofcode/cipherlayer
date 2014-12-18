@@ -146,9 +146,21 @@ function salesforceCallback(req, res, next){
     });
 }
 
+function authSfBridge(passport){
+    return function (req,res,next){
+        var end = res.end;
+        res.end = function(){
+            end.call(this);
+            next();
+        };
+
+        passport.authenticate('forcedotcom')(req,res);
+    }
+}
+
 function addRoutes(server, passport){
     passport.use(salesforceStrategy);
-    server.get('/auth/sf', passport.authenticate('forcedotcom'));
+    server.get('/auth/sf', authSfBridge(passport));
     server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
 }
 
