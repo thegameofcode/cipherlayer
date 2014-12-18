@@ -237,8 +237,11 @@ function startListener(publicPort, privatePort, cbk){
         tokenMng.getAccessTokenInfo(accessToken, function(err, tokenInfo){
             if ( err ) {
                 if ( err.err === 'accesstoken_expired' ) {
+                    debug('expired_access_token', accessToken);
                     res.send(401,{err:'expired_access_token', des:'access token expired'});
+                    return next();
                 }
+                debug('invalid_access_token', accessToken, 'unable to read token info');
                 res.send(401,{err:'invalid_access_token', des:'unable to read token info'});
                 return next();
             }
