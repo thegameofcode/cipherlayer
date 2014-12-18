@@ -40,11 +40,11 @@ describe('/api/profile (verify phone)', function(){
         ],done);
     });
 
-    it('POST phone not verified', function(done){
+    it('POST empty phone', function(done){
         var user = {
             email : "valid@my-comms.com",
             password : "12345678",
-            phone : "111111111"
+            country: "ES"
         };
 
         var options = {
@@ -62,7 +62,63 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 403, body);
             body = JSON.parse(body);
-            assert.deepEqual(body, {"err":"auth_proxy_error","des":"user phone not verified"}, body);
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty phone"});
+            done();
+        });
+    });
+
+    it('POST empty country', function(done){
+        var user = {
+            email : "valid@my-comms.com",
+            password : "12345678",
+            phone : "111111111",
+            country: ""
+        };
+
+        var options = {
+            url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            method:'POST',
+            body : JSON.stringify(user)
+        };
+
+        nock(notifServiceURL)
+            .post('/notification/sms')
+            .reply(204);
+
+        request(options, function(err, res, body){
+            assert.equal(err, null, body);
+            assert.equal(res.statusCode, 403, body);
+            body = JSON.parse(body);
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty country code"});
+            done();
+        });
+    });
+
+    it('POST phone not verified', function(done){
+        var user = {
+            email : "valid@my-comms.com",
+            password : "12345678",
+            phone : "111111111",
+            country: "ES"
+        };
+
+        var options = {
+            url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            method:'POST',
+            body : JSON.stringify(user)
+        };
+
+        nock(notifServiceURL)
+            .post('/notification/sms')
+            .reply(204);
+
+        request(options, function(err, res, body){
+            assert.equal(err, null, body);
+            assert.equal(res.statusCode, 403, body);
+            body = JSON.parse(body);
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"user phone not verified"});
             done();
         });
     });
@@ -71,7 +127,8 @@ describe('/api/profile (verify phone)', function(){
         var user = {
             email : "valid@my-comms.com",
             password : "12345678",
-            phone : "222222222"
+            phone : "222222222",
+            country: "US"
         };
 
         var options = {
@@ -101,7 +158,7 @@ describe('/api/profile (verify phone)', function(){
                 assert.equal(err, null, body);
                 assert.equal(res.statusCode, 401, body);
                 body = JSON.parse(body);
-                assert.deepEqual(body, {"err":"invalid_pin","des":"PIN used is not valid."}, body);
+                assert.deepEqual(body, {"err":"verify_phone_error","des":"PIN used is not valid."});
                 done();
             });
         });
@@ -113,7 +170,8 @@ describe('/api/profile (verify phone)', function(){
         var user = {
             email : "valid@my-comms.com",
             password : "12345678",
-            phone : "333333333"
+            phone : "333333333",
+            country: "GB"
         };
 
         var options = {
@@ -133,7 +191,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}',user.phone);
+            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+44' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);
@@ -170,7 +228,8 @@ describe('/api/profile (verify phone)', function(){
         var user = {
             email : "valid@my-comms.com",
             password : "12345678",
-            phone : "444444444"
+            phone : "444444444",
+            country: "US"
         };
 
         var options = {
@@ -194,7 +253,7 @@ describe('/api/profile (verify phone)', function(){
                 .reply(204);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}',user.phone);
+            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+1' + user.phone);
 
             //Get the correct PIN
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
@@ -207,21 +266,21 @@ describe('/api/profile (verify phone)', function(){
                     assert.equal(err, null, body);
                     assert.equal(res.statusCode, 401, body);
                     body = JSON.parse(body);
-                    assert.deepEqual(body, {"err": "invalid_pin", "des": "PIN used is not valid."}, body);
+                    assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
 
                     //2nd call incorrect pin
                     request(options, function (err, res, body) {
                         assert.equal(err, null, body);
                         assert.equal(res.statusCode, 401, body);
                         body = JSON.parse(body);
-                        assert.deepEqual(body, {"err": "invalid_pin", "des": "PIN used is not valid."}, body);
+                        assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
 
                         //3rd call incorrect pin
                         request(options, function (err, res, body) {
                             assert.equal(err, null, body);
                             assert.equal(res.statusCode, 401, body);
                             body = JSON.parse(body);
-                            assert.deepEqual(body, {"err":"pin_expired","des":"PIN used has expired."}, body);
+                            assert.deepEqual(body, {"err":"verify_phone_error","des":"PIN used has expired."});
 
                             options.headers['x-otp-pin'] = redisPhonePin;
 
@@ -230,7 +289,7 @@ describe('/api/profile (verify phone)', function(){
                                 assert.equal(err, null, body);
                                 assert.equal(res.statusCode, 401, body);
                                 body = JSON.parse(body);
-                                assert.deepEqual(body, {"err": "invalid_pin", "des": "PIN used is not valid."}, body);
+                                assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
 
                                 //Get the correct PIN
                                 redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
@@ -275,7 +334,8 @@ describe('/api/profile (verify phone)', function(){
         var user = {
             email : "valid@my-comms.com",
             password : "12345678",
-            phone : "555555555"
+            phone : "555555555",
+            country: "GB"
         };
 
         var options = {
@@ -295,7 +355,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}',user.phone);
+            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+44' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);
@@ -325,7 +385,7 @@ describe('/api/profile (verify phone)', function(){
                         assert.equal(err, null, body);
                         assert.equal(res.statusCode, 403, body);
                         body = JSON.parse(body);
-                        assert.deepEqual(body, {"err":"auth_proxy_error","des":"user already exists"}, body);
+                        assert.deepEqual(body, {"err":"auth_proxy_error","des":"user already exists"});
                         done();
                     });
                 });

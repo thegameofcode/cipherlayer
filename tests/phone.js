@@ -93,7 +93,7 @@ describe('Phone', function() {
 
                 phoneMng.verifyPhone(baseUser.username, basePhone, 'zzzzz', function (err, verified) {
                     assert.notEqual(err, null);
-                    assert.equal(err.err, 'invalid_pin');
+                    assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
                     done();
                 });
@@ -116,7 +116,7 @@ describe('Phone', function() {
 
                 phoneMng.verifyPhone(baseUser.username, '6666666', createdPIN, function (err, verified) {
                     assert.notEqual(err, null);
-                    assert.equal(err.err, 'validate_pin_error');
+                    assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
                     done();
                 });
@@ -136,13 +136,13 @@ describe('Phone', function() {
                 //1st attempt
                 phoneMng.verifyPhone(baseUser.username, basePhone, '11111', function (err, verified) {
                     assert.notEqual(err, null);
-                    assert.equal(err.err, 'invalid_pin');
+                    assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
 
                     //2nd attempt
                     phoneMng.verifyPhone(baseUser.username, basePhone, '22222', function (err, verified) {
                         assert.notEqual(err, null);
-                        assert.equal(err.err, 'invalid_pin');
+                        assert.equal(err.err, 'verify_phone_error');
                         assert.equal(verified, false);
 
                         //3rd attempt
@@ -152,13 +152,13 @@ describe('Phone', function() {
 
                         phoneMng.verifyPhone(baseUser.username, basePhone, '33333', function (err, verified) {
                             assert.notEqual(err, null);
-                            assert.equal(err.err, 'pin_expired');
+                            assert.equal(err.err, 'verify_phone_error');
                             assert.equal(verified, false);
 
                             //4th attempt, expired PIN
                             phoneMng.verifyPhone(baseUser.username, basePhone, createdPIN, function (err, verified) {
                                 assert.notEqual(err, null);
-                                assert.equal(err.err, 'invalid_pin');
+                                assert.equal(err.err, 'verify_phone_error');
                                 assert.equal(verified, false);
 
                                 var redisKey = config.redisKeys.user_phone_verify.key;

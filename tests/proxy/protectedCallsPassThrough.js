@@ -15,10 +15,12 @@ module.exports = {
             var expectedUsername = 'valid@my-comms.com';
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
+            var expectedUserCountry = 'US';
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
             expectedPublicRequest['phone'] = expectedUserPhone;
+            expectedPublicRequest['country'] = expectedUserCountry;
 
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
@@ -28,7 +30,7 @@ module.exports = {
                 .reply(201, {id: expectedUserId});
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}',expectedUserPhone);
+            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
             var pin = 'xxxx';
 
@@ -36,6 +38,10 @@ module.exports = {
                 assert.equal(err, null);
                 redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
                     assert.equal(err, null);
+
+                    nock('http://localhost:' + config.private_port)
+                        .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                        .reply(201, {id: expectedUserId});
 
                     var options = {
                         url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -83,9 +89,11 @@ module.exports = {
             var expectedUsername = 'valid@my-comms.com';
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '222222222';
+            var expectedUserCountry = 'US';
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
             expectedPublicRequest['phone'] = expectedUserPhone;
+            expectedPublicRequest['country'] = expectedUserCountry;
 
             ciphertoken.createToken(accessTokenSettings, expectedUserId, null, {
                 accessToken: 'acc',
@@ -102,7 +110,7 @@ module.exports = {
                     .reply(203, {id: expectedUserId});
 
                 var redisKey = config.redisKeys.user_phone_verify.key;
-                redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}',expectedUserPhone);
+                redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
                 var pin = 'xxxx';
 
@@ -162,9 +170,11 @@ module.exports = {
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedPublicRequest = {};
             var expectedUserPhone = '222222222';
+            var expectedUserCountry = 'US';
             expectedPublicRequest[config.passThroughEndpoint.username] = 'valid@my-comms.com';
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
             expectedPublicRequest['phone'] = expectedUserPhone;
+            expectedPublicRequest['country'] = expectedUserCountry;
 
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
@@ -174,7 +184,7 @@ module.exports = {
                 .reply(201, {id: expectedUserId});
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}',expectedUserPhone);
+            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
             var pin = 'xxxx';
 

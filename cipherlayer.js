@@ -13,6 +13,7 @@ var userDao = require('./dao');
 var tokenMng = require('./managers/token');
 var phoneMng = require('./managers/phone');
 var redisMng = require('./managers/redis');
+var countrycodes = require('./countrycodes');
 
 var server;
 
@@ -150,12 +151,28 @@ function startListener(publicPort, privatePort, cbk){
         delete(body[config.passThroughEndpoint.password]);
 
         var phone = body.phone;
+        var country = body.country;
         if(!phone){
             res.send(403, {
                 err: 'auth_proxy_error',
-                des: 'invalid userinfo (phone)'
+                des: 'empty phone'
             });
-            return next();
+            return next(false);
+        } else if(!country){
+            res.send(403, {
+                err: 'auth_proxy_error',
+                des: 'empty country code'
+            });
+            return next(false);
+        } else {
+            countrycodes.countryFromIso(country, function(err, returnedCountry){
+                if(err) {
+                    res.send(500, err);
+                    return next(false);
+                }   
+
+                phone = '+' + returnedCountry.Dial + phone;
+            });
         }
 
         userDao.getFromUsername(user.username, function(err, foundUser) {
@@ -172,7 +189,7 @@ function startListener(publicPort, privatePort, cbk){
                     debug('no pin number');
                     phoneMng.createPIN(user.username, phone, function(err, createdPin){
                         if(err){
-                            res.send(403, err);
+                            res.send(500, err);
                             return next(false);
                         } else {
                             res.send(403, {
@@ -186,11 +203,13 @@ function startListener(publicPort, privatePort, cbk){
                     debug('user try pin number', pin);
                     phoneMng.verifyPhone(user.username, phone, pin, function (err, verified) {
                         if(err){
-                            debug('error verifying phone', err);
-                            res.send(401, err);
+                            if(err.err != 'verify_phone_error'){
+                                res.send(500, err)
+                            } else {
+                                res.send(401, err)
+                            }
                             return next(false);
                         } else {
-
                             if(body.sf){
                                 tokenMng.getAccessTokenInfo(body.sf, function(err, tokenInfo){
                                     if(err){

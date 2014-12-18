@@ -119,6 +119,8 @@ describe('AWS', function() {
     it('upload valid zip', function (done) {
         if(!configAWSParam) return done();
 
+        this.timeout(10000);
+
         fs.readFile(uploadZip.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');

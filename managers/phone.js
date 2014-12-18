@@ -51,8 +51,8 @@ function sendPIN(phone, pin, cbk){
     };
 
     request(options, function(err,res,body) {
-        if(err || res.statusCode != 204){
-            return cbk({err:'Send_sms_problem'});
+        if(err){
+            return cbk(err);
         }
         cbk();
     });
@@ -68,7 +68,7 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
         if(!redisPhonePin) {
             createPIN(username, phoneToVerify, function(err, createdPin){
                 if(err) return cbk(err);
-                return cbk({err:'validate_pin_error', des:'Expired PIN or incorrect phone number.'}, false);
+                return cbk({err:'verify_phone_error', des:'Expired PIN or incorrect phone number.'}, false);
             });
         } else {
             redisMng.getKeyValue(redisKey + '.attempts', function(err, redisPinAttempts) {
@@ -76,7 +76,7 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
                 if(!redisPinAttempts || redisPinAttempts === '0') {
                     createPIN(username, phoneToVerify, function(err, createdPin){
                         if(err) return cbk(err);
-                        return cbk({err:'pin_expired', des:'PIN used has expired.'}, false);
+                        return cbk({err:'verify_phone_error', des:'PIN used has expired.'}, false);
                     });
                 } else {
                     if(pin === redisPhonePin){
@@ -86,12 +86,12 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
                         if(redisPinAttempts === '1'){
                             createPIN(username, phoneToVerify, function(err, createdPin){
                                 if(err) return cbk(err);
-                                return cbk({err:'pin_expired', des:'PIN used has expired.'}, false);
+                                return cbk({err:'verify_phone_error', des:'PIN used has expired.'}, false);
                             });
                         } else {
                             redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts-1, function (err, attempts) {
                                 if (err) return cbk(err);
-                                return cbk({err: 'invalid_pin', des:'PIN used is not valid.'}, false);
+                                return cbk({err: 'verify_phone_error', des:'PIN used is not valid.'}, false);
                             });
                         }
                     }

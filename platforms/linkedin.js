@@ -102,7 +102,7 @@ function addUserPlatform(req, res, next){
                 updatedPlatforms.push(linkedInPlatform);
             }
 
-            userDao.updateById(foundUser.id.toString(), {$set: {platforms: updatedPlatforms} }, function(err, updatedUsers){
+            userDao.updateFieldById(foundUser.id.toString(), {platforms: updatedPlatforms}, function(err, updatedUsers){
                 if(err){
                     res.send(500, {err:'internal_error', des:'Error updating the user'});
                     return next(false);
