@@ -60,7 +60,7 @@ describe('/api/profile (verify phone)', function(){
 
         request(options, function(err, res, body){
             assert.equal(err, null, body);
-            assert.equal(res.statusCode, 403, body);
+            assert.equal(res.statusCode, 400, body);
             body = JSON.parse(body);
             assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty phone"});
             done();
@@ -88,7 +88,7 @@ describe('/api/profile (verify phone)', function(){
 
         request(options, function(err, res, body){
             assert.equal(err, null, body);
-            assert.equal(res.statusCode, 403, body);
+            assert.equal(res.statusCode, 400, body);
             body = JSON.parse(body);
             assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty country code"});
             done();
