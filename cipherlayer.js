@@ -151,7 +151,7 @@ function startListener(publicPort, privatePort, cbk){
                 err: 'auth_proxy_error',
                 des: 'invalid userinfo (phone)'
             });
-            return cbk();
+            return next();
         }
 
         userDao.getFromUsername(user.username, function(err, foundUser) {
