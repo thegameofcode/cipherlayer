@@ -54,7 +54,8 @@ function startListener(publicPort, privatePort, cbk){
     });
 
     server.on('after', function(req, res, route, error){
-        debug('< ' + res.statusCode + ' ' + res._data);
+        var timing = Date.now() - new Date(req._time);
+        debug('< ' + res.statusCode + ' ' + res._data + ' ' + timing + 'ms');
     });
 
     //routes
