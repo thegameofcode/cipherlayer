@@ -62,7 +62,6 @@
     "attempts": 3
   },
   "services":{
-    "notifications": "http://localhost:3002",
-    "search" : "http://localhost:3004"
+    "notifications": "http://localhost:3002"
   }
 }

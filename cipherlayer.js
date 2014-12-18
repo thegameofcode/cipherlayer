@@ -165,6 +165,7 @@ function startListener(publicPort, privatePort, cbk){
                 var pin = req.headers['x-otp-pin'];
 
                 if(!pin){
+                    debug('no pin number');
                     phoneMng.createPIN(user.username, phone, function(err, createdPin){
                         if(err){
                             res.send(403, err);
@@ -178,8 +179,10 @@ function startListener(publicPort, privatePort, cbk){
                         }
                     });
                 } else {
+                    debug('user try pin number', pin);
                     phoneMng.verifyPhone(user.username, phone, pin, function (err, verified) {
                         if(err){
+                            debug('error verifying phone', err);
                             res.send(401, err);
                             return next(false);
                         } else {

@@ -1,3 +1,4 @@
+var debug = require('debug')('cipherlayer:platforms:linkedin');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var userDao = require('../dao');
@@ -13,6 +14,7 @@ var linkedInStrategy = new LinkedInStrategy({
     scope: config.linkedin.scope,
     passReqToCallback: true
 }, function(req, accessToken, refreshToken, profile, done) {
+    debug('user '+ profile.id +' logged in using linkedin');
     var data = {
         accessToken:accessToken,
         refreshToken:refreshToken,
