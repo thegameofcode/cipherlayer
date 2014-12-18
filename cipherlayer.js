@@ -245,6 +245,7 @@ function startListener(publicPort, privatePort, cbk){
 
             userDao.getFromId(tokenInfo.userId, function(err, foundUser){
                 if(err){
+                    debug('invalid_access_token', accessToken, 'contains unknown user', tokenInfo.userId);
                     res.send(401,{err:'invalid_access_token', des:'unknown user inside token'});
                     return next();
                 }
