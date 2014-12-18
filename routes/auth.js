@@ -83,6 +83,7 @@ function renewToken(req, res, next){
                 "des" : "Invalid token"
             };
             res.send(401, body);
+            return next();
         }
         if (new Date().getTime() > tokenSet.expiresAtTimestamp){
             var body = {
@@ -90,6 +91,7 @@ function renewToken(req, res, next){
                 "des" : "Expired token"
             };
             res.send(401, body);
+            return next();
         }
         tokenManager.createRefreshToken(tokenSet.userId, '', function(err, newToken){
             var body = {
@@ -97,6 +99,7 @@ function renewToken(req, res, next){
                 expiresIn: config.accessToken.expiration
             };
             res.send(200, body);
+            return next();
         });
     });
 }
