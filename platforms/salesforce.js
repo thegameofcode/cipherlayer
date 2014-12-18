@@ -55,7 +55,7 @@ function prepareSession(accessToken, refreshToken, profile, done){
                     accessToken: accessToken,
                     refreshToken: refreshToken,
                     profile: profile,
-                    expiresAt: new Date().getTime() + config.salesforce.expiration * 60 * 1000
+                    expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
                 };
                 done(data);
             }

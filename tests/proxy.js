@@ -12,6 +12,7 @@ var dao = require('../dao.js');
 
 var describeProtectedCallsStandard = require('./proxy/protectedCallsStandard.js');
 var describeProtectedCallsPassThrough = require('./proxy/protectedCallsPassThrough.js');
+var describeProtectedCallsStandard_SF = require('./proxy/protectedCallsStandard-platformSF.js');
 
 
 var accessTokenSettings = {
@@ -68,8 +69,11 @@ describe('proxy', function(){
         describe('standard', function () {
             describeProtectedCallsStandard.itUnauthorized();
             describeProtectedCallsStandard.itWithoutPlatforms(accessTokenSettings);
-            describeProtectedCallsStandard.itWithSalesforce(accessTokenSettings);
             describeProtectedCallsStandard.itBodyResponseIsNotAJson(accessTokenSettings);
+            describe('with salesforce', function(){
+                describeProtectedCallsStandard_SF.itWithSalesforce(accessTokenSettings);
+                describeProtectedCallsStandard_SF.itRenewSFToken(accessTokenSettings);
+            })
         });
 
         describe('pass through', function () {
