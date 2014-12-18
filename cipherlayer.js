@@ -154,13 +154,13 @@ function startListener(publicPort, privatePort, cbk){
         var phone = body.phone;
         var country = body.country;
         if(!phone){
-            res.send(403, {
+            res.send(400, {
                 err: 'auth_proxy_error',
                 des: 'empty phone'
             });
             return next(false);
         } else if(!country){
-            res.send(403, {
+            res.send(400, {
                 err: 'auth_proxy_error',
                 des: 'empty country code'
             });
@@ -168,7 +168,7 @@ function startListener(publicPort, privatePort, cbk){
         } else {
             countrycodes.countryFromIso(country, function(err, returnedCountry){
                 if(err) {
-                    res.send(500, err);
+                    res.send(400, err);
                     return next(false);
                 }   
 
