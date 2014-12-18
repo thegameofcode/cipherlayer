@@ -52,6 +52,10 @@ function startListener(publicPort, privatePort, cbk){
         next();
     });
 
+    server.on('after', function(req, res, route, error){
+        debug('< ' + res.statusCode + ' ' + res._data);
+    });
+
     //routes
     var routesPath = path.join(__dirname, './routes/');
     fs.readdirSync(routesPath).forEach(function(filename) {
