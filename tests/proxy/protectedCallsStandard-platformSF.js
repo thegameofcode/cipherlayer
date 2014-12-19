@@ -107,7 +107,7 @@ module.exports = {
                         // Shouldn't this new refresh token be send back to the user doing the request?
 
                         //This method returns undefined...
-                        var updatedUser = dao.getFromId(USER.id);
+                        var updatedUser = dao.getFromId((createdUser._id).toString());
 
                         var updatedExpiry = updatedUser.platforms[0].expiry;
                         var roundedUpdatedExpiry = (updatedExpiry / 10000).toFixed();

@@ -72,7 +72,7 @@ describe('proxy', function(){
             describeProtectedCallsStandard.itBodyResponseIsNotAJson(accessTokenSettings);
             describe('with salesforce', function(){
                 describeProtectedCallsStandard_SF.itWithSalesforce(accessTokenSettings);
-                //describeProtectedCallsStandard_SF.itRenewSFToken(accessTokenSettings);
+                // describeProtectedCallsStandard_SF.itRenewSFToken(accessTokenSettings);
             })
         });
 
