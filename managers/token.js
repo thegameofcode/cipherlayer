@@ -26,6 +26,10 @@ function getAccessTokenInfo(accessToken, cbk){
     ciphertoken.getTokenSet(accessTokenSettings, accessToken, cbk);
 }
 
+function getRefreshTokenInfo(refreshToken, cbk){
+    ciphertoken.getTokenSet(refreshTokenSettings, refreshToken, cbk);
+}
+
 function createRefreshToken(userId, data, cbk){
     if(typeof data === 'function'){
         cbk = data;
@@ -63,5 +67,6 @@ module.exports={
     createAccessToken: createAccessToken,
     getAccessTokenInfo: getAccessTokenInfo,
     createRefreshToken: createRefreshToken,
-    createBothTokens: createBothTokens
+    createBothTokens: createBothTokens,
+    getRefreshTokenInfo: getRefreshTokenInfo
 };

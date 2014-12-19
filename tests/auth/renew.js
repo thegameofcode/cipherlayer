@@ -24,19 +24,19 @@ module.exports = {
             });
 
             it('POST - 200', function(done){
-                getAccessToken(USER, function (err, token){
+                getLoginTokens(USER, function (err, tokens){
+                    var refreshToken = tokens.refreshToken;
                     assert.equal(err, null);
-                    assert.notEqual(token, null);
+                    assert.notEqual(refreshToken, null);
 
                     var options = clone(OPTIONS_FOR_RENEW);
-                    options.body = JSON.stringify({refreshToken: token});
+                    options.body = JSON.stringify({refreshToken: refreshToken});
 
                     request(options, function (err, res, body){
                         assert.equal(err, null);
                         assert.equal(res.statusCode, 200, body);
                         body = JSON.parse(body);
                         assert.notEqual(body.accessToken, null);
-                        assert.equal(body.expiresIn, config.accessToken.expiration);
                         done();
                     });
                 });
@@ -59,12 +59,12 @@ module.exports = {
             });
 
             it('POST - 401 expired token', function(done){
-                var accessTokenSettings = {
-                    cipherKey: config.accessToken.cipherKey,
-                    firmKey: config.accessToken.signKey,
-                    tokenExpirationMinutes: -1
+                var refreshTokenSettings = {
+                    cipherKey: config.refreshToken.cipherKey,
+                    firmKey: config.refreshToken.signKey,
+                    tokenExpirationMinutes: 0
                 };
-                ciphertoken.createToken(accessTokenSettings, 'id123', null, {}, function(err, token){
+                ciphertoken.createToken(refreshTokenSettings, 'id123', null, {}, function(err, token){
                     assert.equal(err, null);
 
                     var options = clone(OPTIONS_FOR_RENEW);
@@ -85,7 +85,7 @@ module.exports = {
     }
 };
 
-function getAccessToken(user, cbk){
+function getLoginTokens(user, cbk){
     var options = clone(OPTIONS_FOR_LOGIN);
     options.body = JSON.stringify(user);
 
@@ -94,8 +94,7 @@ function getAccessToken(user, cbk){
             return cbk(err);
         }
         body = JSON.parse(body);
-        var token = body.accessToken;
-        cbk(null, token);
+        cbk(null, body);
     });
 }
 
