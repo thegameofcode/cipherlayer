@@ -58,6 +58,11 @@ function startListener(publicPort, privatePort, cbk){
         debug('< ' + res.statusCode + ' ' + res._data + ' ' + timing + 'ms');
     });
 
+    server.on('uncaughtException', function(req, res, route, error) {
+        var timing = Date.now() - new Date(req._time);
+        debug('< ' + res.statusCode + ' ' + error + ' ' + timing + 'ms');
+    });
+
     //routes
     var routesPath = path.join(__dirname, './routes/');
     fs.readdirSync(routesPath).forEach(function(filename) {
