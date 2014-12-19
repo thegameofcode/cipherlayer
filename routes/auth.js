@@ -93,7 +93,7 @@ function renewToken(req, res, next){
             res.send(401, body);
             return next();
         }
-        tokenManager.createRefreshToken(tokenSet.userId, '', function(err, newToken){
+        tokenManager.createAccessToken(tokenSet.userId, '', function(err, newToken){
             var body = {
                 accessToken: newToken,
                 expiresIn: config.accessToken.expiration
