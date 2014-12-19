@@ -81,6 +81,38 @@ module.exports = {
                     });
                 });
             });
+
+            it('Complete process', function(done){
+                var options = {
+                    url: 'http://localhost:' + config.public_port + '/auth/login',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify({username:USER.username, password:USER.password})
+                };
+
+                request(options, function(err, res, body){
+                    assert.equal(err, null);
+                    assert.equal(res.statusCode, 200, body);
+                    body = JSON.parse(body);
+                    var options = {
+                        url: 'http://localhost:' + config.public_port + '/auth/renew',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        method: 'POST',
+                        body: JSON.stringify({refreshToken:body.refreshToken})
+                    };
+                    request(options, function(err, res, body) {
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 200, body);
+                        body = JSON.parse(body);
+                        assert.notEqual(body.accessToken, null);
+                        done();
+                    });
+                });
+            });
         });
     }
 };
