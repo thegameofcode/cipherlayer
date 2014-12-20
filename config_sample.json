@@ -51,6 +51,9 @@
       "avatars": "avatars"
     }
   },
+  "redis":{
+    "host":"127.0.0.1"
+  },
   "redisKeys": {
     "user_phone_verify": {
       "key":"user.{username}.phone.{phone}",

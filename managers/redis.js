@@ -1,9 +1,10 @@
 var redis = require('redis');
+var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
 var redisClient;
 
 function connect(cbk){
-    redisClient = redis.createClient(6379, '127.0.0.1', {});
+    redisClient = redis.createClient(6379, config.redis.host, {});
     redisClient.on('connect', function (err) {
         if(err) return cbk(err);
         cbk(null,true);
