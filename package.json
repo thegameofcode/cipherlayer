@@ -28,7 +28,8 @@
     "mocha": "./node_modules/mocha/bin/mocha tests --recursive",
     "cucumber": "./node_modules/cucumber/bin/cucumber.js -f pretty",
     "local": "DEBUG=cipherlayer* node main.js",
-    "int": "DEBUG=cipherlayer* node main.js"
+    "int": "DEBUG=cipherlayer* node main.js",
+    "pro": "DEBUG=cipherlayer* node main.js"
   },
   "repository": {
     "type": "git",
