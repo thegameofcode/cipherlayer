@@ -6,6 +6,7 @@ var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
+var request = require('request');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -96,7 +97,8 @@ function salesforceCallback(req, res, next){
                             name: profile._raw.first_name,
                             lastname: profile._raw.last_name,
                             email: profile._raw.email,
-                            sf: token
+                            sf: token,
+                            officeLocation: ((profile._raw.addr_street || '') + ' ' + (profile._raw.addr_city || '') + ' ' + (profile._raw.addr_country || '')).trim()
                         };
 
                         if(profile.avatar){
@@ -108,8 +110,18 @@ function salesforceCallback(req, res, next){
                             returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'').trim();
                         }
 
-                        res.send(203, returnProfile);
-                        next(false);
+                        getUserOptionalInfo(sfData, profile._raw.user_id, function(err, profileDetail){
+                            if(profileDetail.title){
+                                returnProfile.position = profileDetail.title;
+                            }
+
+                            if(profileDetail.companyName){
+                                returnProfile.company = profileDetail.companyName;
+                            }
+
+                            res.send(203, returnProfile);
+                            next(false);
+                        });
                     });
                 });
             } else {
@@ -143,6 +155,25 @@ function salesforceCallback(req, res, next){
             });
         }
         next(false);
+    });
+}
+
+function getUserOptionalInfo(sfData, userId, cbk){
+    var SERVICE_CHATTER_URL = "/services/data/v26.0/chatter/users/" + userId;
+
+    var options = {
+        url: sfData.accessToken.params.instance_url + SERVICE_CHATTER_URL,
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': 'Bearer ' + sfData.accessToken.params.access_token
+        },
+        method: 'GET'
+    };
+    request(options, function(error, res_private, body){
+        if(error){
+            cbk(error, null);
+        }
+        cbk(null, JSON.parse(body));
     });
 }
 
