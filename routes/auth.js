@@ -4,7 +4,7 @@ var tokenManager = require('../managers/token');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var ObjectID = require('mongodb').ObjectID;
 
-function postAuthLogin(req,res,next){
+function postAuthLogin(req, res, next){
     userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
         if(err) {
             res.send(409,{err: err.message});
