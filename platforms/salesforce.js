@@ -1,4 +1,5 @@
 var debug = require('debug')('cipherlayer:platforms:salesforce');
+var request = require('request');
 var async = require('async');
 
 var userDao = require('../dao');
@@ -6,7 +7,6 @@ var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
-var request = require('request');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -189,6 +189,48 @@ function authSfBridge(passport){
     }
 }
 
+function renewSFAccessTokenIfNecessary(user, platform, cbk){
+    var maxTimeTillRenewal = (new Date().getTime() + config.salesforce.renewWhenLessThan * 60 * 1000);
+    if(platform.expiry > maxTimeTillRenewal){
+        return cbk(null, platform.accessToken.params.access_token);
+    }
+    var optionsForSFRenew = {
+        url: config.salesforce.tokenUrl + '?grant_type=refresh_token' + '&' +
+        'client_id=' + config.salesforce.clientId + '&' +
+        'client_secret=' + config.salesforce.clientSecret + '&' +
+        'refresh_token=' + platform.refreshToken,
+        method: 'POST'
+    };
+
+    request(optionsForSFRenew, function(err, res, body){
+        if (err){
+            return cbk(err);
+        }
+        body = JSON.parse(body);
+        var newAccessToken = body.access_token;
+
+        var newSFplatformItem = {
+            "platform": "sf",
+            "accessToken": {
+                "params": {
+                    "id": user.userId,
+                    "instance_url": platform.accessToken.params.instance_url,
+                    "access_token": body.access_token
+                }
+            },
+            "refreshToken": platform.refreshToken,
+            "expiry": new Date().getTime() + config.salesforce.expiration * 60 * 1000
+        };
+        userDao.updateArrayItem(user._id, 'platforms', 'sf', newSFplatformItem, function(err, updatedUsers){
+            if (err){
+                return cbk(err);
+            } else {
+                return cbk(null, newAccessToken);
+            }
+        });
+    });
+}
+
 function addRoutes(server, passport){
     passport.use(salesforceStrategy);
     server.get('/auth/sf', authSfBridge(passport));
@@ -197,5 +239,6 @@ function addRoutes(server, passport){
 
 module.exports = {
     addRoutes: addRoutes,
-    prepareSession: prepareSession
+    prepareSession: prepareSession,
+    renewSFAccessTokenIfNecessary: renewSFAccessTokenIfNecessary
 };

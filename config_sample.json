@@ -21,6 +21,7 @@
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
+  "authHeaderKey": "bearer ",
   "passThroughEndpoint" : {
     "path": "/api/profile",
     "username":"email",
