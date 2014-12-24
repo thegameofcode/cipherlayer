@@ -117,7 +117,6 @@ function stop(cbk){
     });
 }
 
-
 module.exports = {
     start : start,
     stop : stop

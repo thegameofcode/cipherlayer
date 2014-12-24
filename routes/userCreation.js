@@ -171,7 +171,7 @@ function createUserEndpoint(req, res, next) {
                                     platform: 'sf',
                                     accessToken: tokenInfo.data.accessToken,
                                     refreshToken: tokenInfo.data.refreshToken,
-                                    expiry: new Date().getTime() + tokenInfo.data.expiresIn * 1000
+                                    expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
                                 }];
 
                                 createUser(req, body, res, next, user);
@@ -187,7 +187,7 @@ function createUserEndpoint(req, res, next) {
 }
 
 function addRoutes(service){
-    service.post(config.passThroughEndpoint.path, createUserEndpoint)
+    service.post(config.passThroughEndpoint.path, createUserEndpoint);
 
     debug('User creation routes added');
 }
