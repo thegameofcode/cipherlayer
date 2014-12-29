@@ -76,8 +76,8 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/, printTraces, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, propagateRequest);
-    server.post(/(.*)/, printTraces, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, propagateRequest);
+    server.get(/(.*)/, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.post(/(.*)/, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);
