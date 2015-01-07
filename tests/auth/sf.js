@@ -45,6 +45,7 @@ module.exports = {
             it('203 not exists (no avatar)', function(done){
                 nockSFLoginCall();
                 nockSFGetProfileCall(SF_PROFILE);
+                nockSFGetOptInfo();
 
                 var options = clone(OPTIONS);
                 options.url ='http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
@@ -103,13 +104,14 @@ module.exports = {
 
                 it('203 not exists (valid avatar)', function(done){
                     if(!configAWSParam) return done();
-
                     nockSFLoginCall();
 
                     var sfProfile = clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
+                    nockSFGetOptInfo();
                     nockSFGetProfileCall(sfProfile);
+
 
                     var options = clone(OPTIONS);
                     options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
@@ -122,6 +124,11 @@ module.exports = {
                         assert.equal(body.name, 'Name');
                         assert.equal(body.lastname, 'Lastname');
                         assert.equal(body.email, 'name.lastname@email.com');
+                        /*
+                         TODO FIX There is no body.avatar.
+                         body.avatar is always undefined sfProfile only have photos.picture and photos.thumbnail
+                         ¿Must change sf callback to check for photos instead avatar?. Or need to mock the call?
+                        */
                         assert.notEqual(body.avatar, undefined);
                         assert.notEqual(body.avatar, null);
                         assert.equal(body.phone, '000000000');
@@ -230,4 +237,13 @@ function nockSFGetProfileCall(profile){
     nock('https://cs15.salesforce.com')
         .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
         .reply(200, profile);
+}
+
+function nockSFGetOptInfo(){
+    nock('https://cs15.salesforce.com')
+        .get('/services/data/v26.0/chatter/users/005e0000001uNIyAAM')
+        .reply(200, {
+            position: 'Backend Developer',
+            company: 'Vodafone'
+        });
 }
