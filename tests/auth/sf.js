@@ -104,14 +104,14 @@ module.exports = {
 
                 it('203 not exists (valid avatar)', function(done){
                     if(!configAWSParam) return done();
-                    nockSFLoginCall();
 
                     var sfProfile = clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
-                    nockSFGetOptInfo();
-                    nockSFGetProfileCall(sfProfile);
 
+                    nockSFLoginCall();
+                    nockSFGetProfileCall(sfProfile);
+                    nockSFGetOptInfo();
 
                     var options = clone(OPTIONS);
                     options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
