@@ -124,11 +124,6 @@ module.exports = {
                         assert.equal(body.name, 'Name');
                         assert.equal(body.lastname, 'Lastname');
                         assert.equal(body.email, 'name.lastname@email.com');
-                        /*
-                         TODO FIX There is no body.avatar.
-                         body.avatar is always undefined sfProfile only have photos.picture and photos.thumbnail
-                         ¿Must change sf callback to check for photos instead avatar?. Or need to mock the call?
-                        */
                         assert.notEqual(body.avatar, undefined);
                         assert.notEqual(body.avatar, null);
                         assert.equal(body.phone, '000000000');

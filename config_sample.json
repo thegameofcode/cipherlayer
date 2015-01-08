@@ -35,6 +35,7 @@
     "callbackURL": "http://localhost:3000/auth/sf/callback",
     "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
     "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
+    "renewWhenLessThan": 1,
     "expiration": 5
   },
 
@@ -49,7 +50,7 @@
     "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
     "region": "us-west-2",
     "buckets": {
-      "avatars": "avatars"
+      "avatars": "mycomms-avatars"
     }
   },
   "redis":{
