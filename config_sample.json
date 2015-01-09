@@ -6,18 +6,15 @@
     "signKey" : "unsecureKey2",
     "expiration" : 10
   },
-
   "refreshToken" : {
     "cipherKey" : "unsecureKey3",
     "signKey" : "unsecureKey4",
     "expiration" : 60
   },
-
   "management":{
     "clientId": "Cipher Layer User",
     "clientSecret": "Q0lQSEVSTEFZRVI"
   },
-
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
@@ -27,7 +24,6 @@
     "username":"email",
     "password":"password"
   },
-
   "salesforce" : {
     "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access", "api"],
     "clientId": "{{SALESFORCE_CLIENT_ID}}",
@@ -38,7 +34,6 @@
     "renewWhenLessThan": 1,
     "expiration": 5
   },
-
   "linkedin": {
     "scope": ["r_network", "r_emailaddress", "r_basicprofile", "r_contactinfo", "r_fullprofile"],
     "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
