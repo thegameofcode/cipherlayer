@@ -13,15 +13,15 @@
     "passport": "^0.2.1",
     "passport-forcedotcom": "^0.1.1",
     "passport-linkedin-oauth2": "^1.2.1",
-    "redis": "^0.12.1"
+    "redis": "^0.12.1",
+    "restify": "^2.8.3"
   },
   "devDependencies": {
     "assert": "^1.1.2",
     "cucumber": "^0.4.4",
     "mocha": "^2.0.1",
     "nock": "^0.51.0",
-    "request": "^2.47.0",
-    "restify": "^2.8.3"
+    "request": "^2.47.0"
   },
   "scripts": {
     "test": "npm run-script mocha && npm run-script cucumber",
