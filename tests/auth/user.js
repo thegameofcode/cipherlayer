@@ -136,15 +136,15 @@ module.exports = {
                             assert.equal(err, null);
                             assert.equal(count, 1);
                         });
-                    });
 
-                    options.headers = HEADERS_WITH_AUTHORIZATION_BASIC;
-                    request(options, function(err, res){
-                        assert.equal(err, null);
-                        dao.countUsers(function(err, count){
+                        options.headers = HEADERS_WITH_AUTHORIZATION_BASIC;
+                        request(options, function(err, res){
                             assert.equal(err, null);
-                            assert.equal(count, 0);
-                            done();
+                            dao.countUsers(function(err, count){
+                                assert.equal(err, null);
+                                assert.equal(count, 0);
+                                done();
+                            });
                         });
                     });
                 });
