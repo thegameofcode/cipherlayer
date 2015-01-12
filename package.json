@@ -24,7 +24,7 @@
     "request": "^2.47.0"
   },
   "scripts": {
-    "test": "npm run-script mocha && npm run-script cucumber",
+    "test": "npm run-script mocha",
     "mocha": "./node_modules/mocha/bin/mocha tests --recursive",
     "cucumber": "./node_modules/cucumber/bin/cucumber.js -f pretty",
     "local": "DEBUG=cipherlayer* node main.js",
