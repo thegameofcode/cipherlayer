@@ -14,6 +14,7 @@ Feature: A user logs in using SalesForce
     When the client app receives the SalesForce callback response
     Then the response status code is 302
 
+  @ignore
   Scenario: non-existing user callback response
     Given a user with valid credentials in SalesForce not linked to SalesForce
     When the client app receives the SalesForce callback response
