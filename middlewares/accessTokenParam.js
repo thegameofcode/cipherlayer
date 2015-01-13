@@ -5,7 +5,7 @@ function checkAccessTokenParam (req, res, next){
     var paramAT = req.params.at;
 
     if(paramAT){
-        req.headers.Authorization = 'Bearer ' + paramAT;
+        req.headers.authorization = config.authHeaderKey + paramAT;
     }
 
     next();
