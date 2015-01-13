@@ -17,7 +17,7 @@ function propagateRequest(req, res, next){
                 debug('<= ' + private_res.statusCode + ' no json body' + ' ' + timing + 'ms');
             }
             if(private_res.statusCode === 302){
-                res.header('Location', private_res.headers('Location'));
+                res.header('Location', private_res.headers['Location']);
                 res.send(302);
             } else {
                 res.send(Number(private_res.statusCode), body);
