@@ -50,7 +50,7 @@ function startListener(publicPort, privatePort, cbk){
     });
 
     server.use(restify.queryParser());
-    server.use(restify.bodyParser());
+    server.use(restify.bodyParser({maxBodySize: 3000000}));
     server.use(function(req,res,next){
         debug('> ' + req.method + ' ' + req.url);
         next();
