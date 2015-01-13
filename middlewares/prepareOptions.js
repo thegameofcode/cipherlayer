@@ -7,7 +7,8 @@ function prepareOptions (req, res, next){
             'Content-Type': req.header('Content-Type'),
             'x-user-id': req.tokenInfo.userId
         },
-        method: req.method
+        method: req.method,
+        followRedirect: false
     };
 
     // TODO pass all file data correctly
