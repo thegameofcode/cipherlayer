@@ -16,6 +16,7 @@ var findUser = require('./middlewares/findUser.js');
 var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
+var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
 
 var server;
 
@@ -76,8 +77,8 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.post(/(.*)/, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);
