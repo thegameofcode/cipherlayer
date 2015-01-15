@@ -2,7 +2,7 @@ var assert = require('assert');
 var versionManager = require('../middlewares/version.js');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
-describe.only('version control', function(){
+describe('version control', function(){
 
     describe('manager', function(){
         //it('rejects if no version header is included', function(done){
