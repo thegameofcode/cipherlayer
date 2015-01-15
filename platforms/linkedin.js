@@ -2,6 +2,7 @@ var debug = require('debug')('cipherlayer:platforms:linkedin');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var userDao = require('../dao');
+var checkVersion = require('../middlewares/version.js');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -121,7 +122,7 @@ function addUserPlatform(req, res, next){
 
 function addRoutes(server, passport){
     passport.use(linkedInStrategy);
-    server.get('/auth/in', passport.authenticate('linkedin', { state: new Date().getTime() } ));
+    server.get('/auth/in', checkVersion, passport.authenticate('linkedin', { state: new Date().getTime() } ));
     server.post('/auth/in', addUserPlatform);
     server.get('/auth/in/callback', passport.authenticate('linkedin', { failureRedirect: '/auth/error', session: false} ), linkedInCallback);
 }

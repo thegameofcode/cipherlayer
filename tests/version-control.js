@@ -1,5 +1,5 @@
 var assert = require('assert');
-var versionManager = require('../middlewares/version.js');
+var versionCheck = require('../middlewares/version.js');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
 describe('version control', function(){
@@ -29,7 +29,7 @@ describe('version control', function(){
         //        if(canContinue === false && validResponse) done();
         //    };
         //
-        //    versionManager(req,res,next);
+        //    versionCheck(req,res,next);
         //});
 
         it('accepts if no version header is included', function(done){
@@ -43,7 +43,7 @@ describe('version control', function(){
                 if(canContinue === undefined || canContinue === true) done();
             };
 
-            versionManager(req,res,next);
+            versionCheck(req,res,next);
         });
 
         it('invalid platform in header', function(done){
@@ -73,7 +73,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
-            versionManager(req,res,next);
+            versionCheck(req,res,next);
         });
 
         it('invalid platform version in header', function(done){
@@ -104,7 +104,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
-            versionManager(req,res,next);
+            versionCheck(req,res,next);
         });
 
         it('old platform version in header', function(done){
@@ -135,7 +135,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
-            versionManager(req,res,next);
+            versionCheck(req,res,next);
         });
 
         it('valid version must continue', function(done){
@@ -162,7 +162,7 @@ describe('version control', function(){
                 if(canContinue === undefined || canContinue === true) done();
             };
 
-            versionManager(req,res,next);
+            versionCheck(req,res,next);
         });
     });
 

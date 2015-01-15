@@ -7,6 +7,7 @@ var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
+var checkVersion = require('../middlewares/version.js');
 
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -233,7 +234,7 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
 
 function addRoutes(server, passport){
     passport.use(salesforceStrategy);
-    server.get('/auth/sf', authSfBridge(passport));
+    server.get('/auth/sf', checkVersion, authSfBridge(passport));
     server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);
 }
 
