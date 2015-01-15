@@ -56,6 +56,7 @@ module.exports = {
 
                     var options = clone(OPTIONS_STANDARD_CALL);
                     options.headers.Authorization = 'bearer ' + loginToken;
+                    options.headers[config.version.header] = "test/1";
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);
@@ -99,6 +100,7 @@ module.exports = {
 
                     var options = clone(OPTIONS_STANDARD_CALL);
                     options.headers.Authorization = 'bearer ' + loginToken;
+                    options.headers[config.version.header] = "test/1";
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);

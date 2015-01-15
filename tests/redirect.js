@@ -54,6 +54,7 @@ describe('Redirect', function(){
                         'Authorization': 'bearer ' + loginToken
                     }
                 };
+                options.headers[config.version.header] = "test/1";
 
                 nock('http://localhost:' + config.private_port)
                     .post('/whatever')

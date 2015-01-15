@@ -53,6 +53,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -81,6 +82,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -109,6 +111,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -137,6 +140,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -180,6 +184,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -238,6 +243,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')
@@ -344,6 +350,7 @@ describe('/api/profile (verify phone)', function(){
             method:'POST',
             body : JSON.stringify(user)
         };
+        options.headers[config.version.header] = "test/1";
 
         nock(notifServiceURL)
             .post('/notification/sms')

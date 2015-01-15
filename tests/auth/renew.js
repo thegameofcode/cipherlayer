@@ -30,6 +30,7 @@ module.exports = {
                     assert.notEqual(refreshToken, null);
 
                     var options = clone(OPTIONS_FOR_RENEW);
+                    options.headers[config.version.header] = "test/1";
                     options.body = JSON.stringify({refreshToken: refreshToken});
 
                     request(options, function (err, res, body){
@@ -45,6 +46,7 @@ module.exports = {
             it('POST - 401 invalid token', function(done){
                 var invalidToken = 'not a valid token :( sorry';
                 var options = clone(OPTIONS_FOR_RENEW);
+                options.headers[config.version.header] = "test/1";
                 options.body = JSON.stringify({refreshToken: invalidToken});
 
                 request(options, function (err, res, body){
@@ -68,6 +70,7 @@ module.exports = {
                     assert.equal(err, null);
 
                     var options = clone(OPTIONS_FOR_RENEW);
+                    options.headers[config.version.header] = "test/1";
                     options.body = JSON.stringify({refreshToken: token});
 
                     request(options, function(err, res, body){
@@ -91,12 +94,14 @@ module.exports = {
                     method: 'POST',
                     body: JSON.stringify({username:USER.username, password:USER.password})
                 };
+                options.headers[config.version.header] = "test/1";
 
                 request(options, function(err, res, body){
                     assert.equal(err, null);
                     assert.equal(res.statusCode, 200, body);
                     body = JSON.parse(body);
                     var options = clone(OPTIONS_FOR_RENEW);
+                    options.headers[config.version.header] = "test/1";
                     options.body = JSON.stringify({refreshToken:body.refreshToken});
 
                     request(options, function(err, res, body) {
@@ -114,6 +119,7 @@ module.exports = {
 
 function getLoginTokens(user, cbk){
     var options = clone(OPTIONS_FOR_LOGIN);
+    options.headers[config.version.header] = "test/1";
     options.body = JSON.stringify(user);
 
     request(options, function (err, res, body) {

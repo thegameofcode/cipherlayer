@@ -63,5 +63,19 @@
   },
   "services":{
     "notifications": "http://localhost:3002"
+  },
+  "version" : {
+    "header" : "x-mycomms-version",
+    "platforms" : {
+      "iPhone" : {
+        "link": "http://install.diawi.com/3eEeZF",
+        "0.1.5" : false,
+        "0.1.6" : true
+      },
+      "test" : {
+        "link" : "http://testLink",
+        "1" : true
+      }
+    }
   }
 }
