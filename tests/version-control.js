@@ -5,42 +5,28 @@ var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 describe('version control', function(){
 
     describe('manager', function(){
-        //it('rejects if no version header is included', function(done){
-        //    var expectedCode = 400;
-        //    var expectedError = {
-        //        err:"invalid_version",
-        //        des:"Must update to last application version"
-        //    };
-        //    var validResponse = false;
-        //
-        //    var req = {
-        //        header : function(){
-        //            return undefined
-        //        }
-        //    };
-        //    var res = {
-        //        send : function(code, body){
-        //            assert.equal(code, expectedCode, 'invalid response code');
-        //            assert.deepEqual(body, expectedError, 'invalid response body');
-        //            validResponse = true;
-        //        }
-        //    };
-        //    var next = function(canContinue){
-        //        if(canContinue === false && validResponse) done();
-        //    };
-        //
-        //    versionCheck(req,res,next);
-        //});
+        it('rejects if no version header is included', function(done){
+            var expectedCode = 400;
+            var expectedError = {
+                err:"invalid_version",
+                des:"Must update to last application version"
+            };
+            var validResponse = false;
 
-        it('accepts if no version header is included', function(done){
             var req = {
                 header : function(){
                     return undefined
                 }
             };
-            var res = {};
+            var res = {
+                send : function(code, body){
+                    assert.equal(code, expectedCode, 'invalid response code');
+                    assert.deepEqual(body, expectedError, 'invalid response body');
+                    validResponse = true;
+                }
+            };
             var next = function(canContinue){
-                if(canContinue === undefined || canContinue === true) done();
+                if(canContinue === false && validResponse) done();
             };
 
             versionCheck(req,res,next);

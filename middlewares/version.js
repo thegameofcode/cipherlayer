@@ -9,9 +9,8 @@ function checkVersion(req,res,next){
     };
 
     if (!versionHeaderValue) {
-        //res.send(400, errInvalidVersion);
-        //return next(false);
-        return next();
+        res.send(400, errInvalidVersion);
+        return next(false);
     }
 
     var split = versionHeaderValue.split("/");

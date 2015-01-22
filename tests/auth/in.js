@@ -24,6 +24,7 @@ module.exports = {
                     method:'GET',
                     followRedirect: false
                 };
+                options.headers[config.version.header] = "test/1";
 
                 request(options, function(err,res,body){
                     assert.equal(err,null);
