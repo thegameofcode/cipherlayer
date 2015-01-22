@@ -81,6 +81,7 @@ function startListener(publicPort, privatePort, cbk){
     server.get(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
     server.post(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
     server.del(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.put(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);
