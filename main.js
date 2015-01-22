@@ -11,4 +11,9 @@ cipherLayer.start(config.public_port, config.private_port, function(err){
         console.log('listening on port ' + config.public_port);
         debug('listening on port ' + config.public_port);
     }
+
+    fs.watchFile('config.json', function(curr, prev){
+        debug('config file updated. exiting');
+        process.exit(1);
+    });
 });
