@@ -3,7 +3,7 @@ var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var ObjectID = require('mongodb').ObjectID;
-var checkVersion = require('../middlewares/version.js');
+var checkVersion = require('../middlewares/version.js')(config.version);
 
 function postAuthLogin(req, res, next){
     userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){

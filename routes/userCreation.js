@@ -7,8 +7,8 @@ var countrycodes = require('../countrycodes');
 var userDao = require('../dao');
 var tokenMng = require('../managers/token');
 var phoneMng = require('../managers/phone');
-var checkVersion = require('../middlewares/version.js');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var checkVersion = require('../middlewares/version.js')(config.version);
 
 function createUser(req, body, res, next, user) {
     var options = {

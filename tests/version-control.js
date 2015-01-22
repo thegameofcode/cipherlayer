@@ -1,8 +1,17 @@
 var assert = require('assert');
-var versionCheck = require('../middlewares/version.js');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
 describe('version control', function(){
+
+    var settings = {
+        "header" : "x-mycomms-version",
+        "platforms" : {
+            "test" : {
+                "link" : "http://testLink",
+                "1.0" : true
+            }
+        }
+    };
 
     describe('manager', function(){
         it('rejects if no version header is included', function(done){
@@ -29,6 +38,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
+            var versionCheck = require('../middlewares/version.js')(settings);
             versionCheck(req,res,next);
         });
 
@@ -59,6 +69,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
+            var versionCheck = require('../middlewares/version.js')(settings);
             versionCheck(req,res,next);
         });
 
@@ -67,7 +78,7 @@ describe('version control', function(){
             var expectedError = {
                 err:"invalid_version",
                 des:"Must update to last application version",
-                data:config.version.platforms.iPhone.link
+                data:settings.platforms.test.link
             };
             var validResponse = false;
 
@@ -75,7 +86,7 @@ describe('version control', function(){
                 header : function(headerKey){
                     switch(headerKey){
                         case config.version.header:
-                            return 'iPhone/invalidVersion';
+                            return 'test/invalidVersion';
                     }
                 }
             };
@@ -90,6 +101,7 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
+            var versionCheck = require('../middlewares/version.js')(settings);
             versionCheck(req,res,next);
         });
 
@@ -98,7 +110,7 @@ describe('version control', function(){
             var expectedError = {
                 err:"invalid_version",
                 des:"Must update to last application version",
-                data:config.version.platforms.iPhone.link
+                data:settings.platforms.test.link
             };
             var validResponse = false;
 
@@ -106,7 +118,7 @@ describe('version control', function(){
                 header : function(headerKey){
                     switch(headerKey){
                         case config.version.header:
-                            return 'iPhone/oldVersion';
+                            return 'test/oldVersion';
                     }
                 }
             };
@@ -121,25 +133,17 @@ describe('version control', function(){
                 if(canContinue === false && validResponse) done();
             };
 
+            var versionCheck = require('../middlewares/version.js')(settings);
             versionCheck(req,res,next);
         });
 
         it('valid version must continue', function(done){
 
-            var platformConfig = config.version.platforms.iPhone;
-            var validVersion = '';
-            for(var key in platformConfig){
-                if(platformConfig[key] === true) {
-                    validVersion = key;
-                    break;
-                }
-            }
-
             var req = {
                 header : function(headerKey){
                     switch(headerKey){
-                        case config.version.header:
-                            return 'iPhone/' + validVersion;
+                        case settings.header:
+                            return 'test/1.0';
                     }
                 }
             };
@@ -148,8 +152,8 @@ describe('version control', function(){
                 if(canContinue === undefined || canContinue === true) done();
             };
 
+            var versionCheck = require('../middlewares/version.js')(settings);
             versionCheck(req,res,next);
         });
     });
-
 });

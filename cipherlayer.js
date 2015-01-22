@@ -17,7 +17,7 @@ var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
 var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
-var checkVersion = require('./middlewares/version.js');
+var checkVersion = require('./middlewares/version.js')(config.version);
 
 var server;
 

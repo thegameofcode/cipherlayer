@@ -7,9 +7,9 @@ var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
 var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
-var checkVersion = require('../middlewares/version.js');
-
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
+var checkVersion = require('../middlewares/version.js')(config.version);
+
 
 // PASSPORT
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
