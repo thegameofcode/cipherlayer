@@ -17,8 +17,8 @@ describe('version control', function(){
         it('rejects if no version header is included', function(done){
             var expectedCode = 400;
             var expectedError = {
-                err:"invalid_version",
-                des:"Must update to last application version"
+                err:"no_version_header",
+                des:"Version header must be included"
             };
             var validResponse = false;
 
@@ -45,8 +45,8 @@ describe('version control', function(){
         it('invalid platform in header', function(done){
             var expectedCode = 400;
             var expectedError = {
-                err:"invalid_version",
-                des:"Must update to last application version"
+                err:"invalid_version_platform",
+                des:"Version header is invalid"
             };
             var validResponse = false;
 
@@ -138,7 +138,6 @@ describe('version control', function(){
         });
 
         it('valid version must continue', function(done){
-
             var req = {
                 header : function(headerKey){
                     switch(headerKey){
