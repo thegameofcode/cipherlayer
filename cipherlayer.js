@@ -5,6 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var passport = require('passport');
+var clone = require('clone');
 
 var userDao = require('./dao');
 var redisMng = require('./managers/redis');
@@ -17,7 +18,7 @@ var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
 var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
-var checkVersion = require('./middlewares/version.js')(config.version);
+var versionControl = require('version-control');
 
 var server;
 
@@ -57,6 +58,15 @@ function startListener(publicPort, privatePort, cbk){
         next();
     });
 
+    var versionControlOptions = clone(config.version);
+    versionControlOptions.public = [
+        "/auth/sf",
+        "/auth/sf/*",
+        "/auth/in",
+        "/auth/in/*",
+    ];
+    server.use(versionControl(versionControlOptions));
+
     server.on('after', function(req, res, route, error){
         var timing = Date.now() - new Date(req._time);
         debug('< ' + res.statusCode + ' ' + res._data + ' ' + timing + 'ms');
@@ -78,10 +88,10 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.post(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.del(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.put(/(.*)/, checkVersion, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);

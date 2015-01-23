@@ -3,7 +3,6 @@ var userDao = require('../dao');
 var tokenManager = require('../managers/token');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var ObjectID = require('mongodb').ObjectID;
-var checkVersion = require('../middlewares/version.js')(config.version);
 
 function postAuthLogin(req, res, next){
     userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
@@ -106,10 +105,10 @@ function renewToken(req, res, next){
 }
 
 function addRoutes(service) {
-    service.post('/auth/login', checkVersion, postAuthLogin);
-    service.post('/auth/user', checkVersion, checkAuthBasic, postAuthUser);
-    service.del('/auth/user', checkVersion, checkAuthBasic, delAuthUser);
-    service.post('/auth/renew', checkVersion, renewToken);
+    service.post('/auth/login', postAuthLogin);
+    service.post('/auth/user', checkAuthBasic, postAuthUser);
+    service.del('/auth/user', checkAuthBasic, delAuthUser);
+    service.post('/auth/renew', renewToken);
 
     debug('Auth routes added');
 }
