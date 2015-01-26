@@ -5,7 +5,7 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 var myStepDefinitionsWrapper = function () {
-    this.Given(/^a user request login with linkedIn account$/, function (callback) {
+    this.When(/^a user request login with linkedIn account$/, function (callback) {
 
         var options = {
             url: 'http://localhost:'+config.public_port+'/auth/in',
