@@ -71,7 +71,7 @@ function createUser(req, body, res, next, user) {
 function createUserEndpoint(req, res, next) {
     var body = clone(req.body);
 
-    if (body[config.passThroughEndpoint.username] == undefined) {
+    if (body[config.passThroughEndpoint.username] === undefined) {
         res.send(400, {
             err: 'auth_proxy_error',
             des: 'invalid userinfo'
@@ -79,8 +79,8 @@ function createUserEndpoint(req, res, next) {
         return next(false);
     }
 
-    if (body[config.passThroughEndpoint.password] == undefined) {
-        if (body.sf == undefined) {
+    if (body[config.passThroughEndpoint.password] === undefined) {
+        if (body.sf === undefined) {
             res.send(400, {
                 err: 'invalid_security_token',
                 des: 'you must provide a password or a salesforce token to create the user'
@@ -151,9 +151,9 @@ function createUserEndpoint(req, res, next) {
                 phoneMng.verifyPhone(user.username, phone, pin, function (err, verified) {
                     if (err) {
                         if (err.err != 'verify_phone_error') {
-                            res.send(500, err)
+                            res.send(500, err);
                         } else {
-                            res.send(401, err)
+                            res.send(401, err);
                         }
                         return next(false);
                     } else {

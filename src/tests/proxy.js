@@ -73,7 +73,7 @@ describe('proxy', function(){
             describe('with salesforce', function(){
                 describeProtectedCallsStandard_SF.itWithSalesforce(accessTokenSettings);
                 describeProtectedCallsStandard_SF.itRenewSFToken(accessTokenSettings);
-            })
+            });
         });
 
         describe('pass through', function () {

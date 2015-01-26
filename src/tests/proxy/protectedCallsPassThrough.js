@@ -19,8 +19,8 @@ module.exports = {
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
-            expectedPublicRequest['phone'] = expectedUserPhone;
-            expectedPublicRequest['country'] = expectedUserCountry;
+            expectedPublicRequest.phone = expectedUserPhone;
+            expectedPublicRequest.country = expectedUserCountry;
 
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
@@ -93,8 +93,8 @@ module.exports = {
             var expectedUserCountry = 'US';
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
-            expectedPublicRequest['phone'] = expectedUserPhone;
-            expectedPublicRequest['country'] = expectedUserCountry;
+            expectedPublicRequest.phone = expectedUserPhone;
+            expectedPublicRequest.country = expectedUserCountry;
 
             ciphertoken.createToken(accessTokenSettings, expectedUserId, null, {
                 accessToken: 'acc',
@@ -175,8 +175,8 @@ module.exports = {
             var expectedUserCountry = 'US';
             expectedPublicRequest[config.passThroughEndpoint.username] = 'valid@my-comms.com';
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
-            expectedPublicRequest['phone'] = expectedUserPhone;
-            expectedPublicRequest['country'] = expectedUserCountry;
+            expectedPublicRequest.phone = expectedUserPhone;
+            expectedPublicRequest.country = expectedUserCountry;
 
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);

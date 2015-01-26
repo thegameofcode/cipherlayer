@@ -17,7 +17,7 @@ module.exports = function(){
         };
 
         if (METHOD == 'POST'){
-            options.body = PAYLOAD
+            options.body = PAYLOAD;
         }
         options.headers[config.version.header] = "test/1";
 

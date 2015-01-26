@@ -13,7 +13,7 @@ function propagateRequest(req, res, next){
             try{
                 body = JSON.parse(body);
                 debug('<= ' + private_res.statusCode + ' json body' + ' ' + timing + 'ms');
-            } catch(err) {
+            } catch(ex) {
                 debug('<= ' + private_res.statusCode + ' no json body' + ' ' + timing + 'ms');
             }
             if(private_res.statusCode === 302){

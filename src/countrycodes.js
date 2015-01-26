@@ -15,7 +15,7 @@ function countryFromPhone(phone, cbk){
     if(country){
       cbk(null, country);
     } else {
-      cbk({err:'country_not_found',des:'given phone does not match any country dial code'})
+      cbk({err:'country_not_found',des:'given phone does not match any country dial code'});
     }
   });
 }
@@ -30,7 +30,7 @@ function countryFromIso(iso, cbk){
     if(country){
       cbk(null, country);
     } else {
-      cbk({err:'country_not_found',des:'given phone does not match any country dial code'})
+      cbk({err:'country_not_found',des:'given phone does not match any country dial code'});
     }
   });
 }

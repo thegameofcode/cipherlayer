@@ -30,8 +30,8 @@ function prepareSession(accessToken, refreshToken, profile, done){
     async.series(
         [
             function uploadAvatar(done){
-                if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture
-                    || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
+                if(!profile._raw || !profile._raw.photos || !profile._raw.photos.picture ||
+                    !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
                     return done();
                 }
 
@@ -105,7 +105,7 @@ function salesforceCallback(req, res, next){
                             returnProfile.avatar = profile.avatar;
                         }
 
-                        if(err == null && country){
+                        if(err === null && country){
                             returnProfile.country = country['ISO3166-1-Alpha-2'];
                             returnProfile.phone = profile._raw.mobile_phone.replace('+'+country.Dial,'').trim();
                         }
@@ -186,7 +186,7 @@ function authSfBridge(passport){
         };
 
         passport.authenticate('forcedotcom')(req,res);
-    }
+    };
 }
 
 function renewSFAccessTokenIfNecessary(user, platform, cbk){

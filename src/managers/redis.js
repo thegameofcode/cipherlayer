@@ -19,7 +19,7 @@ function disconnect(cbk){
 function insertKeyValue(key, value, expSeconds, cbk){
     if(!redisClient){
         return cbk({err:'redis_not_connected'});
-    };
+    }
 
     redisClient.set(key,value, function(err) {
         if (err) {
@@ -40,7 +40,7 @@ function insertKeyValue(key, value, expSeconds, cbk){
 function updateKeyValue(key, value, cbk){
     if(!redisClient){
         return cbk({err:'redis_not_connected'});
-    };
+    }
 
     redisClient.ttl(key, function(err, expSeconds){
         if (err) return cbk(err);
@@ -51,7 +51,7 @@ function updateKeyValue(key, value, cbk){
 function getKeyValue(key, cbk){
     if(!redisClient){
         return cbk({err:'redis_not_connected'});
-    };
+    }
 
     redisClient.get(key, function (err, value) {
         return cbk(err, value);
@@ -61,7 +61,7 @@ function getKeyValue(key, cbk){
 function deleteKeyValue(key, cbk){
     if(!redisClient){
         return cbk({err:'redis_not_connected'});
-    };
+    }
 
     redisClient.del(key, function (err, deleted) {
         return cbk(err, (deleted == 1));
@@ -71,7 +71,7 @@ function deleteKeyValue(key, cbk){
 function deleteAllKeys(cbk){
     if(!redisClient){
         return cbk({err:'redis_not_connected'});
-    };
+    }
 
     redisClient.flushall(cbk);
 }

@@ -86,7 +86,7 @@ function getFromUsername(username, cbk){
             if(err) {
                 return cbk(err);
             }
-            if(user == null){
+            if(user === null){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
             if(user.username == username) {
@@ -106,7 +106,7 @@ function getFromUsernamePassword(username, password, cbk){
             if(err) {
                 return cbk(err);
             }
-            if(user == null){
+            if(user === null){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
             if(user.username == username) {
@@ -132,7 +132,7 @@ function getFromId(id, cbk){
             if(err) {
                 return cbk(err);
             }
-            if(user == null){
+            if(user === null){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
             if(user._id == id) {

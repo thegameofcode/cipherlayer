@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:main');
-var cipherLayer = require('./cipherlayer');
+var cipherLayer = require('./src/cipherlayer');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 

@@ -78,19 +78,19 @@ function renewToken(req, res, next){
     var refreshToken = req.body.refreshToken;
     tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
         if (err){
-            var body = {
+            var errInvalidToken = {
                 "err" : "invalid_token",
                 "des" : "Invalid token"
             };
-            res.send(401, body);
+            res.send(401, errInvalidToken);
             return next();
         }
         if (new Date().getTime() > tokenSet.expiresAtTimestamp){
-            var body = {
+            var errExpiredToken = {
                 "err" : "expired_token",
                 "des" : "Expired token"
             };
-            res.send(401, body);
+            res.send(401, errExpiredToken);
             return next();
         }
         tokenManager.createAccessToken(tokenSet.userId, '', function(err, newToken){

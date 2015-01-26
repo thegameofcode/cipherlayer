@@ -79,8 +79,8 @@ module.exports = {
                 var configAWSParam = false;
 
                 it('Get AWS configuration', function (done) {
-                    var msg = 'You must configure your AWS service in the config file, '
-                        + '\r\notherwise you must skip the next test, which use AWS';
+                    var msg = 'You must configure your AWS service in the config file, ' +
+                        '\r\notherwise you must skip the next test, which use AWS';
 
                     assert.notEqual(config.aws, null, msg);
                     assert.notEqual(config.aws, 'undefined', msg);

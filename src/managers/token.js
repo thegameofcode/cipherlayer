@@ -17,7 +17,7 @@ var refreshTokenSettings = {
 function createAccessToken(userId, data ,cbk){
     if(typeof data === 'function'){
         cbk = data;
-        data = {}
+        data = {};
     }
     ciphertoken.createToken(accessTokenSettings, userId, null, data, cbk);
 }
@@ -33,7 +33,7 @@ function getRefreshTokenInfo(refreshToken, cbk){
 function createRefreshToken(userId, data, cbk){
     if(typeof data === 'function'){
         cbk = data;
-        data = {}
+        data = {};
     }
     ciphertoken.createToken(refreshTokenSettings, userId, null, data, cbk);
 }

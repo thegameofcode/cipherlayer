@@ -18,7 +18,7 @@ describe('token manager', function(){
 
                     done();
                 });
-            })
+            });
         });
 
         it('userId, data, callback', function(done){
@@ -36,7 +36,7 @@ describe('token manager', function(){
 
                     done();
                 });
-            })
+            });
         });
     });
 
@@ -52,7 +52,7 @@ describe('token manager', function(){
 
                 done();
             });
-        })
+        });
     });
 
     describe('createRefreshToken',function(){
@@ -68,7 +68,7 @@ describe('token manager', function(){
 
                     done();
                 });
-            })
+            });
         });
 
         it('userId, data, callback', function(done){
@@ -85,7 +85,7 @@ describe('token manager', function(){
 
                     done();
                 });
-            })
+            });
         });
     });
 

@@ -32,8 +32,8 @@ describe('AWS', function() {
     };
 
     it('Get AWS configuration', function (done) {
-        var msg = 'You must configure your AWS service in the config file, '
-                + '\r\notherwise you must skip this group of tests';
+        var msg = 'You must configure your AWS service in the config file, ' +
+            '\r\notherwise you must skip this group of tests';
 
         assert.notEqual(config.aws, null, msg);
         assert.notEqual(config.aws, 'undefined', msg);

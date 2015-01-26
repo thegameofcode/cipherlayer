@@ -104,4 +104,4 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
 module.exports = {
     createPIN : createPIN,
     verifyPhone : verifyPhone
-}
+};

@@ -28,9 +28,9 @@ describe('Phone', function() {
                 async.series([
                     function(done){
                         redisMng.connect(done);
-                    }
-                    ,function(done){
-                        redisMng.deleteAllKeys(done)
+                    },
+                    function(done){
+                        redisMng.deleteAllKeys(done);
                     }
                 ],done);
             }
