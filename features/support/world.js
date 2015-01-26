@@ -48,21 +48,6 @@ function getPinNumber(username, phone, cbk){
     });
 }
 
-function deleteAllUsers(done){
-    var options = {
-        url: 'http://localhost:'+config.public_port+'/auth/user',
-        headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
-        },
-        method:'DELETE'
-    };
-    options.headers[config.version.header] = "test/1";
-    request(options, function(err,res,body) {
-        done(err, res);
-    });
-}
-
 // RESPONSE
 var response = {};
 
@@ -71,7 +56,7 @@ function getResponse(){
 }
 
 // TOKENS
-var tokens = {}
+var tokens = {};
 
 function getTokens(){
     return tokens;
@@ -82,7 +67,6 @@ module.exports = {
     resetUser: resetUser,
     getResponse: getResponse,
     getTokens: getTokens,
-    deleteAllUsers:deleteAllUsers,
     createPin:createPin,
     getPinNumber:getPinNumber
 };

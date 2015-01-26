@@ -12,7 +12,6 @@ var myStepDefinitionsWrapper = function () {
 
         world.getPinNumber(payload.email, '+34'+payload.phone, function(err, pin){
 
-            console.log('PINNNNN NUMBERRRRR ', pin);
             var options = {
                 url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
                 headers: {
@@ -26,7 +25,7 @@ var myStepDefinitionsWrapper = function () {
 
             nock('http://localhost:' + config.private_port)
                 .post(config.passThroughEndpoint.path)
-                .reply(201, {id: 1234567890});
+                .reply(201, {id: "a1b2c3d4e5f6"});
 
             request(options, function(err,res,body) {
                 assert.equal(err,null);
@@ -34,7 +33,6 @@ var myStepDefinitionsWrapper = function () {
                 world.getResponse().body = JSON.parse(body);
                 callback();
             });
-
         });
 
 

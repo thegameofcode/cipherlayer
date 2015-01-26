@@ -26,6 +26,7 @@ module.exports = function(){
                     body : JSON.stringify(world.getUser())
                 };
 
+                options.headers[config.version.header] = "test/1";
                 request(options, function(err,res,body) {
                     assert.equal(err,null);
                     assert.equal(res.statusCode, 201);
@@ -44,6 +45,8 @@ module.exports = function(){
                     method:'POST',
                     body : JSON.stringify(world.getUser())
                 };
+
+                options.headers[config.version.header] = "test/1";
 
                 request(options, function(err,res,body) {
                     assert.equal(err,null);

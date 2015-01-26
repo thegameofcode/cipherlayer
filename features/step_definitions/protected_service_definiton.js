@@ -20,7 +20,7 @@ module.exports = function(){
         nock('http://localhost:'+config.private_port)
             .post(PATH, JSON.parse(REQUEST_PAYLOAD))
             .reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
-
+            
         callback();
     });
 };

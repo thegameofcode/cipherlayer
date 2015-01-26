@@ -44,10 +44,6 @@ module.exports = function(){
             "first_name": "Name",
             "last_name": "Lastname",
             "timezone": "Europe/London",
-            "photos": {
-                "picture": "https://c.cs15.content.force.com/profilephoto/005/F",
-                "thumbnail": "https://c.cs15.content.force.com/profilephoto/005/T"
-            },
             "addr_street": null,
             "addr_city": null,
             "addr_state": null,
@@ -87,6 +83,10 @@ module.exports = function(){
 
         nock('https://cs15.salesforce.com')
             .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
+            .reply(200, sfProfile);
+
+        nock('https://cs15.salesforce.com')
+            .get('/services/data/v26.0/chatter/users/005e0000001uNIyAAM')
             .reply(200,sfProfile);
 
         var followRedirects = world.getUser().username !== undefined;
@@ -99,6 +99,8 @@ module.exports = function(){
             method:'GET',
             followAllRedirects: followRedirects
         };
+
+        options.headers[config.version.header] = "test/1";
 
         request(options, function(err,res,body) {
             assert.equal(err,null);

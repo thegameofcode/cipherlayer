@@ -14,7 +14,7 @@ module.exports = function(){
 
         cipherlayer.start(config.public_port, config.private_port, function(err){
 
-
+            assert.equal(err,null);
             var options = {
                 url: 'http://localhost:'+config.public_port+'/auth/user',
                 headers: {
