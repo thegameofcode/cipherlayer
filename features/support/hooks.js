@@ -13,7 +13,7 @@ module.exports = function(){
         world.resetUser();
 
         cipherlayer.start(config.public_port, config.private_port, function(err){
-            assert.equal(err,null);
+
 
             var options = {
                 url: 'http://localhost:'+config.public_port+'/auth/user',
@@ -24,6 +24,7 @@ module.exports = function(){
                 method:'DELETE'
             };
 
+            options.headers[config.version.header] = "test/1";
             request(options, function(err,res,body) {
                 assert.equal(err,null);
                 assert.equal(res.statusCode, 204);
@@ -34,6 +35,6 @@ module.exports = function(){
     });
 
     this.After(function(done){
-        cipherlayer.stop(done);
+       cipherlayer.stop(done);
     });
 };

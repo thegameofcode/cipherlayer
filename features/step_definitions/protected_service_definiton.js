@@ -11,7 +11,7 @@ module.exports = function(){
                 'Content-Type': 'application/json; charset=utf-8',
                 'x-user-id' : world.getUser().id
             }
-        }).get(PATH).reply(STATUS, JSON.parse(RESPONSE_PAYLOAD));
+        }).get(PATH).reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
 
         callback();
     });
@@ -19,7 +19,7 @@ module.exports = function(){
     this.Given(/^a protected service replies to a POST request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
         nock('http://localhost:'+config.private_port)
             .post(PATH, JSON.parse(REQUEST_PAYLOAD))
-            .reply(STATUS, JSON.parse(RESPONSE_PAYLOAD));
+            .reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
 
         callback();
     });
