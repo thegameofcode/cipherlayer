@@ -40,7 +40,7 @@ module.exports = {
 
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
-                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.statusCode, 200, body);
                     body = JSON.parse(body);
                     assert.notEqual(body.accessToken, undefined);
                     assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);
