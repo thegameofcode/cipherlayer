@@ -57,6 +57,7 @@
       "expireInSec": 2
     }
   },
+  "usePinVerification": true,
   "userPIN": {
     "size": 4,
     "attempts": 3

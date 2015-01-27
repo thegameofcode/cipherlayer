@@ -132,6 +132,10 @@ function createUserEndpoint(req, res, next) {
         } else {
             var pin = req.headers['x-otp-pin'];
 
+            if( config.usePinVerification === false ) {
+                return createUser(req, body, res, next, user);
+            }
+
             if (!pin) {
                 debug('no pin number');
                 phoneMng.createPIN(user.username, phone, function (err, createdPin) {
