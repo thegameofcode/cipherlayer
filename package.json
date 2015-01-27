@@ -30,9 +30,9 @@
     "which": "^1.0.8"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha src/tests --recursive",
+    "test": "npm run-script mocha && npm run-script cucumber",
     "mocha": "./node_modules/mocha/bin/mocha src/tests --recursive",
-    "cucumber": "./node_modules/cucumber/bin/cucumber.js -f pretty --tags @feature",
+    "cucumber": "./node_modules/cucumber/bin/cucumber.js src/features -f pretty --tags @feature",
     "local": "DEBUG=cipherlayer* node main.js",
     "int": "DEBUG=cipherlayer* node main.js",
     "pro": "DEBUG=cipherlayer* node main.js",
