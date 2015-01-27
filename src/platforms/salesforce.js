@@ -1,11 +1,11 @@
 var debug = require('debug')('cipherlayer:platforms:salesforce');
 var request = require('request');
 var async = require('async');
+var countries = require('countries-info');
 
 var userDao = require('../dao');
 var userManager = require('../managers/user');
 var tokenManager = require('../managers/token');
-var countrycodes = require('../countrycodes');
 var fileStoreMng = require('../managers/file_store');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
@@ -92,7 +92,7 @@ function salesforceCallback(req, res, next){
                     refreshToken:sfData.refreshToken
                 };
                 tokenManager.createAccessToken(profile.id, tokenData, function(err, token){
-                    countrycodes.countryFromPhone(profile._raw.mobile_phone, function(err, country){
+                    countries.countryFromPhone(profile._raw.mobile_phone, function(err, country){
                         var returnProfile = {
                             name: profile._raw.first_name,
                             lastname: profile._raw.last_name,

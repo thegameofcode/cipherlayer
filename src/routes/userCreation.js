@@ -3,7 +3,7 @@ var clone = require('clone');
 var crypto = require('crypto');
 var request = require('request');
 
-var countrycodes = require('../countrycodes');
+var countries = require('countries-info');
 var userDao = require('../dao');
 var tokenMng = require('../managers/token');
 var phoneMng = require('../managers/phone');
@@ -112,7 +112,7 @@ function createUserEndpoint(req, res, next) {
         });
         return next(false);
     } else {
-        countrycodes.countryFromIso(country, function (err, returnedCountry) {
+        countries.countryFromIso(country, function (err, returnedCountry) {
             if (err) {
                 res.send(400, err);
                 return next(false);
