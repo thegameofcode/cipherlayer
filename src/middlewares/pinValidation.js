@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:routes:auth');
+var debug = require('debug')('cipherlayer:middleware:pinValidation');
 var clone = require('clone');
 var request = require('request');
 var extend = require('util')._extend;
