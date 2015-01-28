@@ -37,11 +37,8 @@ function createPin(userId, phone, cbk){
 }
 
 function getPinNumber(userId, phone, cbk){
-
     var redisKey = config.redisKeys.user_phone_verify.key;
     redisKey = redisKey.replace('{userId}',userId).replace('{phone}',phone);
-
-    console.log('REDIS KEYSSSSS ',redisKey);
 
     redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
         cbk(err, redisPhonePin);
