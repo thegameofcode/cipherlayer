@@ -9,5 +9,6 @@ var SOURCE_FOLDERS = ['./src/**/*.js', './features/**/*.js', 'gulpfile.js'];
 gulp.task('jshint', function() {
     return gulp.src(SOURCE_FOLDERS)
         .pipe(jshint())
-        .pipe(jshint.reporter('default'));
+        .pipe(jshint.reporter('jshint-junit-reporter',{outputFile:'lint-tests-reports.xml'}))
+        .pipe(jshint.reporter('fail'));
 });

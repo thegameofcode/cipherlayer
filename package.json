@@ -25,6 +25,7 @@
     "cucumber-junit": "^1.1.10",
     "gulp": "^3.8.10",
     "gulp-jshint": "^1.9.0",
+    "jshint-junit-reporter": "^0.1.0",
     "mocha": "^2.0.1",
     "nock": "^0.51.0",
     "pre-commit": "0.0.11",
@@ -32,8 +33,8 @@
     "which": "^1.0.8"
   },
   "scripts": {
-    "test": "npm run-script mocha && npm run-script cucumber",
-    "test-go": "npm run-script mocha-go && npm run-script cucumber-go",
+    "test": "npm run-script lint && npm run-script mocha && npm run-script cucumber",
+    "test-go": "npm run-script lint && npm run-script mocha-go && npm run-script cucumber-go",
     "mocha": "./node_modules/mocha/bin/mocha src/tests --recursive",
     "mocha-go": "./node_modules/mocha/bin/mocha --recursive -R xunit src/tests > unit-tests-reports.xml",
     "cucumber": "./node_modules/cucumber/bin/cucumber.js src/features -f pretty --tags @feature",

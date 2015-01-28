@@ -31,3 +31,4 @@ node_modules
 config.json
 cucumber-tests-reports.xml
 unit-tests-reports.xml
+lint-tests-reports.xml
