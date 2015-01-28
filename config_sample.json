@@ -24,6 +24,16 @@
     "username":"email",
     "password":"password"
   },
+  "pinValidationEndpoints" : [
+    {
+      "path": "/api/me/phones",
+      "method": "post",
+      "fields": {
+        "countryISO": "country",
+        "phoneNumber": "phone"
+      }
+    }
+  ],
   "salesforce" : {
     "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access", "api"],
     "clientId": "{{SALESFORCE_CLIENT_ID}}",
