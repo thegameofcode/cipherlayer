@@ -20,6 +20,8 @@ var propagateRequest = require('./middlewares/propagateRequest.js');
 var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
 var versionControl = require('version-control');
 
+var pinValidation = require('./middlewares/pinValidation.js');
+
 var server;
 
 function startDaos(cbk){
@@ -88,10 +90,10 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);

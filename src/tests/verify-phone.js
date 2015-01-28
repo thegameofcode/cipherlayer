@@ -196,7 +196,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+44' + user.phone);
+            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+44' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);
@@ -259,7 +259,7 @@ describe('/api/profile (verify phone)', function(){
                 .reply(204);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+1' + user.phone);
+            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+1' + user.phone);
 
             //Get the correct PIN
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
@@ -362,7 +362,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',user.email).replace('{phone}','+44' + user.phone);
+            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+44' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);

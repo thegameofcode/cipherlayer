@@ -21,7 +21,7 @@ function insertKeyValue(key, value, expSeconds, cbk){
         return cbk({err:'redis_not_connected'});
     }
 
-    redisClient.set(key,value, function(err) {
+    redisClient.set(key, value, function(err) {
         if (err) {
             return cbk(err);
         } else {

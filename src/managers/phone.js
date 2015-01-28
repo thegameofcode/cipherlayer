@@ -7,9 +7,9 @@ var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
 var redisMng = require('./redis');
 
-function createPIN(username, phone, cbk){
+function createPIN(userId, phone, cbk){
     var redisKey = config.redisKeys.user_phone_verify.key;
-    redisKey =  redisKey.replace('{username}',username).replace('{phone}',phone);
+    redisKey =  redisKey.replace('{userId}',userId).replace('{phone}',phone);
     var expires = config.redisKeys.user_phone_verify.expireInSec;
     var pinAttempts = config.userPIN.attempts;
 
@@ -58,15 +58,15 @@ function sendPIN(phone, pin, cbk){
     });
 }
 
-function verifyPhone(username, phoneToVerify, pin,cbk) {
+function verifyPhone(userId, phoneToVerify, pin,cbk) {
     var redisKey = config.redisKeys.user_phone_verify.key;
-    redisKey = redisKey.replace('{username}',username).replace('{phone}',phoneToVerify);
+    redisKey = redisKey.replace('{userId}',userId).replace('{phone}',phoneToVerify);
 
     redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin){
         if(err) return cbk(err);
 
         if(!redisPhonePin) {
-            createPIN(username, phoneToVerify, function(err, createdPin){
+            createPIN(userId, phoneToVerify, function(err, createdPin){
                 if(err) return cbk(err);
                 return cbk({err:'verify_phone_error', des:'Expired PIN or incorrect phone number.'}, false);
             });
@@ -74,7 +74,7 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
             redisMng.getKeyValue(redisKey + '.attempts', function(err, redisPinAttempts) {
                 if(err) return cbk(err);
                 if(!redisPinAttempts || redisPinAttempts === '0') {
-                    createPIN(username, phoneToVerify, function(err, createdPin){
+                    createPIN(userId, phoneToVerify, function(err, createdPin){
                         if(err) return cbk(err);
                         return cbk({err:'verify_phone_error', des:'PIN used has expired.'}, false);
                     });
@@ -84,7 +84,7 @@ function verifyPhone(username, phoneToVerify, pin,cbk) {
                     } else {
                         //Last attempt
                         if(redisPinAttempts === '1'){
-                            createPIN(username, phoneToVerify, function(err, createdPin){
+                            createPIN(userId, phoneToVerify, function(err, createdPin){
                                 if(err) return cbk(err);
                                 return cbk({err:'verify_phone_error', des:'PIN used has expired.'}, false);
                             });

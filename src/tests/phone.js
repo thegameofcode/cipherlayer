@@ -162,7 +162,7 @@ describe('Phone', function() {
                                 assert.equal(verified, false);
 
                                 var redisKey = config.redisKeys.user_phone_verify.key;
-                                redisKey = redisKey.replace('{username}',baseUser.username).replace('{phone}',basePhone);
+                                redisKey = redisKey.replace('{userId}',baseUser.username).replace('{phone}',basePhone);
 
                                 //5th attempt, new correct PIN
                                 redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {

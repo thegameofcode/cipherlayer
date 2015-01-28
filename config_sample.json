@@ -53,7 +53,7 @@
   },
   "redisKeys": {
     "user_phone_verify": {
-      "key":"user.{username}.phone.{phone}",
+      "key":"user.{userId}.phone.{phone}",
       "expireInSec": 2
     }
   },

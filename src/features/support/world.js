@@ -23,7 +23,7 @@ function resetUser(){
     user = {};
 }
 
-function createPin(username, phone, cbk){
+function createPin(userId, phone, cbk){
 
     var notifServiceURL = config.services.notifications;
 
@@ -31,15 +31,15 @@ function createPin(username, phone, cbk){
         .post('/notification/sms')
         .reply(204);
 
-    phoneMng.createPIN(username, phone, function(err, pin){
+    phoneMng.createPIN(userId, phone, function(err, pin){
         cbk(err,pin);
     });
 }
 
-function getPinNumber(username, phone, cbk){
+function getPinNumber(userId, phone, cbk){
 
     var redisKey = config.redisKeys.user_phone_verify.key;
-    redisKey = redisKey.replace('{username}',username).replace('{phone}',phone);
+    redisKey = redisKey.replace('{userId}',userId).replace('{phone}',phone);
 
     console.log('REDIS KEYSSSSS ',redisKey);
 

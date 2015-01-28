@@ -30,7 +30,7 @@ module.exports = {
                 .reply(201, {id: expectedUserId});
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
+            redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
             var pin = 'xxxx';
 
@@ -111,7 +111,7 @@ module.exports = {
                     .reply(203, {id: expectedUserId});
 
                 var redisKey = config.redisKeys.user_phone_verify.key;
-                redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
+                redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
                 var pin = 'xxxx';
 
@@ -186,7 +186,7 @@ module.exports = {
                 .reply(201, {id: expectedUserId});
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{username}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
+            redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
             var pin = 'xxxx';
 
