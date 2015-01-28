@@ -29,3 +29,5 @@ node_modules
 .idea
 
 config.json
+cucumber-tests-reports.xml
+unit-tests-reports.xml
