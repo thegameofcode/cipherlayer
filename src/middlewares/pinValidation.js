@@ -55,7 +55,9 @@ function pinValidation(req, res, next) {
         }
     }
 
-    if(requiresPinValidation){
+    if(!requiresPinValidation){
+        return next();
+    } else {
         debug('Requires pin validation path \''+path+'\'');
         if(!validBodySchema){
             debug('Invalid body params');
@@ -107,8 +109,6 @@ function pinValidation(req, res, next) {
                 });
             }
         });
-    } else {
-        return next();
     }
 }
 
