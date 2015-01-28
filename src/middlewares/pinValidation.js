@@ -34,7 +34,7 @@ function pinValidation(req, res, next) {
         var check = exp.replace(/\*/g,'.*');
 
         var match = path.match(check);
-        requiresPinValidation = (match != null && path == match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
+        requiresPinValidation = (match !== null && path == match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
         debug('match \''+ path +'\' with \'' + exp + '\' : ' + requiresPinValidation);
         if(requiresPinValidation){
             var fieldsSchema = {
