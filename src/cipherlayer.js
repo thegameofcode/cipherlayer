@@ -22,6 +22,9 @@ var versionControl = require('version-control');
 
 var pinValidation = require('./middlewares/pinValidation.js');
 
+var jsonValidator = require('./managers/json_validator');
+var configSchema = require('../config_schema.json');
+
 var server;
 
 function startDaos(cbk){
@@ -112,6 +115,11 @@ function stopListener(cbk){
 }
 
 function start(publicPort, privatePort, cbk){
+    //Validate the current config.json with the schema
+    //if( !jsonValidator.isValidJSON(config, configSchema)) {
+    //    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
+    //}
+
     async.series([
         startDaos,
         startRedis,

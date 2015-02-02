@@ -44,7 +44,7 @@ module.exports = {
                 });
             });
 
-            it('203 not exists (no avatar)', function(done){
+            it('203 not exists (default avatar)', function(done){
                 nockSFLoginCall();
                 nockSFGetProfileCall(SF_PROFILE);
                 nockSFGetOptInfo();
@@ -60,7 +60,11 @@ module.exports = {
                     assert.equal(body.name, 'Name');
                     assert.equal(body.lastname, 'Lastname');
                     assert.equal(body.email, 'name.lastname@email.com');
-                    assert.equal(body.avatar, null);
+
+                    if ( config.salesforce.replaceDefaultAvatar){
+                        assert.equal(body.avatar, config.salesforce.replaceDefaultAvatar.replacementAvatar );
+                    }
+
                     assert.equal(body.phone, '000000000');
                     assert.equal(body.country, 'ES');
                     assert.notEqual(body.sf, undefined);

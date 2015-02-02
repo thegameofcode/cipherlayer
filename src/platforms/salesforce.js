@@ -35,21 +35,26 @@ function prepareSession(accessToken, refreshToken, profile, done){
                     return done();
                 }
 
-                var oauthToken = "?oauth_token=" + accessToken.params.access_token;
-
-                var avatarPath = profile._raw.photos.picture + oauthToken;
-                //TODO change this to use 'path' framework
-                var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
-                var name = profile.id.substring(idPos) + '.jpg';
-
-                fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
-                    if(err){
-                        debug('Error uploading a profile picture to AWS');
-                    } else {
-                        profile.avatar = avatarUrl;
-                    }
+                if ( config.salesforce.replaceDefaultAvatar && profile._raw.photos.picture.indexOf(config.salesforce.replaceDefaultAvatar.defaultAvatar)>-1 ){
+                    profile.avatar = config.salesforce.replaceDefaultAvatar.replacementAvatar;
                     done();
-                });
+                } else {
+                    var oauthToken = "?oauth_token=" + accessToken.params.access_token;
+
+                    var avatarPath = profile._raw.photos.picture + oauthToken;
+                    //TODO change this to use 'path' framework
+                    var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
+                    var name = profile.id.substring(idPos) + '.jpg';
+
+                    fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
+                        if(err){
+                            debug('Error uploading a profile picture to AWS');
+                        } else {
+                            profile.avatar = avatarUrl;
+                        }
+                        done();
+                    });
+                }
             },
             function returnSessionData(done){
                 var data = {
