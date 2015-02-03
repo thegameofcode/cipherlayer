@@ -1,4 +1,4 @@
-var cipherlayer = require('../cipherlayer.js');
+var cipherlayer = require('../src/cipherlayer.js');
 var assert = require('assert');
 var net = require('net');
 var fs = require('fs');

@@ -6,9 +6,15 @@ var clone = require('clone');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
-var dao = require('../dao');
-var cipherlayer = require('../cipherlayer');
-var redisMng = require('../managers/redis');
+var dao = require('../src/' +
+'' +
+'' +
+'' +
+'' +
+'' +
+'dao');
+var cipherlayer = require('../src/cipherlayer');
+var redisMng = require('../src/managers/redis');
 
 var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
     'Content-Type': 'application/json; charset=utf-8'

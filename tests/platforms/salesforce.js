@@ -1,10 +1,10 @@
 var assert = require('assert');
 
-var cipherlayer = require('../../cipherlayer.js');
-var sfPlatform = require('./../../platforms/salesforce.js');
-var dao = require('../../dao.js');
+var cipherlayer = require('../../src/cipherlayer.js');
+var sfPlatform = require('../../src/platforms/salesforce.js');
+var dao = require('../../src/dao.js');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
-var SF_PROFILE = require('./../resources/sfProfileTemplate.js');
+var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 
 var sfAccessToken= {
     id:"https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",

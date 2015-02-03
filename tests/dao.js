@@ -1,7 +1,7 @@
 var assert = require('assert');
 var clone = require('clone');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
-var dao = require('../dao.js');
+var dao = require('../src/dao.js');
 
 describe('user dao', function(){
     var baseUser = {

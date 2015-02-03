@@ -1,4 +1,4 @@
-var redisMng = require('../managers/redis');
+var redisMng = require('../src/managers/redis');
 var assert = require('assert');
 var async = require('async');
 

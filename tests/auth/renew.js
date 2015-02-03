@@ -4,7 +4,7 @@ var request = require('request');
 var clone = require('clone');
 var ciphertoken = require('ciphertoken');
 
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 

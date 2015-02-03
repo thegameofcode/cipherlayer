@@ -4,9 +4,9 @@ var request = require('request');
 var ciphertoken = require('ciphertoken');
 var assert = require('assert');
 var fs = require('fs');
-var redisMng = require('../../managers/redis');
+var redisMng = require('../../src/managers/redis');
 
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = {

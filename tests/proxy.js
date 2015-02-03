@@ -6,9 +6,9 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var async = require('async');
 var nock = require('nock');
 var request = require('request');
-var cipherlayer = require('../cipherlayer');
+var cipherlayer = require('../src/cipherlayer');
 var clone = require('clone');
-var dao = require('../dao.js');
+var dao = require('../src/dao.js');
 
 var describeProtectedCallsStandard = require('./proxy/protectedCallsStandard.js');
 var describeProtectedCallsPassThrough = require('./proxy/protectedCallsPassThrough.js');

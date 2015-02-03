@@ -3,7 +3,7 @@ var request = require('request');
 var fs = require('fs');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 
 
 module.exports = {

@@ -5,7 +5,7 @@ var fs = require('fs');
 var clone = require('clone');
 var nock = require('nock');
 
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 

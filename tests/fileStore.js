@@ -1,4 +1,4 @@
-var fileStoreMng = require('../managers/file_store');
+var fileStoreMng = require('../src/managers/file_store');
 var assert = require('assert');
 var async = require('async');
 var fs = require('fs');

@@ -35,8 +35,8 @@
   "scripts": {
     "test": "npm run-script lint && npm run-script mocha && npm run-script cucumber",
     "test-go": "npm run-script lint-go && npm run-script mocha-go && npm run-script cucumber-go",
-    "mocha": "./node_modules/mocha/bin/mocha src/tests --recursive",
-    "mocha-go": "./node_modules/mocha/bin/mocha --recursive -R xunit src/tests > unit-tests-reports.xml",
+    "mocha": "./node_modules/mocha/bin/mocha tests --recursive",
+    "mocha-go": "./node_modules/mocha/bin/mocha --recursive -R xunit ./tests > unit-tests-reports.xml",
     "cucumber": "./node_modules/cucumber/bin/cucumber.js src/features -f pretty --tags @feature",
     "cucumber-go": "./node_modules/cucumber/bin/cucumber.js src/features --tags @feature --format=json | ./node_modules/cucumber-junit/bin/cucumber-junit > cucumber-tests-reports.xml",
     "local": "DEBUG=cipherlayer* node main.js",

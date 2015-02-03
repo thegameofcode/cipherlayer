@@ -4,7 +4,7 @@ var ciphertoken = require('ciphertoken');
 var fs = require('fs');
 var nock = require('nock');
 
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = {

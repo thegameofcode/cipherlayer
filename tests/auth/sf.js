@@ -6,7 +6,7 @@ var nock = require('nock');
 var clone = require('clone');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
-var dao = require('../../dao.js');
+var dao = require('../../src/dao.js');
 
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 

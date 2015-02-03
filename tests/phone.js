@@ -1,10 +1,10 @@
 var assert = require('assert');
 var async = require('async');
 
-var dao = require('../dao');
-var phoneMng = require('../managers/phone');
-var redisMng = require('../managers/redis');
-var cipherlayer = require('../cipherlayer');
+var dao = require('../src/dao');
+var phoneMng = require('../src/managers/phone');
+var redisMng = require('../src/managers/redis');
+var cipherlayer = require('../src/cipherlayer');
 
 var nock = require('nock');
 

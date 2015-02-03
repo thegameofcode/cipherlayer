@@ -1,6 +1,6 @@
 var assert = require('assert');
 var ciphertoken = require('ciphertoken');
-var tokenManager = require('../managers/token');
+var tokenManager = require('../src/managers/token');
 var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
 
 

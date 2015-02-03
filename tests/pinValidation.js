@@ -1,8 +1,8 @@
 var assert = require('assert');
-var pinValidation = require('../middlewares/pinValidation.js');
+var pinValidation = require('../src/middlewares/pinValidation.js');
 var nock = require('nock');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
-var redisMng = require('../managers/redis');
+var redisMng = require('../src/managers/redis');
 var countries = require('countries-info');
 
 var notifServiceURL = config.services.notifications;
