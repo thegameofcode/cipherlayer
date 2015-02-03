@@ -17,7 +17,7 @@ var SF_DATA = {
 };
 var USER = {
     id: 'a1b2c3d4e5f6',
-    username: "valid@my-comms.com",
+    username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
     password: "12345678",
     platforms: [
         {
@@ -48,7 +48,7 @@ var OPTIONS_STANDARD_CALL = {
 module.exports = {
     itWithSalesforce: function withSalesForce(accessTokenSettings){
         it('200 with salesforce', function (done) {
-            dao.addUser(USER, function (err, createdUser) {
+            dao.addUser()(USER, function (err, createdUser) {
                 assert.equal(err, null);
 
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
@@ -73,7 +73,7 @@ module.exports = {
             var userWithSoonExpiry = clone(USER);
             userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
 
-            dao.addUser(userWithSoonExpiry, function(err, createdUser){
+            dao.addUser()(userWithSoonExpiry, function(err, createdUser){
                 assert.equal(err, null);
 
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function(err, loginToken){

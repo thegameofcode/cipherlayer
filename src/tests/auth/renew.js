@@ -15,7 +15,7 @@ module.exports = {
             beforeEach(function (done){
                 dao.deleteAllUsers(function (err){
                     assert.equal(err, null);
-                    dao.addUser(USER, function (err, createdUser) {
+                    dao.addUser()(USER, function (err, createdUser) {
                         assert.equal(err, null);
                         assert.notEqual(createdUser, undefined);
                         done();
@@ -134,7 +134,7 @@ function getLoginTokens(user, cbk){
 
 var USER = {
     id: 'a1b2c3d4e5f6',
-    username: 'validUser',
+    username: 'validUser'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '') ,
     password: 'validPassword123'
 };
 

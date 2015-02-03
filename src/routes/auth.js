@@ -40,7 +40,7 @@ function postAuthUser(req, res, next){
         user.platforms = req.body.platforms;
     }
 
-    userDao.addUser(user,function(err,createdUser){
+    userDao.addUser()(user,function(err,createdUser){
         if(err){
             res.send(409, err);
         } else {

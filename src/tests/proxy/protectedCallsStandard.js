@@ -34,11 +34,11 @@ module.exports = {
         it('200 without platforms', function (done) {
             var user = {
                 id: 'a1b2c3d4e5f6',
-                username: "valid@my-comms.com",
+                username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: "12345678"
             };
 
-            dao.addUser(user, function (err, createdUser) {
+            dao.addUser()(user, function (err, createdUser) {
                 assert.equal(err, null);
 
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
@@ -78,11 +78,11 @@ module.exports = {
         it('body response is not a json', function (done) {
             var user = {
                 id: 'a1b2c3d4e5f6',
-                username: "valid@my-comms.com",
+                username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: "12345678"
             };
 
-            dao.addUser(user, function (err, createdUser) {
+            dao.addUser()(user, function (err, createdUser) {
                 assert.equal(err, null);
 
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {

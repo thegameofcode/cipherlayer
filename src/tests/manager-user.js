@@ -2,6 +2,8 @@ var assert = require('assert');
 var userManager = require('../managers/user');
 var userDao = require('../dao');
 
+var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+
 describe('User Manager', function(){
     beforeEach(function(done){
         userDao.connect(function(err){
@@ -27,11 +29,11 @@ describe('User Manager', function(){
 
         var expectedUser = {
             id:'a1b2c3d4e5f6',
-            username: 'username',
+            username: 'username' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
             password: '12345678'
         };
 
-        userDao.addUser(expectedUser, function(err, createdUser){
+        userDao.addUser()(expectedUser, function(err, createdUser){
             assert.equal(err, null);
             assert.notEqual(createdUser, null);
             userManager.setPlatformData(expectedUser.id, 'sf', expectedPlatformData, function(err){

@@ -6,7 +6,7 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 
 module.exports = function(){
     this.Given(/^a user of client app with valid credentials$/, function (callback) {
-        world.getUser().username = 'valid_user';
+        world.getUser().username = 'valid_user' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
         world.getUser().password = 'valid_password';
 
         var options = {

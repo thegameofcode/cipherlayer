@@ -1,12 +1,14 @@
+var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
+
 var SF_PROFILE = {
     "id": "https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM",
     "asserted_user": true,
     "user_id": "005e0000001uNIyAAM",
     "organization_id": "00De00000004cdeEAA",
-    "username": "name.lastname@email.com",
+    "username": "name.lastname" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
     "nick_name": "nick",
     "display_name": "Name Lastname",
-    "email": "name.lastname@email.com",
+    "email": "name.lastname" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
     "email_verified": true,
     "first_name": "Name",
     "last_name": "Lastname",

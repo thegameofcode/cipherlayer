@@ -36,10 +36,10 @@ describe('Redirect', function(){
 
         var expectedUser = {
             id:'a1b2c3d4e5f6',
-            username:'user1',
+            username:'user1'+ (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
             password:'pass1'
         };
-        dao.addUser(expectedUser, function(err,createdUser) {
+        dao.addUser()(expectedUser, function(err,createdUser) {
             assert.equal(err, null);
             assert.notEqual(createdUser, null);
 

@@ -154,7 +154,8 @@
         "platforms": { "type": "object" }
       },
       "required": true
-    }
+    },
+    "allowedDomains": { "type": "array", "items": { "type": "object" } }
   },
   "additionalProperties": false
 }

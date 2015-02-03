@@ -1,11 +1,12 @@
-var dao = require('../dao.js');
 var assert = require('assert');
 var clone = require('clone');
+var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
+var dao = require('../dao.js');
 
 describe('user dao', function(){
     var baseUser = {
         id:'a1b2c3d4e5f6',
-        username:'user1',
+        username:'user1' + (config.allowedDomains[0] ? config.allowedDomains[0] : '') ,
         password:'pass1'
     };
 
@@ -34,7 +35,7 @@ describe('user dao', function(){
     it('add', function(done){
         var expectedUser = clone(baseUser);
 
-        dao.addUser(expectedUser, function(err,createdUser){
+        dao.addUser()(expectedUser, function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser._id,expectedUser.id);
             assert.equal(createdUser.username,expectedUser.username);
@@ -49,7 +50,7 @@ describe('user dao', function(){
 
     it('getFromUsername', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(expectedUser,function(err,createdUser){
+        dao.addUser()(expectedUser,function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromUsername(expectedUser.username, function(err, foundUser){
@@ -62,7 +63,7 @@ describe('user dao', function(){
 
     it('getFromUsernamePassword', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(expectedUser, function(err,createdUser){
+        dao.addUser()(expectedUser, function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function(err, foundUser){
@@ -76,7 +77,7 @@ describe('user dao', function(){
 
     it('getFromId', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(expectedUser, function(err,createdUser){
+        dao.addUser()(expectedUser, function(err,createdUser){
             assert.equal(err,null);
             assert.notEqual(createdUser,null);
             dao.getFromId(createdUser._id, function(err, foundUser){
@@ -90,11 +91,11 @@ describe('user dao', function(){
 
     it('already exists', function(done){
         var expectedUser = clone(baseUser);
-        dao.addUser(expectedUser,function(err,createdUser){
+        dao.addUser()(expectedUser,function(err,createdUser){
             assert.equal(err,null);
             assert.equal(createdUser.username,expectedUser.username);
             assert.equal(createdUser.password,expectedUser.password);
-            dao.addUser(expectedUser,function(err,createdUser){
+            dao.addUser()(expectedUser,function(err,createdUser){
                 assert.equal(err.err,'username_already_exists');
                 assert.equal(createdUser,null);
                 done();
@@ -120,7 +121,7 @@ describe('user dao', function(){
 
         dao.deleteAllUsers(function(err) {
             assert.equal(err, null);
-            dao.addUser(expectedUser,function(err,createdUser) {
+            dao.addUser()(expectedUser,function(err,createdUser) {
                 assert.equal(err, null);
                 assert.notEqual(createdUser, null);
                 assert.equal(createdUser._id, expectedUser.id);
@@ -147,7 +148,7 @@ describe('user dao', function(){
 
             dao.deleteAllUsers(function(err) {
                 assert.equal(err, null);
-                dao.addUser(expectedUser,function(err,createdUser) {
+                dao.addUser()(expectedUser,function(err,createdUser) {
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
                     assert.equal(createdUser._id, expectedUser.id);
@@ -176,7 +177,7 @@ describe('user dao', function(){
 
             dao.deleteAllUsers(function(err) {
                 assert.equal(err, null);
-                dao.addUser(expectedUser,function(err,createdUser) {
+                dao.addUser()(expectedUser,function(err,createdUser) {
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
                     assert.equal(createdUser._id, expectedUser.id);
@@ -212,7 +213,7 @@ describe('user dao', function(){
 
             dao.deleteAllUsers(function(err) {
                 assert.equal(err, null);
-                dao.addUser(expectedUser,function(err, createdUser) {
+                dao.addUser()(expectedUser,function(err, createdUser) {
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
                     assert.equal(createdUser._id, expectedUser.id);
@@ -232,4 +233,79 @@ describe('user dao', function(){
             });
         });
     });
+
+    describe('user domain', function(){
+        it('domain not valid', function(done){
+            var expectedUser = clone(baseUser);
+            expectedUser.username = 'invalid.user@domain.com';
+            dao.addUser()(expectedUser,function(err, createdUser){
+                assert.notEqual(err,null);
+                assert.equal(err.err, dao.ERROR_USER_DOMAIN_NOT_ALLOWED);
+                done();
+            });
+        });
+
+        it('not domains defined in config', function(done){
+            var expectedUser = clone(baseUser);
+            expectedUser.username = 'invalid.user@domain.com';
+
+            var modifiedConfig = clone(config);
+            modifiedConfig.allowedDomains = [];
+
+            dao.addUser(modifiedConfig)(expectedUser,function(err, createdUser){
+                assert.equal(err,null);
+                assert.equal(createdUser._id,expectedUser.id);
+                assert.equal(createdUser.username,expectedUser.username);
+                assert.equal(createdUser.password,expectedUser.password);
+                dao.countUsers(function(err,count){
+                    assert.equal(err, null);
+                    assert.equal(count, 1);
+                    done();
+                });
+            });
+        });
+
+        it('some domains defined in config (valid)', function(done){
+            var expectedUser = clone(baseUser);
+            expectedUser.username = 'invalid.user@igzinc.com';
+
+            var modifiedConfig = clone(config);
+            modifiedConfig.allowedDomains = [
+                "*@vodafone.com",
+                "*@my-comms.com",
+                "*@igzinc.com"
+            ];
+
+            dao.addUser(modifiedConfig)(expectedUser,function(err, createdUser){
+                assert.equal(err,null);
+                assert.equal(createdUser._id,expectedUser.id);
+                assert.equal(createdUser.username,expectedUser.username);
+                assert.equal(createdUser.password,expectedUser.password);
+                dao.countUsers(function(err,count){
+                    assert.equal(err, null);
+                    assert.equal(count, 1);
+                    done();
+                });
+            });
+        });
+
+        it('some domains defined in config (invalid)', function(done){
+            var expectedUser = clone(baseUser);
+            expectedUser.username = 'invalid.user@test.com';
+
+            var modifiedConfig = clone(config);
+            modifiedConfig.allowedDomains = [
+                "*@vodafone.com",
+                "*@my-comms.com",
+                "*@igzinc.com"
+            ];
+
+            dao.addUser(modifiedConfig)(expectedUser,function(err, createdUser){
+                assert.notEqual(err,null);
+                assert.equal(err.err, dao.ERROR_USER_DOMAIN_NOT_ALLOWED);
+                done();
+            });
+        });
+    });
+
 });

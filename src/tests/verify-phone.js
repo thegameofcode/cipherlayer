@@ -18,6 +18,13 @@ describe('/api/profile (verify phone)', function(){
 
     var notifServiceURL = config.services.notifications;
 
+    var baseUser = {
+        email : "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        password : "12345678",
+        phone : "444444444",
+        country: "US"
+    };
+
     beforeEach(function(done){
         async.series([
             function(done){
@@ -41,11 +48,8 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it('POST empty phone', function(done){
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            country: "ES"
-        };
+        var user = clone(baseUser);
+        user.phone = null;
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -69,12 +73,8 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it('POST empty country', function(done){
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "111111111",
-            country: ""
-        };
+        var user = clone(baseUser);
+        user.country = '';
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -98,12 +98,7 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it('POST phone not verified', function(done){
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "111111111",
-            country: "ES"
-        };
+        var user = clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -127,12 +122,7 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it('POST incorrect PIN sended (1 attempt)', function(done){
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "222222222",
-            country: "US"
-        };
+        var user = clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -171,12 +161,7 @@ describe('/api/profile (verify phone)', function(){
     it('POST correct PIN sended', function(done){
         this.timeout(10000);
 
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "333333333",
-            country: "GB"
-        };
+        var user = clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -196,7 +181,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+44' + user.phone);
+            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+1' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);
@@ -230,12 +215,7 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it('POST incorrect PIN sended (3 attempts)', function(done){
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "444444444",
-            country: "US"
-        };
+        var user = clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -337,12 +317,7 @@ describe('/api/profile (verify phone)', function(){
     it('POST user already exists', function(done){
         this.timeout(10000);
 
-        var user = {
-            email : "valid@my-comms.com",
-            password : "12345678",
-            phone : "555555555",
-            country: "GB"
-        };
+        var user = clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
@@ -362,7 +337,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(res.statusCode, 403, body);
 
             var redisKey = config.redisKeys.user_phone_verify.key;
-            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+44' + user.phone);
+            redisKey = redisKey.replace('{userId}',user.email).replace('{phone}','+1' + user.phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
                 assert.equal(err, null);

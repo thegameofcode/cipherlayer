@@ -10,7 +10,6 @@ var dao = require('../../dao.js');
 
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 
-
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
         describe('/sf', function(){
@@ -59,7 +58,7 @@ module.exports = {
 
                     assert.equal(body.name, 'Name');
                     assert.equal(body.lastname, 'Lastname');
-                    assert.equal(body.email, 'name.lastname@email.com');
+                    assert.equal(body.email, 'name.lastname'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '') );
 
                     if ( config.salesforce.replaceDefaultAvatar){
                         assert.equal(body.avatar, config.salesforce.replaceDefaultAvatar.replacementAvatar );
@@ -129,7 +128,7 @@ module.exports = {
 
                         assert.equal(body.name, 'Name');
                         assert.equal(body.lastname, 'Lastname');
-                        assert.equal(body.email, 'name.lastname@email.com');
+                        assert.equal(body.email, sfProfile.email );
                         assert.notEqual(body.avatar, undefined);
                         assert.notEqual(body.avatar, null);
                         assert.equal(body.phone, '000000000');
@@ -143,11 +142,11 @@ module.exports = {
             it('200 OK', function(done){
                 var user = {
                     id: 'a1b2c3d4e5f6',
-                    username: 'name.lastname@email.com',
+                    username: 'name.lastname' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                     password: '12345678'
                 };
 
-                dao.addUser(user, function(err, createdUser){
+                dao.addUser()(user, function(err, createdUser){
                     assert.equal(err,null);
                     assert.notEqual(createdUser, undefined);
 

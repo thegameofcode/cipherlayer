@@ -53,7 +53,7 @@ module.exports = {
             });
 
             it('POST 409 already exists', function(done){
-                dao.addUser(USER, function(err,createdUser){
+                dao.addUser()(USER, function(err,createdUser){
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
 
@@ -76,7 +76,7 @@ module.exports = {
             });
 
             it('401 Not authorized when trying to POST an existing user without basic auth', function(done){
-                dao.addUser(USER, function(err,createdUser){
+                dao.addUser()(USER, function(err,createdUser){
                     assert.equal(err,null);
                     assert.notEqual(createdUser, null);
 
@@ -96,7 +96,7 @@ module.exports = {
             });
 
             it('DELETE 204', function (done){
-                dao.addUser(USER, function(err, createdUser){
+                dao.addUser()(USER, function(err, createdUser){
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
 
@@ -121,7 +121,7 @@ module.exports = {
             });
 
             it('401 Not authorized when trying to delete without basic authorization', function(done) {
-                dao.addUser(USER, function(err, createdUser){
+                dao.addUser()(USER, function(err, createdUser){
                     assert.equal(err, null);
                     assert.notEqual(createdUser, null);
 
@@ -160,7 +160,7 @@ module.exports = {
 };
 
 
-var username = 'validuser';
+var username = 'validuser'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
 var password = 'validpassword';
 var phone = '111111111';
 

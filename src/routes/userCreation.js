@@ -36,7 +36,7 @@ function createUser(req, body, res, next, user) {
                 user.password = crypto.pseudoRandomBytes(12).toString('hex');
             }
 
-            userDao.addUser(user, function (err, createdUser) {
+            userDao.addUser()(user, function (err, createdUser) {
                 if (err) {
                     debug('error adding user: ', err);
                     res.send(409, {err: err.message});

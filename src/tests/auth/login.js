@@ -12,14 +12,14 @@ module.exports = {
         describe('/login', function () {
             var baseUser = {
                 id: 'a1b2c3d4e5f6',
-                username: 'validuser',
+                username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: 'validpassword'
             };
             beforeEach(function (done) {
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);
                     var userToCreate = clone(baseUser);
-                    dao.addUser(userToCreate, function (err, createdUser) {
+                    dao.addUser()(userToCreate, function (err, createdUser) {
                         assert.equal(err, null);
                         assert.notEqual(createdUser, undefined);
                         done();

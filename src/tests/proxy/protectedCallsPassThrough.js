@@ -12,7 +12,7 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){
         it('201 Created', function (done) {
-            var expectedUsername = 'valid@my-comms.com';
+            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
             var expectedUserCountry = 'US';
@@ -87,7 +87,7 @@ module.exports = {
     itPlatformInfo: function platformInfo(accessTokenSettings, refreshTokenSettings){
         it('203 Platform Info', function (done) {
 
-            var expectedUsername = 'valid@my-comms.com';
+            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '222222222';
             var expectedUserCountry = 'US';
@@ -168,12 +168,12 @@ module.exports = {
     },
     itAlreadyExists: function alreadyExists(accessTokenSettings, refreshTokenSettings){
         it('409 already exists', function (done) {
-            var expectedUsername = 'valid@my-comms.com';
+            var expectedUsername = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedPublicRequest = {};
             var expectedUserPhone = '222222222';
             var expectedUserCountry = 'US';
-            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid@my-comms.com';
+            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
