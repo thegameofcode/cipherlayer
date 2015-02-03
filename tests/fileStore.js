@@ -100,7 +100,8 @@ describe('AWS', function() {
         });
     });
 
-    it('upload valid image', function (done) {
+
+    it.skip('upload valid image', function (done) {
         if(!configAWSParam) return done();
 
         this.timeout(10000);
@@ -116,7 +117,7 @@ describe('AWS', function() {
         });
     });
 
-    it('upload valid zip', function (done) {
+    it.skip('upload valid zip', function (done) {
         if(!configAWSParam) return done();
 
         this.timeout(10000);
@@ -131,6 +132,7 @@ describe('AWS', function() {
             });
         });
     });
+
 
     it('get URL', function (done) {
         if(!configAWSParam) return done();

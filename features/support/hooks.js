@@ -1,7 +1,7 @@
 var request = require('request');
 var assert = require('assert');
 
-var cipherlayer = require('../../cipherlayer');
+var cipherlayer = require('../../src/cipherlayer');
 var world = require('./world');
 
 var fs = require('fs');

@@ -107,7 +107,7 @@ module.exports = {
                     done();
                 });
 
-                it('203 not exists (valid avatar)', function(done){
+                it.skip('203 not exists (valid avatar)', function(done){
                     if(!configAWSParam) return done();
 
                     var sfProfile = clone(SF_PROFILE);

@@ -1,12 +1,12 @@
 var request = require('request');
 var assert = require('assert');
 
-var phoneMng= require("../../managers/phone");
-var redisMng= require("../../managers/redis");
+var phoneMng= require("../../src/managers/phone");
+var redisMng= require("../../src/managers/redis");
 
 var nock = require("nock");
 
-var cipherlayer = require('../../cipherlayer');
+var cipherlayer = require('../../src/cipherlayer');
 var world = require('./world');
 
 var fs = require('fs');
