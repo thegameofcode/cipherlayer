@@ -3,7 +3,7 @@ var request = require('request');
 var assert = require('assert');
 var async = require('async');
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 module.exports = function(){
     this.Given(/^a client application with a valid access token$/, function (callback) {

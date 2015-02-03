@@ -2,7 +2,7 @@ var world = require('../support/world');
 var nock = require('nock');
 
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 module.exports = function(){
     this.Given(/^a protected service replies to a GET request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){

@@ -2,7 +2,7 @@ var assert = require('assert');
 var userManager = require('../src/managers/user');
 var userDao = require('../src/dao');
 
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../config.json');
 
 describe('User Manager', function(){
     beforeEach(function(done){

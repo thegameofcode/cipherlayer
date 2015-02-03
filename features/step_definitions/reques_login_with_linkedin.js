@@ -2,7 +2,7 @@ var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 var myStepDefinitionsWrapper = function () {
     this.When(/^a user request login with linkedIn account$/, function (callback) {

@@ -1,7 +1,7 @@
 var assert = require('assert');
 var pinValidation = require('../src/middlewares/pinValidation.js');
 var nock = require('nock');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../config.json');
 var redisMng = require('../src/managers/redis');
 var countries = require('countries-info');
 

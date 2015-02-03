@@ -2,7 +2,7 @@ var debug = require('debug')('cipherlayer:dao');
 var clone = require('clone');
 var assert = require('assert');
 var extend = require('util')._extend;
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 

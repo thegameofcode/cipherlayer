@@ -5,7 +5,7 @@ var request = require('request');
 var ciphertoken = require('ciphertoken');
 var dao = require('../src/dao.js');
 var cipherlayer = require('../src/cipherlayer');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../config.json');
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,

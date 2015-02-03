@@ -5,7 +5,7 @@ var fs = require('fs');
 var nock = require('nock');
 
 var dao = require('../../src/dao.js');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 module.exports = {
     itUnauthorized: function Unauthorized() {

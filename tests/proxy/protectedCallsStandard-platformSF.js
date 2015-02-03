@@ -6,7 +6,7 @@ var clone = require('clone');
 var nock = require('nock');
 
 var dao = require('../../src/dao.js');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 
 var expectedBody = {field1: 'value1', field2: 'value2'};

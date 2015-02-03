@@ -3,7 +3,7 @@ var request = require('request');
 var fs = require('fs');
 
 var cipherlayer = require('../src/cipherlayer.js');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../config.json');
 
 var describeLogin = require('./auth/login.js');
 var describeUser = require('./auth/user.js');

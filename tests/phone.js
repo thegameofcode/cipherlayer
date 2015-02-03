@@ -8,7 +8,7 @@ var cipherlayer = require('../src/cipherlayer');
 
 var nock = require('nock');
 
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../config.json');
 
 describe('Phone', function() {
     var baseUser = {

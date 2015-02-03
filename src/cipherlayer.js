@@ -3,7 +3,7 @@ var restify = require('restify');
 var async = require('async');
 var fs = require('fs');
 var path = require('path');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../config.json');
 var passport = require('passport');
 var clone = require('clone');
 

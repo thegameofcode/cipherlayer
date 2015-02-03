@@ -7,7 +7,7 @@ var countries = require('countries-info');
 var userDao = require('../dao');
 var tokenMng = require('../managers/token');
 var phoneMng = require('../managers/phone');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 function createUser(req, body, res, next, user) {
     var options = {

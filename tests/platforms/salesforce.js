@@ -3,7 +3,7 @@ var assert = require('assert');
 var cipherlayer = require('../../src/cipherlayer.js');
 var sfPlatform = require('../../src/platforms/salesforce.js');
 var dao = require('../../src/dao.js');
-var config = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
+var config = require('../../config.json');
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 
 var sfAccessToken= {

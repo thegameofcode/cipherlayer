@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:service');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 function checkAuthHeader (req, res, next){
     req.auth = req.header('Authorization');

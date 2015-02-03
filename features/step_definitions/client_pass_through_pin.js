@@ -3,7 +3,7 @@ var assert = require('assert');
 var world = require('../support/world');
 var nock = require('nock');
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 var myStepDefinitionsWrapper = function () {
     this.When(/^the client makes a pass through (.*) with the following (.*) in the body with a pin header$/, function (METHOD, PUBLIC_PAYLOAD,callback) {

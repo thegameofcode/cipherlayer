@@ -1,7 +1,7 @@
 var AWS = require('aws-sdk');
 var fs = require('fs');
 var https = require('https');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 var s3;
 

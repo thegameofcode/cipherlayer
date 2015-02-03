@@ -10,7 +10,7 @@ var cipherlayer = require('../../src/cipherlayer');
 var world = require('./world');
 
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 
 var user = {};

@@ -1,5 +1,5 @@
 var redis = require('redis');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 var redisClient;
 

@@ -5,7 +5,7 @@ var ciphertoken = require('ciphertoken');
 var nock = require('nock');
 var clone = require('clone');
 
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 var dao = require('../../src/dao.js');
 
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');

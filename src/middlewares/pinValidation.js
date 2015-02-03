@@ -6,7 +6,7 @@ var extend = require('util')._extend;
 var countries = require('countries-info');
 var phoneMng = require('../managers/phone');
 var jsonUtil = require('../managers/json_validator');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 var errInvalidFields = {
     err: 'auth_proxy_error',
