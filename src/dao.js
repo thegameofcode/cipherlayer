@@ -42,6 +42,9 @@ function _addUser(userToAdd, cbk){
         return cbk({err:'invalid_password'}, null);
     }
 
+    var signUpDate = new Date().getTime();
+    userToAdd.signUpDate = signUpDate;
+
     var username = String(userToAdd.username);
     debug('Domain control for email \''+username+'\'');
 
