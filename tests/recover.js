@@ -4,10 +4,10 @@ var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
 var fs = require('fs');
-var cipherlayer = require('../cipherlayer.js');
+var cipherlayer = require('../src/cipherlayer.js');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
-var dao = require('../dao.js');
+var dao = require('../src/dao.js');
 
 
 describe('Reset Password', function () {
