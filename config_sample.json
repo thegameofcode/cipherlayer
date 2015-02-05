@@ -19,11 +19,14 @@
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
   "authHeaderKey": "bearer ",
+
   "passThroughEndpoint" : {
     "path": "/api/profile",
+    "recoverPath": "/api/user/:email/password",
     "username":"email",
     "password":"password"
   },
+
   "pinValidationEndpoints" : [
     {
       "path": "/api/me/phones",
@@ -87,5 +90,10 @@
   },
   "allowedDomains":[
     "*@a.com"
-  ]
+  ],
+
+  "recoverMessage": {
+    "subject" :"Recover MyComms User Passaword",
+    "body" : "Here is your new password for accessing to your MyContacts account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> If you receiver this email by error or you are sure you didn't requested it, please contact support@my-comms.com"
+  }
 }

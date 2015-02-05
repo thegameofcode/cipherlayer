@@ -146,6 +146,30 @@ function getFromUsernamePassword(username, password, cbk){
     });
 }
 
+function getAllUserFields(username, cbk){
+    if(!username){
+        return cbk({err:'invalid_username'}, null);
+    }
+
+    collection.find({username: username}, function(err, users){
+        if(err) {
+            return cbk(err, null);
+        }
+
+        users.nextObject(function(err, user){
+            if(err) {
+                return cbk(err);
+            }
+            if(user === null){
+                return cbk(new Error(ERROR_USER_NOT_FOUND), null);
+            }
+            if(user.username == username) {
+                return cbk(null, user);
+            }
+        });
+    });
+}
+
 function deleteAllUsers(cbk){
     collection.remove({},function(err,numberRemoved){
         cbk();
@@ -169,6 +193,22 @@ function getFromId(id, cbk){
                 return cbk(null, user);
             }
         });
+    });
+}
+
+function addToArrayFieldById(userId, fieldName, fieldValue,  cbk){
+    var _id = new ObjectID(userId);
+    var updatedField = {};
+    updatedField[fieldName] = {
+        $each: [fieldValue]
+    };
+
+    var data = {$push: updatedField};
+    collection.update({_id: _id}, data, function(err, updatedProfiles){
+        if(err) {
+            return cbk(err, null);
+        }
+            cbk(null, updatedProfiles);
     });
 }
 
@@ -235,6 +275,8 @@ module.exports = {
 
     updateField : updateField,
     updateArrayItem : updateArrayItem,
+    addToArrayFieldById:addToArrayFieldById,
+    getAllUserFields:getAllUserFields,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
