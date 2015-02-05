@@ -30,9 +30,16 @@ function recoverUserPassWord(req, res, next){
                 passwd += randomNum.toString();
             }
 
-            var fieldvalue = [foundUser.password, passwd];
+            var fieldValue = [];
 
-            userDao.updateField(foundUser._id, 'password', fieldvalue, function(err, result){
+            if(Array.isArray(foundUser.password)){
+                fieldValue = [foundUser.password[0], passwd];
+            }else{
+                fieldValue = [foundUser.password, passwd];
+            }
+
+
+            userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
                 if(err){
                     res.send(403, {
                         err: 'auth_proxy_error',

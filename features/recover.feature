@@ -1,8 +1,6 @@
-Feature: client application POST a profile to create
+Feature: client application requests recover password
 
-  #TODO: update to validate the domain with the first item of the allowedDomains in the config (if it exists)
-
-  @feature
+  @feature @now
   Scenario Outline: Client request recover password
     Given a user of client app with valid credentials
     When the client makes a <METHOD> request to <PATH>

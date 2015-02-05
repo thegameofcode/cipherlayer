@@ -60,4 +60,43 @@ describe('Reset Password', function () {
         });
     });
 
+    it('Send 2 times recover Password', function (done) {
+        this.timeout(3000);
+        var options = {
+            url: 'http://localhost:' + config.public_port + '/api/user/'+ baseUser.username+'/password',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            method: 'GET'
+        };
+        options.headers[config.version.header] = "test/1";
+
+        nock(config.services.notifications)
+            .post('/notification/email')
+            .reply(201);
+
+        request(options, function (err, res, body) {
+            assert.equal(err, null);
+            assert.equal(res.statusCode, 201);
+            dao.getAllUserFields(baseUser.username, function(err, result){
+                assert.equal(err, null);
+                assert.equal(result.password.length, 2);
+
+                nock(config.services.notifications)
+                    .post('/notification/email')
+                    .reply(201);
+
+                request(options, function (err2, res2, body) {
+                    assert.equal(err2, null);
+                    assert.equal(res2.statusCode, 201);
+                    dao.getAllUserFields(baseUser.username, function(err, result){
+                        assert.equal(err, null);
+                        assert.equal(result.password.length, 2);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
 });
