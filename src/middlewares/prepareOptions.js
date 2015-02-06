@@ -3,10 +3,13 @@ var fs = require('fs');
 
 function prepareOptions (req, res, next){
     var options = {
-        url: 'http://localhost:' + config.private_port + req.url,
+        url: 'http://'+ config.private_server + ':' + config.private_port + req.url,
         headers: {
             'Content-Type': req.header('Content-Type'),
-            'x-user-id': req.tokenInfo.userId
+            'x-user-id': req.tokenInfo.userId,
+            'Host': req.headers.host,
+            'X-Real-IP': req.connection.remoteAddress,
+            'X-Forwarded-For': req.header('X-Forwarded-For') || req.connection.remoteAddress
         },
         method: req.method,
         followRedirect: false

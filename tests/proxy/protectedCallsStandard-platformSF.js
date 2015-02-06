@@ -128,7 +128,7 @@ module.exports = {
 };
 
 function nockProtectedStandartCall(id, expectedSfData, expectedBody) {
-    nock('http://localhost:' + config.private_port, {
+    nock('http://' + config.private_host + ':' + config.private_port, {
         reqheaders: {
             'x-user-id': id,
             'x-sf-data': JSON.stringify(expectedSfData),

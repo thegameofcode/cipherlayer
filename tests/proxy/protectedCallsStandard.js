@@ -44,7 +44,7 @@ module.exports = {
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
                     var expectedBody = {field1: 'value1', field2: 'value2'};
 
-                    nock('http://localhost:' + config.private_port, {
+                    nock('http://' + config.private_host + ':' + config.private_port, {
                         reqheaders: {
                             'x-user-id': createdUser._id,
                             'content-type': 'application/json; charset=utf-8'
@@ -88,7 +88,7 @@ module.exports = {
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
                     var expectedBody = {field1: 'value1', field2: 'value2'};
 
-                    nock('http://localhost:' + config.private_port, {
+                    nock('http://' + config.private_host + ':' + config.private_port, {
                         reqheaders: {
                             'x-user-id': createdUser._id,
                             'content-type': 'application/json; charset=utf-8'

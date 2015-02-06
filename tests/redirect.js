@@ -56,7 +56,7 @@ describe('Redirect', function(){
                 };
                 options.headers[config.version.header] = "test/1";
 
-                nock('http://localhost:' + config.private_port)
+                nock('http://' + config.private_host + ':' + config.private_port)
                     .post('/whatever')
                     .reply(302, 'Redirecting', {
                         'Location': redirectURL

@@ -23,7 +23,7 @@ var myStepDefinitionsWrapper = function () {
             };
             options.headers[config.version.header] = "test/1";
 
-            nock('http://localhost:' + config.private_port)
+            nock('http://' + config.private_host + ':' + config.private_port)
                 .post(config.passThroughEndpoint.path)
                 .reply(201, {id: "a1b2c3d4e5f6"});
 
