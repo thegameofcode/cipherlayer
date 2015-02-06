@@ -25,7 +25,7 @@ module.exports = {
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-            nock('http://localhost:' + config.private_port)
+            nock('http://' + config.private_host + ':' + config.private_port)
                 .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .reply(201, {id: expectedUserId});
 
@@ -39,7 +39,7 @@ module.exports = {
                 redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
                     assert.equal(err, null);
 
-                    nock('http://localhost:' + config.private_port)
+                    nock('http://' + config.private_host + ':' + config.private_port)
                         .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                         .reply(201, {id: expectedUserId});
 
@@ -106,7 +106,7 @@ module.exports = {
                 var expectedPrivateResponse = clone(expectedPublicRequest);
                 delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-                nock('http://localhost:' + config.private_port)
+                nock('http://' + config.private_host + ':' + config.private_port)
                     .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                     .reply(203, {id: expectedUserId});
 
@@ -181,7 +181,7 @@ module.exports = {
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-            nock('http://localhost:' + config.private_port)
+            nock('http://' + config.private_host + ':' + config.private_port)
                 .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .reply(201, {id: expectedUserId});
 

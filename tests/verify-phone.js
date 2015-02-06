@@ -194,7 +194,7 @@ describe('/api/profile (verify phone)', function(){
 
                 var expectedUserId = 'a1b2c3d4e5f6';
 
-                nock('http://localhost:' + config.private_port)
+                nock('http://' + config.private_host + ':' + config.private_port)
                     .post(config.passThroughEndpoint.path)
                     .reply(201, {id: expectedUserId});
 
@@ -289,7 +289,7 @@ describe('/api/profile (verify phone)', function(){
 
                                     var expectedUserId = 'a1b2c3d4e5f6';
 
-                                    nock('http://localhost:' + config.private_port)
+                                    nock('http://' + config.private_host + ':' + config.private_port)
                                         .post(config.passThroughEndpoint.path)
                                         .reply(201, {id: expectedUserId});
 
@@ -350,7 +350,7 @@ describe('/api/profile (verify phone)', function(){
 
                 var expectedUserId = 'a1b2c3d4e5f6';
 
-                nock('http://localhost:' + config.private_port)
+                nock('http://' + config.private_host + ':' + config.private_port)
                     .post(config.passThroughEndpoint.path)
                     .reply(201, {id: expectedUserId});
 

@@ -3,6 +3,7 @@
   "type": "object",
   "properties": {
     "public_port": { "type": "integer", "required": true },
+    "private_host": { "type": "string", "required": true },
     "private_port": { "type": "integer", "required": true },
     "accessToken": {
       "type": "object",
