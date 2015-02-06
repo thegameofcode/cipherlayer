@@ -3,7 +3,7 @@ var fs = require('fs');
 
 function prepareOptions (req, res, next){
     var options = {
-        url: 'http://'+ config.private_server + ':' + config.private_port + req.url,
+        url: 'http://'+ config.private_host + ':' + config.private_port + req.url,
         headers: {
             'Content-Type': req.header('Content-Type'),
             'x-user-id': req.tokenInfo.userId,
