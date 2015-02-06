@@ -11,9 +11,12 @@ var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 
 function createUser(req, body, res, next, user) {
     var options = {
-        url: 'http://localhost:' + config.private_port + req.url,
+        url: 'http://' + config.private_host + ':' + config.private_port + req.url,
         headers: {
-            'Content-Type': 'application/json; charset=utf-8'
+            'Content-Type': 'application/json; charset=utf-8',
+            'Host': req.headers.host,
+            'X-Real-IP': req.connection.remoteAddress,
+            'X-Forwarded-For': req.header('X-Forwarded-For') || req.connection.remoteAddress
         },
         method: req.method,
         body: JSON.stringify(body)

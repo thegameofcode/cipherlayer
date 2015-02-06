@@ -1,6 +1,7 @@
 {
   "public_port" : 3000,
   "private_port" : 3001,
+  "private_server": "localhost",
   "accessToken" : {
     "cipherKey" : "unsecureKey1",
     "signKey" : "unsecureKey2",
