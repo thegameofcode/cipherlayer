@@ -1,0 +1,161 @@
+{
+  "id": "/CONFIG",
+  "type": "object",
+  "properties": {
+    "public_port": { "type": "integer", "required": true },
+    "private_port": { "type": "integer", "required": true },
+    "accessToken": {
+      "type": "object",
+      "properties": {
+        "cipherKey": {"type": "string", "required": true},
+        "signKey": {"type": "string", "required": true},
+        "expiration": { "type": "integer", "required": true }
+      },
+      "required": true
+    },
+    "refreshToken": {
+      "type": "object",
+      "properties": {
+        "cipherKey": {"type": "string", "required": true},
+        "signKey": {"type": "string", "required": true},
+        "expiration": { "type": "integer", "required": true }
+      },
+      "required": true
+    },
+    "management": {
+      "type": "object",
+      "properties": {
+        "clientId": {"type": "string", "required": true},
+        "clientSecret": {"type": "string", "required": true}
+      },
+      "required": true
+    },
+    "db": {
+      "conn": { "type": "string", "format": "uri", "required": true }
+    },
+    "passThroughEndpoint": {
+      "type": "object",
+      "properties": {
+        "path": {"type": "string", "required": true},
+        "username": {"type": "string", "required": true},
+        "password": {"type": "string", "required": true}
+      },
+      "required": true
+    },
+    "pinValidationEndpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "required": true},
+          "method": {"type": "string", "enum": ["post", "get", "delete", "put"] ,"required": true},
+          "fields": {
+            "type": "object",
+            "properties": {
+              "countryISO": {"type": "string", "required": true},
+              "phoneNumber": {"type": "string", "required": true}
+            },
+            "required": true
+          }
+        },
+        "required": true
+      }
+    },
+    "salesforce": {
+      "type": "object",
+      "properties": {
+        "scope": { "type": "array", "items": {"type": "string"}, "required": true },
+        "clientId": { "type": "string", "required": true },
+        "clientSecret": { "type": "string", "required": true },
+        "callbackURL": { "type": "string", "format": "uri", "required": true },
+        "authUrl": { "type": "string", "format": "uri", "required": true },
+        "tokenUrl": { "type": "string", "format": "uri", "required": true },
+        "renewWhenLessThan": { "type": "integer", "required": true },
+        "expiration": { "type": "integer", "required": true },
+        "replaceDefaultAvatar": {
+          "type": "object",
+          "properties": {
+            "defaultAvatar": { "type": "string", "required": true },
+            "replacementAvatar": { "type": "string", "required": true }
+          }
+        },
+        "required": true
+      },
+      "required": true
+    },
+    "authHeaderKey": {"type": "string", "required": true },
+    "linkedin": {
+      "type": "object",
+      "properties": {
+        "scope": { "type": "array", "items": {"type": "string"}, "required": true },
+        "consumerKey": {"type": "string", "required": true },
+        "consumerSecret": {"type": "string", "required": true },
+        "callbackURL": { "type": "string", "format": "uri", "required": true }
+      },
+      "required": true
+    },
+    "aws":{
+      "type": "object",
+      "properties": {
+        "accessKeyId": { "type": "string", "required": true },
+        "secretAccessKey": { "type": "string", "required": true },
+        "region": { "type": "string", "required": true },
+        "buckets": {
+          "type": "object",
+          "properties": {
+            "avatars": { "type": "string", "required": true }
+          },
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "redis":{
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "format": "ip-address", "required": true }
+      },
+      "required": true
+    },
+    "redisKeys": {
+      "type": "object",
+      "properties": {
+        "user_phone_verify": {
+          "type": "object",
+          "properties": {
+            "key": { "type": "string", "required": true },
+            "expireInSec": { "type": "integer", "required": true }
+          },
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "usePinVerification": { "type": "boolean", "required": true },
+    "userPIN": {
+      "type": "object",
+      "properties": {
+        "size": { "type": "integer", "required": true },
+        "attempts": { "type": "integer", "required": true }
+      },
+      "required": true
+    },
+    "services":{
+      "type": "object",
+      "properties": {
+        "notifications": { "type": "string", "format": "uri", "required": true }
+      },
+      "required": true
+    },
+    "version": {
+      "type": "object",
+      "properties": {
+        "header": { "type": "string", "required": true },
+        "platforms": { "type": "object" }
+      },
+      "required": true
+    },
+    "allowedDomains": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": false
+}

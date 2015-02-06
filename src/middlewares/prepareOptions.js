@@ -1,4 +1,4 @@
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 var fs = require('fs');
 
 function prepareOptions (req, res, next){

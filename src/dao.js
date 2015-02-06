@@ -1,11 +1,14 @@
+var debug = require('debug')('cipherlayer:dao');
 var clone = require('clone');
 var assert = require('assert');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var extend = require('util')._extend;
+var config = require('../config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
+var ERROR_USER_DOMAIN_NOT_ALLOWED = 'user_domain_not_allowed';
 
 //db connection
 var url = config.db.conn;
@@ -28,7 +31,7 @@ function disconnect(cbk){
     });
 }
 
-function addUser(userToAdd, cbk){
+function _addUser(userToAdd, cbk){
     if(!userToAdd.id){
         return cbk({err:'invalid_id'}, null);
     }
@@ -39,28 +42,55 @@ function addUser(userToAdd, cbk){
         return cbk({err:'invalid_password'}, null);
     }
 
-    userToAdd = clone(userToAdd);
+    var signUpDate = new Date().getTime();
+    userToAdd.signUpDate = signUpDate;
 
-    getFromUsername(userToAdd.username, function(err, foundUser){
-        if(err){
-            if(err.message == ERROR_USER_NOT_FOUND) {
-                userToAdd._id = userToAdd.id;
-                delete(userToAdd.id);
+    var username = String(userToAdd.username);
+    debug('Domain control for email \''+username+'\'');
 
-                collection.insert(userToAdd, function(err, result){
-                    if(err) {
-                        return cbk(err, null);
-                    }
+    var isValidDomain = true;
 
-                    cbk(null, result[0]);
-                });
-            } else {
-                cbk(err, null);
-            }
-        } else {
-            cbk({err:ERROR_USERNAME_ALREADY_EXISTS}, null);
+    if(_settings.allowedDomains){
+        for(var i = 0; i < _settings.allowedDomains.length; i++){
+            var domain = _settings.allowedDomains[i];
+
+            //wildcard
+            var check = domain.replace(/\*/g,'.*');
+            var match = username.match(check);
+            isValidDomain = (match !== null && username === match[0]);
+            debug('match \''+ username +'\' with \'' + domain + '\' : ' + isValidDomain);
+            if(isValidDomain) break;
         }
-    });
+    }
+
+    if(!isValidDomain) {
+        debug('Invalid email domain \''+username+'\'');
+        cbk({err:ERROR_USER_DOMAIN_NOT_ALLOWED}, null);
+    } else {
+        debug('Valid email domain \''+username+'\'');
+        userToAdd = clone(userToAdd);
+
+        getFromUsername(userToAdd.username, function(err, foundUser){
+            if(err){
+                if(err.message == ERROR_USER_NOT_FOUND) {
+                    userToAdd._id = userToAdd.id;
+                    delete(userToAdd.id);
+
+                    collection.insert(userToAdd, function(err, result){
+                        if(err) {
+                            return cbk(err, null);
+                        }
+
+                        cbk(null, result[0]);
+                    });
+                } else {
+                    cbk(err, null);
+                }
+            } else {
+                cbk({err:ERROR_USERNAME_ALREADY_EXISTS}, null);
+            }
+        });
+    }
 }
 
 function countUsers(cbk){
@@ -116,6 +146,30 @@ function getFromUsernamePassword(username, password, cbk){
     });
 }
 
+function getAllUserFields(username, cbk){
+    if(!username){
+        return cbk({err:'invalid_username'}, null);
+    }
+
+    collection.find({username: username}, function(err, users){
+        if(err) {
+            return cbk(err, null);
+        }
+
+        users.nextObject(function(err, user){
+            if(err) {
+                return cbk(err);
+            }
+            if(user === null){
+                return cbk(new Error(ERROR_USER_NOT_FOUND), null);
+            }
+            if(user.username == username) {
+                return cbk(null, user);
+            }
+        });
+    });
+}
+
 function deleteAllUsers(cbk){
     collection.remove({},function(err,numberRemoved){
         cbk();
@@ -139,6 +193,22 @@ function getFromId(id, cbk){
                 return cbk(null, user);
             }
         });
+    });
+}
+
+function addToArrayFieldById(userId, fieldName, fieldValue,  cbk){
+    var _id = new ObjectID(userId);
+    var updatedField = {};
+    updatedField[fieldName] = {
+        $each: [fieldValue]
+    };
+
+    var data = {$push: updatedField};
+    collection.update({_id: _id}, data, function(err, updatedProfiles){
+        if(err) {
+            return cbk(err, null);
+        }
+            cbk(null, updatedProfiles);
     });
 }
 
@@ -187,11 +257,16 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     });
 }
 
+var _settings = {};
+
 module.exports = {
     connect : connect,
     disconnect : disconnect,
-
-    addUser : addUser,
+    addUser : function(settings){
+        _settings = clone(config);
+        _settings = extend(_settings, settings);
+        return _addUser;
+    },
     countUsers : countUsers,
     getFromUsername : getFromUsername,
     getFromUsernamePassword : getFromUsernamePassword,
@@ -200,7 +275,10 @@ module.exports = {
 
     updateField : updateField,
     updateArrayItem : updateArrayItem,
+    addToArrayFieldById:addToArrayFieldById,
+    getAllUserFields:getAllUserFields,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
-    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
+    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
+    ERROR_USER_DOMAIN_NOT_ALLOWED: ERROR_USER_DOMAIN_NOT_ALLOWED
 };

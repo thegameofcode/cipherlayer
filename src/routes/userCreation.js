@@ -7,7 +7,7 @@ var countries = require('countries-info');
 var userDao = require('../dao');
 var tokenMng = require('../managers/token');
 var phoneMng = require('../managers/phone');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 
 function createUser(req, body, res, next, user) {
     var options = {
@@ -39,7 +39,7 @@ function createUser(req, body, res, next, user) {
                 user.password = crypto.pseudoRandomBytes(12).toString('hex');
             }
 
-            userDao.addUser(user, function (err, createdUser) {
+            userDao.addUser()(user, function (err, createdUser) {
                 if (err) {
                     debug('error adding user: ', err);
                     res.send(409, {err: err.message});
@@ -192,6 +192,7 @@ function createUserEndpoint(req, res, next) {
         }
     });
 }
+
 
 function addRoutes(service){
     service.post(config.passThroughEndpoint.path, createUserEndpoint);

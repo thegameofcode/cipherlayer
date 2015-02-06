@@ -3,7 +3,7 @@ var restify = require('restify');
 var async = require('async');
 var fs = require('fs');
 var path = require('path');
-var config = JSON.parse(fs.readFileSync('config.json','utf8'));
+var config = require('../config.json');
 var passport = require('passport');
 var clone = require('clone');
 
@@ -21,6 +21,9 @@ var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
 var versionControl = require('version-control');
 
 var pinValidation = require('./middlewares/pinValidation.js');
+
+var jsonValidator = require('./managers/json_validator');
+var configSchema = require('../config_schema.json');
 
 var server;
 
@@ -112,6 +115,11 @@ function stopListener(cbk){
 }
 
 function start(publicPort, privatePort, cbk){
+    //Validate the current config.json with the schema
+    //if( !jsonValidator.isValidJSON(config, configSchema)) {
+    //    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
+    //}
+
     async.series([
         startDaos,
         startRedis,

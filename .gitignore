@@ -32,3 +32,4 @@ config.json
 cucumber-tests-reports.xml
 unit-tests-reports.xml
 lint-tests-reports.xml
+dump.rdb

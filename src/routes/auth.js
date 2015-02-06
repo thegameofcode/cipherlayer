@@ -1,7 +1,7 @@
 var debug = require('debug')('cipherlayer:routes:auth');
 var userDao = require('../dao');
 var tokenManager = require('../managers/token');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require('../../config.json');
 var ObjectID = require('mongodb').ObjectID;
 
 function postAuthLogin(req, res, next){
@@ -40,7 +40,7 @@ function postAuthUser(req, res, next){
         user.platforms = req.body.platforms;
     }
 
-    userDao.addUser(user,function(err,createdUser){
+    userDao.addUser()(user,function(err,createdUser){
         if(err){
             res.send(409, err);
         } else {
