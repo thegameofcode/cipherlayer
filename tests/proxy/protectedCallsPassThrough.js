@@ -31,10 +31,6 @@ module.exports = {
                 .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .reply(201, {id: expectedUserId});
 
-            nock(notifServiceURL)
-                .post('/notification/email')
-                .reply(204);
-
             var redisKey = config.redisKeys.user_phone_verify.key;
             redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
@@ -47,11 +43,10 @@ module.exports = {
 
                     nock('http://' + config.private_host + ':' + config.private_port)
                         .post(config.passThroughEndpoint.path, expectedPrivateResponse)
-                        .times(2)
                         .reply(201, {id: expectedUserId});
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                        url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
                         headers: {
                             'Content-Type': 'application/json; charset=utf-8',
                             'x-otp-pin': pin
@@ -62,7 +57,7 @@ module.exports = {
                     options.headers[config.version.header] = "test/1";
 
                     request(options, function (err, res, body) {
-                            assert.equal(err, null);
+                        assert.equal(err, null);
                         assert.equal(res.statusCode, 201, body);
                         body = JSON.parse(body);
 
@@ -128,7 +123,7 @@ module.exports = {
                         assert.equal(err, null);
 
                         var options = {
-                            url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                            url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
                             headers: {
                                 'Content-Type': 'application/json; charset=utf-8',
                                 'x-otp-pin': pin
@@ -203,7 +198,7 @@ module.exports = {
                     assert.equal(err, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                        url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
                         headers: {
                             'Content-Type': 'application/json; charset=utf-8',
                             'x-otp-pin': pin
@@ -242,7 +237,7 @@ module.exports = {
             expectedPublicRequest[config.passThroughEndpoint.username] = 'valid@my-comms.com';
 
             var options = {
-                url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
@@ -276,7 +271,7 @@ module.exports = {
             var expectedPrivateResponse = clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-            nock('http://localhost:' + config.private_port)
+            nock('http://' + config.private_host + ':' + config.private_port)
                 .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .times(2)
                 .reply(201, {id: expectedUserId});
@@ -296,7 +291,7 @@ module.exports = {
                     assert.equal(err, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                        url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
                         headers: {
                             'Content-Type': 'application/json; charset=utf-8',
                             'x-otp-pin': pin
