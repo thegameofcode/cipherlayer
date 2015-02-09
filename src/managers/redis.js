@@ -29,7 +29,9 @@ function insertKeyValue(key, value, expSeconds, cbk){
                 if (err) {
                     return cbk(err);
                 } else {
-                    redisClient.expire(key, expSeconds);
+                    if(expSeconds){
+                        redisClient.expire(key, expSeconds);
+                    }
                     return cbk(null,value);
                 }
             });

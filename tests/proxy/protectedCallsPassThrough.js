@@ -9,6 +9,8 @@ var redisMng = require('../../src/managers/redis');
 var dao = require('../../src/dao.js');
 var config = require('../../config.json');
 
+var notifServiceURL = config.services.notifications;
+
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){
         it('201 Created', function (done) {
@@ -29,6 +31,10 @@ module.exports = {
                 .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                 .reply(201, {id: expectedUserId});
 
+            nock(notifServiceURL)
+                .post('/notification/email')
+                .reply(204);
+
             var redisKey = config.redisKeys.user_phone_verify.key;
             redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
@@ -41,6 +47,7 @@ module.exports = {
 
                     nock('http://' + config.private_host + ':' + config.private_port)
                         .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                        .times(2)
                         .reply(201, {id: expectedUserId});
 
                     var options = {
@@ -55,7 +62,7 @@ module.exports = {
                     options.headers[config.version.header] = "test/1";
 
                     request(options, function (err, res, body) {
-                        assert.equal(err, null);
+                            assert.equal(err, null);
                         assert.equal(res.statusCode, 201, body);
                         body = JSON.parse(body);
 
@@ -208,7 +215,7 @@ module.exports = {
 
                     request(options, function (err, res, body) {
                         assert.equal(err, null);
-                        assert.equal(res.statusCode, 201);
+                        assert.equal(res.statusCode, 201, body);
                         body = JSON.parse(body);
 
                         assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);
@@ -252,6 +259,64 @@ module.exports = {
                 assert.equal(body.des, 'you must provide a password or a salesforce token to create the user');
                 done();
             });
+        });
+    },
+    itCreatedVerifyMail: function createdVerifyMail(accessTokenSettings, refreshTokenSettings){
+        it.skip('201 Created (Verify email)', function (done) {
+            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            var expectedUserId = 'a1b2c3d4e5f6';
+            var expectedUserPhone = '111111111';
+            var expectedUserCountry = 'US';
+            var expectedPublicRequest = {};
+            expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
+            expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
+            expectedPublicRequest.phone = expectedUserPhone;
+            expectedPublicRequest.country = expectedUserCountry;
+
+            var expectedPrivateResponse = clone(expectedPublicRequest);
+            delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
+
+            nock('http://localhost:' + config.private_port)
+                .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                .times(2)
+                .reply(201, {id: expectedUserId});
+
+            nock(notifServiceURL)
+                .post('/notification/email')
+                .reply(204);
+
+            var redisKey = config.redisKeys.user_phone_verify.key;
+            redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
+
+            var pin = 'xxxx';
+
+            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+                assert.equal(err, null);
+                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function(err){
+                    assert.equal(err, null);
+
+                    var options = {
+                        url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8',
+                            'x-otp-pin': pin
+                        },
+                        method: 'POST',
+                        body: JSON.stringify(expectedPublicRequest)
+                    };
+                    options.headers[config.version.header] = "test/1";
+
+                    request(options, function (err, res, body) {
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 200, body);
+                        body = JSON.parse(body);
+                        assert.deepEqual(body, {des: expectedUsername}, body);
+                        done();
+                    });
+
+                });
+            });
+
         });
     }
 };

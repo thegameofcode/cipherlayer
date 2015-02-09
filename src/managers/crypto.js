@@ -1,25 +1,32 @@
 var crypto = require('crypto');
-var clone = require('clone');
-var extend = require('util')._extend;
+var _ = require('lodash');
 
-var algorithm = 'aes-256-ctr';
-var password = 'bXljb21tc2VuY3J5cHQ=';
+var defaultSettings = {
+    algorithm : 'aes-256-ctr',
+    password : ''
+};
 
-function encrypt(text){
-    var cipher = crypto.createCipher(algorithm,password);
+var _settings = {};
+
+function encrypt(text, cbk){
+    var cipher = crypto.createCipher(_settings.algorithm, _settings.password);
     var crypted = cipher.update(text,'utf8','hex');
     crypted += cipher.final('hex');
-    return crypted;
+    cbk(crypted);
 }
 
-function decrypt(text){
-    var decipher = crypto.createDecipher(algorithm,password);
+function decrypt(text, cbk){
+    var decipher = crypto.createDecipher(_settings.algorithm, _settings.password);
     var dec = decipher.update(text,'hex','utf8');
     dec += decipher.final('utf8');
-    return dec;
+    cbk(dec);
 }
 
-module.exports = {
-    encrypt: encrypt,
-    decrypt: decrypt
+module.exports = function(settings) {
+    _.extend(_settings, defaultSettings, settings);
+
+    return {
+        encrypt: encrypt,
+        decrypt: decrypt
+    };
 };

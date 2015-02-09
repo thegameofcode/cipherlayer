@@ -208,6 +208,7 @@ describe('middleware pinValidation', function(){
 
         nock(notifServiceURL)
             .post('/notification/sms')
+            .times(2)
             .reply(204);
 
         var res = {

@@ -81,6 +81,7 @@ describe('proxy', function(){
             describeProtectedCallsPassThrough.itPlatformInfo(accessTokenSettings, refreshTokenSettings);
             describeProtectedCallsPassThrough.itAlreadyExists(accessTokenSettings, refreshTokenSettings);
             describeProtectedCallsPassThrough.itNotSecurityToken();
+            describeProtectedCallsPassThrough.itCreatedVerifyMail(accessTokenSettings, refreshTokenSettings);
         });
     });
 });

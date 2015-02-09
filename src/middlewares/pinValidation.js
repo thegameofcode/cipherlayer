@@ -1,7 +1,7 @@
 var debug = require('debug')('cipherlayer:middleware:pinValidation');
 var clone = require('clone');
 var request = require('request');
-var extend = require('util')._extend;
+var _ = require('lodash');
 
 var countries = require('countries-info');
 var phoneMng = require('../managers/phone');
@@ -13,12 +13,8 @@ var errInvalidFields = {
     des: 'Invalid JSON fields'
 };
 
-var errPhoneNotVerified = {
-    err: 'auth_proxy_error',
-    des: 'User phone not verified'
-};
-
 var defaultSettings = config;
+var _settings = {};
 
 function pinValidation(req, res, next) {
     var path = String(req.url);
@@ -82,40 +78,27 @@ function pinValidation(req, res, next) {
             }
 
             var pin = req.headers ? req.headers['x-otp-pin'] : null;
-            if (!pin) {
-                debug('no pin number');
-                phoneMng.createPIN(user.id, phone, function (err, createdPin) {
-                    if (err) {
+            debug('user try pin number', pin);
+            phoneMng.verifyPhone(user.id, phone, pin, function (err, verified) {
+                if (err) {
+                    if (!err.code ) {
                         res.send(500, err);
-                        return next(false);
                     } else {
-                        res.send(403, errPhoneNotVerified);
-                        return next(false);
+                        var errCode = err.code;
+                        delete(err.code);
+                        res.send(errCode, err);
                     }
-                });
-            } else {
-                debug('user try pin number', pin);
-                phoneMng.verifyPhone(user.id, phone, pin, function (err, verified) {
-                    if (err) {
-                        if (err.err != 'verify_phone_error') {
-                            res.send(500, err);
-                        } else {
-                            res.send(401, err);
-                        }
-                        return next(false);
-                    } else {
-                        return next();
-                    }
-                });
-            }
+                    return next(false);
+                } else {
+                    return next();
+                }
+            });
         });
     }
 }
 
-var _settings = {};
 module.exports = function(settings){
-    _settings = clone(defaultSettings);
-    _settings = extend(_settings, settings);
+    _.extend(_settings, defaultSettings, settings);
 
     return pinValidation;
 };

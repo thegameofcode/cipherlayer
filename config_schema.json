@@ -141,6 +141,17 @@
       },
       "required": true
     },
+    "useEmailVerification": { "type": "boolean", "required": true },
+
+    "emailVerification":
+    {
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string", "required": true },
+        "text": { "type": "string", "required": true }
+      },
+      "required": true
+    },
     "services":{
       "type": "object",
       "properties": {
@@ -156,7 +167,15 @@
       },
       "required": true
     },
-    "allowedDomains": { "type": "array", "items": { "type": "object" } }
+    "allowedDomains": { "type": "array", "items": { "type": "object" } },
+    "recoverMessage": {
+      "type": "object",
+      "properties": {
+        "subject" : { "type": "string", "required": true },
+        "body" : { "type": "string", "required": true }
+      },
+      "required": true
+    }
   },
   "additionalProperties": false
 }

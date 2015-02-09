@@ -235,16 +235,13 @@ describe('user dao', function(){
     });
 
     describe('user domain', function(){
-
         it('domain not valid', function(done){
-
-            var modifiedConfig = clone(config);
-            modifiedConfig.allowedDomains = [
-                "*@vodafone.com"
-            ];
-
             var expectedUser = clone(baseUser);
             expectedUser.username = 'invalid.user@domain.com';
+
+            var modifiedConfig = clone(config);
+            modifiedConfig.allowedDomains = ["*@invalid.es"];
+
             dao.addUser(modifiedConfig)(expectedUser,function(err, createdUser){
                 assert.notEqual(err,null);
                 assert.equal(err.err, dao.ERROR_USER_DOMAIN_NOT_ALLOWED);

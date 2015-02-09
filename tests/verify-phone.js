@@ -116,12 +116,12 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 403, body);
             body = JSON.parse(body);
-            assert.deepEqual(body, {"err":"auth_proxy_error","des":"user phone not verified"});
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"User phone not verified"});
             done();
         });
     });
 
-    it('POST incorrect PIN sended (1 attempt)', function(done){
+    it('POST incorrect PIN sent (1 attempt)', function(done){
         var user = clone(baseUser);
 
         var options = {
@@ -158,7 +158,7 @@ describe('/api/profile (verify phone)', function(){
         });
     });
 
-    it('POST correct PIN sended', function(done){
+    it('POST correct PIN sent', function(done){
         this.timeout(10000);
 
         var user = clone(baseUser);
@@ -188,11 +188,8 @@ describe('/api/profile (verify phone)', function(){
 
                 options.headers['x-otp-pin'] = redisPhonePin;
 
-                nock(notifServiceURL)
-                    .post('/notification/sms')
-                    .reply(204);
-
                 var expectedUserId = 'a1b2c3d4e5f6';
+
 
                 nock('http://' + config.private_host + ':' + config.private_port)
                     .post(config.passThroughEndpoint.path)
@@ -214,7 +211,7 @@ describe('/api/profile (verify phone)', function(){
         });
     });
 
-    it('POST incorrect PIN sended (3 attempts)', function(done){
+    it('POST incorrect PIN sent (3 attempts)', function(done){
         var user = clone(baseUser);
 
         var options = {

@@ -2,6 +2,7 @@
   "public_port" : 3000,
   "private_port" : 3001,
   "private_host": "localhost",
+  "public_url" : "https://int.my-comms.com",
   "accessToken" : {
     "cipherKey" : "unsecureKey1",
     "signKey" : "unsecureKey2",
@@ -75,6 +76,11 @@
     "size": 4,
     "attempts": 3
   },
+  "useEmailVerification": false,
+  "emailVerification":{
+    "subject": "Email verification",
+    "text": "<p>link to activate your account:</p> <p>{link}</p>"
+  },
   "services":{
     "notifications": "http://localhost:3002"
   },
@@ -91,7 +97,6 @@
   "allowedDomains":[
     "*@a.com"
   ],
-
   "recoverMessage": {
     "subject" :"Recover MyComms User Passaword",
     "body" : "Here is your new password for accessing to your MyContacts account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> If you receiver this email by error or you are sure you didn't requested it, please contact support@my-comms.com"

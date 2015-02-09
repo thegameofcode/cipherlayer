@@ -1,5 +1,5 @@
 var assert = require('assert');
-var userManager = require('../src/managers/user');
+var userManager = require('../src/managers/user')();
 var userDao = require('../src/dao');
 
 var config = require('../config.json');

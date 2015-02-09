@@ -4,7 +4,7 @@ var async = require('async');
 var countries = require('countries-info');
 
 var userDao = require('../dao');
-var userManager = require('../managers/user');
+var userManager = require('../managers/user')();
 var tokenManager = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');
 var config = require('../../config.json');
