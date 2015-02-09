@@ -17,9 +17,6 @@ describe('Reset Password', function () {
         password: 'validpassword'
     };
 
-    afterEach(function(done){
-        cipherlayer.stop(done);
-    });
     beforeEach(function (done) {
         cipherlayer.start(config.public_port, config.private_port, function(err, result){
             dao.deleteAllUsers(function (err) {
@@ -34,10 +31,14 @@ describe('Reset Password', function () {
         });
     });
 
+    afterEach(function(done){
+        cipherlayer.stop(done);
+    });
+
     it('Send Recover Password', function (done) {
         this.timeout(3000);
         var options = {
-            url: 'http://localhost:' + config.public_port + '/api/user/'+ baseUser.username+'/password',
+            url: 'http://localhost:' + config.public_port + '/user/'+ baseUser.username+'/password',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
@@ -63,7 +64,7 @@ describe('Reset Password', function () {
     it('Send 2 times recover Password', function (done) {
         this.timeout(3000);
         var options = {
-            url: 'http://localhost:' + config.public_port + '/api/user/'+ baseUser.username+'/password',
+            url: 'http://localhost:' + config.public_port + '/user/'+ baseUser.username+'/password',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },

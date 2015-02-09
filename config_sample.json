@@ -23,7 +23,6 @@
 
   "passThroughEndpoint" : {
     "path": "/api/profile",
-    "recoverPath": "/api/user/:email/password",
     "username":"email",
     "password":"password"
   },

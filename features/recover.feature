@@ -7,8 +7,8 @@ Feature: client application requests recover password
     Then the response status code is 201
 
   Examples:
-  | METHOD | PATH                       |
-  | GET    | /api/user/:email/password  |
+  | METHOD | PATH                        |
+  | GET    | /user/:email/password       |
 
 
   @feature
@@ -23,5 +23,5 @@ Feature: client application requests recover password
     And the response body contains json attribute "expiresIn"
 
   Examples:
-  | METHOD | PATH                       |
-  | GET    | /api/user/:email/password  |
+  | METHOD | PATH                        |
+  | GET    | /user/:email/password       |

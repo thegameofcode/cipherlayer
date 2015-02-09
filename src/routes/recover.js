@@ -86,7 +86,7 @@ function recoverUserPassWord(req, res, next){
 }
 
 function addRoutes(service){
-    service.get(config.passThroughEndpoint.recoverPath, recoverUserPassWord);
+    service.get('/user/:email/password', recoverUserPassWord);
     debug('User recover routes added');
 }
 
