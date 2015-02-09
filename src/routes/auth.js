@@ -10,6 +10,13 @@ function postAuthLogin(req, res, next){
             res.send(409,{err: err.message});
             return next(false);
         } else {
+            userDao.getAllUserFields(foundUser.username, function (err, result){
+                if(Array.isArray(result.password)){
+                    userDao.updateField(foundUser._id, "password", req.body.password, function(err, result){
+                        debug('UpdatePasswordField', err, result);
+                    });
+                }
+            });
             tokenManager.createBothTokens(foundUser._id, function(err, tokens){
                 if(err) {
                     res.send(409,{err: err.message});
@@ -19,6 +26,7 @@ function postAuthLogin(req, res, next){
                 }
                 next(false);
             });
+
         }
     });
 }
