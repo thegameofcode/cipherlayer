@@ -21,13 +21,12 @@
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
   "authHeaderKey": "bearer ",
-
   "passThroughEndpoint" : {
     "path": "/api/profile",
+    "recoverPath": "/api/user/:email/password",
     "username":"email",
     "password":"password"
   },
-
   "pinValidationEndpoints" : [
     {
       "path": "/api/me/phones",
@@ -46,8 +45,13 @@
     "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
     "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
     "renewWhenLessThan": 1,
-    "expiration": 5
+    "expiration": 5,
+    "replaceDefaultAvatar": {
+      "defaultAvatar" : "profilephoto/005/F",
+      "replacementAvatar" : "https://_default_avatar.png"
+    }
   },
+  "authHeaderKey": "bearer ",
   "linkedin": {
     "scope": ["r_network", "r_emailaddress", "r_basicprofile", "r_contactinfo", "r_fullprofile"],
     "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
@@ -69,6 +73,10 @@
     "user_phone_verify": {
       "key":"user.{userId}.phone.{phone}",
       "expireInSec": 2
+    },
+    "direct_login_transaction": {
+      "key":"user.{username}.transaction",
+      "expireInSec": 86400
     }
   },
   "usePinVerification": true,
@@ -79,8 +87,10 @@
   "useEmailVerification": false,
   "emailVerification":{
     "subject": "Email verification",
-    "text": "<p>link to activate your account:</p> <p>{link}</p>"
+    "text": "<p>Here is a link to activate your account:</p> <p>{link}</p>"
   },
+  "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" ],
+  "nonCompatibleEmailMsg": "User created correctly, access to the app in your device.",
   "services":{
     "notifications": "http://localhost:3002"
   },

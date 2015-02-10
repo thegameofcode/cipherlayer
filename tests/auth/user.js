@@ -1,10 +1,15 @@
 var assert = require('assert');
 var request = require('request');
 var fs = require('fs');
+var ciphertoken = require('ciphertoken');
+var async = require('async');
+var crypto = require('crypto');
+var nock = require('nock');
 
 var config = require('../../config.json');
 var dao = require('../../src/dao.js');
 
+var redisMng = require('../../src/managers/redis');
 
 module.exports = {
     describe: function(){
@@ -19,7 +24,7 @@ module.exports = {
 
             it('POST 201 created', function(done){
                 var options = {
-                    url: 'http://localhost:' + config.public_port + '/auth/user',
+                    url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                     headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                     method:'POST',
                     body : JSON.stringify({username: username, password: password, phone: phone})
@@ -38,7 +43,7 @@ module.exports = {
 
             it('401 Not authorized when trying to POST to /auth/user without basic authorization', function(done){
                 var options = {
-                    url: 'http://localhost:' + config.public_port + '/auth/user',
+                    url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                     headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
                     method:'POST',
                     body : JSON.stringify({username: username, password: password})
@@ -58,7 +63,7 @@ module.exports = {
                     assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                         headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                         method:'POST',
                         body : JSON.stringify({username: USER.username, password: USER.password})
@@ -81,7 +86,7 @@ module.exports = {
                     assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                         headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
                         method:'POST',
                         body : JSON.stringify({username: USER.username, password: USER.password})
@@ -101,7 +106,7 @@ module.exports = {
                     assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                         headers: HEADERS_WITH_AUTHORIZATION_BASIC,
                         method:'DELETE'
                     };
@@ -126,7 +131,7 @@ module.exports = {
                     assert.notEqual(createdUser, null);
 
                     var options = {
-                        url: 'http://localhost:' + config.public_port + '/auth/user',
+                        url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
                         headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
                         method:'DELETE'
                     };
@@ -152,6 +157,140 @@ module.exports = {
                     });
                 });
             });
+
+            var tokenSettings = {
+                cipherKey: config.accessToken.cipherKey,
+                firmKey: config.accessToken.signKey,
+                tokenExpirationMinutes: config.accessToken.expiration * 60
+            };
+
+            describe('/user/activate', function(){
+
+                beforeEach(function(done){
+                    async.series([
+                        function(done){
+                            redisMng.connect(done);
+                        },
+                        function(done){
+                            redisMng.deleteAllKeys(done);
+                        }
+                    ],done);
+                });
+
+                it('Create OK (iOS device) ', function(done) {
+                    var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+
+                    var bodyData = {
+                        firstName: 'Firstname',
+                        lastName: 'Lastname',
+                        password: password,
+                        country: 'US',
+                        phone: phone,
+                        email: username,
+                        transactionId: transactionId
+                    };
+
+                    var redisKey = config.redisKeys.direct_login_transaction.key;
+                    redisKey = redisKey.replace('{username}', bodyData.email);
+                    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+
+                    redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
+                        assert.equal(err, null);
+
+                        ciphertoken.createToken(tokenSettings, username, null, bodyData, function(err, token){
+                            assert.equal(err, null);
+
+                            var options = {
+                                url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate?verifyToken=' + token ,
+                                method:'GET',
+                                headers: {},
+                                followRedirect: false
+                            };
+                            options.headers['user-agent'] = "Apple-iPhone5C2/1001.525";
+
+                            nock('http://' + config.private_host + ':' + config.private_port)
+                                .post(config.passThroughEndpoint.path)
+                                .reply(201, {id: USER.id});
+
+                            request(options, function(err, res, body){
+                                assert.equal(err, null);
+                                assert.equal(res.statusCode, 302, body);
+                                done();
+                            });
+                        });
+
+                    });
+                });
+
+                it('Create OK (not an iOS device) ', function(done) {
+                    var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+
+                    var bodyData = {
+                        firstName: 'Firstname',
+                        lastName: 'Lastname',
+                        password: password,
+                        country: 'US',
+                        phone: phone,
+                        email: username,
+                        transactionId: transactionId
+                    };
+
+                    var redisKey = config.redisKeys.direct_login_transaction.key;
+                    redisKey = redisKey.replace('{username}', bodyData.email);
+                    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+
+                    redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
+                        assert.equal(err, null);
+
+                        ciphertoken.createToken(tokenSettings, username, null, bodyData, function(err, token){
+                            assert.equal(err, null);
+
+                            var options = {
+                                url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate?verifyToken=' + token ,
+                                method:'GET',
+                                headers: {},
+                                followRedirect: false
+                            };
+                            options.headers['user-agent'] = "Mozilla/5.0";
+
+                            nock('http://' + config.private_host + ':' + config.private_port)
+                                .post(config.passThroughEndpoint.path)
+                                .reply(201, {id: USER.id});
+
+                            request(options, function(err, res, body){
+                                assert.equal(err, null);
+                                assert.equal(res.statusCode, 200, body);
+                                body = JSON.parse(body);
+                                assert.deepEqual(body, { msg : config.nonCompatibleEmailMsg } );
+                                done();
+                            });
+                        });
+
+                    });
+                });
+
+                it('No verify token param', function(done) {
+                    var expectedResponseBody = {
+                        err: 'auth_proxy_error',
+                        des: 'empty param verifyToken'
+                    };
+
+                    var options = {
+                        url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate',
+                        method:'GET'
+                    };
+
+                    request(options, function(err, res, body){
+                        assert.equal(err, null);
+                        assert.equal(res.statusCode, 400, body);
+                        body = JSON.parse(body);
+                        assert.deepEqual(body, expectedResponseBody);
+                        done();
+                    });
+                });
+
+            });
+
         });
     }
 

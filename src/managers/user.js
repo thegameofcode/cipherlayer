@@ -4,12 +4,16 @@ var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
 var countries = require('countries-info');
+var ciphertoken = require('ciphertoken');
 
 var userDao = require('../dao');
 var tokenMng = require('./token');
 var phoneMng = require('./phone');
+var redisMng = require('./redis');
 var cryptoMng = require('./crypto')({ password : 'password' });
 var config = require('../../config.json');
+
+var jsonValidator = require('./json_validator');
 
 var defaultSettings = config;
 var _settings = {};
@@ -50,7 +54,7 @@ function createUser(req, cbk) {
 
     var user = {
         username: body[config.passThroughEndpoint.username],
-        password: body[config.passThroughEndpoint.password]
+        password: [body[config.passThroughEndpoint.password]]
     };
     delete(body[config.passThroughEndpoint.password]);
 
@@ -130,6 +134,81 @@ function createUser(req, cbk) {
     });
 }
 
+function createDirectLoginUser(req, cbk) {
+    if(!req.params.verifyToken){
+        return cbk({
+            err: 'auth_proxy_error',
+            des: 'empty param verifyToken',
+            code: 400
+        });
+    }
+
+    var token = clone(req.params.verifyToken);
+    //Decipher the body
+    var tokenSettings = {
+        cipherKey: _settings.accessToken.cipherKey,
+        firmKey: _settings.accessToken.signKey,
+        tokenExpirationMinutes: _settings.accessToken.expiration * 60
+    };
+
+    ciphertoken.getTokenSet(tokenSettings, token, function(err, bodyData){
+        if(err){
+            return cbk(err);
+        }
+        var body = bodyData.data;
+
+        var profileSchema = require('./json_formats/profile_create.json');
+        //Validate the current bodyData with the schema profile_create.json
+        if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
+            return cbk({
+                err:'invalid_profile_data',
+                des:'The data format provided is nor valid.',
+                code: 400
+            });
+        }
+
+        //Verify the transactionId
+        var redisKey = config.redisKeys.direct_login_transaction.key;
+        redisKey = redisKey.replace('{username}', body.email);
+
+        redisMng.getKeyValue(redisKey, function(err, transactionId) {
+            if(err){
+                return cbk(err);
+            }
+
+            if(body.transactionId === transactionId){
+                var user = {
+                    username: body[config.passThroughEndpoint.username],
+                    password: [body[config.passThroughEndpoint.password]]
+                };
+                delete(body[config.passThroughEndpoint.password]);
+
+                userDao.getFromUsername(user.username, function (err, foundUser) {
+                    if (foundUser) {
+                        return cbk({
+                            err: 'auth_proxy_error',
+                            des: 'user already exists',
+                            code: 403
+                        });
+                    }
+
+                    req.url = config.passThroughEndpoint.path;
+                    req.method = 'POST';
+
+                    delete(body[config.passThroughEndpoint.password]);
+                    createUserPrivateCall(req, body, user, cbk);
+                });
+            } else {
+                return cbk({
+                    err:'invalid_profile_data',
+                    des:'Transaction has expired.',
+                    code: 400
+                });
+            }
+        });
+    });
+}
+
 function createUserPrivateCall(req, body, user, cbk){
     var options = {
         url: 'http://localhost:' + config.private_port + req.url,
@@ -203,6 +282,7 @@ module.exports = function(settings) {
 
     return {
         setPlatformData : setPlatformData,
-        createUser : createUser
+        createUser : createUser,
+        createDirectLoginUser : createDirectLoginUser
     };
 };

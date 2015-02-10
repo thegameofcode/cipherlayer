@@ -2,10 +2,23 @@ var assert = require('assert');
 var async = require('async');
 var nock = require('nock');
 
+var redisMng = require('../src/managers/redis');
+
 var config = require('../config.json');
 var notifServiceURL = config.services.notifications;
 
 describe('Email', function() {
+
+    beforeEach(function(done){
+        async.series([
+            function(done){
+                redisMng.connect(done);
+            },
+            function(done){
+                redisMng.deleteAllKeys(done);
+            }
+        ],done);
+    });
 
     it('verifyEmail', function (done) {
         var emailMng = require('../src/managers/email')({
@@ -54,10 +67,6 @@ describe('Email', function() {
         var emailMng = require('../src/managers/email')({
             "useEmailVerification": false
         });
-
-        nock(notifServiceURL)
-            .post('/notification/email')
-            .reply(204);
 
         var email = "test@test.com";
         var bodyData = {

@@ -3,9 +3,11 @@ var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var _ = require('lodash');
+var ciphertoken = require('ciphertoken');
+var crypto = require('crypto');
 
-var cryptoMng = require('./crypto')({ password : 'email' });
 var config = require('../../config.json');
+var redisMng = require('./redis');
 
 var defaultSettings = config;
 var _settings = {};
@@ -48,19 +50,44 @@ function verifyEmail(email, bodyData, cbk){
         });
     }
 
-    cryptoMng.encrypt(JSON.stringify(bodyData), function(encryptedData){
-        var link =  _settings.public_url + '/user/activate?verifyToken='+ encryptedData;
-        var htmlLink = '<a href="' + link+ '">' + link + '</a>';
-        var emailText = (_settings.emailVerification.text).replace('{link}', htmlLink);
+    var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
-        var subject = _settings.emailVerification.subject;
+    var redisKey = config.redisKeys.direct_login_transaction.key;
+    redisKey = redisKey.replace('{username}', bodyData.email);
+    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
 
-        //Send verify email
-        sendEmailVerification(email, subject, emailText, function(err){
-            if (err) {
+    redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
+        if(err){
+            return cbk(err);
+        }
+        bodyData.transactionId = transactionId;
+
+        //Get the same expiration as the redis Key
+        var tokenSettings = {
+            cipherKey: config.accessToken.cipherKey,
+            firmKey: config.accessToken.signKey,
+            tokenExpirationMinutes: redisExp
+        };
+
+        ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+            if(err){
                 return cbk(err);
             }
-            return cbk(null, email);
+
+            var link =  _settings.public_url + '/user/activate?verifyToken='+ token;
+            var htmlLink = '<a href="' + link+ '">' + link + '</a>';
+            var emailText = (_settings.emailVerification.text).replace('{link}', htmlLink);
+
+            var subject = _settings.emailVerification.subject;
+
+            //Send verify email
+            sendEmailVerification(email, subject, emailText, function(err){
+                if (err) {
+                    return cbk(err);
+                }
+                return cbk(null, email);
+            });
+
         });
     });
 }

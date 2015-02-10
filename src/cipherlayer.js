@@ -68,7 +68,8 @@ function startListener(publicPort, privatePort, cbk){
         "/auth/sf",
         "/auth/sf/*",
         "/auth/in",
-        "/auth/in/*"
+        "/auth/in/*",
+        "/user/activate*"
     ];
     server.use(versionControl(versionControlOptions));
 
