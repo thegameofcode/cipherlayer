@@ -20,12 +20,11 @@ var myStepDefinitionsWrapper = function () {
 
         nock(config.services.notifications)
             .post('/notification/email')
-            .reply(201);
+            .reply(204);
 
         request(options, function(err,res,body) {
             assert.equal(err,null);
             world.getResponse().statusCode = res.statusCode;
-            world.getResponse().body = JSON.parse(body);
             callback();
         });
     });

@@ -52,7 +52,7 @@ describe('Reset Password', function () {
 
         request(options, function (err, res, body) {
             assert.equal(err, null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 204);
             dao.getAllUserFields(baseUser.username, function(err, result){
                 assert.equal(err, null);
                 assert.equal(result.password.length, 2);
@@ -74,22 +74,22 @@ describe('Reset Password', function () {
 
         nock(config.services.notifications)
             .post('/notification/email')
-            .reply(201);
+            .reply(204);
 
         request(options, function (err, res, body) {
             assert.equal(err, null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 204);
             dao.getAllUserFields(baseUser.username, function(err, result){
                 assert.equal(err, null);
                 assert.equal(result.password.length, 2);
 
                 nock(config.services.notifications)
                     .post('/notification/email')
-                    .reply(201);
+                    .reply(204);
 
                 request(options, function (err2, res2, body) {
                     assert.equal(err2, null);
-                    assert.equal(res2.statusCode, 201);
+                    assert.equal(res2.statusCode, 204);
                     dao.getAllUserFields(baseUser.username, function(err, result){
                         assert.equal(err, null);
                         assert.equal(result.password.length, 2);

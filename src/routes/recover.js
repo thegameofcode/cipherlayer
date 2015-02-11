@@ -68,12 +68,9 @@ function recoverUserPassWord(req, res, next){
 
                     request(options, function(err, private_res, body){
                         if(err){
-                            res.send(500, {
-                                err: 'Internal error',
-                                des: 'Email not sent'
-                            });
+                            res.send(500, { err: 'internalError', des: 'Internal server error'});
                         }else{
-                            res.send(201, "Email Sent");
+                            res.send(204);
                         }
                         return next(false);
 
