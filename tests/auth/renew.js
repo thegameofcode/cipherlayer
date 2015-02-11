@@ -7,6 +7,7 @@ var ciphertoken = require('ciphertoken');
 var dao = require('../../src/dao.js');
 var config = require('../../config.json');
 
+var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 
 module.exports = {
     describe: function(){
@@ -15,10 +16,14 @@ module.exports = {
             beforeEach(function (done){
                 dao.deleteAllUsers(function (err){
                     assert.equal(err, null);
-                    dao.addUser()(USER, function (err, createdUser) {
-                        assert.equal(err, null);
-                        assert.notEqual(createdUser, undefined);
-                        done();
+                    var userToCreate = clone(USER);
+                    cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {
+                        userToCreate.password = encryptedPwd;
+                        dao.addUser()(userToCreate, function (err, createdUser) {
+                            assert.equal(err, null);
+                            assert.notEqual(createdUser, undefined);
+                            done();
+                        });
                     });
                 });
             });

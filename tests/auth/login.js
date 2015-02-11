@@ -7,6 +7,8 @@ var fs = require('fs');
 var config = require('../../config.json');
 var dao = require('../../src/dao.js');
 
+var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
+
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
         describe('/login', function () {
@@ -15,14 +17,18 @@ module.exports = {
                 username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: 'validpassword'
             };
+
             beforeEach(function (done) {
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);
                     var userToCreate = clone(baseUser);
-                    dao.addUser()(userToCreate, function (err, createdUser) {
-                        assert.equal(err, null);
-                        assert.notEqual(createdUser, undefined);
-                        done();
+                    cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {
+                        userToCreate.password = encryptedPwd;
+                        dao.addUser()(userToCreate, function (err, createdUser) {
+                            assert.equal(err, null);
+                            assert.notEqual(createdUser, undefined);
+                            done();
+                        });
                     });
                 });
             });

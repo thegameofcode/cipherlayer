@@ -4,30 +4,34 @@ var tokenManager = require('../managers/token');
 var config = require('../../config.json');
 var ObjectID = require('mongodb').ObjectID;
 
-function postAuthLogin(req, res, next){
-    userDao.getFromUsernamePassword(req.body.username, req.body.password,function(err,foundUser){
-        if(err) {
-            res.send(409,{err: err.message});
-            return next(false);
-        } else {
-            userDao.getAllUserFields(foundUser.username, function (err, result){
-                if(Array.isArray(result.password)){
-                    userDao.updateField(foundUser._id, "password", req.body.password, function(err, result){
-                        debug('UpdatePasswordField', err, result);
-                    });
-                }
-            });
-            tokenManager.createBothTokens(foundUser._id, function(err, tokens){
-                if(err) {
-                    res.send(409,{err: err.message});
-                } else {
-                    tokens.expiresIn = config.accessToken.expiration;
-                    res.send(200,tokens);
-                }
-                next(false);
-            });
+var cryptoMng = require('../managers/crypto')({ password : 'password' });
 
-        }
+function postAuthLogin(req, res, next){
+    cryptoMng.encrypt(req.body.password, function(encryptedPwd){
+        userDao.getFromUsernamePassword(req.body.username, encryptedPwd,function(err,foundUser){
+            if(err) {
+                res.send(409,{err: err.message});
+                return next(false);
+            } else {
+                userDao.getAllUserFields(foundUser.username, function (err, result){
+                    if(Array.isArray(result.password)){
+                        userDao.updateField(foundUser._id, "password", req.body.password, function(err, result){
+                            debug('UpdatePasswordField', err, result);
+                        });
+                    }
+                });
+                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+                    if(err) {
+                        res.send(409,{err: err.message});
+                    } else {
+                        tokens.expiresIn = config.accessToken.expiration;
+                        res.send(200,tokens);
+                    }
+                    next(false);
+                });
+
+            }
+        });
     });
 }
 
@@ -48,16 +52,20 @@ function postAuthUser(req, res, next){
         user.platforms = req.body.platforms;
     }
 
-    userDao.addUser()(user,function(err,createdUser){
-        if(err){
-            res.send(409, err);
-        } else {
-            var responseUser = {
-                username: createdUser.username
-            };
-            res.send(201,responseUser);
-        }
-        return next(false);
+    cryptoMng.encrypt(user.password, function(encryptedPwd){
+        user.password = encryptedPwd;
+
+        userDao.addUser()(user,function(err,createdUser){
+            if(err){
+                res.send(409, err);
+            } else {
+                var responseUser = {
+                    username: createdUser.username
+                };
+                res.send(201,responseUser);
+            }
+            return next(false);
+        });
     });
 }
 
