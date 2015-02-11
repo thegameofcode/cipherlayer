@@ -32,7 +32,7 @@ function setPlatformData(userId, platform, data, cbk){
 }
 
 function createUser(body, pin, cbk) {
-    if (body[_settings.passThroughEndpoint.username] === undefined) {
+    if (!body[_settings.passThroughEndpoint.username]) {
         return cbk({
             err: 'auth_proxy_error',
             des: 'invalid userinfo',
@@ -40,8 +40,17 @@ function createUser(body, pin, cbk) {
         });
     }
 
-    if (body[_settings.passThroughEndpoint.password] === undefined) {
-        if (body.sf === undefined) {
+    if(!isValidDomain(body[_settings.passThroughEndpoint.username])) {
+        debug('Invalid email domain \''+body[_settings.passThroughEndpoint.username]+'\'');
+        return cbk({
+            err:'user_domain_not_allowed',
+            des:'username domain not included in the whitelist',
+            code: 400
+        }, null);
+    }
+
+    if (!body[_settings.passThroughEndpoint.password]) {
+        if (!body.sf) {
             return cbk({
                 err: 'invalid_security_token',
                 des: 'you must provide a password or a salesforce token to create the user',
@@ -54,15 +63,6 @@ function createUser(body, pin, cbk) {
         username: body[_settings.passThroughEndpoint.username],
         password: [body[_settings.passThroughEndpoint.password]]
     };
-
-    if(!isValidDomain(user.username)) {
-        debug('Invalid email domain \''+user.username+'\'');
-        return cbk({
-            err:'user_domain_not_allowed',
-            des:'username domain not included in the whitelist',
-            code: 400
-        }, null);
-    }
 
     var phone = body.phone;
     var country = body.country;
@@ -131,7 +131,7 @@ function createUser(body, pin, cbk) {
     });
 }
 
-function createDirectLoginUser(token, cbk) {
+function createUserByToken(token, cbk) {
     if(!token){
         return cbk({
             err: 'auth_proxy_error',
@@ -304,6 +304,6 @@ module.exports = function(settings) {
     return {
         setPlatformData : setPlatformData,
         createUser : createUser,
-        createDirectLoginUser : createDirectLoginUser
+        createUserByToken : createUserByToken
     };
 };

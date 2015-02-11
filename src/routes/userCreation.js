@@ -21,7 +21,7 @@ function createUserEndpoint(req, res, next) {
     });
 }
 
-function createDirectLoginUser(req, res, next) {
+function createUserByToken(req, res, next) {
     if(!req.params){
         res.send(400, {
             err: 'invalid_url_params',
@@ -30,7 +30,7 @@ function createDirectLoginUser(req, res, next) {
         return next();
     }
 
-    userMng().createDirectLoginUser(req.params.verifyToken, function(err, tokens){
+    userMng().createUserByToken(req.params.verifyToken, function(err, tokens){
         if (err) {
             if (!err.code ) {
                 res.send(500, err);
@@ -65,7 +65,7 @@ function createDirectLoginUser(req, res, next) {
 
 function addRoutes(service){
     service.post(config.passThroughEndpoint.path, createUserEndpoint);
-    service.get('/user/activate', createDirectLoginUser);
+    service.get('/user/activate', createUserByToken);
 
     debug('User creation routes added');
 }

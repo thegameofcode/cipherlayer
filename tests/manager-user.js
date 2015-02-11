@@ -2,6 +2,7 @@ var assert = require('assert');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
 var nock = require('nock');
+var clone = require('clone');
 var userDao = require('../src/dao');
 var redisMng = require('../src/managers/redis');
 var userMng = require('../src/managers/user');
@@ -15,8 +16,6 @@ var accesTokenSettings = {
     firmKey: config.accessToken.signKey,
     tokenExpirationMinutes: config.accessToken.expiration * 60
 };
-
-//config.redisKeys.direct_login_transaction.expireInSec
 
 describe('User Manager', function(){
     beforeEach(function(done){
@@ -195,17 +194,12 @@ describe('User Manager', function(){
             } );
         });
 
-        it('usePinVerification = false & useEmailVerification = true', function(done){
+        it('usePinVerification = false & useEmailVerification = false', function(done){
             var configSettings = {
                 usePinVerification: false,
-                useEmailVerification: true
+                useEmailVerification: false
             };
             var pin = null;
-
-            var expectedResult = {
-                des: profileBody.email,
-                code: 200
-            };
 
             nock('http://' + config.private_host + ':' + config.private_port)
                 .post(config.passThroughEndpoint.path)
@@ -216,10 +210,191 @@ describe('User Manager', function(){
                 .reply(204);
 
             userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                assert.equal(err, null);
+                assert.equal(tokens.expiresIn, accesTokenSettings.tokenExpirationMinutes);
+                assert.notEqual(tokens.accessToken, undefined);
+                ciphertoken.getTokenSet(accesTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
+                    assert.equal(err, null);
+                    assert.equal(accessTokenInfo.userId, expectedUserId);
+                    done();
+                });
+            } );
+        });
+
+        it('Invalid domain', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false,
+                allowedDomains: ["*@valid.com"]
+            };
+            var pin = null;
+
+            profileBody.email  = "invalid@invaliddomain.com";
+
+            var expectedResult = {
+                err:"user_domain_not_allowed",
+                des:"username domain not included in the whitelist",
+                code:400
+            };
+
+            nock('http://' + config.private_host + ':' + config.private_port)
+                .post(config.passThroughEndpoint.path)
+                .reply(201, {id: expectedUserId});
+
+            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
             } );
         });
+
+        it('No username', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.email  = null;
+
+            var expectedResult = {
+                err:"auth_proxy_error",
+                des:"invalid userinfo",
+                code:400
+            };
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
+        });
+
+        it('No password', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.password  = null;
+
+            var expectedResult = {
+                err:"invalid_security_token",
+                des:"you must provide a password or a salesforce token to create the user",
+                code:400
+            };
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
+        });
+
+        it('No phone', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.phone  = null;
+
+            var expectedResult = {
+                err:"auth_proxy_error",
+                des:"empty phone or country",
+                code:400
+            };
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
+        });
+
+        it('No country', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.country  = null;
+
+            var expectedResult = {
+                err:"auth_proxy_error",
+                des:"empty phone or country",
+                code:400
+            };
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
+        });
+
+        it('Invalid country code', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.country  = '--';
+
+            var expectedResult = {
+                err:"country_not_found",
+                des:"given phone does not match any country dial code"
+            };
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
+        });
+
+        it('user exists', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var expectedResult = {
+                err:"auth_proxy_error",
+                des:"user already exists",
+                code: 403
+            };
+
+            nock('http://' + config.private_host + ':' + config.private_port)
+                .post(config.passThroughEndpoint.path)
+                .reply(201, {id: expectedUserId});
+
+            //1st call create the user
+            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                assert.equal(err, null);
+
+                //2nd call must fail
+                userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                    assert.notEqual(err, null);
+                    assert.deepEqual(err, expectedResult );
+                    done();
+                });
+            });
+        });
     });
+
+    //describe('Create user DIRECT LOGIN', function() {
+    //
+    //});
+
 });
