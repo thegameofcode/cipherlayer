@@ -58,6 +58,33 @@ function createUser(req, cbk) {
     };
     delete(body[config.passThroughEndpoint.password]);
 
+    //Username in the whitelist
+    debug('Domain control for email \''+user.username+'\'');
+
+    var isValidDomain = true;
+
+    if(_settings.allowedDomains){
+        for(var i = 0; i < _settings.allowedDomains.length; i++){
+            var domain = _settings.allowedDomains[i];
+
+            //wildcard
+            var check = domain.replace(/\*/g,'.*');
+            var match = user.username.match(check);
+            isValidDomain = (match !== null && user.username === match[0]);
+            debug('match \''+ user.username +'\' with \'' + domain + '\' : ' + isValidDomain);
+            if(isValidDomain) break;
+        }
+    }
+
+    if(!isValidDomain) {
+        debug('Invalid email domain \''+user.username+'\'');
+        return cbk({
+            err:'user_domain_not_allowed',
+            des:'username domain not included in the whitelist',
+            code: 400
+        }, null);
+    }
+
     var phone = body.phone;
     var country = body.country;
     if (!phone) {
@@ -96,40 +123,43 @@ function createUser(req, cbk) {
                 return cbk(err);
             }
 
-            var emailMng = require('./email')( { useEmailVerification : _settings.useEmailVerification });
-            emailMng.verifyEmail(body.email, body, function (err, destinationEmail) {
-                if(err){
-                    return cbk(err);
-                }
-                if(destinationEmail){
-                    return cbk({
-                        des: destinationEmail,
-                        code: 200
-                    });
-                } else {
-                    if (body.sf) {
-                        tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
-                            if (err) {
-                                res.send(400, {
-                                    err: 'invalid_platform_token',
-                                    des: 'you must provide a valid salesforce token'
-                                });
-                                return next(false);
-                            }
-
-                            user.platforms = [{
-                                platform: 'sf',
-                                accessToken: tokenInfo.data.accessToken,
-                                refreshToken: tokenInfo.data.refreshToken,
-                                expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
-                            }];
+            //If it is SF then not email verification
+            delete(body[config.passThroughEndpoint.password]);
+            if (body.sf) {
+                tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
+                    if (err) {
+                        res.send(400, {
+                            err: 'invalid_platform_token',
+                            des: 'you must provide a valid salesforce token'
                         });
+                        return next(false);
                     }
 
-                    delete(body[config.passThroughEndpoint.password]);
+                    user.platforms = [{
+                        platform: 'sf',
+                        accessToken: tokenInfo.data.accessToken,
+                        refreshToken: tokenInfo.data.refreshToken,
+                        expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
+                    }];
+
                     createUserPrivateCall(req, body, user, cbk);
-                }
-            });
+                });
+            } else {
+                var emailMng = require('./email')( { useEmailVerification : _settings.useEmailVerification });
+                emailMng.verifyEmail(body.email, body, function (err, destinationEmail) {
+                    if(err){
+                        return cbk(err);
+                    }
+                    if(destinationEmail){
+                        return cbk({
+                            des: destinationEmail,
+                            code: 200
+                        });
+                    } else {
+                        createUserPrivateCall(req, body, user, cbk);
+                    }
+                });
+            }
         });
     });
 }
@@ -245,6 +275,7 @@ function createUserPrivateCall(req, body, user, cbk){
                     debug('error adding user: ', err);
                     return cbk({
                         err: err.message,
+                        des: 'error adding user to DB',
                         code: 409
                     });
                 } else {

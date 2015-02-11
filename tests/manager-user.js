@@ -49,4 +49,8 @@ describe('User Manager', function(){
             });
         });
     });
+
+
+    //TODO insert the manager/user methods tests
+
 });

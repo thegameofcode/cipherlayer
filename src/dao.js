@@ -8,7 +8,6 @@ var ObjectID = require('mongodb').ObjectID;
 
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
-var ERROR_USER_DOMAIN_NOT_ALLOWED = 'user_domain_not_allowed';
 
 //db connection
 var url = config.db.conn;
@@ -45,52 +44,28 @@ function _addUser(userToAdd, cbk){
     var signUpDate = new Date().getTime();
     userToAdd.signUpDate = signUpDate;
 
-    var username = String(userToAdd.username);
-    debug('Domain control for email \''+username+'\'');
+    userToAdd = clone(userToAdd);
 
-    var isValidDomain = true;
+    getFromUsername(userToAdd.username, function(err, foundUser){
+        if(err){
+            if(err.message == ERROR_USER_NOT_FOUND) {
+                userToAdd._id = userToAdd.id;
+                delete(userToAdd.id);
 
-    if(_settings.allowedDomains){
-        for(var i = 0; i < _settings.allowedDomains.length; i++){
-            var domain = _settings.allowedDomains[i];
+                collection.insert(userToAdd, function(err, result){
+                    if(err) {
+                        return cbk(err, null);
+                    }
 
-            //wildcard
-            var check = domain.replace(/\*/g,'.*');
-            var match = username.match(check);
-            isValidDomain = (match !== null && username === match[0]);
-            debug('match \''+ username +'\' with \'' + domain + '\' : ' + isValidDomain);
-            if(isValidDomain) break;
-        }
-    }
-
-    if(!isValidDomain) {
-        debug('Invalid email domain \''+username+'\'');
-        cbk({err:ERROR_USER_DOMAIN_NOT_ALLOWED}, null);
-    } else {
-        debug('Valid email domain \''+username+'\'');
-        userToAdd = clone(userToAdd);
-
-        getFromUsername(userToAdd.username, function(err, foundUser){
-            if(err){
-                if(err.message == ERROR_USER_NOT_FOUND) {
-                    userToAdd._id = userToAdd.id;
-                    delete(userToAdd.id);
-
-                    collection.insert(userToAdd, function(err, result){
-                        if(err) {
-                            return cbk(err, null);
-                        }
-
-                        cbk(null, result[0]);
-                    });
-                } else {
-                    cbk(err, null);
-                }
+                    cbk(null, result[0]);
+                });
             } else {
-                cbk({err:ERROR_USERNAME_ALREADY_EXISTS}, null);
+                cbk(err, null);
             }
-        });
-    }
+        } else {
+            cbk({err:ERROR_USERNAME_ALREADY_EXISTS}, null);
+        }
+    });
 }
 
 function countUsers(cbk){
@@ -279,6 +254,5 @@ module.exports = {
     getAllUserFields:getAllUserFields,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
-    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
-    ERROR_USER_DOMAIN_NOT_ALLOWED: ERROR_USER_DOMAIN_NOT_ALLOWED
+    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
 };
