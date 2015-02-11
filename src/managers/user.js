@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:routes:auth');
+var debug = require('debug')('cipherlayer:manager:user');
 var clone = require('clone');
 var request = require('request');
 var crypto = require('crypto');
@@ -235,57 +235,63 @@ function createUserPrivateCall(body, user, cbk){
             body = JSON.parse(body);
             user.id = body.id;
 
-            crypto.pseudoRandomBytes(12, function(err, randomPwd) {
-                if (err) {
-                    return cbk(err);
-                }
+            if (!user.password) {
+                debug('user has no password ', user.username);
+                user.password = random(12);
+                debug('created user password ', user.password);
+            }
 
-                if (!user.password) {
-                    debug('user has no password ', user.username);
-                    user.password = [randomPwd];
-                    debug('created user password ', user.password);
-                }
+            cryptoMng.encrypt(user.password, function(encrypted){
+                user.password = [encrypted];
 
-                cryptoMng.encrypt(user.password, function(encrypted){
-                    user.password = [encrypted];
-
-                    userDao.addUser()(user, function (err, createdUser) {
-                        if (err) {
-                            debug('error adding user: ', err);
-                            return cbk({
-                                err: err.err,
-                                des: 'error adding user to DB',
-                                code: 409
-                            });
-                        } else {
-                            userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
-                                if (err) {
-                                    debug('error obtaining user: ', err);
-                                    return cbk({
-                                        err: err.message,
-                                        code: 409
-                                    });
-                                } else {
-                                    tokenMng.createBothTokens(foundUser._id, function (err, tokens) {
-                                        if (err) {
-                                            debug('error creating tokens: ', err);
-                                            return cbk({
-                                                err: err.message,
-                                                code: 409
-                                            });
-                                        } else {
-                                            tokens.expiresIn = _settings.accessToken.expiration * 60;
-                                            cbk(null, tokens);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                userDao.addUser()(user, function (err, createdUser) {
+                    if (err) {
+                        debug('error adding user: ', err);
+                        return cbk({
+                            err: err.err,
+                            des: 'error adding user to DB',
+                            code: 409
+                        });
+                    } else {
+                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password[0], function (err, foundUser) {
+                            if (err) {
+                                debug('error obtaining user: ', err);
+                                return cbk({
+                                    err: err.message,
+                                    code: 409
+                                });
+                            } else {
+                                tokenMng.createBothTokens(foundUser._id, function (err, tokens) {
+                                    if (err) {
+                                        debug('error creating tokens: ', err);
+                                        return cbk({
+                                            err: err.message,
+                                            code: 409
+                                        });
+                                    } else {
+                                        tokens.expiresIn = _settings.accessToken.expiration * 60;
+                                        cbk(null, tokens);
+                                    }
+                                });
+                            }
+                        });
+                    }
                 });
             });
         }
     });
+}
+
+function random (howMany, chars) {
+    chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
+    var rnd = crypto.randomBytes(howMany),
+        value = new Array(howMany),
+        len = chars.length;
+
+    for (var i = 0; i < howMany; i++) {
+        value[i] = chars[rnd[i] % len];
+    }
+    return value.join('');
 }
 
 function isValidDomain(email){
