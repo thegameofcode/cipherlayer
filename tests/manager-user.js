@@ -3,6 +3,7 @@ var ciphertoken = require('ciphertoken');
 var async = require('async');
 var nock = require('nock');
 var clone = require('clone');
+var ciphertoken = require('ciphertoken');
 var userDao = require('../src/dao');
 var redisMng = require('../src/managers/redis');
 var userMng = require('../src/managers/user');
@@ -11,11 +12,13 @@ var config = require('../config.json');
 
 var notifServiceURL = config.services.notifications;
 
-var accesTokenSettings = {
+var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
     firmKey: config.accessToken.signKey,
     tokenExpirationMinutes: config.accessToken.expiration * 60
 };
+
+var expectedUserId = 'a1b2c3d4e5f6';
 
 describe('User Manager', function(){
     beforeEach(function(done){
@@ -95,8 +98,6 @@ describe('User Manager', function(){
             country: 'US'
         };
 
-        var expectedUserId = 'a1b2c3d4e5f6';
-
         it('usePinVerification = true & useEmailVerification = false', function(done){
             var configSettings = {
                 usePinVerification: true,
@@ -117,9 +118,9 @@ describe('User Manager', function(){
 
                     userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
                         assert.equal(err, null);
-                        assert.equal(tokens.expiresIn, accesTokenSettings.tokenExpirationMinutes);
+                        assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                         assert.notEqual(tokens.accessToken, undefined);
-                        ciphertoken.getTokenSet(accesTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
+                        ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
                             assert.equal(err, null);
                             assert.equal(accessTokenInfo.userId, expectedUserId);
                             done();
@@ -211,9 +212,9 @@ describe('User Manager', function(){
 
             userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.equal(err, null);
-                assert.equal(tokens.expiresIn, accesTokenSettings.tokenExpirationMinutes);
+                assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                 assert.notEqual(tokens.accessToken, undefined);
-                ciphertoken.getTokenSet(accesTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
+                ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
                     assert.equal(err, null);
                     assert.equal(accessTokenInfo.userId, expectedUserId);
                     done();
@@ -377,7 +378,7 @@ describe('User Manager', function(){
 
             var expectedResult = {
                 err:"user_domain_not_allowed",
-                des:"username domain not included in the whitelist",
+                des: "Sorry your email domain is not authorised for this service",
                 code:400
             };
 
@@ -393,8 +394,200 @@ describe('User Manager', function(){
         });
     });
 
-    //describe('Create user DIRECT LOGIN', function() {
-    //
-    //});
+    describe('Create user DIRECT LOGIN', function() {
+        var redisKey = config.redisKeys.direct_login_transaction.key;
+        var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+
+        var tokenSettings = clone(accessTokenSettings);
+        tokenSettings.tokenExpirationMinutes = redisExp;
+
+        it('OK', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+
+            var transactionId = '1a2b3c4d5e6f';
+
+            var bodyData = {
+                officeLocation: "",
+                country: "US",
+                lastName: "lastName",
+                phone: "111111111",
+                company: "",
+                password: "valid_password",
+                firstName: "firstName",
+                email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                position: "",
+                transactionId: transactionId
+            };
+
+            redisKey = redisKey.replace('{username}', bodyData.email);
+            redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+                assert.equal(err, null);
+                assert.equal(value, transactionId);
+
+                ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+                    if(err){
+                        return cbk(err);
+                    }
+
+                    nock('http://' + config.private_host + ':' + config.private_port)
+                        .post(config.passThroughEndpoint.path)
+                        .reply(201, {id: expectedUserId});
+
+                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                        assert.equal(err, null);
+                        assert.notEqual(tokens.accessToken, undefined);
+                        ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
+                            assert.equal(err, null);
+                            assert.equal(accessTokenInfo.userId, expectedUserId);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('Invalid data', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+
+            var transactionId = '1a2b3c4d5e6f';
+
+            var bodyData = {
+                company: "",
+                password: "valid_password",
+                firstName: "firstName",
+                email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                position: "",
+                transactionId: transactionId
+            };
+
+            var expectedResult = {
+                err:"invalid_profile_data",
+                des:"The data format provided is nor valid.",
+                code:400
+            };
+
+            ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+                if(err){
+                    return cbk(err);
+                }
+
+                nock('http://' + config.private_host + ':' + config.private_port)
+                    .post(config.passThroughEndpoint.path)
+                    .reply(201, {id: expectedUserId});
+
+                userMng(configSettings).createUserByToken( token, function(err, tokens){
+                    assert.notEqual(err, null);
+                    assert.deepEqual(err, expectedResult);
+                    done();
+                });
+            });
+        });
+
+        it('Incorrect transactionId', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+
+            var transactionId = '1a2b3c4d5e6f';
+
+            var bodyData = {
+                country: "US",
+                lastName: "lastName",
+                phone: "111111111",
+                company: "",
+                password: "valid_password",
+                firstName: "firstName",
+                email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                transactionId: 'abcde'
+            };
+
+            var expectedResult = {
+                err:'invalid_profile_data',
+                des:'Incorrect or expired transaction.',
+                code: 400
+            };
+
+            redisKey = redisKey.replace('{username}', bodyData.email);
+            redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+                assert.equal(err, null);
+                assert.equal(value, transactionId);
+
+                ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+                    if(err){
+                        return cbk(err);
+                    }
+
+                    nock('http://' + config.private_host + ':' + config.private_port)
+                        .post(config.passThroughEndpoint.path)
+                        .reply(201, {id: expectedUserId});
+
+                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                        assert.notEqual(err, null);
+                        assert.deepEqual(err, expectedResult);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('Call sent 2 times', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+
+            var transactionId = '1a2b3c4d5e6f';
+
+            var bodyData = {
+                country: "US",
+                lastName: "lastName",
+                phone: "111111111",
+                company: "",
+                password: "valid_password",
+                firstName: "firstName",
+                email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                transactionId: transactionId
+            };
+
+            var expectedResult = {
+                err: "auth_proxy_error",
+                des: "user already exists",
+                code: 403
+            };
+
+            redisKey = redisKey.replace('{username}', bodyData.email);
+            redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+                assert.equal(err, null);
+                assert.equal(value, transactionId);
+
+                ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+                    if(err){
+                        return cbk(err);
+                    }
+
+                    nock('http://' + config.private_host + ':' + config.private_port)
+                        .post(config.passThroughEndpoint.path)
+                        .reply(201, {id: expectedUserId});
+
+                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                        assert.equal(err, null);
+
+                        userMng(configSettings).createUserByToken( token, function(err, tokens) {
+                            assert.notEqual(err, null);
+                            assert.deepEqual(err, expectedResult);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
 
 });

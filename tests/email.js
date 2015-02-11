@@ -34,7 +34,7 @@ describe('Email', function() {
             key : "value",
             key2: "value2"
         };
-        emailMng.verifyEmail(email, bodyData, function(err, returnedEmail){
+        emailMng.emailVerification(email, bodyData, function(err, returnedEmail){
             assert.equal(err, null);
             assert.equal(returnedEmail, email);
             done();
@@ -57,7 +57,7 @@ describe('Email', function() {
             key : "value",
             key2: "value2"
         };
-        emailMng.verifyEmail(email, bodyData, function(err, returnedEmail){
+        emailMng.emailVerification(email, bodyData, function(err, returnedEmail){
             assert.deepEqual(err, expected_error);
             done();
         });
@@ -73,7 +73,7 @@ describe('Email', function() {
             key : "value",
             key2: "value2"
         };
-        emailMng.verifyEmail(email, bodyData, function(err, returnedEmail){
+        emailMng.emailVerification(email, bodyData, function(err, returnedEmail){
             assert.equal(err, null);
             assert.equal(returnedEmail, null);
             done();

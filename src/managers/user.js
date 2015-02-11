@@ -17,6 +17,9 @@ var jsonValidator = require('./json_validator');
 
 var _settings = {};
 
+//This is Chris's contribution to the coding of this project!!!
+var ERR_INVALID_USER_DOMAIN = 'Sorry your email domain is not authorised for this service';
+
 function setPlatformData(userId, platform, data, cbk){
     userDao.updateArrayItem(userId, 'platforms', 'platform', data, function(err, updates){
         if(err) {
@@ -43,8 +46,8 @@ function createUser(body, pin, cbk) {
     if(!isValidDomain(body[_settings.passThroughEndpoint.username])) {
         debug('Invalid email domain \''+body[_settings.passThroughEndpoint.username]+'\'');
         return cbk({
-            err:'user_domain_not_allowed',
-            des:'username domain not included in the whitelist',
+            err: 'user_domain_not_allowed',
+            des: ERR_INVALID_USER_DOMAIN,
             code: 400
         }, null);
     }
@@ -113,7 +116,7 @@ function createUser(body, pin, cbk) {
                         createUserPrivateCall(body, user, cbk);
                     });
                 } else {
-                    emailMng(_settings).verifyEmail(body.email, body, function (err, destinationEmail) {
+                    emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
                         if(err){
                             return cbk(err);
                         }
@@ -144,7 +147,8 @@ function createUserByToken(token, cbk) {
     var tokenSettings = {
         cipherKey: _settings.accessToken.cipherKey,
         firmKey: _settings.accessToken.signKey,
-        tokenExpirationMinutes: _settings.accessToken.expiration * 60
+        //Same expiration as the redisKey
+        tokenExpirationMinutes: _settings.redisKeys.direct_login_transaction.expireInSec
     };
 
     ciphertoken.getTokenSet(tokenSettings, token, function(err, bodyData){
@@ -162,7 +166,6 @@ function createUserByToken(token, cbk) {
                 code: 400
             });
         }
-
         //Verify the transactionId
         var redisKey = _settings.redisKeys.direct_login_transaction.key;
         redisKey = redisKey.replace('{username}', body.email);
@@ -183,7 +186,7 @@ function createUserByToken(token, cbk) {
                     debug('Invalid email domain \''+user.username+'\'');
                     return cbk({
                         err:'user_domain_not_allowed',
-                        des:'username domain not included in the whitelist',
+                        des: ERR_INVALID_USER_DOMAIN,
                         code: 400
                     }, null);
                 }
@@ -203,7 +206,7 @@ function createUserByToken(token, cbk) {
             } else {
                 return cbk({
                     err:'invalid_profile_data',
-                    des:'Transaction has expired.',
+                    des:'Incorrect or expired transaction.',
                     code: 400
                 });
             }

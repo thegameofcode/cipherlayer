@@ -36,7 +36,7 @@ function sendEmailVerification(email, subject, emailBody, cbk){
     });
 }
 
-function verifyEmail(email, bodyData, cbk){
+function emailVerification(email, bodyData, cbk){
     if( !_settings.useEmailVerification ) {
         return cbk(null, null);
     }
@@ -73,8 +73,7 @@ function verifyEmail(email, bodyData, cbk){
             }
 
             var link =  _settings.public_url + '/user/activate?verifyToken='+ token;
-            var htmlLink = '<a href="' + link+ '">' + link + '</a>';
-            var emailText = (_settings.emailVerification.text).replace('{link}', htmlLink);
+            var emailText = (_settings.emailVerification.text).replace('{link}', link);
 
             var subject = _settings.emailVerification.subject;
 
@@ -95,6 +94,6 @@ module.exports = function(settings) {
     _settings = _.assign({}, config, settings);
 
     return {
-        verifyEmail: verifyEmail
+        emailVerification: emailVerification
     };
 };
