@@ -234,46 +234,55 @@ function createUserPrivateCall(body, user, cbk){
             debug('<= ' + private_res.statusCode);
             body = JSON.parse(body);
             user.id = body.id;
-            if (!user.password) {
-                user.password = crypto.pseudoRandomBytes(12).toString('hex');
-            } else {
+
+            crypto.pseudoRandomBytes(12, function(err, randomPwd) {
+                if (err) {
+                    return cbk(err);
+                }
+
+                if (!user.password) {
+                    debug('user has no password ', user.username);
+                    user.password = randomPwd;
+                    debug('created user password ', user.password);
+                }
+
                 cryptoMng.encrypt(user.password[0], function(encrypted){
                     user.password = encrypted;
-                });
-            }
 
-            userDao.addUser()(user, function (err, createdUser) {
-                if (err) {
-                    debug('error adding user: ', err);
-                    return cbk({
-                        err: err.message,
-                        des: 'error adding user to DB',
-                        code: 409
-                    });
-                } else {
-                    userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
+                    userDao.addUser()(user, function (err, createdUser) {
                         if (err) {
-                            debug('error obtaining user: ', err);
+                            debug('error adding user: ', err);
                             return cbk({
-                                err: err.message,
+                                err: err.err,
+                                des: 'error adding user to DB',
                                 code: 409
                             });
                         } else {
-                            tokenMng.createBothTokens(foundUser._id, function (err, tokens) {
+                            userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                                 if (err) {
-                                    debug('error creating tokens: ', err);
+                                    debug('error obtaining user: ', err);
                                     return cbk({
                                         err: err.message,
                                         code: 409
                                     });
                                 } else {
-                                    tokens.expiresIn = _settings.accessToken.expiration * 60;
-                                    cbk(null, tokens);
+                                    tokenMng.createBothTokens(foundUser._id, function (err, tokens) {
+                                        if (err) {
+                                            debug('error creating tokens: ', err);
+                                            return cbk({
+                                                err: err.message,
+                                                code: 409
+                                            });
+                                        } else {
+                                            tokens.expiresIn = _settings.accessToken.expiration * 60;
+                                            cbk(null, tokens);
+                                        }
+                                    });
                                 }
                             });
                         }
                     });
-                }
+                });
             });
         }
     });
