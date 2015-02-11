@@ -1,21 +1,23 @@
 var request = require('request');
 var async = require('async');
+var _ = require('lodash');
 
 var fs = require('fs');
 var path = require('path');
 var countries = require('countries-info');
-var config = require('../../config.json');
 
 var redisMng = require('./redis');
 
+var _settings = {};
+
 function createPIN(redisKeyId, phone, cbk){
-    var redisKey = config.redisKeys.user_phone_verify.key;
+    var redisKey = _settings.redisKeys.user_phone_verify.key;
     redisKey =  redisKey.replace('{userId}',redisKeyId).replace('{phone}',phone);
-    var expires = config.redisKeys.user_phone_verify.expireInSec;
-    var pinAttempts = config.userPIN.attempts;
+    var expires = _settings.redisKeys.user_phone_verify.expireInSec;
+    var pinAttempts = _settings.userPIN.attempts;
 
     var pin = '';
-    for(var i=0; i<config.userPIN.size; i++){
+    for(var i=0; i<_settings.userPIN.size; i++){
         var randomNum = Math.floor(Math.random() * 9);
         pin += randomNum.toString();
     }
@@ -36,7 +38,7 @@ function createPIN(redisKeyId, phone, cbk){
 }
 
 function sendPIN(phone, pin, cbk){
-    var notifServiceURL = config.services.notifications;
+    var notifServiceURL = _settings.services.notifications;
     var sms = {
         phone: phone,
         text: 'MyContacts pin code: ' + pin
@@ -51,7 +53,7 @@ function sendPIN(phone, pin, cbk){
         body: JSON.stringify(sms)
     };
 
-    request(options, function(err,res,body) {
+    request(options, function(err, res, body) {
         if(err){
             return cbk(err);
         }
@@ -60,7 +62,7 @@ function sendPIN(phone, pin, cbk){
 }
 
 function verifyPhone(redisKeyId, phone, pin, cbk) {
-    if( !config.usePinVerification ) {
+    if( !_settings.usePinVerification ) {
         return cbk(null, true);
     }
 
@@ -86,7 +88,7 @@ function verifyPhone(redisKeyId, phone, pin, cbk) {
             }
         });
     } else {
-        var redisKey = config.redisKeys.user_phone_verify.key;
+        var redisKey = _settings.redisKeys.user_phone_verify.key;
         redisKey = redisKey.replace('{userId}',redisKeyId).replace('{phone}',phone);
 
         redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin){
@@ -151,7 +153,12 @@ function verifyPhone(redisKeyId, phone, pin, cbk) {
     }
 }
 
-module.exports = {
-    createPIN : createPIN,
-    verifyPhone : verifyPhone
+module.exports = function(settings) {
+    var config = require('../../config.json');
+    _settings = _.assign({}, config, settings);
+
+    return {
+        createPIN : createPIN,
+        verifyPhone : verifyPhone
+    };
 };

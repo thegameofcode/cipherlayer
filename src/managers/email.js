@@ -6,10 +6,8 @@ var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
 
-var config = require('../../config.json');
 var redisMng = require('./redis');
 
-var defaultSettings = config;
 var _settings = {};
 
 function sendEmailVerification(email, subject, emailBody, cbk){
@@ -52,9 +50,9 @@ function verifyEmail(email, bodyData, cbk){
 
     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
-    var redisKey = config.redisKeys.direct_login_transaction.key;
+    var redisKey = _settings.redisKeys.direct_login_transaction.key;
     redisKey = redisKey.replace('{username}', bodyData.email);
-    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+    var redisExp = _settings.redisKeys.direct_login_transaction.expireInSec;
 
     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
         if(err){
@@ -64,8 +62,8 @@ function verifyEmail(email, bodyData, cbk){
 
         //Get the same expiration as the redis Key
         var tokenSettings = {
-            cipherKey: config.accessToken.cipherKey,
-            firmKey: config.accessToken.signKey,
+            cipherKey: _settings.accessToken.cipherKey,
+            firmKey: _settings.accessToken.signKey,
             tokenExpirationMinutes: redisExp
         };
 
@@ -93,7 +91,8 @@ function verifyEmail(email, bodyData, cbk){
 }
 
 module.exports = function(settings) {
-    _.extend(_settings, defaultSettings, settings);
+    var config = require('../../config.json');
+    _settings = _.assign({}, config, settings);
 
     return {
         verifyEmail: verifyEmail

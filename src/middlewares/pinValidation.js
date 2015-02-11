@@ -79,7 +79,7 @@ function pinValidation(req, res, next) {
 
             var pin = req.headers ? req.headers['x-otp-pin'] : null;
             debug('user try pin number', pin);
-            phoneMng.verifyPhone(user.id, phone, pin, function (err, verified) {
+            phoneMng().verifyPhone(user.id, phone, pin, function (err, verified) {
                 if (err) {
                     if (!err.code ) {
                         res.send(500, err);

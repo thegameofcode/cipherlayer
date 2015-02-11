@@ -1,10 +1,10 @@
 var debug = require('debug')('cipherlayer:routes:auth');
 
-var userMng = require('../managers/user')();
+var userMng = require('../managers/user');
 var config = require('../../config.json');
 
 function createUserEndpoint(req, res, next) {
-    userMng.createUser(req, function(err, tokens){
+    userMng().createUser(req.body, req.headers['x-otp-pin'], function(err, tokens){
         if (err) {
             if (!err.code ) {
                 res.send(500, err);
@@ -22,7 +22,15 @@ function createUserEndpoint(req, res, next) {
 }
 
 function createDirectLoginUser(req, res, next) {
-    userMng.createDirectLoginUser(req, function(err, tokens){
+    if(!req.params){
+        res.send(400, {
+            err: 'invalid_url_params',
+            des: 'The call to this url must have params.'
+        } );
+        return next();
+    }
+
+    userMng().createDirectLoginUser(req.params.verifyToken, function(err, tokens){
         if (err) {
             if (!err.code ) {
                 res.send(500, err);

@@ -31,6 +31,8 @@ function disconnect(cbk){
 }
 
 function _addUser(userToAdd, cbk){
+    userToAdd = clone(userToAdd);
+
     if(!userToAdd.id){
         return cbk({err:'invalid_id'}, null);
     }
@@ -43,8 +45,6 @@ function _addUser(userToAdd, cbk){
 
     var signUpDate = new Date().getTime();
     userToAdd.signUpDate = signUpDate;
-
-    userToAdd = clone(userToAdd);
 
     getFromUsername(userToAdd.username, function(err, foundUser){
         if(err){

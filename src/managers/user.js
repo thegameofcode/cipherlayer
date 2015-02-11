@@ -8,14 +8,13 @@ var ciphertoken = require('ciphertoken');
 
 var userDao = require('../dao');
 var tokenMng = require('./token');
-var phoneMng = require('./phone');
 var redisMng = require('./redis');
 var cryptoMng = require('./crypto')({ password : 'password' });
-var config = require('../../config.json');
+var phoneMng = require('./phone');
+var emailMng = require('./email');
 
 var jsonValidator = require('./json_validator');
 
-var defaultSettings = config;
 var _settings = {};
 
 function setPlatformData(userId, platform, data, cbk){
@@ -32,9 +31,8 @@ function setPlatformData(userId, platform, data, cbk){
     });
 }
 
-function createUser(req, cbk) {
-    var body = clone(req.body);
-    if (body[config.passThroughEndpoint.username] === undefined) {
+function createUser(body, pin, cbk) {
+    if (body[_settings.passThroughEndpoint.username] === undefined) {
         return cbk({
             err: 'auth_proxy_error',
             des: 'invalid userinfo',
@@ -42,7 +40,7 @@ function createUser(req, cbk) {
         });
     }
 
-    if (body[config.passThroughEndpoint.password] === undefined) {
+    if (body[_settings.passThroughEndpoint.password] === undefined) {
         if (body.sf === undefined) {
             return cbk({
                 err: 'invalid_security_token',
@@ -53,30 +51,11 @@ function createUser(req, cbk) {
     }
 
     var user = {
-        username: body[config.passThroughEndpoint.username],
-        password: [body[config.passThroughEndpoint.password]]
+        username: body[_settings.passThroughEndpoint.username],
+        password: [body[_settings.passThroughEndpoint.password]]
     };
-    delete(body[config.passThroughEndpoint.password]);
 
-    //Username in the whitelist
-    debug('Domain control for email \''+user.username+'\'');
-
-    var isValidDomain = true;
-
-    if(_settings.allowedDomains){
-        for(var i = 0; i < _settings.allowedDomains.length; i++){
-            var domain = _settings.allowedDomains[i];
-
-            //wildcard
-            var check = domain.replace(/\*/g,'.*');
-            var match = user.username.match(check);
-            isValidDomain = (match !== null && user.username === match[0]);
-            debug('match \''+ user.username +'\' with \'' + domain + '\' : ' + isValidDomain);
-            if(isValidDomain) break;
-        }
-    }
-
-    if(!isValidDomain) {
+    if(!isValidDomain(user.username)) {
         debug('Invalid email domain \''+user.username+'\'');
         return cbk({
             err:'user_domain_not_allowed',
@@ -87,85 +66,73 @@ function createUser(req, cbk) {
 
     var phone = body.phone;
     var country = body.country;
-    if (!phone) {
+    if (!phone || !country) {
         return cbk({
             err: 'auth_proxy_error',
-            des: 'empty phone',
+            des: 'empty phone or country',
             code: 400
-        });
-    } else if (!country) {
-        return cbk({
-            err: 'auth_proxy_error',
-            des: 'empty country code',
-            code: 400
-        });
-    } else {
-        countries.countryFromIso(country, function (err, returnedCountry) {
-            if (err) {
-                return cbk(err);
-            }
-            phone = '+' + returnedCountry.Dial + phone;
         });
     }
-
-    userDao.getFromUsername(user.username, function (err, foundUser) {
-        if (foundUser) {
-            return cbk({
-                err: 'auth_proxy_error',
-                des: 'user already exists',
-                code: 403
-            });
+    countries.countryFromIso(country, function (err, returnedCountry) {
+        if (err) {
+            return cbk(err);
         }
+        phone = '+' + returnedCountry.Dial + phone;
 
-        var pin = req.headers['x-otp-pin'];
-        phoneMng.verifyPhone(user.username, phone, pin, function (err, verified) {
-            if (err) {
-                return cbk(err);
-            }
-
-            //If it is SF then not email verification
-            delete(body[config.passThroughEndpoint.password]);
-            if (body.sf) {
-                tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
-                    if (err) {
-                        res.send(400, {
-                            err: 'invalid_platform_token',
-                            des: 'you must provide a valid salesforce token'
-                        });
-                        return next(false);
-                    }
-
-                    user.platforms = [{
-                        platform: 'sf',
-                        accessToken: tokenInfo.data.accessToken,
-                        refreshToken: tokenInfo.data.refreshToken,
-                        expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
-                    }];
-
-                    createUserPrivateCall(req, body, user, cbk);
-                });
-            } else {
-                var emailMng = require('./email')( { useEmailVerification : _settings.useEmailVerification });
-                emailMng.verifyEmail(body.email, body, function (err, destinationEmail) {
-                    if(err){
-                        return cbk(err);
-                    }
-                    if(destinationEmail){
-                        return cbk({
-                            des: destinationEmail,
-                            code: 200
-                        });
-                    } else {
-                        createUserPrivateCall(req, body, user, cbk);
-                    }
+        userDao.getFromUsername(user.username, function (err, foundUser) {
+            if (foundUser) {
+                return cbk({
+                    err: 'auth_proxy_error',
+                    des: 'user already exists',
+                    code: 403
                 });
             }
+
+            phoneMng(_settings).verifyPhone(user.username, phone, pin, function (err, verified) {
+                if (err) {
+                    return cbk(err);
+                }
+
+                if (body.sf) {
+                    delete(body[_settings.passThroughEndpoint.password]);
+                    tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
+                        if (err) {
+                            return cbk({
+                                err: 'invalid_platform_token',
+                                des: 'you must provide a valid salesforce token',
+                                code: 400
+                            });
+                        }
+
+                        user.platforms = [{
+                            platform: 'sf',
+                            accessToken: tokenInfo.data.accessToken,
+                            refreshToken: tokenInfo.data.refreshToken,
+                            expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
+                        }];
+                        createUserPrivateCall(body, user, cbk);
+                    });
+                } else {
+                    emailMng(_settings).verifyEmail(body.email, body, function (err, destinationEmail) {
+                        if(err){
+                            return cbk(err);
+                        }
+                        if(destinationEmail){
+                            return cbk({
+                                des: destinationEmail,
+                                code: 200
+                            });
+                        }
+                        createUserPrivateCall(body, user, cbk);
+                    });
+                }
+            });
         });
     });
 }
 
-function createDirectLoginUser(req, cbk) {
-    if(!req.params.verifyToken){
+function createDirectLoginUser(token, cbk) {
+    if(!token){
         return cbk({
             err: 'auth_proxy_error',
             des: 'empty param verifyToken',
@@ -173,7 +140,6 @@ function createDirectLoginUser(req, cbk) {
         });
     }
 
-    var token = clone(req.params.verifyToken);
     //Decipher the body
     var tokenSettings = {
         cipherKey: _settings.accessToken.cipherKey,
@@ -198,7 +164,7 @@ function createDirectLoginUser(req, cbk) {
         }
 
         //Verify the transactionId
-        var redisKey = config.redisKeys.direct_login_transaction.key;
+        var redisKey = _settings.redisKeys.direct_login_transaction.key;
         redisKey = redisKey.replace('{username}', body.email);
 
         redisMng.getKeyValue(redisKey, function(err, transactionId) {
@@ -208,10 +174,19 @@ function createDirectLoginUser(req, cbk) {
 
             if(body.transactionId === transactionId){
                 var user = {
-                    username: body[config.passThroughEndpoint.username],
-                    password: [body[config.passThroughEndpoint.password]]
+                    username: body[_settings.passThroughEndpoint.username],
+                    password: [body[_settings.passThroughEndpoint.password]]
                 };
-                delete(body[config.passThroughEndpoint.password]);
+                delete(body[_settings.passThroughEndpoint.password]);
+
+                if(!isValidDomain(user.username)) {
+                    debug('Invalid email domain \''+user.username+'\'');
+                    return cbk({
+                        err:'user_domain_not_allowed',
+                        des:'username domain not included in the whitelist',
+                        code: 400
+                    }, null);
+                }
 
                 userDao.getFromUsername(user.username, function (err, foundUser) {
                     if (foundUser) {
@@ -222,11 +197,8 @@ function createDirectLoginUser(req, cbk) {
                         });
                     }
 
-                    req.url = config.passThroughEndpoint.path;
-                    req.method = 'POST';
-
-                    delete(body[config.passThroughEndpoint.password]);
-                    createUserPrivateCall(req, body, user, cbk);
+                    delete(body[_settings.passThroughEndpoint.password]);
+                    createUserPrivateCall(body, user, cbk);
                 });
             } else {
                 return cbk({
@@ -239,17 +211,17 @@ function createDirectLoginUser(req, cbk) {
     });
 }
 
-function createUserPrivateCall(req, body, user, cbk){
+function createUserPrivateCall(body, user, cbk){
     var options = {
-        url: 'http://localhost:' + config.private_port + req.url,
+        url: 'http://localhost:' + _settings.private_port + _settings.passThroughEndpoint.path,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
-        method: req.method,
+        method: 'POST',
         body: JSON.stringify(body)
     };
 
-    debug('=> ' + req.method + ' ' + options.url);
+    debug('=> POST ' + options.url);
     request(options, function (err, private_res, body) {
         if (err) {
             debug('<= error: ' + err);
@@ -295,7 +267,7 @@ function createUserPrivateCall(req, body, user, cbk){
                                         code: 409
                                     });
                                 } else {
-                                    tokens.expiresIn = config.accessToken.expiration * 60;
+                                    tokens.expiresIn = _settings.accessToken.expiration * 60;
                                     cbk(null, tokens);
                                 }
                             });
@@ -307,9 +279,27 @@ function createUserPrivateCall(req, body, user, cbk){
     });
 }
 
+function isValidDomain(email){
+    debug('Domain control for email \''+email+'\'');
+    var validDomain = true;
+    if(_settings.allowedDomains){
+        for(var i = 0; i < _settings.allowedDomains.length; i++){
+            var domain = _settings.allowedDomains[i];
+
+            //wildcard
+            var check = domain.replace(/\*/g,'.*');
+            var match = email.match(check);
+            validDomain = (match !== null && email === match[0]);
+            debug('match \''+ email +'\' with \'' + domain + '\' : ' + validDomain);
+            if(validDomain) break;
+        }
+    }
+    return validDomain;
+}
 
 module.exports = function(settings) {
-    _.extend(_settings, defaultSettings, settings);
+    var config = require('../../config.json');
+    _settings = _.assign({}, config, settings);
 
     return {
         setPlatformData : setPlatformData,

@@ -67,7 +67,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 400, body);
             body = JSON.parse(body);
-            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty phone"});
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty phone or country"});
             done();
         });
     });
@@ -92,7 +92,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 400, body);
             body = JSON.parse(body);
-            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty country code"});
+            assert.deepEqual(body, {"err":"auth_proxy_error","des":"empty phone or country"});
             done();
         });
     });
@@ -134,16 +134,13 @@ describe('/api/profile (verify phone)', function(){
 
         nock(notifServiceURL)
             .post('/notification/sms')
+            .times(2)
             .reply(204);
 
         //1st call must create the pin
         request(options, function(err, res, body){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 403, body);
-
-            nock(notifServiceURL)
-                .post('/notification/sms')
-                .reply(204);
 
             options.headers['x-otp-pin'] = 'zzzz';
 
