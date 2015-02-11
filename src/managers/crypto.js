@@ -9,6 +9,9 @@ var defaultSettings = {
 var _settings = {};
 
 function encrypt(text, cbk){
+    if(!text){
+        return cbk();
+    }
     var cipher = crypto.createCipher(_settings.algorithm, _settings.password);
     var crypted = cipher.update(text,'utf8','hex');
     crypted += cipher.final('hex');
@@ -16,6 +19,9 @@ function encrypt(text, cbk){
 }
 
 function decrypt(text, cbk){
+    if(!text){
+        return cbk();
+    }
     var decipher = crypto.createDecipher(_settings.algorithm, _settings.password);
     var dec = decipher.update(text,'hex','utf8');
     dec += decipher.final('utf8');

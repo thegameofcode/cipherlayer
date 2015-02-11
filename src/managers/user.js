@@ -237,7 +237,7 @@ function createUserPrivateCall(body, user, cbk){
             if (!user.password) {
                 user.password = crypto.pseudoRandomBytes(12).toString('hex');
             } else {
-                cryptoMng.encrypt(JSON.stringify(body), function(encrypted){
+                cryptoMng.encrypt(user.password[0], function(encrypted){
                     user.password = encrypted;
                 });
             }
