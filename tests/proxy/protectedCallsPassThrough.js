@@ -242,7 +242,7 @@ module.exports = {
     itNotSecurityToken: function notSecurityToken(){
         it('400 not security token', function (done) {
             var expectedPublicRequest = {};
-            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid@my-comms.com';
+            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
 
             var options = {
                 url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,

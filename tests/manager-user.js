@@ -221,33 +221,6 @@ describe('User Manager', function(){
             } );
         });
 
-        it('Invalid domain', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false,
-                allowedDomains: ["*@valid.com"]
-            };
-            var pin = null;
-
-            profileBody.email  = "invalid@invaliddomain.com";
-
-            var expectedResult = {
-                err:"user_domain_not_allowed",
-                des:"username domain not included in the whitelist",
-                code:400
-            };
-
-            nock('http://' + config.private_host + ':' + config.private_port)
-                .post(config.passThroughEndpoint.path)
-                .reply(201, {id: expectedUserId});
-
-            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
-                assert.notEqual(err, null);
-                assert.deepEqual(err, expectedResult );
-                done();
-            } );
-        });
-
         it('No username', function(done){
             var configSettings = {
                 usePinVerification: false,
@@ -390,6 +363,33 @@ describe('User Manager', function(){
                     done();
                 });
             });
+        });
+
+        it('Invalid domain', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false,
+                allowedDomains: ["*@valid.com"]
+            };
+            var pin = null;
+
+            profileBody.email  = "invalid@invaliddomain.com";
+
+            var expectedResult = {
+                err:"user_domain_not_allowed",
+                des:"username domain not included in the whitelist",
+                code:400
+            };
+
+            nock('http://' + config.private_host + ':' + config.private_port)
+                .post(config.passThroughEndpoint.path)
+                .reply(201, {id: expectedUserId});
+
+            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                assert.notEqual(err, null);
+                assert.deepEqual(err, expectedResult );
+                done();
+            } );
         });
     });
 
