@@ -61,7 +61,7 @@ function createUser(body, pin, cbk) {
 
     var user = {
         username: body[_settings.passThroughEndpoint.username],
-        password: [body[_settings.passThroughEndpoint.password]]
+        password: body[_settings.passThroughEndpoint.password]
     };
 
     var phone = body.phone;
@@ -175,7 +175,7 @@ function createUserByToken(token, cbk) {
             if(body.transactionId === transactionId){
                 var user = {
                     username: body[_settings.passThroughEndpoint.username],
-                    password: [body[_settings.passThroughEndpoint.password]]
+                    password: body[_settings.passThroughEndpoint.password]
                 };
                 delete(body[_settings.passThroughEndpoint.password]);
 
@@ -242,12 +242,12 @@ function createUserPrivateCall(body, user, cbk){
 
                 if (!user.password) {
                     debug('user has no password ', user.username);
-                    user.password = randomPwd;
+                    user.password = [randomPwd];
                     debug('created user password ', user.password);
                 }
 
-                cryptoMng.encrypt(user.password[0], function(encrypted){
-                    user.password = encrypted;
+                cryptoMng.encrypt(user.password, function(encrypted){
+                    user.password = [encrypted];
 
                     userDao.addUser()(user, function (err, createdUser) {
                         if (err) {

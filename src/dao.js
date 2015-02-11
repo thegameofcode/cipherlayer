@@ -31,28 +31,28 @@ function disconnect(cbk){
 }
 
 function _addUser(userToAdd, cbk){
-    userToAdd = clone(userToAdd);
+    var user = clone(userToAdd);
 
-    if(!userToAdd.id){
+    if(!user.id){
         return cbk({err:'invalid_id'}, null);
     }
-    if(!userToAdd.username){
+    if(!user.username){
         return cbk({err:'invalid_username'}, null);
     }
-    if(!userToAdd.password){
+    if(!user.password){
         return cbk({err:'invalid_password'}, null);
     }
 
     var signUpDate = new Date().getTime();
-    userToAdd.signUpDate = signUpDate;
+    user.signUpDate = signUpDate;
 
-    getFromUsername(userToAdd.username, function(err, foundUser){
+    getFromUsername(user.username, function(err, foundUser){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
-                userToAdd._id = userToAdd.id;
-                delete(userToAdd.id);
+                user._id = user.id;
+                delete(user.id);
 
-                collection.insert(userToAdd, function(err, result){
+                collection.insert(user, function(err, result){
                     if(err) {
                         return cbk(err, null);
                     }
