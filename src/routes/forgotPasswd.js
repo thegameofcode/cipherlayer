@@ -4,6 +4,7 @@ var request = require('request');
 var userDao = require('../dao');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
+var emailMng = require('../managers/email');
 
 function recoverUserPassWord(req, res, next){
 
@@ -45,36 +46,18 @@ function recoverUserPassWord(req, res, next){
                             err: 'auth_proxy_error',
                             des: 'internal error setting a new password'
                         });
+
                         return next(false);
 
                     }else{
-                        var html = config.recoverMessage.body.replace("__PASSWD__", passwd);
-
-                        var body = {
-                            to: req.params.email,
-                            subject: config.recoverMessage.subject ,
-                            html: html
-                        };
-
-                        var options = {
-                            url: config.services.notifications + '/notification/email',
-                            headers: {
-                                'Content-Type': 'application/json; charset=utf-8'
-                            },
-                            method: 'POST',
-                            body: JSON.stringify(body)
-                        };
-
-                        request(options, function(err, private_res, body){
+                        emailMng().sendEmailForgotPassword(req.params.email, passwd, function(err, result){
                             if(err){
                                 res.send(500, { err: 'internalError', des: 'Internal server error'});
                             }else{
                                 res.send(204);
                             }
                             return next(false);
-
                         });
-
                     }
                 });
             });

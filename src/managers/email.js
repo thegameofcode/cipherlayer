@@ -5,7 +5,8 @@ var path = require('path');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
-
+var userDao = require('../dao');
+var cryptoMng = require('./crypto')({ password : 'password' });
 var redisMng = require('./redis');
 
 var _settings = {};
@@ -89,11 +90,44 @@ function emailVerification(email, bodyData, cbk){
     });
 }
 
+function sendEmailForgotPassword(email, passwd, cbk){
+
+    var html = _settings.recoverMessage.body.replace("__PASSWD__", passwd);
+
+    var body = {
+        to: email,
+        subject: _settings.recoverMessage.subject ,
+        html: html
+    };
+
+    var options = {
+        url: _settings.services.notifications + '/notification/email',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+        },
+        method: 'POST',
+        body: JSON.stringify(body)
+    };
+
+    request(options, function(err, res, body){
+        if(err) {
+            cbk({err: 'internalError', des: 'Internal server error'});
+        }
+        if (res.statusCode === 500) {
+            err = body;
+            return cbk(err);
+        }
+        cbk();
+    });
+
+}
+
 module.exports = function(settings) {
     var config = require('../../config.json');
     _settings = _.assign({}, config, settings);
 
     return {
-        emailVerification: emailVerification
+        emailVerification: emailVerification,
+        sendEmailForgotPassword:sendEmailForgotPassword
     };
 };
