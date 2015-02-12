@@ -10,7 +10,7 @@ var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var dao = require('../src/dao.js');
 
 
-describe('Reset Password', function () {
+describe('Forgot Password', function () {
     var baseUser = {
         id: 'a1b2c3d4e5f6',
         username: 'jie.lee' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
@@ -35,7 +35,7 @@ describe('Reset Password', function () {
         cipherlayer.stop(done);
     });
 
-    it('Send Recover Password', function (done) {
+    it('Send new Password', function (done) {
         this.timeout(3000);
         var options = {
             url: 'http://localhost:' + config.public_port + '/user/'+ baseUser.username+'/password',
@@ -61,7 +61,7 @@ describe('Reset Password', function () {
         });
     });
 
-    it('Send 2 times recover Password', function (done) {
+    it('Send 2 times new Password', function (done) {
         this.timeout(3000);
         var options = {
             url: 'http://localhost:' + config.public_port + '/user/'+ baseUser.username+'/password',

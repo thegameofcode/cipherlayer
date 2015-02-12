@@ -6,7 +6,7 @@ var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var emailMng = require('../managers/email');
 
-function recoverUserPassWord(req, res, next){
+function sendNewPassword(req, res, next){
 
     if(!req.params.email){
         res.send(400, {
@@ -66,7 +66,7 @@ function recoverUserPassWord(req, res, next){
 }
 
 function addRoutes(service){
-    service.get('/user/:email/password', recoverUserPassWord);
+    service.get('/user/:email/password', sendNewPassword);
     debug('User recover routes added');
 }
 
