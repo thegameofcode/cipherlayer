@@ -18,8 +18,8 @@ function recoverUserPassWord(req, res, next){
     userDao.getAllUserFields(req.params.email, function(err, foundUser){
         if (!foundUser) {
             res.send(404, {
-                err: 'auth_proxy_error',
-                des: 'user not found'
+                err: 'user_not_found',
+                des: 'email does not exists'
             });
             return next(false);
         }else{
