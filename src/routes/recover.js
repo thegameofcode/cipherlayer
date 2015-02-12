@@ -3,7 +3,7 @@ var clone = require('clone');
 var request = require('request');
 var userDao = require('../dao');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
-
+var cryptoMng = require('../managers/crypto')({ password : 'password' });
 
 function recoverUserPassWord(req, res, next){
 
@@ -30,52 +30,53 @@ function recoverUserPassWord(req, res, next){
                 passwd += randomNum.toString();
             }
 
-            var fieldValue = [];
+            cryptoMng.encrypt(passwd, function(encryptedPassword){
+                var fieldValue = [];
 
-            if(Array.isArray(foundUser.password)){
-                fieldValue = [foundUser.password[0], passwd];
-            }else{
-                fieldValue = [foundUser.password, passwd];
-            }
-
-
-            userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
-                if(err){
-                    res.send(500, {
-                        err: 'auth_proxy_error',
-                        des: 'internal error setting a new password'
-                    });
-                    return next(false);
-
+                if(Array.isArray(foundUser.password)){
+                    fieldValue = [foundUser.password[0], encryptedPassword];
                 }else{
-                    var html = config.recoverMessage.body.replace("__PASSWD__", passwd);
+                    fieldValue = [foundUser.password, encryptedPassword];
+                }
 
-                    var body = {
-                        to: req.params.email,
-                        subject: config.recoverMessage.subject ,
-                        html: html
-                    };
-
-                    var options = {
-                        url: config.services.notifications + '/notification/email',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method: 'POST',
-                        body: JSON.stringify(body)
-                    };
-
-                    request(options, function(err, private_res, body){
-                        if(err){
-                            res.send(500, { err: 'internalError', des: 'Internal server error'});
-                        }else{
-                            res.send(204);
-                        }
+                userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
+                    if(err){
+                        res.send(500, {
+                            err: 'auth_proxy_error',
+                            des: 'internal error setting a new password'
+                        });
                         return next(false);
 
-                    });
+                    }else{
+                        var html = config.recoverMessage.body.replace("__PASSWD__", passwd);
 
-                }
+                        var body = {
+                            to: req.params.email,
+                            subject: config.recoverMessage.subject ,
+                            html: html
+                        };
+
+                        var options = {
+                            url: config.services.notifications + '/notification/email',
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(body)
+                        };
+
+                        request(options, function(err, private_res, body){
+                            if(err){
+                                res.send(500, { err: 'internalError', des: 'Internal server error'});
+                            }else{
+                                res.send(204);
+                            }
+                            return next(false);
+
+                        });
+
+                    }
+                });
             });
         }
     });
