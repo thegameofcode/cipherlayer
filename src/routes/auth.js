@@ -15,7 +15,7 @@ function postAuthLogin(req, res, next){
             } else {
                 userDao.getAllUserFields(foundUser.username, function (err, result){
                     if(Array.isArray(result.password)){
-                        userDao.updateField(foundUser._id, "password", req.body.password, function(err, result){
+                        userDao.updateField(foundUser._id, "password", encryptedPwd, function(err, result){
                             debug('UpdatePasswordField', err, result);
                         });
                     }
