@@ -245,7 +245,7 @@ function createUserPrivateCall(body, user, cbk){
             }
 
             cryptoMng.encrypt(user.password, function(encrypted){
-                user.password = [encrypted];
+                user.password = encrypted;
 
                 userDao.addUser()(user, function (err, createdUser) {
                     if (err) {
@@ -256,7 +256,7 @@ function createUserPrivateCall(body, user, cbk){
                             code: 409
                         });
                     } else {
-                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password[0], function (err, foundUser) {
+                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                             if (err) {
                                 debug('error obtaining user: ', err);
                                 return cbk({
