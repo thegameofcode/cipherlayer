@@ -10,14 +10,14 @@ function recoverUserPassWord(req, res, next){
     if(!req.params.email){
         res.send(400, {
             err: 'auth_proxy_error',
-            des: 'empty country code'
+            des: 'empty email'
         });
         return next(false);
     }
 
     userDao.getAllUserFields(req.params.email, function(err, foundUser){
         if (!foundUser) {
-            res.send(403, {
+            res.send(404, {
                 err: 'auth_proxy_error',
                 des: 'user not found'
             });
@@ -41,14 +41,13 @@ function recoverUserPassWord(req, res, next){
 
             userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
                 if(err){
-                    res.send(403, {
+                    res.send(500, {
                         err: 'auth_proxy_error',
-                        des: 'user already exists'
+                        des: 'internal error setting a new password'
                     });
                     return next(false);
 
                 }else{
-
                     var html = config.recoverMessage.body.replace("__PASSWD__", passwd);
 
                     var body = {
