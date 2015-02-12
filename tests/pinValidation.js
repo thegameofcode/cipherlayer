@@ -143,7 +143,7 @@ describe('middleware pinValidation', function(){
     it('error if phone does not send the pin', function(done){
         var expectedCode = 403;
         var expectedError = {
-            err: 'auth_proxy_error',
+            err: 'auth_proxy_verified_error',
             des: 'User phone not verified'
         };
         var validResponse = false;
@@ -188,7 +188,7 @@ describe('middleware pinValidation', function(){
     it('error if pin does not match with the stored one', function(done){
         var expectedCode = 403;
         var expectedError = {
-            err: 'auth_proxy_error',
+            err: 'auth_proxy_verified_error',
             des: 'User phone not verified'
         };
         var validResponse = false;
@@ -242,7 +242,7 @@ describe('middleware pinValidation', function(){
     it('continue if pin match with the stored one', function(done){
         var expectedCode = 403;
         var expectedError = {
-            err: 'auth_proxy_error',
+            err: 'auth_proxy_verified_error',
             des: 'User phone not verified'
         };
         var validResponse = false;
@@ -293,7 +293,7 @@ describe('middleware pinValidation', function(){
     it( config.userPIN.attempts +' incorrect pin attemps (creates a new pin)', function(done){
         var expectedCode = 403;
         var expectedError = {
-            err: 'auth_proxy_error',
+            err: 'auth_proxy_verified_error',
             des: 'User phone not verified'
         };
         var invalidResponseAttemps = 0;

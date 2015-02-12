@@ -116,7 +116,7 @@ describe('/api/profile (verify phone)', function(){
             assert.equal(err, null, body);
             assert.equal(res.statusCode, 403, body);
             body = JSON.parse(body);
-            assert.deepEqual(body, {"err":"auth_proxy_error","des":"User phone not verified"});
+            assert.deepEqual(body, {"err":"auth_proxy_verified_error","des":"User phone not verified"});
             done();
         });
     });

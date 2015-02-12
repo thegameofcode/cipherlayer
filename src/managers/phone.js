@@ -81,7 +81,7 @@ function verifyPhone(redisKeyId, phone, pin, cbk) {
                 return cbk(err);
             } else {
                 return cbk({
-                    err: 'auth_proxy_error',
+                    err: 'auth_proxy_verified_error',
                     des: 'User phone not verified',
                     code: 403
                 });
