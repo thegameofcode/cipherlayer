@@ -344,7 +344,7 @@ describe('User Manager', function(){
             var pin = null;
 
             var expectedResult = {
-                err:"auth_proxy_error",
+                err:"auth_proxy_user_error",
                 des:"user already exists",
                 code: 403
             };

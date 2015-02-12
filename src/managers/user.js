@@ -85,7 +85,7 @@ function createUser(body, pin, cbk) {
         userDao.getFromUsername(user.username, function (err, foundUser) {
             if (foundUser) {
                 return cbk({
-                    err: 'auth_proxy_error',
+                    err: 'auth_proxy_user_error',
                     des: 'user already exists',
                     code: 403
                 });
