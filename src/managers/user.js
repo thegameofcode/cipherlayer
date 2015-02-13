@@ -285,6 +285,25 @@ function createUserPrivateCall(body, user, cbk){
     });
 }
 
+function setPassword(id, body, cbk){
+    if(!body.password){
+        return cbk({
+            err: 'auth_proxy_error',
+            des: 'invalid body request',
+            code: 400
+        });
+    }
+
+    cryptoMng.encrypt(body.password, function(encryptedPwd){
+        userDao.updateField(id, 'password', encryptedPwd, function(err, result){
+            debug('UpdatePasswordField', err, result);
+            return cbk(err, result);
+        });
+    });
+}
+
+//Aux functions
+
 function random (howMany, chars) {
     chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
     var rnd = crypto.randomBytes(howMany),
@@ -322,6 +341,7 @@ module.exports = function(settings) {
     return {
         setPlatformData : setPlatformData,
         createUser : createUser,
-        createUserByToken : createUserByToken
+        createUserByToken : createUserByToken,
+        setPassword: setPassword
     };
 };

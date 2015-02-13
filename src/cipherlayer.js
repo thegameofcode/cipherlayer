@@ -10,14 +10,15 @@ var clone = require('clone');
 var userDao = require('./dao');
 var redisMng = require('./managers/redis');
 
-var printTraces = require('./middlewares/traces.js');
+var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
 var checkAuthHeader = require('./middlewares/authHeader.js');
 var decodeToken = require('./middlewares/decodeToken.js');
 var findUser = require('./middlewares/findUser.js');
+var printTraces = require('./middlewares/traces.js');
 var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
-var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
+
 var versionControl = require('version-control');
 
 var pinValidation = require('./middlewares/pinValidation.js');

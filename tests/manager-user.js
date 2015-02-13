@@ -590,4 +590,29 @@ describe('User Manager', function(){
         });
     });
 
+    describe('Set user password', function() {
+
+        var expectedUser = {
+            id:'a1b2c3d4e5f6',
+            username: 'username' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+            password: '12345678'
+        };
+
+        it('200 ok', function(done){
+            var newPassword = {
+                password: 'n3wPas5W0rd'
+            };
+
+            userDao.addUser()(expectedUser, function(err, createdUser) {
+                userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                    assert.equal(err, null);
+                    assert.equal(result, 1);
+                    //TODO verify the password stored in DB (cant use dao.getById - it does not return password)
+                    done();
+                });
+            });
+
+        });
+    });
+
 });
