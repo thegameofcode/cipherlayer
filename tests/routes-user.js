@@ -225,7 +225,7 @@ describe('User', function () {
             });
         });
 
-        it('400 (invalid authorization)', function (done) {
+        it('500 (invalid authorization)', function (done) {
             var newPassword = {
                 password: 'n3wPas5W0rd'
             };
