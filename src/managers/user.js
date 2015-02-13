@@ -264,7 +264,13 @@ function createUserPrivateCall(body, user, cbk){
                                     code: 409
                                 });
                             } else {
-                                tokenMng.createBothTokens(foundUser._id, function (err, tokens) {
+
+                                var data = {};
+                                if(foundUser.role){
+                                    data = {"role": foundUser.role};
+                                }
+
+                                tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
                                     if (err) {
                                         debug('error creating tokens: ', err);
                                         return cbk({

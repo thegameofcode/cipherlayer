@@ -148,7 +148,12 @@ function salesforceCallback(req, res, next){
                     debug('error updating sf tokens into user '+foundUser._id+':' + err);
                     //TODO check if it's ok to ignore this error
                 }
-                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+                var data = {};
+                if(foundUser.role){
+                    data = {"role": foundUser.role};
+                }
+
+                tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                     if(err) {
                         res.send(409,{err: err.message});
                     } else {

@@ -38,18 +38,18 @@ function createRefreshToken(userId, data, cbk){
     ciphertoken.createToken(refreshTokenSettings, userId, null, data, cbk);
 }
 
-function createBothTokens(userId, cbk){
+function createBothTokens(userId, data, cbk){
     var tokens = {};
 
     async.parallel([
         function(done){
-            createAccessToken(userId, function(err, token){
+            createAccessToken(userId, data, function(err, token){
                 tokens.accessToken = token;
                 done(err);
             });
         },
         function(done){
-            createRefreshToken(userId, function(err, token){
+            createRefreshToken(userId, data, function(err, token){
                 tokens.refreshToken = token;
                 done(err);
             });

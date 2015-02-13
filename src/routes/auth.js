@@ -20,7 +20,12 @@ function postAuthLogin(req, res, next){
                         });
                     }
                 });
-                tokenManager.createBothTokens(foundUser._id, function(err, tokens){
+
+                var data = {};
+                if(foundUser.role){
+                    data = {"role": foundUser.role};
+                }
+                tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                     if(err) {
                         res.send(409,{err: err.message});
                     } else {

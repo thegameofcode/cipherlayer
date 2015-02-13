@@ -47,7 +47,11 @@ function linkedInCallback(req, res, next){
                 next(false);
             }
         } else {
-            tokenManager.createBothTokens(foundUser.username, function(err, tokens){
+            var dataToken = {};
+            if(foundUser.role){
+                dataToken = {"role": foundUser.role};
+            }
+            tokenManager.createBothTokens(foundUser.username, dataToken, function(err, tokens){
                 if(err) {
                     res.send(409,{err: err.message});
                 } else {
