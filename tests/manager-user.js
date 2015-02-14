@@ -93,7 +93,7 @@ describe('User Manager', function(){
 
         var profileBody = {
             email: 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
-            password: '12345678',
+            password: 'n3wPas5W0rd',
             phone: '111111111',
             country: 'US'
         };
@@ -613,6 +613,74 @@ describe('User Manager', function(){
             });
 
         });
+
+        it('400 invalid passwords', function(done){
+            var newPassword = {
+                password: 'newpassword'
+            };
+
+            var expectedResult = {
+                err: 'invalid_password_format',
+                des: 'Your password must be at least 8 characters and must contain at least one capital letter and one number.',
+                code: 400
+            };
+
+            userDao.addUser()(expectedUser, function(err, createdUser) {
+                userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                    assert.notEqual(err, null);
+                    assert.deepEqual(err,expectedResult);
+
+                    newPassword = {
+                        password: 'newPASSWORD'
+                    };
+
+                    userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                        assert.notEqual(err, null);
+                        assert.deepEqual(err,expectedResult);
+
+                        newPassword = {
+                            password: 'new111111'
+                        };
+
+                        userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                            assert.notEqual(err, null);
+                            assert.deepEqual(err,expectedResult);
+
+                            newPassword = {
+                                password: 'n3wPas5W0rd'
+                            };
+
+                            userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                                assert.equal(err, null);
+                                assert.equal(result, 1);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+
+        });
     });
+
+    //This method is turned to private
+    //it('Validate Password', function(done){
+    //    var pwds = [
+    //        ['password', false],
+    //        ['PASSWORD', false],
+    //        ['12345678', false],
+    //        ['aaAAbbBB', false],
+    //        ['aa11bb22', false],
+    //        ['aa11AA', false],
+    //        ['AA11BB22', true],
+    //        ['Pas5W0rd', true]
+    //    ];
+    //
+    //    async.map(pwds, function(pwd, cbk){
+    //        var result = userMng().validatePwd(pwd[0]);
+    //        assert.equal(result, pwd[1], pwd[0]);
+    //        cbk();
+    //    }, done);
+    //});
 
 });

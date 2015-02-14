@@ -20,7 +20,7 @@ describe('/api/profile (verify phone)', function(){
 
     var baseUser = {
         email : "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
-        password : "12345678",
+        password : "n3wPas5W0rd",
         phone : "444444444",
         country: "US"
     };

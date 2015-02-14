@@ -15,6 +15,12 @@ var emailMng = require('./email');
 
 var jsonValidator = require('./json_validator');
 
+var ERR_INVALID_PWD = {
+    err: 'invalid_password_format',
+    des: 'Your password must be at least 8 characters and must contain at least one capital letter and one number.',
+    code: 400
+};
+
 var _settings = {};
 
 //This is Chris's contribution to the coding of this project!!!
@@ -59,6 +65,11 @@ function createUser(body, pin, cbk) {
                 des: 'you must provide a password or a salesforce token to create the user',
                 code: 400
             });
+        }
+    } else {
+        if(!validatePwd(body.password)) {
+            var err = ERR_INVALID_PWD;
+            return cbk(err);
         }
     }
 
@@ -300,16 +311,20 @@ function setPassword(id, body, cbk){
         });
     }
 
-    cryptoMng.encrypt(body.password, function(encryptedPwd){
-        userDao.updateField(id, 'password', encryptedPwd, function(err, result){
-            debug('UpdatePasswordField', err, result);
-            return cbk(err, result);
+    if(!validatePwd(body.password)) {
+        var err = ERR_INVALID_PWD;
+        return cbk(err);
+    } else {
+        cryptoMng.encrypt(body.password, function(encryptedPwd){
+            userDao.updateField(id, 'password', encryptedPwd, function(err, result){
+                debug('UpdatePasswordField', err, result);
+                return cbk(err, result);
+            });
         });
-    });
+    }
 }
 
 //Aux functions
-
 function random (howMany, chars) {
     chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
     var rnd = crypto.randomBytes(howMany),
@@ -340,6 +355,12 @@ function isValidDomain(email){
     return validDomain;
 }
 
+function validatePwd(pwd){
+    var regex = /(?=.*\d)(?=.*[A-Z]).{8}/;
+    return regex.test(pwd);
+}
+
+
 module.exports = function(settings) {
     var config = require('../../config.json');
     _settings = _.assign({}, config, settings);
@@ -348,6 +369,7 @@ module.exports = function(settings) {
         setPlatformData : setPlatformData,
         createUser : createUser,
         createUserByToken : createUserByToken,
-        setPassword: setPassword
+        setPassword: setPassword,
+        validatePwd: validatePwd
     };
 };
