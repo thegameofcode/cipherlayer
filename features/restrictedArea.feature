@@ -25,7 +25,7 @@ Feature: client application logs in with admin role
   @feature @now
   Scenario Outline: A protected admin service needs an accessToken with admin role attribute auth to be called
     Given admin client application with a valid access token
-    And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
+    And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body ""
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
   Examples:
@@ -44,3 +44,15 @@ Feature: client application logs in with admin role
     | PATH          | METHOD  | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD        |
     | /api/profile  | GET     | 401    |                 | {"err":"unauthorized"}  |
     | /api/profile  | PUT     | 401    | {"key":"value"} | {"err":"unauthorized"}  |
+
+
+  @feature @now
+  Scenario Outline: Client with no admin role request restricted endpoints
+    Given a client application with a valid access token
+    And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body ""
+    When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
+    Then the response status code is <STATUS>
+
+  Examples:
+    | PATH          | METHOD  | STATUS | REQUEST_PAYLOAD |
+    | /api/profile  | PUT     | 401    | {"key":"value"} |

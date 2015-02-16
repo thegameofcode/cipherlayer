@@ -11,7 +11,7 @@ function checkPermissions (req, res, next){
 
     checkRestrictedPathRole(path, method, role, function(err){
         if(err){
-            res.send(401, {err:'unauthorized'});
+            res.send(401, err);
             return next(false);
         }else{
             return next();
@@ -21,13 +21,13 @@ function checkPermissions (req, res, next){
 }
 
 function checkRestrictedPathRole(path, method, role, cbk){
-    cbk(_.find(config.restrictEndPoints, function(restricted){
+    cbk(_.find(config.restrictEndpoints, function(restricted){
         if(restricted.path == path && restricted.methods.indexOf(method) > -1){
 
             if(role && role == "admin"){
                 cbk();
             }else{
-                cbk({err: "notAuthorized"});
+                cbk({err:'unauthorized'});
             }
         }
     }));

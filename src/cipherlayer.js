@@ -18,7 +18,7 @@ var printTraces = require('./middlewares/traces.js');
 var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
-var checkPermissions = require('./middlewares/checkPermissions.js');
+var permissions = require('./middlewares/permissions.js');
 
 var versionControl = require('version-control');
 
@@ -96,10 +96,10 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, checkPermissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
-    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, checkPermissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
-    server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, checkPermissions, findUser,prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
-    server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, checkPermissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser,prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
+    server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, prepareOptions, platformsSetUp, printTraces, propagateRequest, pinValidation);
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);

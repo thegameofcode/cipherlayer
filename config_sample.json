@@ -110,7 +110,7 @@
     "subject" :"Reset MyComms Password",
     "body" : "Here is your new password for accessing to your MyContacts account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> If you receiver this email by error or you are sure you didn't requested it, please contact support@my-comms.com"
   },
-  "restrictEndPoints" : [
+  "restrictEndpoints" : [
     {
       "path" : "/api/profile",
       "methods" : ["GET", "PUT"]
