@@ -23,4 +23,13 @@ module.exports = function(){
             
         callback();
     });
+
+
+    this.Given(/^a protected service replies to a PUT request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
+        nock('http://localhost:'+config.private_port)
+            .put(PATH, JSON.parse(REQUEST_PAYLOAD))
+            .reply(Number(STATUS));
+
+        callback();
+    });
 };

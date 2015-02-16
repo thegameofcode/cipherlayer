@@ -16,7 +16,7 @@ module.exports = function(){
             method: METHOD
         };
 
-        if (METHOD == 'POST'){
+        if (METHOD == 'POST' || METHOD == 'PUT'){
             options.body = PAYLOAD;
         }
         options.headers[config.version.header] = "test/1";
@@ -24,7 +24,9 @@ module.exports = function(){
         request(options, function(err,res,body) {
             assert.equal(err,null);
             world.getResponse().statusCode = res.statusCode;
-            world.getResponse().body = JSON.parse(body);
+            if(body){
+                world.getResponse().body = JSON.parse(body);
+            }
             callback();
         });
     });

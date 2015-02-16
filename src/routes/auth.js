@@ -53,6 +53,10 @@ function postAuthUser(req, res, next){
         user.id = new ObjectID();
     }
 
+    if(req.body.role){
+        user.role = req.body.role;
+    }
+
     if(req.body.platforms){
         user.platforms = req.body.platforms;
     }

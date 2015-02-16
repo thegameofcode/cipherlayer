@@ -9,7 +9,6 @@ var request = require('request');
 var cipherlayer = require('../src/cipherlayer');
 var clone = require('clone');
 var dao = require('../src/dao.js');
-
 var describeProtectedCallsStandard = require('./proxy/protectedCallsStandard.js');
 var describeProtectedCallsPassThrough = require('./proxy/protectedCallsPassThrough.js');
 var describeProtectedCallsStandard_SF = require('./proxy/protectedCallsStandard-platformSF.js');
