@@ -621,7 +621,7 @@ describe('User Manager', function(){
 
             var expectedResult = {
                 err: 'invalid_password_format',
-                des: 'Your password must be at least 8 characters and must contain at least one capital letter and one number.',
+                des: 'Your password must be at least 8 characters and must contain at least one capital, one lower and one number.',
                 code: 400
             };
 
@@ -647,13 +647,22 @@ describe('User Manager', function(){
                             assert.deepEqual(err,expectedResult);
 
                             newPassword = {
-                                password: 'n3wPas5W0rd'
+                                password: 'NEWPA55W0RD'
                             };
 
                             userMng().setPassword(createdUser._id, newPassword, function(err, result){
-                                assert.equal(err, null);
-                                assert.equal(result, 1);
-                                done();
+                                assert.notEqual(err, null);
+                                assert.deepEqual(err,expectedResult);
+
+                                newPassword = {
+                                    password: 'n3wPas5W0rd'
+                                };
+
+                                userMng().setPassword(createdUser._id, newPassword, function(err, result){
+                                    assert.equal(err, null);
+                                    assert.equal(result, 1);
+                                    done();
+                                });
                             });
                         });
                     });
@@ -672,7 +681,7 @@ describe('User Manager', function(){
     //        ['aaAAbbBB', false],
     //        ['aa11bb22', false],
     //        ['aa11AA', false],
-    //        ['AA11BB22', true],
+    //        ['AA11BB22', false],
     //        ['Pas5W0rd', true]
     //    ];
     //

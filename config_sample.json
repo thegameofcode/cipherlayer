@@ -110,6 +110,10 @@
     "subject" :"Reset MyComms Password",
     "body" : "Here is your new password for accessing to your MyContacts account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> If you receiver this email by error or you are sure you didn't requested it, please contact support@my-comms.com"
   },
+  "password":{
+    "regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
+    "message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number."
+  },
   "restrictEndpoints" : [
     {
       "path" : "/api/profile",

@@ -15,9 +15,11 @@ var emailMng = require('./email');
 
 var jsonValidator = require('./json_validator');
 
+var config = require('../../config.json');
+
 var ERR_INVALID_PWD = {
     err: 'invalid_password_format',
-    des: 'Your password must be at least 8 characters and must contain at least one capital letter and one number.',
+    des: config.password.message,
     code: 400
 };
 
@@ -356,7 +358,7 @@ function isValidDomain(email){
 }
 
 function validatePwd(pwd){
-    var regex = /(?=.*\d)(?=.*[A-Z]).{8}/;
+    var regex = new RegExp(config.password.regexValidation);
     return regex.test(pwd);
 }
 
@@ -369,7 +371,6 @@ module.exports = function(settings) {
         setPlatformData : setPlatformData,
         createUser : createUser,
         createUserByToken : createUserByToken,
-        setPassword: setPassword,
-        validatePwd: validatePwd
+        setPassword: setPassword
     };
 };
