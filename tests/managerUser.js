@@ -101,6 +101,10 @@ describe('User Manager', function(){
         it('usePinVerification = true & useEmailVerification = false', function(done){
             var configSettings = {
                 usePinVerification: true,
+                userPIN: {
+                    "size": 4,
+                    "attempts": 3
+                },
                 useEmailVerification: false
             };
             var pin = 'xxxx';
@@ -109,7 +113,7 @@ describe('User Manager', function(){
             redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
             redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
                     assert.equal(err, null);
 
                     nock('http://' + config.private_host + ':' + config.private_port)
@@ -134,6 +138,10 @@ describe('User Manager', function(){
         it('usePinVerification = true & useEmailVerification = true', function(done){
             var configSettings = {
                 usePinVerification: true,
+                userPIN: {
+                    size: 4,
+                    attempts: 3
+                },
                 useEmailVerification: true
             };
             var pin = 'xxxx';
@@ -147,7 +155,7 @@ describe('User Manager', function(){
             redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
             redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
                     assert.equal(err, null);
 
                     nock('http://' + config.private_host + ':' + config.private_port)

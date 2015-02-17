@@ -301,7 +301,7 @@ describe('middleware pinValidation', function(){
         pinValidation(settings)(req, res, next);
     });
 
-    it( config.userPIN.attempts +' incorrect pin attemps (creates a new pin)', function(done){
+    it(' max number of incorrect pin attemps (creates a new pin)', function(done){
         var expectedCode = 403;
         var expectedError = {
             err: 'auth_proxy_verified_error',
@@ -360,19 +360,19 @@ describe('middleware pinValidation', function(){
                     });
                 }
                 //At this attempt pin must EXPIRE
-                else if(invalidResponseAttemps === config.userPIN.attempts) {
+                else if(invalidResponseAttemps === settings.userPIN.attempts) {
                     expectedError.des= 'PIN used has expired.';
 
                     pinValidation(settings)(req, res, next);
                 }
                 //This attempt is to check the expiration of the 1st pin
-                else if(invalidResponseAttemps === config.userPIN.attempts+1 ) {
+                else if(invalidResponseAttemps === settings.userPIN.attempts+1 ) {
                     req.headers['x-otp-pin'] = firstValidPin;
 
                     pinValidation(settings)(req, res, next);
                 }
                 //This attempt is to check that the new generated pin is correct
-                else if(invalidResponseAttemps > config.userPIN.attempts+1){
+                else if(invalidResponseAttemps > settings.userPIN.attempts+1){
                     getPinNumber(req.user.id, req.body.country, req.body.phone, function(err, returnedPin){
                         assert.notEqual(returnedPin, null, 'invalid or not created pin');
 
