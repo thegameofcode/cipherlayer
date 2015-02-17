@@ -39,6 +39,11 @@ describe('middleware pinValidation', function(){
                 "key":"user.{userId}.phone.{phone}",
                 "expireInSec": 300
             }
+        },
+        "usePinVerification": true,
+        "userPIN": {
+            "size": 4,
+            "attempts": 3
         }
     };
 

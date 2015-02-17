@@ -10,6 +10,14 @@ var nock = require('nock');
 
 var config = require('../config.json');
 
+var phoneSettings = {
+    "usePinVerification": true,
+    "userPIN": {
+        "size": 4,
+        "attempts": 3
+    }
+};
+
 describe('Phone', function() {
     var baseUser = {
         id : 'a1b2c3d4e5f6',
@@ -55,7 +63,7 @@ describe('Phone', function() {
 
         var basePhone = '111111111';
 
-        phoneMng().createPIN(baseUser.username, basePhone, function(err, createdPin){
+        phoneMng(phoneSettings).createPIN(baseUser.username, basePhone, function(err, createdPin){
             assert.equal(err,null);
             assert.notEqual(createdPin, null);
             done();
@@ -71,10 +79,10 @@ describe('Phone', function() {
             var basePhone = '222222222';
             var baseCountry = 'US';
 
-            phoneMng().createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+            phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
 
-                phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
+                phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
                     assert.equal(err, null);
                     assert.equal(verified, true);
                     done();
@@ -90,10 +98,10 @@ describe('Phone', function() {
             var basePhone = '333333333';
             var baseCountry = 'US';
 
-            phoneMng().createPIN(baseUser.username, '+1' +basePhone, function (err, createdPIN) {
+            phoneMng(phoneSettings).createPIN(baseUser.username, '+1' +basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
 
-                phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, 'zzzzz', function (err, verified) {
+                phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, 'zzzzz', function (err, verified) {
                     assert.notEqual(err, null);
                     assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
@@ -110,14 +118,14 @@ describe('Phone', function() {
             var basePhone = '444444444';
             var baseCountry = 'US';
 
-            phoneMng().createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+            phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
 
                 nock(notifServiceURL)
                     .post('/notification/sms')
                     .reply(204);
 
-                phoneMng().verifyPhone(baseUser.username, '6666666', baseCountry, createdPIN, function (err, verified) {
+                phoneMng(phoneSettings).verifyPhone(baseUser.username, '6666666', baseCountry, createdPIN, function (err, verified) {
                     assert.notEqual(err, null);
                     assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
@@ -134,17 +142,17 @@ describe('Phone', function() {
             var basePhone = '555555555';
             var baseCountry = 'US';
 
-            phoneMng().createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+            phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
 
                 //1st attempt
-                phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, 'zzzzz', function (err, verified) {
+                phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, 'zzzzz', function (err, verified) {
                     assert.notEqual(err, null);
                     assert.equal(err.err, 'verify_phone_error');
                     assert.equal(verified, false);
 
                     //2nd attempt
-                    phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, 'yyyyy', function (err, verified) {
+                    phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, 'yyyyy', function (err, verified) {
                         assert.notEqual(err, null);
                         assert.equal(err.err, 'verify_phone_error');
                         assert.equal(verified, false);
@@ -154,13 +162,13 @@ describe('Phone', function() {
                             .post('/notification/sms')
                             .reply(204);
 
-                        phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, 'jjjjj', function (err, verified) {
+                        phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, 'jjjjj', function (err, verified) {
                             assert.notEqual(err, null);
                             assert.equal(err.err, 'verify_phone_error');
                             assert.equal(verified, false);
 
                             //4th attempt, expired PIN
-                            phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
+                            phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
                                 assert.notEqual(err, null);
                                 assert.equal(err.err, 'verify_phone_error');
                                 assert.equal(verified, false);
@@ -173,7 +181,7 @@ describe('Phone', function() {
                                     assert.equal(err, null);
                                     assert.notEqual(createdPIN, redisPhonePin);
 
-                                    phoneMng().verifyPhone(baseUser.username, basePhone, baseCountry, redisPhonePin, function (err, verified) {
+                                    phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, redisPhonePin, function (err, verified) {
                                         assert.equal(err, null);
                                         assert.equal(verified, true);
                                         done();
