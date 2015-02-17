@@ -90,6 +90,9 @@ describe('middleware pinValidation', function(){
             body: {
                 "country": "ES"
             },
+            user: {
+                id: "1a2b3c4d5e6f"
+            },
             method: "POST"
         };
 
@@ -109,7 +112,7 @@ describe('middleware pinValidation', function(){
     });
 
     it('error if country does not found', function(done){
-        var expectedCode = 400;
+        var expectedCode = 500;
         var expectedError = {
             err: 'country_not_found',
             des: 'given phone does not match any country dial code'
@@ -121,6 +124,9 @@ describe('middleware pinValidation', function(){
             body: {
                 "country": "--",
                 "phone": "666666666"
+            },
+            user: {
+                id: "1a2b3c4d5e6f"
             },
             method: "POST"
         };

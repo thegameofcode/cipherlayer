@@ -80,69 +80,55 @@ function createUser(body, pin, cbk) {
         password: body[_settings.passThroughEndpoint.password]
     };
 
-    var phone = body.phone;
-    var country = body.country;
-    if (!phone || !country) {
-        return cbk({
-            err: 'auth_proxy_error',
-            des: 'empty phone or country',
-            code: 400
-        });
-    }
-    countries.countryFromIso(country, function (err, returnedCountry) {
-        if (err) {
-            return cbk(err);
+    userDao.getFromUsername(user.username, function (err, foundUser) {
+        if (foundUser) {
+            return cbk({
+                err: 'auth_proxy_user_error',
+                des: 'user already exists',
+                code: 403
+            });
         }
-        phone = '+' + returnedCountry.Dial + phone;
 
-        userDao.getFromUsername(user.username, function (err, foundUser) {
-            if (foundUser) {
-                return cbk({
-                    err: 'auth_proxy_user_error',
-                    des: 'user already exists',
-                    code: 403
-                });
+        var phone = body.phone;
+        var countryISO = body.country;
+        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err, verified) {
+            if (err) {
+                return cbk(err);
             }
 
-            phoneMng(_settings).verifyPhone(user.username, phone, pin, function (err, verified) {
-                if (err) {
-                    return cbk(err);
-                }
+            if (body.sf) {
+                delete(body[_settings.passThroughEndpoint.password]);
+                tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
+                    if (err) {
+                        return cbk({
+                            err: 'invalid_platform_token',
+                            des: 'you must provide a valid salesforce token',
+                            code: 400
+                        });
+                    }
 
-                if (body.sf) {
-                    delete(body[_settings.passThroughEndpoint.password]);
-                    tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
-                        if (err) {
-                            return cbk({
-                                err: 'invalid_platform_token',
-                                des: 'you must provide a valid salesforce token',
-                                code: 400
-                            });
-                        }
-
-                        user.platforms = [{
-                            platform: 'sf',
-                            accessToken: tokenInfo.data.accessToken,
-                            refreshToken: tokenInfo.data.refreshToken,
-                            expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
-                        }];
-                        createUserPrivateCall(body, user, cbk);
-                    });
-                } else {
-                    emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
-                        if(err){
-                            return cbk(err);
-                        }
-                        if(destinationEmail){
-                            return cbk({
-                                des: destinationEmail,
-                                code: 200
-                            });
-                        }
-                        createUserPrivateCall(body, user, cbk);
-                    });
-                }
-            });
+                    user.platforms = [{
+                        platform: 'sf',
+                        accessToken: tokenInfo.data.accessToken,
+                        refreshToken: tokenInfo.data.refreshToken,
+                        expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
+                    }];
+                    createUserPrivateCall(body, user, cbk);
+                });
+            } else {
+                emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
+                    if(err){
+                        return cbk(err);
+                    }
+                    if(destinationEmail){
+                        return cbk({
+                            des: destinationEmail,
+                            code: 200
+                        });
+                    }
+                    createUserPrivateCall(body, user, cbk);
+                });
+            }
         });
     });
 }

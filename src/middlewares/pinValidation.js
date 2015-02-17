@@ -55,6 +55,12 @@ function pinValidation(req, res, next) {
         return next();
     } else {
         debug('Requires pin validation path \''+path+'\'');
+        var user = req.user;
+        if(!user){
+            res.send(401, {err:'invalid_headers', des:'no user in headers'});
+            return next(false);
+        }
+
         if(!validBodySchema){
             debug('Invalid body params');
             res.send(400, errInvalidFields);
@@ -64,35 +70,21 @@ function pinValidation(req, res, next) {
         var phone = body[pinValidationConfig.fields.phoneNumber];
         var countryISO = body[pinValidationConfig.fields.countryISO];
 
-        countries.countryFromIso(countryISO, function (err, returnedCountry) {
+        var pin = req.headers ? req.headers['x-otp-pin'] : null;
+        debug('user try pin number', pin);
+        phoneMng().verifyPhone(user.id, phone, countryISO, pin, function (err, verified) {
             if (err) {
-                res.send(400, err);
-                return next(false);
-            }
-            phone = '+' + returnedCountry.Dial + phone;
-
-            var user = req.user;
-            if(!user){
-                res.send(401, {err:'invalid_headers', des:'no user in headers'});
-                return next(false);
-            }
-
-            var pin = req.headers ? req.headers['x-otp-pin'] : null;
-            debug('user try pin number', pin);
-            phoneMng().verifyPhone(user.id, phone, pin, function (err, verified) {
-                if (err) {
-                    if (!err.code ) {
-                        res.send(500, err);
-                    } else {
-                        var errCode = err.code;
-                        delete(err.code);
-                        res.send(errCode, err);
-                    }
-                    return next(false);
+                if (!err.code ) {
+                    res.send(500, err);
                 } else {
-                    return next();
+                    var errCode = err.code;
+                    delete(err.code);
+                    res.send(errCode, err);
                 }
-            });
+                return next(false);
+            } else {
+                return next();
+            }
         });
     }
 }

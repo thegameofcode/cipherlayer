@@ -270,7 +270,7 @@ describe('User Manager', function(){
 
         it('No phone', function(done){
             var configSettings = {
-                usePinVerification: false,
+                usePinVerification: true,
                 useEmailVerification: false
             };
             var pin = null;
@@ -286,14 +286,14 @@ describe('User Manager', function(){
 
             userMng(configSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
-                assert.deepEqual(err, expectedResult );
+                assert.deepEqual(err, expectedResult);
                 done();
             } );
         });
 
         it('No country', function(done){
             var configSettings = {
-                usePinVerification: false,
+                usePinVerification: true,
                 useEmailVerification: false
             };
             var pin = null;
@@ -316,7 +316,7 @@ describe('User Manager', function(){
 
         it('Invalid country code', function(done){
             var configSettings = {
-                usePinVerification: false,
+                usePinVerification: true,
                 useEmailVerification: false
             };
             var pin = null;
@@ -333,6 +333,33 @@ describe('User Manager', function(){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
+            } );
+        });
+
+        it('no phone & no country & NO PIN verification', function(done){
+            var configSettings = {
+                usePinVerification: false,
+                useEmailVerification: false
+            };
+            var pin = null;
+
+            var profile = clone(profileBody);
+            profile.country  = null;
+            profile.phone  = null;
+
+            nock('http://' + config.private_host + ':' + config.private_port)
+                .post(config.passThroughEndpoint.path)
+                .reply(201, {id: expectedUserId});
+
+            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+                assert.equal(err, null);
+                assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
+                assert.notEqual(tokens.accessToken, undefined);
+                ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
+                    assert.equal(err, null);
+                    assert.equal(accessTokenInfo.userId, expectedUserId);
+                    done();
+                });
             } );
         });
 
