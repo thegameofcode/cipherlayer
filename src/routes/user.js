@@ -1,6 +1,8 @@
 var debug = require('debug')('cipherlayer:routes:auth');
 var clone = require('clone');
 var request = require('request');
+var RandExp = require('randexp');
+
 var userDao = require('../dao');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
@@ -32,11 +34,13 @@ function sendNewPassword(req, res, next){
             return next(false);
         }else{
 
-            var passwd = '';
-            for(var i=0; i<6; i++){
-                var randomNum = Math.floor(Math.random() * 9);
-                passwd += randomNum.toString();
-            }
+            //var passwd = '';
+            //for(var i=0; i<6; i++){
+            //    var randomNum = Math.floor(Math.random() * 9);
+            //    passwd += randomNum.toString();
+            //}
+
+            var passwd = new RandExp(new RegExp(config.password.generatedRegex)).gen();
 
             cryptoMng.encrypt(passwd, function(encryptedPassword){
                 var fieldValue = [];
