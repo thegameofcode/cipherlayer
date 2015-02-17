@@ -47,7 +47,7 @@ describe('middleware pinValidation', function(){
         }
     };
 
-    function getPinNumber(userId, country, phone, cbk){
+    function getPinNumber(userId, phone, country, cbk){
         countries.countryFromIso(country, function (err, returnedCountry) {
             assert.equal(err, null);
             phone = '+' + returnedCountry.Dial + phone;
@@ -185,7 +185,7 @@ describe('middleware pinValidation', function(){
 
         var next = function(canContinue){
             if(canContinue === false && validResponse) {
-                getPinNumber(req.user.id, req.body.country, req.body.phone, function(err, returnedPin){
+                getPinNumber(req.user.id, req.body.phone, req.body.country, function(err, returnedPin){
                     assert.equal(err, null);
                     assert.notEqual(returnedPin, null, 'invalid or not created pin');
                     done();
@@ -286,7 +286,7 @@ describe('middleware pinValidation', function(){
             if(!canContinue && validResponse) {
                 done();
             } else {
-                getPinNumber(req.user.id, req.body.country, req.body.phone, function(err, returnedPin){
+                getPinNumber(req.user.id, req.body.phone, req.body.country, function(err, returnedPin){
                     assert.equal(err, null);
                     assert.notEqual(returnedPin, null, 'invalid or not created pin');
                     req.headers['x-otp-pin'] = returnedPin;
@@ -351,7 +351,7 @@ describe('middleware pinValidation', function(){
 
                 //1st attempt store the pin to check expiration at 3 attempts
                 if(invalidResponseAttemps === 1) {
-                    getPinNumber(req.user.id, req.body.country, req.body.phone, function(err, returnedPin){
+                    getPinNumber(req.user.id, req.body.phone, req.body.country, function(err, returnedPin){
                         assert.equal(err, null);
                         assert.notEqual(returnedPin, null, 'invalid or not created pin');
                         firstValidPin = returnedPin;
@@ -373,7 +373,7 @@ describe('middleware pinValidation', function(){
                 }
                 //This attempt is to check that the new generated pin is correct
                 else if(invalidResponseAttemps > settings.userPIN.attempts+1){
-                    getPinNumber(req.user.id, req.body.country, req.body.phone, function(err, returnedPin){
+                    getPinNumber(req.user.id, req.body.phone, req.body.country, function(err, returnedPin){
                         assert.notEqual(returnedPin, null, 'invalid or not created pin');
 
                         req.headers['x-otp-pin'] = returnedPin;
