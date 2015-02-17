@@ -664,7 +664,7 @@ describe('User Manager', function(){
     });
 
     //This method is turned to private
-    //it('Validate Password', function(done){
+    //it.only('Validate Password', function(done){
     //    var pwds = [
     //        ['password', false],
     //        ['PASSWORD', false],
