@@ -22,7 +22,8 @@ function checkPermissions (req, res, next){
 
 function checkRestrictedPathRole(path, method, role, cbk){
     cbk(_.find(config.restrictEndpoints, function(restricted){
-        if(restricted.path == path && restricted.methods.indexOf(method) > -1){
+
+        if(path.indexOf(restricted.path) > -1 && restricted.methods.indexOf(method) > -1){
 
             if(role && role == "admin"){
                 cbk();
