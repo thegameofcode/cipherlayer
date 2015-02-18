@@ -107,7 +107,7 @@ function createUserByToken(req, res, next) {
             }
             return next(false);
         } else {
-            var compatibleDevices = config.compatibleEmailDevices;
+            var compatibleDevices = config.emailVerification.compatibleEmailDevices;
             var device = String(req.headers['user-agent']);
 
             for(var i = 0; i < compatibleDevices.length; i++){
@@ -123,7 +123,7 @@ function createUserByToken(req, res, next) {
                     return next(false);
                 }
             }
-            res.send(200, { msg: config.nonCompatibleEmailMsg } );
+            res.send(200, { msg: config.emailVerification.nonCompatibleEmailMsg } );
             return next();
         }
     });

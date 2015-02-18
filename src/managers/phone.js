@@ -11,13 +11,13 @@ var redisMng = require('./redis');
 var _settings = {};
 
 function createPIN(redisKeyId, phone, cbk){
-    var redisKey = _settings.redisKeys.user_phone_verify.key;
+    var redisKey = _settings.phoneVerification.redis.key;
     redisKey =  redisKey.replace('{userId}',redisKeyId).replace('{phone}',phone);
-    var expires = _settings.redisKeys.user_phone_verify.expireInSec;
-    var pinAttempts = _settings.userPIN.attempts;
+    var expires = _settings.phoneVerification.redis.expireInSec;
+    var pinAttempts = _settings.phoneVerification.attempts;
 
     var pin = '';
-    for(var i=0; i<_settings.userPIN.size; i++){
+    for(var i=0; i<_settings.phoneVerification.pinSize; i++){
         var randomNum = Math.floor(Math.random() * 9);
         pin += randomNum.toString();
     }
@@ -38,7 +38,7 @@ function createPIN(redisKeyId, phone, cbk){
 }
 
 function sendPIN(phone, pin, cbk){
-    var notifServiceURL = _settings.services.notifications;
+    var notifServiceURL = _settings.externalServices.notifications;
     var sms = {
         phone: phone,
         text: 'MyContacts pin code: ' + pin
@@ -62,7 +62,7 @@ function sendPIN(phone, pin, cbk){
 }
 
 function verifyPhone(redisKeyId, phone, country, pin, cbk) {
-    if( !_settings.usePinVerification ) {
+    if( !_settings.phoneVerification ) {
         return cbk(null, true);
     }
 
@@ -101,7 +101,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
                 }
             });
         } else {
-            var redisKey = _settings.redisKeys.user_phone_verify.key;
+            var redisKey = _settings.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}',redisKeyId).replace('{phone}',phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin){

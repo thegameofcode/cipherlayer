@@ -18,7 +18,7 @@ var myStepDefinitionsWrapper = function () {
         };
         options.headers[config.version.header] = "test/1";
 
-        nock(config.services.notifications)
+        nock(config.externalServices.notifications)
             .post('/notification/email')
             .reply(204);
 

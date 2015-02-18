@@ -11,21 +11,34 @@ var nock = require('nock');
 var config = require('../config.json');
 
 var phoneSettings = {
-    "usePinVerification": true,
-    "userPIN": {
-        "size": 4,
-        "attempts": 3
+    phoneVerification: {
+        pinSize: 4,
+        attempts: 3,
+        redis:{
+            key:"user.{userId}.phone.{phone}",
+            expireInSec: 300
+        },
+        pinValidationEndpoints : [
+            {
+                path: "/api/me/phones",
+                method: "post",
+                fields: {
+                    countryISO: "country",
+                    phoneNumber: "phone"
+                }
+            }
+        ]
     }
 };
 
-describe('Phone', function() {
+describe('phone', function() {
     var baseUser = {
         id : 'a1b2c3d4e5f6',
         username : 'validuser',
         password : 'validpassword'
     };
 
-    var notifServiceURL = config.services.notifications;
+    var notifServiceURL = config.externalServices.notifications;
 
     beforeEach(function(done){
         async.parallel([
@@ -56,7 +69,7 @@ describe('Phone', function() {
         ],done);
     });
 
-    it('Create pin', function(done){
+    it('create pin', function(done){
         nock(notifServiceURL)
             .post('/notification/sms')
             .reply(204);
@@ -70,7 +83,7 @@ describe('Phone', function() {
         });
     });
 
-    describe('Verify phone', function() {
+    describe('verify phone', function() {
         it('valid PIN', function (done) {
             nock(notifServiceURL)
                 .post('/notification/sms')
@@ -173,7 +186,7 @@ describe('Phone', function() {
                                 assert.equal(err.err, 'verify_phone_error');
                                 assert.equal(verified, false);
 
-                                var redisKey = config.redisKeys.user_phone_verify.key;
+                                var redisKey = config.phoneVerification.redis.key;
                                 redisKey = redisKey.replace('{userId}',baseUser.username).replace('{phone}','+1' + basePhone);
 
                                 //5th attempt, new correct PIN

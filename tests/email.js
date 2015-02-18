@@ -5,9 +5,9 @@ var nock = require('nock');
 var redisMng = require('../src/managers/redis');
 
 var config = require('../config.json');
-var notifServiceURL = config.services.notifications;
+var notifServiceURL = config.externalServices.notifications;
 
-describe('Email', function() {
+describe('email', function() {
 
     beforeEach(function(done){
         async.series([
@@ -65,7 +65,7 @@ describe('Email', function() {
 
     it('verifyEmail (useEmailVerification = false)', function (done) {
         var emailMng = require('../src/managers/email')({
-            "useEmailVerification": false
+            "emailVerification": false
         });
 
         var email = "test@test.com";

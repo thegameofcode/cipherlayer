@@ -13,7 +13,7 @@ var accessTokenSettings = {
     tokenExpirationMinutes: config.accessToken.expiration * 60
 };
 
-describe('Redirect', function(){
+describe('redirect', function(){
 
     beforeEach(function(done){
         cipherlayer.start(config.public_port, config.private_port, function (err) {

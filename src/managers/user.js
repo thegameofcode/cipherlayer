@@ -15,11 +15,8 @@ var emailMng = require('./email');
 
 var jsonValidator = require('./json_validator');
 
-var config = require('../../config.json');
-
 var ERR_INVALID_PWD = {
     err: 'invalid_password_format',
-    des: config.password.message,
     code: 400
 };
 
@@ -69,7 +66,8 @@ function createUser(body, pin, cbk) {
             });
         }
     } else {
-        if(!validatePwd(body.password)) {
+        if(!validatePwd(body.password, _settings.password.regexValidation)) {
+            ERR_INVALID_PWD.des = _settings.password.message;
             var err = ERR_INVALID_PWD;
             return cbk(err);
         }
@@ -147,7 +145,7 @@ function createUserByToken(token, cbk) {
         cipherKey: _settings.accessToken.cipherKey,
         firmKey: _settings.accessToken.signKey,
         //Same expiration as the redisKey
-        tokenExpirationMinutes: _settings.redisKeys.direct_login_transaction.expireInSec
+        tokenExpirationMinutes: _settings.emailVerification.redis.expireInSec
     };
 
     ciphertoken.getTokenSet(tokenSettings, token, function(err, bodyData){
@@ -166,7 +164,7 @@ function createUserByToken(token, cbk) {
             });
         }
         //Verify the transactionId
-        var redisKey = _settings.redisKeys.direct_login_transaction.key;
+        var redisKey = _settings.emailVerification.redis.key;
         redisKey = redisKey.replace('{username}', body.email);
 
         redisMng.getKeyValue(redisKey, function(err, transactionId) {
@@ -299,7 +297,8 @@ function setPassword(id, body, cbk){
         });
     }
 
-    if(!validatePwd(body.password)) {
+    if(!validatePwd(body.password, _settings.password.regexValidation)) {
+        ERR_INVALID_PWD.des = _settings.password.message;
         var err = ERR_INVALID_PWD;
         return cbk(err);
     } else {
@@ -343,8 +342,8 @@ function isValidDomain(email){
     return validDomain;
 }
 
-function validatePwd(pwd){
-    var regex = new RegExp(config.password.regexValidation);
+function validatePwd(pwd, regexp){
+    var regex = new RegExp(regexp);
     return regex.test(pwd);
 }
 

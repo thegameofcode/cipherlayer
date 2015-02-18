@@ -10,7 +10,7 @@ var userMng = require('../src/managers/user');
 
 var config = require('../config.json');
 
-var notifServiceURL = config.services.notifications;
+var notifServiceURL = config.externalServices.notifications;
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
@@ -20,7 +20,38 @@ var accessTokenSettings = {
 
 var expectedUserId = 'a1b2c3d4e5f6';
 
-describe('User Manager', function(){
+var configSettings = {
+    phoneVerification: {
+        pinSize: 4,
+        attempts: 3,
+        redis:{
+            key:"user.{userId}.phone.{phone}",
+            expireInSec: 300
+        },
+        pinValidationEndpoints : [
+            {
+                path: "/api/me/phones",
+                method: "post",
+                fields: {
+                    countryISO: "country",
+                    phoneNumber: "phone"
+                }
+            }
+        ]
+    },
+    emailVerification:{
+        subject: "MyContacts email verification",
+        body: "<p>Thanks for register into MyContacts, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@my-comms.com'>support@my-comms.com</a> and we will be pleased to help you.</p>",
+        compatibleEmailDevices: [ "*iPhone*", "*iPad*", "*iPod*" ],
+        nonCompatibleEmailMsg: "Your user has been created correctly, try to access to MyContacts app in your device.",
+        redis: {
+            key:"user.{username}.transaction",
+            expireInSec: 86400
+        }
+    }
+};
+
+describe('user Manager', function(){
     beforeEach(function(done){
         async.series([
             function(done){
@@ -90,7 +121,6 @@ describe('User Manager', function(){
     });
 
     describe('Create user', function(){
-
         var profileBody = {
             email: 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
             password: 'n3wPas5W0rd',
@@ -99,28 +129,25 @@ describe('User Manager', function(){
         };
 
         it('usePinVerification = true & useEmailVerification = false', function(done){
-            var configSettings = {
-                usePinVerification: true,
-                userPIN: {
-                    "size": 4,
-                    "attempts": 3
-                },
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.emailVerification = null;
+
             var pin = 'xxxx';
 
-            var redisKey = config.redisKeys.user_phone_verify.key;
+            var redisKey = config.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
-            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+            var expiration = config.phoneVerification.redis.expireInSec;
+
+            redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts , expiration, function(err){
                     assert.equal(err, null);
 
                     nock('http://' + config.private_host + ':' + config.private_port)
                         .post(config.passThroughEndpoint.path)
                         .reply(201, {id: expectedUserId});
 
-                    userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                    userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                         assert.equal(err, null);
                         assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                         assert.notEqual(tokens.accessToken, undefined);
@@ -136,14 +163,8 @@ describe('User Manager', function(){
         });
 
         it('usePinVerification = true & useEmailVerification = true', function(done){
-            var configSettings = {
-                usePinVerification: true,
-                userPIN: {
-                    size: 4,
-                    attempts: 3
-                },
-                useEmailVerification: true
-            };
+            var testsConfigSettings = clone(configSettings);
+
             var pin = 'xxxx';
 
             var expectedResult = {
@@ -151,11 +172,13 @@ describe('User Manager', function(){
                 code: 200
             };
 
-            var redisKey = config.redisKeys.user_phone_verify.key;
+            var redisKey = config.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
-            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+            var expiration = config.phoneVerification.redis.expireInSec;
+
+            redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts , expiration, function(err){
                     assert.equal(err, null);
 
                     nock('http://' + config.private_host + ':' + config.private_port)
@@ -166,7 +189,7 @@ describe('User Manager', function(){
                         .post('/notification/email')
                         .reply(204);
 
-                    userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                    userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                         assert.notEqual(err, null);
                         assert.deepEqual(err, expectedResult );
                         done();
@@ -177,10 +200,9 @@ describe('User Manager', function(){
         });
 
         it('usePinVerification = false & useEmailVerification = true', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: true
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+
             var pin = null;
 
             var expectedResult = {
@@ -196,7 +218,7 @@ describe('User Manager', function(){
                 .post('/notification/email')
                 .reply(204);
 
-            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -204,10 +226,10 @@ describe('User Manager', function(){
         });
 
         it('usePinVerification = false & useEmailVerification = false', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             nock('http://' + config.private_host + ':' + config.private_port)
@@ -218,7 +240,7 @@ describe('User Manager', function(){
                 .post('/notification/email')
                 .reply(204);
 
-            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.equal(err, null);
                 assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                 assert.notEqual(tokens.accessToken, undefined);
@@ -231,10 +253,10 @@ describe('User Manager', function(){
         });
 
         it('No username', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -246,7 +268,7 @@ describe('User Manager', function(){
                 code:400
             };
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -254,10 +276,10 @@ describe('User Manager', function(){
         });
 
         it('No password', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -269,7 +291,7 @@ describe('User Manager', function(){
                 code:400
             };
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -277,10 +299,9 @@ describe('User Manager', function(){
         });
 
         it('No phone', function(done){
-            var configSettings = {
-                usePinVerification: true,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -292,7 +313,7 @@ describe('User Manager', function(){
                 code:400
             };
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult);
                 done();
@@ -300,10 +321,9 @@ describe('User Manager', function(){
         });
 
         it('No country', function(done){
-            var configSettings = {
-                usePinVerification: true,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -315,7 +335,7 @@ describe('User Manager', function(){
                 code:400
             };
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -323,10 +343,9 @@ describe('User Manager', function(){
         });
 
         it('Invalid country code', function(done){
-            var configSettings = {
-                usePinVerification: true,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -337,7 +356,7 @@ describe('User Manager', function(){
                 des:"given phone does not match any country dial code"
             };
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -345,10 +364,10 @@ describe('User Manager', function(){
         });
 
         it('no phone & no country & NO PIN verification', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var profile = clone(profileBody);
@@ -359,7 +378,7 @@ describe('User Manager', function(){
                 .post(config.passThroughEndpoint.path)
                 .reply(201, {id: expectedUserId});
 
-            userMng(configSettings).createUser( profile, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
                 assert.equal(err, null);
                 assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
                 assert.notEqual(tokens.accessToken, undefined);
@@ -372,10 +391,10 @@ describe('User Manager', function(){
         });
 
         it('user exists', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+
             var pin = null;
 
             var expectedResult = {
@@ -389,7 +408,7 @@ describe('User Manager', function(){
                 .reply(201, {id: expectedUserId});
 
             //1st call create the user
-            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.equal(err, null);
 
                 //2nd call must fail
@@ -402,11 +421,11 @@ describe('User Manager', function(){
         });
 
         it('Invalid domain', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false,
-                allowedDomains: ["*@valid.com"]
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
+            testsConfigSettings.emailVerification = null;
+            testsConfigSettings.allowedDomains = ["*@valid.com"];
+
             var pin = null;
 
             profileBody.email  = "invalid@invaliddomain.com";
@@ -421,7 +440,7 @@ describe('User Manager', function(){
                 .post(config.passThroughEndpoint.path)
                 .reply(201, {id: expectedUserId});
 
-            userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+            userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
                 assert.notEqual(err, null);
                 assert.deepEqual(err, expectedResult );
                 done();
@@ -430,17 +449,15 @@ describe('User Manager', function(){
     });
 
     describe('Create user DIRECT LOGIN', function() {
-        var redisKey = config.redisKeys.direct_login_transaction.key;
-        var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+        var redisKey = config.emailVerification.redis.key;
+        var redisExp = config.emailVerification.redis.expireInSec;
 
         var tokenSettings = clone(accessTokenSettings);
         tokenSettings.tokenExpirationMinutes = redisExp;
 
         it('OK', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
 
             var transactionId = '1a2b3c4d5e6f';
 
@@ -471,7 +488,7 @@ describe('User Manager', function(){
                         .post(config.passThroughEndpoint.path)
                         .reply(201, {id: expectedUserId});
 
-                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                    userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
                         assert.equal(err, null);
                         assert.notEqual(tokens.accessToken, undefined);
                         ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
@@ -485,10 +502,8 @@ describe('User Manager', function(){
         });
 
         it('Invalid data', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
 
             var transactionId = '1a2b3c4d5e6f';
 
@@ -516,7 +531,7 @@ describe('User Manager', function(){
                     .post(config.passThroughEndpoint.path)
                     .reply(201, {id: expectedUserId});
 
-                userMng(configSettings).createUserByToken( token, function(err, tokens){
+                userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
                     assert.notEqual(err, null);
                     assert.deepEqual(err, expectedResult);
                     done();
@@ -525,10 +540,8 @@ describe('User Manager', function(){
         });
 
         it('Incorrect transactionId', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
 
             var transactionId = '1a2b3c4d5e6f';
 
@@ -563,7 +576,7 @@ describe('User Manager', function(){
                         .post(config.passThroughEndpoint.path)
                         .reply(201, {id: expectedUserId});
 
-                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                    userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
                         assert.notEqual(err, null);
                         assert.deepEqual(err, expectedResult);
                         done();
@@ -573,10 +586,8 @@ describe('User Manager', function(){
         });
 
         it('Call sent 2 times', function(done){
-            var configSettings = {
-                usePinVerification: false,
-                useEmailVerification: false
-            };
+            var testsConfigSettings = clone(configSettings);
+            testsConfigSettings.phoneVerification = null;
 
             var transactionId = '1a2b3c4d5e6f';
 
@@ -611,10 +622,10 @@ describe('User Manager', function(){
                         .post(config.passThroughEndpoint.path)
                         .reply(201, {id: expectedUserId});
 
-                    userMng(configSettings).createUserByToken( token, function(err, tokens){
+                    userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
                         assert.equal(err, null);
 
-                        userMng(configSettings).createUserByToken( token, function(err, tokens) {
+                        userMng(testsConfigSettings).createUserByToken( token, function(err, tokens) {
                             assert.notEqual(err, null);
                             assert.deepEqual(err, expectedResult);
                             done();
@@ -720,7 +731,9 @@ describe('User Manager', function(){
     //        ['Pas5W0rd', true]
     //    ];
     //
-    //    async.map(pwds, function(pwd, cbk){
+    //    var regexp = "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}";
+    //
+    //    async.map(pwds, regexp, function(pwd, cbk){
     //        var result = userMng().validatePwd(pwd[0]);
     //        assert.equal(result, pwd[1], pwd[0]);
     //        cbk();

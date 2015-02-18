@@ -21,7 +21,7 @@ var AUTHORIZATION;
 
 var createdUserId;
 
-describe('User', function () {
+describe('user', function () {
 
     var baseUser = {
         id: 'a1b2c3d4e5f6',
@@ -67,7 +67,7 @@ describe('User', function () {
             };
             options.headers[config.version.header] = "test/1";
 
-            nock(config.services.notifications)
+            nock(config.externalServices.notifications)
                 .post('/notification/email')
                 .reply(201);
 
@@ -92,8 +92,9 @@ describe('User', function () {
             };
             options.headers[config.version.header] = "test/1";
 
-            nock(config.services.notifications)
+            nock(config.externalServices.notifications)
                 .post('/notification/email')
+                .times(2)
                 .reply(204);
 
             request(options, function (err, res, body) {
@@ -102,10 +103,6 @@ describe('User', function () {
                 dao.getAllUserFields(baseUser.username, function(err, result){
                     assert.equal(err, null);
                     assert.equal(result.password.length, 2);
-
-                    nock(config.services.notifications)
-                        .post('/notification/email')
-                        .reply(204);
 
                     request(options, function (err2, res2, body) {
                         assert.equal(err2, null);

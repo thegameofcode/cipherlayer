@@ -2,7 +2,7 @@ var redisMng = require('../src/managers/redis');
 var assert = require('assert');
 var async = require('async');
 
-describe('Redis', function() {
+describe('redis', function() {
     beforeEach(function (done) {
         redisMng.connect(done);
     });

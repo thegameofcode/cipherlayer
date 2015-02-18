@@ -15,7 +15,7 @@ var sfAccessToken= {
 };
 
 
-describe('Inject expiresAtTimestamp whit refresh token', function(){
+describe('inject expiresAtTimestamp whit refresh token', function(){
 
     beforeEach(function(done){
         cipherlayer.start(config.public_port, config.private_port, done);

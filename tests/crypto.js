@@ -2,7 +2,7 @@ var assert = require('assert');
 var async = require('async');
 var crypto = require('crypto');
 
-describe('Crypto', function() {
+describe('crypto', function() {
 
     var cryptoSettings = {
         algorithm : 'aes-256-ctr',

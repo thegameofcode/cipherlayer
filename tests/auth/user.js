@@ -190,9 +190,9 @@ module.exports = {
                         transactionId: transactionId
                     };
 
-                    var redisKey = config.redisKeys.direct_login_transaction.key;
+                    var redisKey = config.emailVerification.redis.key;
                     redisKey = redisKey.replace('{username}', bodyData.email);
-                    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+                    var redisExp = config.emailVerification.redis.expireInSec;
 
                     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
                         assert.equal(err, null);
@@ -235,9 +235,9 @@ module.exports = {
                         transactionId: transactionId
                     };
 
-                    var redisKey = config.redisKeys.direct_login_transaction.key;
+                    var redisKey = config.emailVerification.redis.key;
                     redisKey = redisKey.replace('{username}', bodyData.email);
-                    var redisExp = config.redisKeys.direct_login_transaction.expireInSec;
+                    var redisExp = config.emailVerification.redis.expireInSec;
 
                     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
                         assert.equal(err, null);
@@ -261,7 +261,7 @@ module.exports = {
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 200, body);
                                 body = JSON.parse(body);
-                                assert.deepEqual(body, { msg : config.nonCompatibleEmailMsg } );
+                                assert.deepEqual(body, { msg : config.emailVerification.nonCompatibleEmailMsg } );
                                 done();
                             });
                         });

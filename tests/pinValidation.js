@@ -5,7 +5,7 @@ var config = require('../config.json');
 var redisMng = require('../src/managers/redis');
 var countries = require('countries-info');
 
-var notifServiceURL = config.services.notifications;
+var notifServiceURL = config.externalServices.notifications;
 
 describe('middleware pinValidation', function(){
 

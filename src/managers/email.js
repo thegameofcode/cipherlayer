@@ -5,14 +5,12 @@ var path = require('path');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
-var userDao = require('../dao');
-var cryptoMng = require('./crypto')({ password : 'password' });
 var redisMng = require('./redis');
 
 var _settings = {};
 
 function sendEmailVerification(email, subject, emailBody, cbk){
-    var notifServiceURL = _settings.services.notifications;
+    var notifServiceURL = _settings.externalServices.notifications;
     var emailOptions = {
         to: email,
         subject: subject,
@@ -38,7 +36,7 @@ function sendEmailVerification(email, subject, emailBody, cbk){
 }
 
 function emailVerification(email, bodyData, cbk){
-    if( !_settings.useEmailVerification ) {
+    if( !_settings.emailVerification ) {
         return cbk(null, null);
     }
 
@@ -51,9 +49,9 @@ function emailVerification(email, bodyData, cbk){
 
     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
-    var redisKey = _settings.redisKeys.direct_login_transaction.key;
+    var redisKey = _settings.emailVerification.redis.key;
     redisKey = redisKey.replace('{username}', bodyData.email);
-    var redisExp = _settings.redisKeys.direct_login_transaction.expireInSec;
+    var redisExp = _settings.emailVerification.redis.expireInSec;
 
     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
         if(err){
@@ -74,7 +72,7 @@ function emailVerification(email, bodyData, cbk){
             }
 
             var link =  _settings.public_url + '/user/activate?verifyToken='+ token;
-            var emailText = (_settings.emailVerification.text).replace('{link}', link);
+            var emailText = (_settings.emailVerification.body).replace('{link}', link);
 
             var subject = _settings.emailVerification.subject;
 
@@ -92,16 +90,16 @@ function emailVerification(email, bodyData, cbk){
 
 function sendEmailForgotPassword(email, passwd, cbk){
 
-    var html = _settings.recoverMessage.body.replace("__PASSWD__", passwd);
+    var html = _settings.password.body.replace("__PASSWD__", passwd);
 
     var body = {
         to: email,
-        subject: _settings.recoverMessage.subject ,
+        subject: _settings.password.subject ,
         html: html
     };
 
     var options = {
-        url: _settings.services.notifications + '/notification/email',
+        url: _settings.externalServices.notifications + '/notification/email',
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },

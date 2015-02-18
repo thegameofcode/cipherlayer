@@ -16,7 +16,7 @@ var redisMng = require('../src/managers/redis');
 
 describe('/api/profile (verify phone)', function(){
 
-    var notifServiceURL = config.services.notifications;
+    var notifServiceURL = config.externalServices.notifications;
 
     var baseUser = {
         email : "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
