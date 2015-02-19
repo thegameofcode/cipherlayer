@@ -47,6 +47,7 @@ function createUser(body, pin, cbk) {
             code: 400
         });
     }
+    body[_settings.passThroughEndpoint.username] = body[_settings.passThroughEndpoint.username].toLowerCase();
 
     if(!isValidDomain(body[_settings.passThroughEndpoint.username])) {
         debug('Invalid email domain \''+body[_settings.passThroughEndpoint.username]+'\'');
