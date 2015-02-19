@@ -29,6 +29,13 @@ describe('user', function () {
         password: 'validpassword'
     };
 
+    function validatePwd(pwd, cbk){
+        cryptoMng.decrypt(pwd, function(decryptedPwd) {
+            var regex = new RegExp(config.password.regexValidation);
+            return cbk(regex.test(decryptedPwd));
+        });
+    }
+
     beforeEach(function (done) {
         cipherlayer.start(config.public_port, config.private_port, function(err, result){
             dao.deleteAllUsers(function (err) {
@@ -77,7 +84,15 @@ describe('user', function () {
                 dao.getAllUserFields(baseUser.username, function(err, result){
                     assert.equal(err, null);
                     assert.equal(result.password.length, 2);
-                    done();
+                    dao.getAllUserFields(baseUser.username, function(err, foundUser){
+                        assert.equal(err, null);
+                        assert.notEqual(foundUser, null);
+
+                        validatePwd(foundUser.password[1], function(valid){
+                            assert.equal(valid, true);
+                            done();
+                        });
+                    });
                 });
             });
         });
@@ -138,8 +153,14 @@ describe('user', function () {
             request(options, function (err, res, body) {
                 assert.equal(err, null, body);
                 assert.equal(res.statusCode, 204, body);
-                //TODO verify the password stored in DB (cant use dao.getById - it does not return password)
-                done();
+                dao.getAllUserFields(baseUser.username, function(err, foundUser){
+                    assert.equal(err, null);
+                    assert.notEqual(foundUser, null);
+                    validatePwd(foundUser.password, function(valid){
+                        assert.equal(valid, true);
+                        done();
+                    });
+                });
             });
         });
 

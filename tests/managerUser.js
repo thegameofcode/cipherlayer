@@ -7,6 +7,7 @@ var ciphertoken = require('ciphertoken');
 var userDao = require('../src/dao');
 var redisMng = require('../src/managers/redis');
 var userMng = require('../src/managers/user');
+var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
 
 var config = require('../config.json');
 
@@ -52,6 +53,14 @@ var configSettings = {
 };
 
 describe('user Manager', function(){
+
+    function validatePwd(pwd, cbk){
+        cryptoMng.decrypt(pwd, function(decryptedPwd) {
+            var regex = new RegExp(config.password.regexValidation);
+            return cbk(regex.test(decryptedPwd));
+        });
+    }
+
     beforeEach(function(done){
         async.series([
             function(done){
@@ -653,8 +662,14 @@ describe('user Manager', function(){
                 userMng().setPassword(createdUser._id, newPassword, function(err, result){
                     assert.equal(err, null);
                     assert.equal(result, 1);
-                    //TODO verify the password stored in DB (cant use dao.getById - it does not return password)
-                    done();
+                    userDao.getAllUserFields(createdUser.username, function(err, foundUser){
+                        assert.equal(err, null);
+                        assert.notEqual(foundUser, null);
+                        validatePwd(foundUser.password, function(valid){
+                            assert.equal(valid, true);
+                            done();
+                        });
+                    });
                 });
             });
 
