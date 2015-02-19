@@ -124,7 +124,7 @@ function getAllUserFields(username, cbk){
     if(!username){
         return cbk({err:'invalid_username'}, null);
     }
-
+    username = new RegExp(escapeRegexp(username.toLowerCase()), "i");
     collection.find({username: username}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -137,9 +137,7 @@ function getAllUserFields(username, cbk){
             if(user === null){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
-            if(user.username == username) {
-                return cbk(null, user);
-            }
+            return cbk(null, user);
         });
     });
 }
