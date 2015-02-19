@@ -399,7 +399,7 @@ describe('user Manager', function(){
             } );
         });
 
-        it('user exists', function(done){
+        it('user exists (same username with capital letters)', function(done){
             var testsConfigSettings = clone(configSettings);
             testsConfigSettings.phoneVerification = null;
             testsConfigSettings.emailVerification = null;
@@ -424,7 +424,14 @@ describe('user Manager', function(){
                 userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
                     assert.notEqual(err, null);
                     assert.deepEqual(err, expectedResult );
-                    done();
+
+                    //3rd call must fail (same username with capital letters)
+                    profileBody.email = 'VALID' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+                    userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+                        assert.notEqual(err, null);
+                        assert.deepEqual(err, expectedResult );
+                        done();
+                    });
                 });
             });
         });

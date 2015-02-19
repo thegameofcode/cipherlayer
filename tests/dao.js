@@ -138,6 +138,19 @@ describe('user dao', function(){
         });
     });
 
+    it('already exists (capitalized username)', function(done){
+        var fakeUser = _.assign({_id:baseUser.id}, baseUser);
+        sinon.stub(fakeUsersFind,'nextObject').yields(null, fakeUser);
+
+        var expectedUser = _.assign({},baseUser);
+        expectedUser.username = 'UsEr1' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+        dao.addUser()(expectedUser,function(err,createdUser){
+            assert.equal(err.err,'username_already_exists');
+            assert.equal(createdUser,null);
+            done();
+        });
+    });
+
     it('delete all', function(done){
         sinon.stub(fakeCollection,'count').yields(null,0);
 

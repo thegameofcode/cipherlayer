@@ -39,6 +39,7 @@ function _addUser(userToAdd, cbk){
     if(!user.username){
         return cbk({err:'invalid_username'}, null);
     }
+    user.username = user.username.toLowerCase();
     if(!user.password){
         return cbk({err:'invalid_password'}, null);
     }
@@ -81,7 +82,7 @@ function getFromUsername(username, cbk){
     if(!username){
         return cbk({err:'invalid_username'}, null);
     }
-
+    username = username.toLowerCase();
     collection.find({username: username}, {password:0}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -102,6 +103,7 @@ function getFromUsername(username, cbk){
 }
 
 function getFromUsernamePassword(username, password, cbk){
+    username = username.toLowerCase();
     collection.find({username: username, password: password}, {password:0}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -114,7 +116,7 @@ function getFromUsernamePassword(username, password, cbk){
             if(user === null){
                 return cbk(new Error(ERROR_USER_NOT_FOUND), null);
             }
-            if(user.username == username) {
+            if(user.username === username) {
                 return cbk(null, user);
             }
         });
