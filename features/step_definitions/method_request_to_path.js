@@ -8,7 +8,7 @@ var assert = require('assert');
 var myStepDefinitionsWrapper = function () {
     this.When(/^the client makes a (.*) request to (.*)$/, function (METHOD, PATH, callback) {
 
-        var path = PATH.replace(":email", world.getUser().username);
+        var path = PATH.replace(":email", world.getUser().username.toUpperCase()); //Upper to check the lower email validation
         var options = {
             url: 'http://localhost:' + config.public_port + path,
             headers: {
