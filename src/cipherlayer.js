@@ -155,7 +155,7 @@ function getStatus(cbk){
         }
     ],function(err){
         if(err){
-            return cbk(err)
+            return cbk(err);
         }
         cbk();
     });
