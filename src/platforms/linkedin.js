@@ -1,6 +1,6 @@
 var debug = require('debug')('cipherlayer:platforms:linkedin');
 var tokenManager = require('../managers/token');
-var userDao = require('../dao');
+var userDao = require('../managers/dao');
 var config = require('../../config.json');
 
 

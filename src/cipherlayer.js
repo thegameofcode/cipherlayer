@@ -7,7 +7,7 @@ var config = require('../config.json');
 var passport = require('passport');
 var clone = require('clone');
 
-var userDao = require('./dao');
+var userDao = require('./managers/dao');
 var redisMng = require('./managers/redis');
 
 var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
@@ -71,7 +71,8 @@ function startListener(publicPort, privatePort, cbk){
         "/auth/sf/*",
         "/auth/in",
         "/auth/in/*",
-        "/user/activate*"
+        "/user/activate*",
+        "/heartbeat"
     ];
     server.use(versionControl(versionControlOptions));
 
@@ -144,7 +145,24 @@ function stop(cbk){
     });
 }
 
+function getStatus(cbk){
+    async.series([
+        function(done){
+            userDao.getStatus(done);
+        },
+        function(done){
+            redisMng.getStatus(done);
+        }
+    ],function(err){
+        if(err){
+            return cbk(err)
+        }
+        cbk();
+    });
+}
+
 module.exports = {
     start : start,
-    stop : stop
+    stop : stop,
+    getStatus: getStatus
 };

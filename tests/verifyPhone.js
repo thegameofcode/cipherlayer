@@ -6,7 +6,7 @@ var clone = require('clone');
 var fs = require('fs');
 var config = require('../config.json');
 
-var dao = require('../src/dao');
+var dao = require('../src/managers/dao');
 var cipherlayer = require('../src/cipherlayer');
 var redisMng = require('../src/managers/redis');
 

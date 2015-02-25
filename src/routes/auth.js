@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:routes:auth');
-var userDao = require('../dao');
+var userDao = require('../managers/dao');
 var tokenManager = require('../managers/token');
 var config = require('../../config.json');
 var ObjectID = require('mongodb').ObjectID;

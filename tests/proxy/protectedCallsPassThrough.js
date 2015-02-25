@@ -6,7 +6,7 @@ var assert = require('assert');
 var fs = require('fs');
 var redisMng = require('../../src/managers/redis');
 
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
 var notifServiceURL = config.externalServices.notifications;

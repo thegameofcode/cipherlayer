@@ -2,7 +2,7 @@ var assert = require('assert');
 
 var cipherlayer = require('../../src/cipherlayer.js');
 var sfPlatform = require('../../src/platforms/salesforce.js');
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 

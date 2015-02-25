@@ -1,7 +1,7 @@
 var assert = require('assert');
 var _ = require('lodash');
 var config = require('../config.json');
-var dao = require('../src/dao.js');
+var dao = require('../src/managers/dao.js');
 var sinon = require('sinon');
 
 var mongoClient = require('mongodb').MongoClient;

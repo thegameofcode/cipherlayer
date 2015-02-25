@@ -3,17 +3,21 @@ var config = require('../../config.json');
 
 var redisClient;
 
+var isConnected;
+
 function connect(cbk){
     redisClient = redis.createClient(6379, config.redis.host, {});
     redisClient.on('connect', function (err) {
         if(err) return cbk(err);
-        cbk(null,true);
+        isConnected = true;
+        cbk(null, true);
     });
 }
 
 function disconnect(cbk){
     redisClient.end();
-    cbk(null,true);
+    isConnected = false;
+    cbk(null, false);
 }
 
 function insertKeyValue(key, value, expSeconds, cbk){
@@ -78,6 +82,16 @@ function deleteAllKeys(cbk){
     redisClient.flushall(cbk);
 }
 
+function getStatus(cbk){
+    var REDIS_ERR = {
+        err: 'component_error',
+        des: 'Redis component is not available'
+    };
+
+    if(!redisClient || !isConnected) return cbk(REDIS_ERR);
+    cbk();
+}
+
 module.exports = {
     connect: connect,
     disconnect: disconnect,
@@ -85,5 +99,7 @@ module.exports = {
     updateKeyValue: updateKeyValue,
     getKeyValue: getKeyValue,
     deleteKeyValue: deleteKeyValue,
-    deleteAllKeys: deleteAllKeys
+    deleteAllKeys: deleteAllKeys,
+
+    getStatus: getStatus
 };

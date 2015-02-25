@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:service');
-var userDao = require('../dao');
+var userDao = require('../managers/dao');
 
 function findUser (req, res, next){
     userDao.getFromId(req.tokenInfo.userId, function(err, foundUser){

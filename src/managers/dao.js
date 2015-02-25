@@ -3,7 +3,7 @@ var clone = require('clone');
 var assert = require('assert');
 var extend = require('util')._extend;
 var escapeRegexp = require('escape-regexp');
-var config = require('../config.json');
+var config = require('../../config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -229,6 +229,19 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     });
 }
 
+function getStatus(cbk){
+    var MONGO_ERR = {
+        err: 'component_error',
+        des: 'MongoDB component is not available'
+    };
+
+    if(!db || !collection) return cbk(MONGO_ERR);
+    collection.count(function(err, count){
+        if(err) return cbk(MONGO_ERR);
+        cbk();
+    });
+}
+
 var _settings = {};
 
 module.exports = {
@@ -251,5 +264,7 @@ module.exports = {
     getAllUserFields:getAllUserFields,
 
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
-    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS
+    ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
+
+    getStatus: getStatus
 };

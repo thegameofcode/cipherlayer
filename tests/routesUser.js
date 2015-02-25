@@ -7,7 +7,7 @@ var fs = require('fs');
 var cipherlayer = require('../src/cipherlayer.js');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
-var dao = require('../src/dao.js');
+var dao = require('../src/managers/dao.js');
 
 var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
 

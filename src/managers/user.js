@@ -6,7 +6,7 @@ var _ = require('lodash');
 var countries = require('countries-info');
 var ciphertoken = require('ciphertoken');
 
-var userDao = require('../dao');
+var userDao = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
 var cryptoMng = require('./crypto')({ password : 'password' });

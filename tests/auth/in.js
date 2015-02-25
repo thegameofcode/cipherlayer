@@ -3,7 +3,7 @@ var fs = require('fs');
 var request = require('request');
 
 var config = require('../../config.json');
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 
 module.exports = {
     describe: function(){

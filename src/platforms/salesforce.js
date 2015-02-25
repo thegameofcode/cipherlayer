@@ -3,7 +3,7 @@ var request = require('request');
 var async = require('async');
 var countries = require('countries-info');
 
-var userDao = require('../dao');
+var userDao = require('../managers/dao');
 var userManager = require('../managers/user')();
 var tokenManager = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');

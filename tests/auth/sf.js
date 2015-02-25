@@ -6,7 +6,7 @@ var nock = require('nock');
 var clone = require('clone');
 
 var config = require('../../config.json');
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 

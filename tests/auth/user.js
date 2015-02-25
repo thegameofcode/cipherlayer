@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var nock = require('nock');
 
 var config = require('../../config.json');
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 
 var redisMng = require('../../src/managers/redis');
 

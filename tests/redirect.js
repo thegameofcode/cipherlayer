@@ -3,7 +3,7 @@ var async = require('async');
 var nock = require('nock');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
-var dao = require('../src/dao.js');
+var dao = require('../src/managers/dao.js');
 var cipherlayer = require('../src/cipherlayer');
 var config = require('../config.json');
 

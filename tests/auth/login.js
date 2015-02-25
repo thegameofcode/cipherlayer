@@ -5,7 +5,7 @@ var ciphertoken = require('ciphertoken');
 var fs = require('fs');
 
 var config = require('../../config.json');
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 
 var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 

@@ -5,7 +5,7 @@ var fs = require('fs');
 var clone = require('clone');
 var nock = require('nock');
 
-var dao = require('../../src/dao.js');
+var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
 
