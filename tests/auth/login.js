@@ -6,6 +6,7 @@ var fs = require('fs');
 
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
+var nock = require('nock');
 
 var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 
@@ -15,7 +16,8 @@ module.exports = {
             var baseUser = {
                 id: 'a1b2c3d4e5f6',
                 username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
-                password: 'validpassword'
+                password: 'validpassword',
+                deviceId: '1234567890'
             };
 
             beforeEach(function (done) {
@@ -44,6 +46,10 @@ module.exports = {
                 };
                 options.headers[config.version.header] = "test/1";
 
+                nock('http://localhost:'+ config.private_port)
+                    .post('/api/me/session')
+                    .reply(204);
+
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
                     assert.equal(res.statusCode, 200, body);
@@ -53,10 +59,12 @@ module.exports = {
                     ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function (err, accessTokenInfo) {
                         assert.equal(err, null);
                         assert.equal(accessTokenInfo.userId, user.id);
+                        assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
                         assert.notEqual(body.refreshToken, undefined);
                         ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, refreshTokenInfo) {
                             assert.equal(err, null);
                             assert.equal(refreshTokenInfo.userId, user.id);
+                            assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
                             done();
                         });
                     });
@@ -90,7 +98,8 @@ module.exports = {
                 id: 'a1b2c3d4e5f6',
                 username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: 'validpassword',
-                role : "admin"
+                role : "admin",
+                deviceId: "0987654321"
             };
 
             beforeEach(function (done) {
@@ -119,6 +128,10 @@ module.exports = {
                 };
                 options.headers[config.version.header] = "test/1";
 
+                nock('http://localhost:'+ config.private_port)
+                    .post('/api/me/session')
+                    .reply(204);
+
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
                     assert.equal(res.statusCode, 200, body);
@@ -129,10 +142,12 @@ module.exports = {
                         assert.equal(err, null);
                         assert.equal(accessTokenInfo.userId, user.id);
                         assert.equal(accessTokenInfo.data.role, user.role);
+                        assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
                         assert.notEqual(body.refreshToken, undefined);
                         ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, refreshTokenInfo) {
                             assert.equal(err, null);
                             assert.equal(refreshTokenInfo.userId, user.id);
+                            assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
                             done();
                         });
                     });

@@ -3,8 +3,9 @@ var userDao = require('../managers/dao');
 var tokenManager = require('../managers/token');
 var config = require('../../config.json');
 var ObjectID = require('mongodb').ObjectID;
-
+var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
+var request = require("request");
 
 function postAuthLogin(req, res, next){
     cryptoMng.encrypt(req.body.password, function(encryptedPwd){
@@ -23,21 +24,50 @@ function postAuthLogin(req, res, next){
 
                 var data = {};
                 if(foundUser.role){
-                    data = {"role": foundUser.role};
+                    data.role = foundUser.role;
                 }
-                tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
-                    if(err) {
-                        res.send(409,{err: err.message});
-                    } else {
-                        tokens.expiresIn = config.accessToken.expiration;
-                        res.send(200,tokens);
-                    }
-                    next(false);
-                });
 
+                if(req.body.deviceId){
+                    data.deviceId = req.body.deviceId;
+                }
+
+                sessionRequest(data.deviceId, foundUser._id, 'POST', function(err, result){
+                    debug('AddDeviceRespose', err, result);
+                    tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
+                        if(err) {
+                            res.send(409,{err: err.message});
+                        } else {
+                            tokens.expiresIn = config.accessToken.expiration;
+                            res.send(200,tokens);
+                        }
+                        next(false);
+                    });
+                });
             }
         });
     });
+}
+
+function sessionRequest (deviceId, userId, method, cbk){
+
+    if(deviceId){
+        var options = {
+            url: 'http://'+ config.private_host + ':' + config.private_port + "/api/me/session",
+            headers: {
+                'Content-Type' : 'application/json; charset=utf-8',
+                'x-user-id': userId
+            },
+            method: method,
+            body: JSON.stringify({"deviceId": deviceId})
+        };
+
+        request(options, function(err, res, body ){
+            cbk(err, body);
+        });
+
+    }else{
+        cbk();
+    }
 }
 
 function postAuthUser(req, res, next){
@@ -51,10 +81,6 @@ function postAuthUser(req, res, next){
         user.id = req.body.id;
     } else {
         user.id = new ObjectID();
-    }
-
-    if(req.body.role){
-        user.role = req.body.role;
     }
 
     if(req.body.platforms){
@@ -101,6 +127,12 @@ function checkAuthBasic(req, res, next){
 
 function renewToken(req, res, next){
     var refreshToken = req.body.refreshToken;
+    var data = {};
+
+    if(req.body.deviceId){
+        data.deviceId = req.body.deviceId;
+    }
+
     tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
         if (err){
             var errInvalidToken = {
@@ -118,14 +150,27 @@ function renewToken(req, res, next){
             res.send(401, errExpiredToken);
             return next();
         }
-        tokenManager.createAccessToken(tokenSet.userId, '', function(err, newToken){
-            var body = {
-                accessToken: newToken,
-                expiresIn: config.accessToken.expiration
-            };
-            res.send(200, body);
-            return next();
+        sessionRequest(data.deviceId, tokenSet.userId, 'POST',function(err, result){
+            debug('AddDeviceRespose', err, result);
+            tokenManager.createAccessToken(tokenSet.userId, data, function(err, newToken){
+                var body = {
+                    accessToken: newToken,
+                    expiresIn: config.accessToken.expiration
+                };
+                res.send(200, body);
+                return next();
+            });
         });
+    });
+}
+
+function authLogout(req, res, next){
+    var userId = req.body.userId;
+    var deviceId = req.body.deviceId;
+    sessionRequest(deviceId , userId, 'DELETE', function(err, result){
+        debug('RemoveDeviceRespose', err, result);
+        res.send(204);
+        return next();
     });
 }
 
@@ -134,6 +179,7 @@ function addRoutes(service) {
     service.post('/auth/user', checkAuthBasic, postAuthUser);
     service.del('/auth/user', checkAuthBasic, delAuthUser);
     service.post('/auth/renew', renewToken);
+    service.post('/auth/logout', authLogout);
 
     debug('Auth routes added');
 }

@@ -97,7 +97,7 @@ module.exports = {
                         'Content-Type': 'application/json; charset=utf-8'
                     },
                     method: 'POST',
-                    body: JSON.stringify({username:USER.username, password:USER.password})
+                    body: JSON.stringify({username:USER.username, password:USER.password, deviceId: USER.deviceId})
                 };
                 options.headers[config.version.header] = "test/1";
 
@@ -140,7 +140,8 @@ function getLoginTokens(user, cbk){
 var USER = {
     id: 'a1b2c3d4e5f6',
     username: 'validUser'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '') ,
-    password: 'validPassword123'
+    password: 'validPassword123',
+    deviceId: 1234567890
 };
 
 var OPTIONS_FOR_RENEW = {
