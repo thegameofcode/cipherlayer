@@ -214,7 +214,7 @@ function createUserByToken(token, cbk) {
 
 function createUserPrivateCall(body, user, cbk){
     var options = {
-        url: 'http://localhost:' + _settings.private_port + _settings.passThroughEndpoint.path,
+        url: 'http://' + _settings.private_host + ':' + _settings.private_port + _settings.passThroughEndpoint.path,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
