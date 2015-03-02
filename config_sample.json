@@ -114,5 +114,8 @@
       "path" : "/api/profile",
       "methods" : ["GET", "PUT"]
     }
+  ],
+  "directProxyUrls": [
+     "\/upload$"
   ]
 }

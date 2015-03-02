@@ -19,6 +19,7 @@ var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
 var permissions = require('./middlewares/permissions.js');
+var bodyParserWrapper = require('./middlewares/bodyParserWrapper.js');
 
 var versionControl = require('version-control');
 
@@ -59,7 +60,8 @@ function startListener(publicPort, privatePort, cbk){
     });
 
     server.use(restify.queryParser());
-    server.use(restify.bodyParser({maxBodySize: 1024 * 1024 * 3}));
+    server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
+
     server.use(function(req,res,next){
         debug('> ' + req.method + ' ' + req.url);
         next();
