@@ -166,6 +166,8 @@ function renewToken(req, res, next){
 
 function authLogout(req, res, next){
     var userId = req.body.userId;
+    //remove platform
+    userId = userId.substr(3);
     var deviceId = req.body.deviceId;
     sessionRequest(deviceId , userId, 'DELETE', function(err, result){
         debug('RemoveDeviceRespose', err, result);
