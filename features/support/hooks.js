@@ -19,7 +19,7 @@ module.exports = function(){
                 url: 'http://localhost:'+config.public_port+'/auth/user',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8',
-                    'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
+                    'Authorization': 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
                 },
                 method:'DELETE'
             };
@@ -27,7 +27,7 @@ module.exports = function(){
             options.headers[config.version.header] = "test/1";
             request(options, function(err,res,body) {
                 assert.equal(err,null);
-                assert.equal(res.statusCode, 204);
+                assert.equal(res.statusCode, 204, body);
                 assert.equal(body,'');
                 done();
             });

@@ -316,5 +316,5 @@ var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 
 var HEADERS_WITH_AUTHORIZATION_BASIC = {
     'Content-Type': 'application/json; charset=utf-8',
-    'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
+    'Authorization': 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
 };

@@ -116,8 +116,8 @@ function delAuthUser(req, res, next){
 }
 
 function checkAuthBasic(req, res, next){
-    var expectedAuthorizationBasic = new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64');
-    if (req.headers["authorization basic"] != expectedAuthorizationBasic) {
+    var expectedAuthorizationBasic = 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64');
+    if (req.headers.authorization != expectedAuthorizationBasic) {
         res.send(401, "Missing basic authorization");
         return next(false);
     } else {

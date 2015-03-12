@@ -14,7 +14,7 @@ module.exports = function(){
             url: 'http://localhost:'+config.public_port+'/auth/user',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
-                'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
+                'Authorization' : 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
             },
             method:'POST',
             body : JSON.stringify(world.getUser())
@@ -24,7 +24,7 @@ module.exports = function(){
 
         request(options, function(err,res,body) {
             assert.equal(err,null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 201, body);
             callback();
         });
     });
