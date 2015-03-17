@@ -40,7 +40,7 @@ module.exports = function(){
                     url: 'http://localhost:'+config.public_port+'/auth/login',
                     headers: {
                         'Content-Type': 'application/json; charset=utf-8',
-                        'Authorization basic': new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
+                        'Authorization' : 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')
                     },
                     method:'POST',
                     body : JSON.stringify(world.getUser())
