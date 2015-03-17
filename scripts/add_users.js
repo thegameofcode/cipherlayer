@@ -18,9 +18,7 @@ var addFixture = function(fixture, callback) {
     var profileBody = {
         id: data._id.$oid || data._id,
         email: data.email,
-        password: data.password,
-        phone: data.phone || '111111',
-        country: data.country || 'US'
+        password: data.password || (process.env.DEFAULT_PASS ? process.env.DEFAULT_PASS : "qwerty")
     };
 
     if(!profileBody.id || !profileBody.email || !profileBody.password) {
