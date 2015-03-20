@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:service');
+var debug = require('debug')('cipherlayer:userAppVersion');
 var userDao = require('../managers/dao');
 var _ = require('lodash');
 
