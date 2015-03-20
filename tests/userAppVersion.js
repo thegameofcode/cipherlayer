@@ -44,7 +44,7 @@ describe('middleware userAppVersion', function(){
         ], done);
     });
 
-    it('update (no appVersion)', function(done){
+    it('update (user has no appVersion)', function(done){
         userDao.addUser()(baseUser, function(err, createdUser) {
             createdUser.id = createdUser._id;
             delete(createdUser._id);
@@ -131,5 +131,23 @@ describe('middleware userAppVersion', function(){
 
             userAppVersion(settings)(req, res, next);
         });
+    });
+
+    it('continue (no version header)', function(done){
+        var req = {
+            headers: {},
+            url: "/api/me",
+            method: "GET",
+            user: baseUser
+        };
+
+        var res = {};
+        var next = function(canContinue) {
+            if (canContinue === undefined || canContinue === true){
+                done();
+            }
+        };
+
+        userAppVersion(settings)(req, res, next);
     });
 });
