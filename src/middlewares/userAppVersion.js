@@ -13,7 +13,8 @@ var defaultSettings = config;
 var _settings = {};
 
 function storeUserAppVersion(req, res, next){
-    if(!req.headers[config.version.header] || req.user.appVersion === req.headers[config.version.header]) {
+    if(!req.headers[_settings.version.header] || req.user.appVersion === req.headers[_settings.version.header]) {
+        debug('appVersion header not found or or is the same as stored [' + req.user.appVersion + '] / [' + req.headers[_settings.version.header] + ']');
         return next();
     } else {
         userDao.updateField(req.user.id, 'appVersion', req.headers[_settings.version.header], function(err, updatedUsers){
@@ -22,6 +23,7 @@ function storeUserAppVersion(req, res, next){
                 res.send(500, updatingUserError);
                 return next(false);
             } else {
+                debug('user [' + req.user.id + '] appVersion [' + req.headers[_settings.version.header] + '] updated correctly ', err);
                 next();
             }
         });
