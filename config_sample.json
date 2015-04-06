@@ -84,7 +84,8 @@
     "redis": {
       "key":"user.{username}.transaction",
       "expireInSec": 86400
-    }
+    },
+    "redirectProtocol":"mycomms"
   },
   "externalServices":{
     "notifications": "http://localhost:3002"

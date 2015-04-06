@@ -118,7 +118,7 @@ function createUserByToken(req, res, next) {
                 debug('match \''+ device +'\' with \'' + exp + '\' : ' + isCompatible);
                 if(isCompatible) {
                     debug('device \''+device+'\'');
-                    res.header('Location', 'mycomms://user/refreshToken/' + tokens.refreshToken );
+                    res.header('Location', config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken );
                     res.send(302);
                     return next(false);
                 }
