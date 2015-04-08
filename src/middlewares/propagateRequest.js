@@ -32,6 +32,8 @@ function propagateRequest(req, res, next){
         // if url is a direct proxy request, use http-proxy
         if (useDirectProxy) {
 
+            // add user id to proxy request headers
+            req.headers['x-user-id'] = req.options.headers['x-user-id'];
             proxy.web(req, res, {
                 target: 'http://'+ config.private_host + ':' + config.private_port
             });
