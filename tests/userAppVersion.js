@@ -44,7 +44,7 @@ describe('middleware userAppVersion', function(){
         ], done);
     });
 
-    it('update (user has no appVersion)', function(done){
+    it.skip('update (user has no appVersion)', function(done){
         userDao.addUser()(baseUser, function(err, createdUser) {
             var req = {
                 headers: {},
@@ -70,7 +70,7 @@ describe('middleware userAppVersion', function(){
         });
     });
 
-    it('update (different appVersion)', function(done){
+    it.skip('update (different appVersion)', function(done){
         baseUser.appVersion = 'version 1.0.0';
         userDao.addUser()(baseUser, function(err, createdUser) {
             var req = {
