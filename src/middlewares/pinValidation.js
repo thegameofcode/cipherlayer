@@ -17,9 +17,14 @@ var defaultSettings = config;
 var _settings = {};
 
 function pinValidation(req, res, next) {
+    if(!_settings.phoneVerification || !_settings.phoneVerification.pinValidationEndpoints) {
+        return next(false);
+    }
+
+    var endPoints = _settings.phoneVerification.pinValidationEndpoints;
+
     var path = String(req.url);
     var body = clone(req.body);
-    var endPoints = _settings.pinValidationEndpoints;
     var requiresPinValidation = false;
     var validBodySchema = false;
     var pinValidationConfig = {};

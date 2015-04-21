@@ -88,9 +88,9 @@ function emailVerification(email, bodyData, cbk){
     });
 }
 
-function sendEmailForgotPassword(email, passwd, cbk){
+function sendEmailForgotPassword(email, passwd, link, cbk){
 
-    var html = _settings.password.body.replace("__PASSWD__", passwd);
+    var html = _settings.password.body.replace("__PASSWD__", passwd).replace("__LINK__", link);
 
     var body = {
         to: email,

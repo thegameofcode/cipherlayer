@@ -80,7 +80,7 @@ describe('user', function () {
 
             request(options, function (err, res, body) {
                 assert.equal(err, null);
-                assert.equal(res.statusCode, 204);
+                assert.equal(res.statusCode, 204, body);
                 dao.getAllUserFields(baseUser.username, function(err, result){
                     assert.equal(err, null);
                     assert.equal(result.password.length, 2);
@@ -114,7 +114,7 @@ describe('user', function () {
 
             request(options, function (err, res, body) {
                 assert.equal(err, null);
-                assert.equal(res.statusCode, 204);
+                assert.equal(res.statusCode, 204, body);
                 dao.getAllUserFields(baseUser.username, function(err, result){
                     assert.equal(err, null);
                     assert.equal(result.password.length, 2);

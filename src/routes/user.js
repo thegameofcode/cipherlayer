@@ -7,6 +7,7 @@ var userDao = require('../managers/dao');
 var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var emailMng = require('../managers/email');
+var tokenManager = require('../managers/token');
 
 var userMng = require('../managers/user');
 
@@ -54,14 +55,22 @@ function sendNewPassword(req, res, next){
                         return next(false);
 
                     }else{
-                        emailMng().sendEmailForgotPassword(req.params.email, passwd, function(err, result){
-                            if(err){
-                                res.send(500, { err: 'internalError', des: 'Internal server error'});
-                            }else{
-                                res.send(204);
-                            }
-                            return next(false);
-                        });
+						var data = {};
+						if(foundUser.role){
+							data.role = foundUser.role;
+						}
+						tokenManager.createBothTokens(foundUser._id, data , function(err, tokens) {
+
+							var link = config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken;
+							emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
+								if (err) {
+									res.send(500, {err: 'internalError', des: 'Internal server error'});
+								} else {
+									res.send(204);
+								}
+								return next(false);
+							});
+						});
                     }
                 });
             });
@@ -118,7 +127,7 @@ function createUserByToken(req, res, next) {
                 debug('match \''+ device +'\' with \'' + exp + '\' : ' + isCompatible);
                 if(isCompatible) {
                     debug('device \''+device+'\'');
-                    res.header('Location', 'mycomms://user/refreshToken/' + tokens.refreshToken );
+                    res.header('Location', config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken );
                     res.send(302);
                     return next(false);
                 }
