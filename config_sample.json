@@ -104,6 +104,7 @@
     "*@a.com"
   ],
   "password":{
+    "validateOldPassword": false,
     "regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
     "message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
     "generatedRegex": "([a-z][\\d][A-Z]){3,4}",

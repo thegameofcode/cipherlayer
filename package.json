@@ -48,7 +48,8 @@
     "int": "DEBUG=cipherlayer* node main.js",
     "pro": "DEBUG=cipherlayer* node main.js",
     "lint": "./node_modules/.bin/gulp jshint",
-    "lint-go": "./node_modules/.bin/gulp jshint-go"
+    "lint-go": "./node_modules/.bin/gulp jshint-go",
+    "fixtures": "node scripts/add_users.js"
   },
   "repository": {
     "type": "git",
