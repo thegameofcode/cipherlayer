@@ -24,7 +24,8 @@ describe('user dao', function(){
             count:function(){},
             find:function(){},
             insert:function(){},
-            update:function(){}
+            update:function(){},
+            ensureIndex:function(){ }
         };
 
         fakeDb = {
@@ -38,6 +39,7 @@ describe('user dao', function(){
 
         sinon.stub(fakeCollection, 'remove').yields();
         sinon.stub(fakeCollection,'find').yields(null, fakeUsersFind);
+        sinon.stub(fakeCollection, 'ensureIndex').yields();
         sinon.stub(fakeDb, 'collection').returns(fakeCollection);
         sinon.stub(mongoClient,'connect').yields(null, fakeDb);
 

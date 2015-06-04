@@ -1,6 +1,7 @@
 var debug = require('debug')('cipherlayer:dao');
 var clone = require('clone');
 var assert = require('assert');
+var async = require('async');
 var extend = require('util')._extend;
 var escapeRegexp = require('escape-regexp');
 var config = require('../../config.json');
@@ -21,7 +22,17 @@ function connect(cbk){
         db = connectedDb;
 
         collection = connectedDb.collection('users');
-        cbk();
+        async.series([
+            function(done){
+                collection.ensureIndex('_id', done);
+            },
+            function(done){
+                collection.ensureIndex('username', done);
+            },
+            function(done){
+                collection.ensureIndex('password', done);
+            }
+        ], cbk);
     });
 }
 
