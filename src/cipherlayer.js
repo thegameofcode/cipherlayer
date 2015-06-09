@@ -20,6 +20,7 @@ var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
 var permissions = require('./middlewares/permissions.js');
 var bodyParserWrapper = require('./middlewares/bodyParserWrapper.js');
+var headerCors = require('./middlewares/headerCors.js');
 
 var versionControl = require('version-control');
 
@@ -60,6 +61,7 @@ function startListener(publicPort, privatePort, cbk){
         name: 'cipherlayer-server'
     });
 
+    server.use(headerCors);
     server.use(restify.queryParser());
     server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
@@ -104,6 +106,7 @@ function startListener(publicPort, privatePort, cbk){
     server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
     server.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
     server.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
 
     server.use(function(req, res, next){
         debug('< ' + res.statusCode);
