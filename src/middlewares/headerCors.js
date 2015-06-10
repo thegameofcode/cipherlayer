@@ -3,7 +3,13 @@ var config = require('../../config.json');
 
 function headerCors (req, res, next){
 
-    var accessControlAllowConfig = config.accessControlAllow[0];
+    var accessControlAllowConfig;
+
+    if(config.accessControlAllow === undefined) {
+        return  next();
+    }else{
+        accessControlAllowConfig = config.accessControlAllow[0];
+    }
 
     if(accessControlAllowConfig.enabled){
         res.header("Access-Control-Allow-Methods" , accessControlAllowConfig.methods);
@@ -13,6 +19,7 @@ function headerCors (req, res, next){
 
         if ('OPTIONS' == req.method) {
             res.send(200);
+            return next(false);
         }else {
             next();
         }
