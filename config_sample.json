@@ -22,7 +22,8 @@
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
   "redis":{
-    "host":"127.0.0.1"
+    "host":"127.0.0.1",
+    "port":6379
   },
   "passThroughEndpoint" : {
     "path": "/api/profile",
@@ -98,7 +99,8 @@
         "1" : true
       }
     },
-    "installPath" : "/install"
+    "installPath" : "/install",
+    "db":"mongodb://localhost/versionControl?w=1"
   },
   "allowedDomains":[
     "*@a.com"

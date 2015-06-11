@@ -21,7 +21,7 @@
     "randexp": "^0.4.0",
     "redis": "^0.12.1",
     "restify": "^2.8.3",
-    "version-control": "^1.2.1"
+    "version-control": "^1.2.3"
   },
   "devDependencies": {
     "assert": "^1.1.2",

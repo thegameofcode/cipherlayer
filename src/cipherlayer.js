@@ -89,7 +89,9 @@ function startListener(publicPort, privatePort, cbk){
     server.on('uncaughtException', function(req, res, route, error) {
         var timing = Date.now() - new Date(req._time);
         debug('< ' + res.statusCode + ' ' + error + ' ' + timing + 'ms');
-        res.send(500, {err:'internal_error', des: 'uncaught exception'});
+        if(!res.statusCode){
+            res.send(500, {err:'internal_error', des: 'uncaught exception'});
+        }
     });
 
     var routesPath = path.join(__dirname, './routes/');

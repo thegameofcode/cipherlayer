@@ -243,7 +243,7 @@ describe('user', function () {
             });
         });
 
-        it('500 (invalid authorization)', function (done) {
+        it('403 (invalid authorization)', function (done) {
             var newPassword = {
                 password: 'n3wPas5W0rd'
             };
@@ -252,7 +252,7 @@ describe('user', function () {
                 url: 'http://localhost:' + config.public_port + '/user/me/password',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8',
-                    'Authorization': 'bearer dsoiafobadjsbahof2345245boadsbkcbiilaSDFGERTFGsdfn4302984252hds'
+                    'Authorization': 'bearer dsoiafobadjsbahof2345245boadsbkcbiilaSDGERTFGsdfn4302984252hds'
                 },
                 method: 'PUT',
                 body : JSON.stringify(newPassword)
@@ -260,13 +260,13 @@ describe('user', function () {
             options.headers[config.version.header] = "test/1";
 
             var expectedResult = {
-                err: "internal_error",
-                des: "uncaught exception"
+                err: "invalid_token",
+                des: "invalid authorization header"
             };
 
             request(options, function (err, res, body) {
                 assert.equal(err, null, body);
-                assert.equal(res.statusCode, 500, body);
+                assert.equal(res.statusCode, 403, body);
                 body = JSON.parse(body);
                 assert.deepEqual(body, expectedResult);
                 done();

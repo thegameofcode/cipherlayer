@@ -6,7 +6,10 @@ var redisClient;
 var isConnected;
 
 function connect(cbk){
-    redisClient = redis.createClient(6379, config.redis.host, {});
+    var host = config.redis.host || "localhost";
+    var port = config.redis.port || 6379;
+
+    redisClient = redis.createClient(port, host, {});
     redisClient.on('connect', function (err) {
         if(err) return cbk(err);
         isConnected = true;
