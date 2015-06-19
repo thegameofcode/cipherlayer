@@ -127,7 +127,16 @@ function createUserByToken(req, res, next) {
                 debug('match \''+ device +'\' with \'' + exp + '\' : ' + isCompatible);
                 if(isCompatible) {
                     debug('device \''+device+'\'');
-                    res.header('Location', config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken );
+
+                    var match = device.match(/.*Android.*/i);
+                    var isAndroid = (match !== null && device === match[0]);
+
+                    if(isAndroid){
+                        res.header('Location', 'intent://user/refreshToken/' + tokens.refreshToken + '/#Intent;scheme=' + config.emailVerification.scheme + ';end' );
+                    } else {
+                        res.header('Location', config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken );
+                    }
+
                     res.send(302);
                     return next(false);
                 }
