@@ -128,7 +128,7 @@ function createUserByToken(req, res, next) {
                 if(isCompatible) {
                     debug('device \''+device+'\'');
 
-                    var match = device.match(/.*Android.*/i);
+                    match = device.match(/.*Android.*/i);
                     var isAndroid = (match !== null && device === match[0]);
 
                     if(isAndroid){
