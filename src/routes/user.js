@@ -137,6 +137,8 @@ function createUserByToken(req, res, next) {
                         res.header('Location', config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken );
                     }
 
+                    debug('>> 302 redirect to > ' , res.headers.location );
+
                     res.send(302);
                     return next(false);
                 }
