@@ -40,7 +40,8 @@ function propagateRequest(req, res, next){
         } else {
 
             // This are the normal requests
-
+            req.options.headers['user-agent'] = req.headers['user-agent'];
+            
             request(req.options, function(err, private_res, body) {
                 var timing = Date.now() - start;
                 if(err) {
