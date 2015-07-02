@@ -8,6 +8,8 @@ var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var request = require("request");
 
 function postAuthLogin(req, res, next){
+    var userAgent = String(req.headers['user-agent']);
+
     cryptoMng.encrypt(req.body.password, function(encryptedPwd){
         userDao.getFromUsernamePassword(req.body.username, encryptedPwd,function(err,foundUser){
             if(err) {
@@ -31,7 +33,7 @@ function postAuthLogin(req, res, next){
                     data.deviceId = req.body.deviceId;
                 }
 
-                sessionRequest(data.deviceId, foundUser._id, 'POST', function(err, result){
+                sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err, result){
                     debug('AddDeviceRespose', err, result);
                     tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                         if(err) {
@@ -48,17 +50,19 @@ function postAuthLogin(req, res, next){
     });
 }
 
-function sessionRequest (deviceId, userId, method, cbk){
+function sessionRequest (deviceId, userId, method, userAgent, cbk){
 
     if(deviceId){
         var options = {
             url: 'http://'+ config.private_host + ':' + config.private_port + "/api/me/session",
             headers: {
                 'Content-Type' : 'application/json; charset=utf-8',
-                'x-user-id': userId
+                'x-user-id': userId,
+                'user-agent': userAgent
             },
             method: method,
-            body: JSON.stringify({"deviceId": deviceId})
+            json: true,
+            body: {"deviceId": deviceId}
         };
 
         request(options, function(err, res, body ){
@@ -134,6 +138,8 @@ function renewToken(req, res, next){
     }
 
     tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
+        var userAgent = String(req.headers['user-agent']);
+
         if (err){
             var errInvalidToken = {
                 "err" : "invalid_token",
@@ -150,7 +156,7 @@ function renewToken(req, res, next){
             res.send(401, errExpiredToken);
             return next();
         }
-        sessionRequest(data.deviceId, tokenSet.userId, 'POST',function(err, result){
+        sessionRequest(data.deviceId, tokenSet.userId, 'POST', userAgent, function(err, result){
             debug('AddDeviceRespose', err, result);
             tokenManager.createAccessToken(tokenSet.userId, data, function(err, newToken){
                 var body = {
@@ -165,11 +171,13 @@ function renewToken(req, res, next){
 }
 
 function authLogout(req, res, next){
+    var userAgent = String(req.headers['user-agent']);
+
     var userId = req.body.userId;
     //remove platform
     userId = userId.substr(3);
     var deviceId = req.body.deviceId;
-    sessionRequest(deviceId , userId, 'DELETE', function(err, result){
+    sessionRequest(deviceId , userId, 'DELETE', userAgent, function(err, result){
         debug('RemoveDeviceRespose', err, result);
         res.send(204);
         return next();

@@ -117,20 +117,20 @@ function createUserByToken(req, res, next) {
             return next(false);
         } else {
             var compatibleDevices = config.emailVerification.compatibleEmailDevices;
-            var device = String(req.headers['user-agent']);
+            var userAgent = String(req.headers['user-agent']);
 
             for(var i = 0; i < compatibleDevices.length; i++){
                 var exp = compatibleDevices[i];
                 var check = exp.replace(/\*/g,'.*');
-                var match = device.match(check);
-                var isCompatible = (match !== null && device === match[0]);
-                debug('match \''+ device +'\' with \'' + exp + '\' : ' + isCompatible);
+                var match = userAgent.match(check);
+                var isCompatible = (match !== null && userAgent === match[0]);
+                debug('match \''+ userAgent +'\' with \'' + exp + '\' : ' + isCompatible);
                 if(isCompatible) {
-                    match = device.match(/.*Android.*/i);
-                    var isAndroid = (match !== null && device === match[0]);
+                    match = userAgent.match(/.*Android.*/i);
+                    var isAndroid = (match !== null && userAgent === match[0]);
                     var location = config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken;
 
-                    debug('device \''+device+'\' is android:', isAndroid);
+                    debug('device \''+userAgent+'\' is android:', isAndroid);
 
                     if(isAndroid){
                         location = 'intent://user/refreshToken/' + tokens.refreshToken + '/#Intent;scheme=' + config.emailVerification.scheme + ';end';
