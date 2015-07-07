@@ -149,8 +149,8 @@ function salesforceCallback(req, res, next){
                     //TODO check if it's ok to ignore this error
                 }
                 var data = {};
-                if(foundUser.role){
-                    data = {"role": foundUser.role};
+                if(foundUser.roles){
+                    data = {"roles": foundUser.roles};
                 }
 
                 tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){

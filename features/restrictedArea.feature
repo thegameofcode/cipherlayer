@@ -1,8 +1,8 @@
 Feature: client application logs in with admin role
 
   Scenario: client app logs in successfully
-    Given a admin user of client app with valid credentials
-    When the client app requests log in the protected application with valid credentials
+    Given a user with role admin and a valid access token
+    When the user requests log in the protected application with valid credentials
     Then the response status code is 200
     And the response body contains json attribute "accessToken"
     And the response body contains json attribute "refreshToken"
@@ -10,7 +10,7 @@ Feature: client application logs in with admin role
 
 
   Scenario Outline: A protected admin service needs an accessToken with admin role attribute auth to be called
-    Given admin with a valid access token
+    Given a user with role admin and a valid access token
     And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
@@ -21,7 +21,7 @@ Feature: client application logs in with admin role
 
 
   Scenario Outline: A protected admin service needs an accessToken with admin role attribute auth to be called
-    Given admin with a valid access token
+    Given a user with role admin and a valid access token
     And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body ""
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
@@ -31,7 +31,7 @@ Feature: client application logs in with admin role
 
 
   Scenario Outline: Client with no admin role request restricted endpoints
-    Given user with a valid access token
+    Given a user with role user and a valid access token
     And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>

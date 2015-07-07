@@ -8,7 +8,7 @@ function checkPermissions (req, res, next){
         return next();
     }
 
-    var role = req.tokenInfo.data.role || 'user';
+    var roles = req.tokenInfo.data.roles || ['user'];
     var path = req._url.pathname;
     var method = req.method;
 
@@ -17,11 +17,15 @@ function checkPermissions (req, res, next){
     for(var i= 0; i< config.endpoints.length; i++){
         var matchPath = path.match(new RegExp(config.endpoints[i].path, 'g'));
         var matchMethod = _.includes(config.endpoints[i].methods, method);
-        var matchRole = _.includes(config.endpoints[i].roles, role);
 
         if( matchPath && matchMethod ){
-            if(matchRole){
-                hasPermissions = true;
+            var matchRole;
+            for(var j=0; j< roles.length; j++){
+                matchRole = _.includes(config.endpoints[i].roles, roles[j]);
+                if(matchRole){
+                    hasPermissions = true;
+                    break;
+                }
             }
             break;
         }

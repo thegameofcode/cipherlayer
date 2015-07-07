@@ -25,8 +25,8 @@ function postAuthLogin(req, res, next){
                 });
 
                 var data = {};
-                if(foundUser.role){
-                    data.role = foundUser.role;
+                if(foundUser.roles){
+                    data.roles = foundUser.roles;
                 }
 
                 if(req.body.deviceId){

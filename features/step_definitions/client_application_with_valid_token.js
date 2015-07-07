@@ -12,7 +12,7 @@ var nock = require('nock');
 var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 
 module.exports = function(){
-    this.Given(/^(.*) with a valid access token$/, function (role, callback) {
+    this.Given(/^a user with role (.*) and a valid access token$/, function (role, callback) {
 
         async.series([
 
@@ -21,7 +21,16 @@ module.exports = function(){
                 world.getUser().id = 'a1b2c3d4e5f6';
                 world.getUser().username = 'valid_user' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
                 world.getUser().password = 'valid_password';
-                world.getUser().role = role || 'user';
+
+                switch(role){
+                    case 'admin':
+                        world.getUser().roles = ['admin'];
+                        break;
+
+                    default:
+                        world.getUser().roles = ['user'];
+                        break;
+                }
 
                 var userToCreate = clone(world.getUser());
                 cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {

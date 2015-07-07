@@ -65,8 +65,8 @@ function _addUser(userToAdd, cbk){
                 user._id = user.id;
                 delete(user.id);
 
-                if(!user.role){
-                    user.role = 'user';
+                if(!user.roles || !user.roles.length){
+                    user.roles = ['user'];
                 }
 
                 collection.insert(user, function(err, result){

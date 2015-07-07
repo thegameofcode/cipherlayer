@@ -5,7 +5,7 @@ var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){
-    this.When(/^the client app requests log in the protected application with valid credentials$/, function (callback) {
+    this.When(/^the user requests log in the protected application with valid credentials$/, function (callback) {
 
         var options = {
             url: 'http://localhost:'+config.public_port+'/auth/login',

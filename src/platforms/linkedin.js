@@ -48,8 +48,8 @@ function linkedInCallback(req, res, next){
             }
         } else {
             var dataToken = {};
-            if(foundUser.role){
-                dataToken = {"role": foundUser.role};
+            if(foundUser.roles){
+                dataToken = {"roles": foundUser.roles};
             }
             tokenManager.createBothTokens(foundUser.username, dataToken, function(err, tokens){
                 if(err) {

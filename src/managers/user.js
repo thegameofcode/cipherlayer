@@ -264,8 +264,8 @@ function createUserPrivateCall(body, user, cbk){
                             } else {
 
                                 var data = {};
-                                if(foundUser.role){
-                                    data = {"role": foundUser.role};
+                                if(foundUser.roles){
+                                    data = {"roles": foundUser.roles};
                                 }
 
                                 tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
