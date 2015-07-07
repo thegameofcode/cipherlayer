@@ -51,7 +51,7 @@ module.exports = {
             dao.addUser()(USER, function (err, createdUser) {
                 assert.equal(err, null);
 
-                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, { role: 'user'}, function (err, loginToken) {
+                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
                     nockProtectedStandartCall(createdUser._id, SF_DATA, expectedBody);
 
                     var options = clone(OPTIONS_STANDARD_CALL);
@@ -77,7 +77,7 @@ module.exports = {
             dao.addUser()(userWithSoonExpiry, function(err, createdUser){
                 assert.equal(err, null);
 
-                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, { role: 'user'}, function(err, loginToken){
+                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function(err, loginToken){
                     assert.equal(err, null);
                     var oldAccessToken = USER.platforms[0].accessToken.params.access_token;
 

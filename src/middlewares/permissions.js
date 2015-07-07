@@ -8,7 +8,7 @@ function checkPermissions (req, res, next){
         return next();
     }
 
-    var role = req.tokenInfo.data.role;
+    var role = req.tokenInfo.data.role || 'user';
     var path = req._url.pathname;
     var method = req.method;
 
