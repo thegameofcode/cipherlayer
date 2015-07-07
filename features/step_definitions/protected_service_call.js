@@ -26,6 +26,8 @@ module.exports = function(){
             world.getResponse().statusCode = res.statusCode;
             if(body){
                 world.getResponse().body = JSON.parse(body);
+            } else {
+                world.getResponse().body = null;
             }
             callback();
         });

@@ -1,6 +1,5 @@
 Feature: client application logs in into a protected backend
 
-  @feature
   Scenario: client app logs in successfully
     Given a user of client app with valid credentials
     When the client app requests log in the protected application with valid credentials
@@ -9,7 +8,6 @@ Feature: client application logs in into a protected backend
     And the response body contains json attribute "refreshToken"
     And the response body contains json attribute "expiresIn"
 
-  @feature
   Scenario: client app logs in send bad credentials
     Given a user of client app with valid credentials
     When the client app requests log in the protected application with invalid credentials

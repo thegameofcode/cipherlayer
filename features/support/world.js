@@ -25,7 +25,7 @@ function resetUser(){
 
 function createPin(userId, phone, cbk){
 
-    var notifServiceURL = config.services.notifications;
+    var notifServiceURL = config.externalServices.notifications;
 
     nock(notifServiceURL)
         .post('/notification/sms')
@@ -37,7 +37,7 @@ function createPin(userId, phone, cbk){
 }
 
 function getPinNumber(userId, phone, cbk){
-    var redisKey = config.redisKeys.user_phone_verify.key;
+    var redisKey = config.phoneVerification.redis.key;
     redisKey = redisKey.replace('{userId}',userId).replace('{phone}',phone);
 
     redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {

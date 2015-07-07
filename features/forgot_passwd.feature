@@ -1,6 +1,5 @@
 Feature: client application requests recover password
 
-  @feature @now
   Scenario Outline: Client request recover password
     Given a user of client app with valid credentials
     When the client makes a <METHOD> request to <PATH>
@@ -11,7 +10,6 @@ Feature: client application requests recover password
   | GET    | /user/:email/password       |
 
 
-  @feature
   Scenario Outline: client app logs in with old password
     Given a user of client app with valid credentials
     When the client makes a <METHOD> request to <PATH>

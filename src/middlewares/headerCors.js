@@ -1,11 +1,11 @@
 var debug = require('debug')('cipherlayer:service');
 var config = require('../../config.json');
 
-function headerCors (req, res, next){
+function headerCors(req, res, next){
 
     var accessControlAllowConfig;
 
-    if(config.accessControlAllow === undefined) {
+    if(!config.accessControlAllow) {
         return  next();
     }else{
         accessControlAllowConfig = config.accessControlAllow[0];
@@ -17,7 +17,7 @@ function headerCors (req, res, next){
         res.header("Access-Control-Allow-Credentials" , accessControlAllowConfig.credentials);
         res.header("Access-Control-Allow-Origin" , accessControlAllowConfig.origin);
 
-        if ('OPTIONS' == req.method) {
+        if ('OPTIONS' === req.method) {
             res.send(200);
             return next(false);
         }else {

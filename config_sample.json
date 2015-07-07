@@ -112,10 +112,16 @@
     "subject" :"Recover Example User Password",
     "body" : "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
   },
-  "restrictEndpoints" : [
+  "endpoints" : [
     {
-      "path" : "/api/profile",
-      "methods" : ["GET", "PUT"]
+      "path" : "\/api\/profile",
+      "methods" : ["POST", "PUT"],
+      "roles" : ["admin"]
+    },
+    {
+      "path": "\/.*",
+      "methods":["GET", "POST", "PUT"],
+      "roles":["user", "admin"]
     }
   ],
   "accessControlAllow" : [
@@ -124,7 +130,7 @@
       "methods" : "OPTION,GET,PUT,POST,HEAD",
       "headers" : "x-mycomms-version,content-type,Authorization",
       "credentials" : "true",
-      "origin": "http://192.168.130.134:8080"
+      "origin": "http://192.168.1.116:9000"
     }
   ],
   "directProxyUrls": [

@@ -41,7 +41,7 @@ module.exports = {
             dao.addUser()(user, function (err, createdUser) {
                 assert.equal(err, null);
 
-                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, { role: 'user'}, function (err, loginToken) {
                     var expectedBody = {field1: 'value1', field2: 'value2'};
 
                     nock('http://' + config.private_host + ':' + config.private_port, {
@@ -85,7 +85,7 @@ module.exports = {
             dao.addUser()(user, function (err, createdUser) {
                 assert.equal(err, null);
 
-                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+                ciphertoken.createToken(accessTokenSettings, createdUser._id, null, { role: 'user'}, function (err, loginToken) {
                     var expectedBody = {field1: 'value1', field2: 'value2'};
 
                     nock('http://' + config.private_host + ':' + config.private_port, {

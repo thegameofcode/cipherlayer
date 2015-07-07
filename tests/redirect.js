@@ -43,7 +43,7 @@ describe('redirect', function(){
             assert.equal(err, null);
             assert.notEqual(createdUser, null);
 
-            ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+            ciphertoken.createToken(accessTokenSettings, createdUser._id, null, { role: 'user' }, function (err, loginToken) {
 
                 var options = {
                     url: 'http://localhost:' + config.public_port + '/whatever',
