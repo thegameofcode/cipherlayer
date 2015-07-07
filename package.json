@@ -61,7 +61,6 @@
   },
   "homepage": "https://github.com/thegameofcode/cipherlayer",
   "pre-commit": [
-    "lint",
-    "test"
+    "lint"
   ]
 }
