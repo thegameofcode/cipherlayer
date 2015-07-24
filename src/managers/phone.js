@@ -41,7 +41,7 @@ function sendPIN(phone, pin, cbk){
     var notifServiceURL = _settings.externalServices.notifications;
     var sms = {
         phone: phone,
-        text: 'MyContacts pin code: ' + pin
+        text: 'MyComms pin code: ' + pin
     };
 
     var options = {
