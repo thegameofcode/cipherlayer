@@ -18,7 +18,7 @@ var _settings = {};
 
 function pinValidation(req, res, next) {
     if(!_settings.phoneVerification || !_settings.phoneVerification.pinValidationEndpoints) {
-        return next(false);
+        return next();
     }
 
     var endPoints = _settings.phoneVerification.pinValidationEndpoints;
