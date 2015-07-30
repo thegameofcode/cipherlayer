@@ -16,7 +16,7 @@
   },
   "management":{
     "clientId": "Cipher Layer User",
-    "clientSecret": "Q0lQSEVSTEFZRVI"
+    "clientSecret": "unsecureKey5"
   },
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
