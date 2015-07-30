@@ -163,8 +163,10 @@ module.exports = {
                         body = JSON.parse(body);
                         assert.notEqual(body.refreshToken, undefined);
                         assert.notEqual(body.expiresIn, undefined);
+                        console.log(body);
 
                         dao.getFromId(createdUser._id, function(err, foundUser){
+                            console.log(foundUser);
                             assert.equal(err,null);
                             assert.notEqual(foundUser.platforms, undefined, 'stored user must contain a platforms array');
                             assert.equal(foundUser.platforms.length, 1, 'stored user must contain 1 platform');
@@ -215,7 +217,6 @@ var OPTIONS = {
 
 function nockSFLoginCall() {
     nock('https://login.salesforce.com')
-        .log(console.log)
         .filteringPath(function (path) {
             if (path.indexOf('/services/oauth2/authorize') > -1) {
                 return '/services/oauth2/authorize';
@@ -236,14 +237,12 @@ function nockSFLoginCall() {
 
 function nockSFGetProfileCall(profile){
     nock('https://cs15.salesforce.com')
-        .log(console.log)
         .get('/id/00De00000004cdeEAA/005e0000001uNIyAAM')
         .reply(200, profile);
 }
 
 function nockSFGetOptInfo(){
     nock('https://cs15.salesforce.com')
-        .log(console.log)
         .get('/services/data/v26.0/chatter/users/005e0000001uNIyAAM')
         .reply(200, {
             position: 'Backend Developer',
