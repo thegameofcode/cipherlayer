@@ -1,0 +1,11 @@
+machine:
+  node:
+    version: 0.12.4
+deployment:
+  npm:
+    branch: master
+    commands:
+      - npm version 1.0.$CIRCLE_BUILD_NUM --no-git-tag-version
+      - printf "//registry.npmjs.org/:_authToken=$NPM_ACCESS_TOKEN" > npmrc
+      - npm publish --userconfig npmrc
+      - rm npmrc
