@@ -1,6 +1,9 @@
 machine:
   node:
     version: 0.12.4
+test:
+  pre:
+    - cp config_sample.json config.json
 deployment:
   npm:
     branch: master
