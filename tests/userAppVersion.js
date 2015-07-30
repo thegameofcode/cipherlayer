@@ -9,7 +9,7 @@ var config = require('../config.json');
 describe('middleware userAppVersion', function(){
     var settings = {
         "version" : {
-            "header" : "x-mycomms-version",
+            "header" : config.version.header,
             "platforms" : {
                 "test" : {
                     "link" : "http://testLink",
