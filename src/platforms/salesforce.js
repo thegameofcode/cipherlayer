@@ -231,7 +231,7 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
             "refreshToken": platform.refreshToken,
             "expiry": new Date().getTime() + config.salesforce.expiration * 60 * 1000
         };
-        userDao.updateArrayItem(user._id, 'platforms', 'sf', newSFplatformItem, function(err, updatedUsers){
+        userDao.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function(err, updatedUsers){
             if (err){
                 return cbk(err);
             } else {
