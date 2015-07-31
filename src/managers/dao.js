@@ -218,16 +218,12 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     data[arrayName + '.$'] = itemValue;
     var update = {$set:data};
 
-    console.log(query,update);
-
     //first tries to update array item if already exists
     collection.update(query, update , function(err, updatedUsers){
         if(err) {
-            console.error(err);
             return cbk(err, null);
         }
 
-        console.log(updatedUsers);
         if(updatedUsers === 0){
             var update = {
                 $push:{}
@@ -236,10 +232,8 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
 
             collection.update({ _id: userId }, update, function(err, updatedUsers){
                 if(err){
-                    console.error(err);
                     return cbk(err, null);
                 }
-                console.log(updatedUsers);
                 cbk(null, updatedUsers);
             });
             return;
