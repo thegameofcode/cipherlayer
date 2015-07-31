@@ -163,10 +163,8 @@ module.exports = {
                         body = JSON.parse(body);
                         assert.notEqual(body.refreshToken, undefined);
                         assert.notEqual(body.expiresIn, undefined);
-                        console.log(body);
 
                         dao.getFromId(createdUser._id, function(err, foundUser){
-                            console.log(foundUser);
                             assert.equal(err,null);
                             assert.notEqual(foundUser.platforms, undefined, 'stored user must contain a platforms array');
                             assert.equal(foundUser.platforms.length, 1, 'stored user must contain 1 platform');

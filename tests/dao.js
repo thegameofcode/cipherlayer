@@ -184,7 +184,7 @@ describe('user dao', function(){
         });
     });
 
-    describe('updateArrayItem', function(){
+    describe.skip('updateArrayItem', function(){
         it('Creates array if not exists', function(done){
             var expectedUser = _.assign({},baseUser);
             var expectedField = 'fieldsArray';

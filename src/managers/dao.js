@@ -219,28 +219,27 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     var update = {$set:data};
 
     //first tries to update array item if already exists
-    collection.update(query, update, {upsert:true} , function(err, updatedUsers){
+    collection.update(query, update , function(err, updatedUsers){
         if(err) {
-            if(err.code == 16836){
-                //item is not found, we add it
-                var update = {
-                    $addToSet:{}
-                };
-                update.$addToSet[arrayName] = itemValue;
-
-                collection.update({ _id: userId }, update, function(err, updatedUsers){
-                    if(err){
-                        return cbk(err, null);
-                    }
-                    cbk(null, updatedUsers);
-                });
-                return;
-            }
-
-            cbk(err, null);
-        } else {
-            cbk(null, updatedUsers);
+            return cbk(err, null);
         }
+
+        if(updatedUsers === 0){
+            var update = {
+                $push:{}
+            };
+            update.$push[arrayName] = itemValue;
+
+            collection.update({ _id: userId }, update, function(err, updatedUsers){
+                if(err){
+                    return cbk(err, null);
+                }
+                cbk(null, updatedUsers);
+            });
+            return;
+        }
+
+        cbk(null, updatedUsers);
     });
 }
 
