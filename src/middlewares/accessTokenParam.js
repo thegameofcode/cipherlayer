@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:service');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 function checkAccessTokenParam (req, res, next){
     var paramAT = req.params.at;

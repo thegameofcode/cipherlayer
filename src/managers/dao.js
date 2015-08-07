@@ -4,7 +4,7 @@ var assert = require('assert');
 var async = require('async');
 var extend = require('util')._extend;
 var escapeRegexp = require('escape-regexp');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 

@@ -1,5 +1,5 @@
-var config = require('../../config.json');
 var debug = require('debug')('cipherlayer:service');
+var config = require(process.cwd() + '/config.json');
 var request = require('request');
 var httpProxy = require('http-proxy');
 var _ = require('lodash');

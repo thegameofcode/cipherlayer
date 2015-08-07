@@ -6,7 +6,7 @@ var _ = require('lodash');
 var countries = require('countries-info');
 var phoneMng = require('../managers/phone');
 var jsonUtil = require('../managers/json_validator');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 var errInvalidFields = {
     err: 'auth_proxy_error',

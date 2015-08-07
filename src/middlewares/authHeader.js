@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:service');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 function checkAuthHeader (req, res, next){
     req.auth = req.header('Authorization');

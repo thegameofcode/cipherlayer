@@ -2,7 +2,7 @@ var debug = require('debug')('cipherlayer:userAppVersion');
 var userDao = require('../managers/dao');
 var _ = require('lodash');
 
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 var updatingUserError = {
     err:'proxy_error',

@@ -1,4 +1,5 @@
-var config = require('../../config.json');
+
+var config = require(process.cwd() + '/config.json');
 var fs = require('fs');
 
 function prepareOptions (req, res, next){

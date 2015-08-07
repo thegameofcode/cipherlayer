@@ -1,4 +1,5 @@
-var config = require('../../config.json');
+
+var config = require(process.cwd() + '/config.json');
 var _ = require('lodash');
 
 var wrapper = module.exports = function(middleware) {

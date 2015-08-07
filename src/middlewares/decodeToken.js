@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:service');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 var tokenMng = require('../managers/token');
 
 function decodeToken (req, res, next){
