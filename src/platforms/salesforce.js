@@ -7,7 +7,7 @@ var userDao = require('../managers/dao');
 var userManager = require('../managers/user')();
 var tokenManager = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 
 // PASSPORT

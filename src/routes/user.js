@@ -4,7 +4,7 @@ var request = require('request');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require(process.cwd() + '/config.json');
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var emailMng = require('../managers/email');
 var tokenManager = require('../managers/token');

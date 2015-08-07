@@ -1,5 +1,5 @@
 var debug = require('debug')('cipherlayer:routes:heartbeat');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 var cipherlayer = require('../cipherlayer');
 

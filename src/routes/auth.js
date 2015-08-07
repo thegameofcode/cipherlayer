@@ -1,9 +1,9 @@
 var debug = require('debug')('cipherlayer:routes:auth');
 var userDao = require('../managers/dao');
 var tokenManager = require('../managers/token');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 var ObjectID = require('mongodb').ObjectID;
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require(process.cwd() + '/config.json');
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var request = require("request");
 
