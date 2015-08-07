@@ -2,7 +2,7 @@
   "name": "cipherlayer",
   "version": "0.0.1",
   "description": "cipherlayer",
-  "main": "cipherlayer.js",
+  "main": "src/cipherlayer.js",
   "dependencies": {
     "async": "^0.9.0",
     "aws-sdk": "^2.1.0",
