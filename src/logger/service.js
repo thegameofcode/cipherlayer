@@ -14,7 +14,7 @@ module.exports = function(){
 		name: 'cipherlayer-service',
 		streams: [{
 			type: 'rotating-file',
-			path: process.cwd() + '/logs/service.log',
+			path: process.cwd() + '/logs/cipherlayer-service.log',
 			period: '1d',
 			count: 7
 		}]
