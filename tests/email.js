@@ -59,6 +59,7 @@ describe('email', function() {
         };
         emailMng.emailVerification(email, bodyData, function(err, returnedEmail){
             assert.deepEqual(err, expected_error);
+			assert.equal(returnedEmail, null);
             done();
         });
     });

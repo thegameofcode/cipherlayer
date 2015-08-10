@@ -1,5 +1,4 @@
 var assert = require('assert');
-var fs = require('fs');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
@@ -37,7 +36,7 @@ module.exports = {
 
                     request(options, function(err,res,body){
                         assert.equal(err,null);
-                        assert.equal(res.statusCode, 302);
+                        assert.equal(res.statusCode, 302, body);
                         done();
                     });
                 });

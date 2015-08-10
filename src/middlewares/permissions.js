@@ -1,7 +1,5 @@
-var debug = require('debug')('cipherlayer:service');
 var config = require(process.cwd() + '/config.json');
 var _ = require('lodash');
-var async = require('async');
 
 function checkPermissions (req, res, next){
     if(!config.endpoints){

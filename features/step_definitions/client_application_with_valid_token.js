@@ -2,7 +2,6 @@ var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
 var async = require('async');
-var fs = require('fs');
 var config = require('../../config.json');
 
 var dao = require('../../src/managers/dao.js');

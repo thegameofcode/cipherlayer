@@ -20,7 +20,7 @@ describe('user dao', function(){
 
     beforeEach(function(done){
         fakeCollection = {
-            remove:function(obj,cbk){},
+            remove:function(){},
             count:function(){},
             find:function(){},
             insert:function(){},

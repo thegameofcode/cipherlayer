@@ -1,7 +1,5 @@
 var assert = require('assert');
-var fs = require('fs');
 var request = require('request');
-
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 
@@ -27,7 +25,7 @@ module.exports = {
 
                 request(options, function(err,res,body){
                     assert.equal(err,null);
-                    assert.equal(res.statusCode, 302);
+                    assert.equal(res.statusCode, 302, body);
                     done();
                 });
             });
@@ -46,7 +44,7 @@ module.exports = {
 
                     request(options, function(err,res,body){
                         assert.equal(err,null);
-                        assert.equal(res.statusCode, 302);
+                        assert.equal(res.statusCode, 302, body);
                         done();
                     });
                 });

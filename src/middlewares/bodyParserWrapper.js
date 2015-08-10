@@ -1,8 +1,7 @@
-
 var config = require(process.cwd() + '/config.json');
 var _ = require('lodash');
 
-var wrapper = module.exports = function(middleware) {
+module.exports = function(middleware) {
     return function(req, res, next) {
 
         var useDirectProxy = _.some(config.directProxyUrls, function(pattern) {

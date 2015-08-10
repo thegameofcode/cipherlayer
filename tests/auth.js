@@ -1,7 +1,3 @@
-var assert = require('assert');
-var request = require('request');
-var fs = require('fs');
-
 var cipherlayer = require('../src/cipherlayer.js');
 var config = require('../config.json');
 

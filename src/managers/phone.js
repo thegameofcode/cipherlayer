@@ -1,12 +1,8 @@
 var request = require('request');
-var async = require('async');
 var _ = require('lodash');
-
-var fs = require('fs');
-var path = require('path');
 var countries = require('countries-info');
-
 var redisMng = require('./redis');
+var todo = require('../logger/todo.js');
 
 var _settings = {};
 
@@ -26,7 +22,7 @@ function createPIN(redisKeyId, phone, cbk){
         if(err){
             return cbk(err);
         }
-        redisMng.insertKeyValue(redisKey + '.attempts', pinAttempts , expires, function(err, attemps){
+        redisMng.insertKeyValue(redisKey + '.attempts', pinAttempts , expires, function(err){
             if(err) {
                 return cbk(err);
             }
@@ -53,7 +49,8 @@ function sendPIN(phone, pin, cbk){
         body: JSON.stringify(sms)
     };
 
-    request(options, function(err, res, body) {
+    request(options, function(err) {
+		todo.warn('pin sms notification request must verify response code');
         if(err){
             return cbk(err);
         }
@@ -88,7 +85,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
         }
 
         if (!pin) {
-            createPIN(redisKeyId, phone, function (err, createdPin) {
+            createPIN(redisKeyId, phone, function (err) {
                 if (err) {
                     err.code = 500;
                     return cbk(err);
@@ -108,7 +105,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
                 if(err) return cbk(err);
 
                 if(!redisPhonePin) {
-                    createPIN(redisKeyId, phone, function(err, createdPin){
+                    createPIN(redisKeyId, phone, function(err){
                         if(err) {
                             return cbk(err);
                         }
@@ -122,7 +119,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
                     redisMng.getKeyValue(redisKey + '.attempts', function(err, redisPinAttempts) {
                         if(err) return cbk(err);
                         if(!redisPinAttempts || redisPinAttempts === '0') {
-                            createPIN(redisKeyId, phone, function(err, createdPin){
+                            createPIN(redisKeyId, phone, function(err){
                                 if(err){
                                     return cbk(err);
                                 }
@@ -138,7 +135,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
                             } else {
                                 //Last attempt
                                 if(redisPinAttempts === '1'){
-                                    createPIN(redisKeyId, phone, function(err, createdPin){
+                                    createPIN(redisKeyId, phone, function(err){
                                         if(err) {
                                             return cbk(err);
                                         }
@@ -149,7 +146,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
                                         }, false);
                                     });
                                 } else {
-                                    redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts-1, function (err, attempts) {
+                                    redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts-1, function (err) {
                                         if (err) return cbk(err);
                                         return cbk({
                                             err: 'verify_phone_error',

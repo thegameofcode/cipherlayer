@@ -17,7 +17,7 @@ function storeUserAppVersion(req, res, next){
         return next();
     } else {
         debug('appVersion [' + req.headers[_settings.version.header] + '] must be updated for the user [' + req.user._id + ']');
-        userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function(err, updatedUsers){
+        userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function(err){
             if(err){
                 debug('error updating user appVersion ', err);
                 res.send(500, updatingUserError);

@@ -1,9 +1,6 @@
 var debug = require('debug')('cipherlayer:middleware:pinValidation');
 var clone = require('clone');
-var request = require('request');
 var _ = require('lodash');
-
-var countries = require('countries-info');
 var phoneMng = require('../managers/phone');
 var jsonUtil = require('../managers/json_validator');
 var config = require(process.cwd() + '/config.json');
@@ -77,7 +74,7 @@ function pinValidation(req, res, next) {
 
         var pin = req.headers ? req.headers['x-otp-pin'] : null;
         debug('user try pin number', pin);
-        phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err, verified) {
+        phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
             if (err) {
                 if (!err.code ) {
                     res.send(500, err);

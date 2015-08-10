@@ -4,7 +4,6 @@ var assert = require('assert');
 var cipherlayer = require('../../src/cipherlayer');
 var world = require('./world');
 
-var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){

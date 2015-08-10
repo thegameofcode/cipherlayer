@@ -6,7 +6,7 @@ var _ = require('lodash');
 
 var proxy = httpProxy.createProxyServer({});
 
-proxy.on('proxyReq', function(proxyReq, req, res, options) {
+proxy.on('proxyReq', function() {
     debug('> http-proxy request received');
 });
 
@@ -18,9 +18,6 @@ proxy.on('error', function (err, req, res) {
     debug('http-proxy error occurred', err);
     res.send(500, {err:' auth_proxy_error', des: 'there was an internal error when redirecting the call to protected service'});
 });
-
-
-
 
 function propagateRequest(req, res, next){
     var start = Date.now();

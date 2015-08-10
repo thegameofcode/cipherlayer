@@ -1,7 +1,5 @@
 var assert = require('assert');
 var async = require('async');
-
-var dao = require('../src/managers/dao');
 var phoneMng = require('../src/managers/phone');
 var redisMng = require('../src/managers/redis');
 var cipherlayer = require('../src/cipherlayer');
@@ -94,6 +92,7 @@ describe('phone', function() {
 
             phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
+				assert.notEqual(createdPIN, null);
 
                 phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
                     assert.equal(err, null);
@@ -113,6 +112,7 @@ describe('phone', function() {
 
             phoneMng(phoneSettings).createPIN(baseUser.username, '+1' +basePhone, function (err, createdPIN) {
                 assert.equal(err, null);
+				assert.notEqual(createdPIN, null);
 
                 phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, 'zzzzz', function (err, verified) {
                     assert.notEqual(err, null);
