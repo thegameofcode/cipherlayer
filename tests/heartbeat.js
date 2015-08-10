@@ -27,7 +27,7 @@ describe('Heartbeat (Server status)', function() {
 
         request(options, function (err, res, body) {
             assert.equal(err, null);
-            assert.equal(res.statusCode, 204);
+            assert.equal(res.statusCode, 204, body);
             done();
         });
     });

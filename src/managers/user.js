@@ -1,9 +1,7 @@
 var debug = require('debug')('cipherlayer:manager:user');
-var clone = require('clone');
 var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
-var countries = require('countries-info');
 var ciphertoken = require('ciphertoken');
 
 var userDao = require('./dao');
@@ -90,7 +88,7 @@ function createUser(body, pin, cbk) {
 
         var phone = body.phone;
         var countryISO = body.country;
-        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err, verified) {
+        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
             if (err) {
                 return cbk(err);
             }

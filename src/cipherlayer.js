@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:service');
+var log = require('./logger/service.js');
 var restify = require('restify');
 var async = require('async');
 var fs = require('fs');
@@ -26,9 +26,6 @@ var versionControl = require('version-control');
 
 var pinValidation = require('./middlewares/pinValidation.js')();
 var userAppVersion = require('./middlewares/userAppVersion.js')();
-
-var jsonValidator = require('./managers/json_validator');
-var configSchema = require('../config_schema.json');
 
 var server;
 
@@ -58,7 +55,8 @@ function stopRedis(cbk){
 
 function startListener(publicPort, privatePort, cbk){
     server = restify.createServer({
-        name: 'cipherlayer-server'
+        name: 'cipherlayer-server',
+		log: log
     });
 
     server.use(headerCors);
@@ -66,7 +64,7 @@ function startListener(publicPort, privatePort, cbk){
     server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
     server.use(function(req,res,next){
-        debug('> ' + req.method + ' ' + req.url);
+        log.info({req: req });
         next();
     });
 
@@ -82,13 +80,11 @@ function startListener(publicPort, privatePort, cbk){
     server.use(versionControl(versionControlOptions));
 
     server.on('after', function(req, res, route, error){
-        var timing = Date.now() - new Date(req._time);
-        debug('< ' + res.statusCode + ' ' + res._data + ' ' + timing + 'ms');
+		log.error({res:res, route:route, err:error});
     });
 
     server.on('uncaughtException', function(req, res, route, error) {
-        var timing = Date.now() - new Date(req._time);
-        debug('< ' + res.statusCode + ' ' + error + ' ' + timing + 'ms');
+        log.error({exception:{req:req, res:res, route:route, err:error}});
         if(!res.statusCode){
             res.send(500, {err:'internal_error', des: 'uncaught exception'});
         }
@@ -111,7 +107,7 @@ function startListener(publicPort, privatePort, cbk){
     server.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
 
     server.use(function(req, res, next){
-        debug('< ' + res.statusCode);
+        log.info('< ' + res.statusCode);
         next();
     });
 

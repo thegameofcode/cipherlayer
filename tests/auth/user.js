@@ -1,6 +1,5 @@
 var assert = require('assert');
 var request = require('request');
-var fs = require('fs');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
 var crypto = require('crypto');
@@ -146,7 +145,7 @@ module.exports = {
                         });
 
                         options.headers = HEADERS_WITH_AUTHORIZATION_BASIC;
-                        request(options, function(err, res){
+                        request(options, function(err){
                             assert.equal(err, null);
                             dao.countUsers(function(err, count){
                                 assert.equal(err, null);
@@ -215,7 +214,7 @@ module.exports = {
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 302, body);
-                                assert.notEqual(res.headers['location'].indexOf(config.emailVerification.scheme + '://user/refreshToken/'), -1);
+                                assert.notEqual(res.headers.location.indexOf(config.emailVerification.scheme + '://user/refreshToken/'), -1);
                                 done();
                             });
                         });
@@ -261,7 +260,7 @@ module.exports = {
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 302, body);
-                                assert.notEqual(res.headers['location'].indexOf('intent://user/refreshToken/'), -1);
+                                assert.notEqual(res.headers.location.indexOf('intent://user/refreshToken/'), -1);
                                 done();
                             });
                         });

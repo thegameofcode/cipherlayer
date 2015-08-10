@@ -37,7 +37,8 @@ describe('user', function () {
     }
 
     beforeEach(function (done) {
-        cipherlayer.start(config.public_port, config.private_port, function(err, result){
+        cipherlayer.start(config.public_port, config.private_port, function(err){
+			assert.equal(err, null);
             dao.deleteAllUsers(function (err) {
                 assert.equal(err, null);
                 var userToCreate = clone(baseUser);
@@ -121,7 +122,7 @@ describe('user', function () {
 
                     request(options, function (err2, res2, body) {
                         assert.equal(err2, null);
-                        assert.equal(res2.statusCode, 204);
+                        assert.equal(res2.statusCode, 204, body);
                         dao.getAllUserFields(baseUser.username, function(err, result){
                             assert.equal(err, null);
                             assert.equal(result.password.length, 2);

@@ -1,4 +1,3 @@
-var debug = require('debug')('cipherlayer:dao');
 var clone = require('clone');
 var assert = require('assert');
 var async = require('async');
@@ -37,7 +36,7 @@ function connect(cbk){
 }
 
 function disconnect(cbk){
-    db.close(function(err,result){
+    db.close(function(err){
         cbk(err);
     });
 }
@@ -59,7 +58,7 @@ function _addUser(userToAdd, cbk){
     var signUpDate = new Date().getTime();
     user.signUpDate = signUpDate;
 
-    getFromUsername(user.username, function(err, foundUser){
+    getFromUsername(user.username, function(err){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
                 user._id = user.id;
@@ -158,8 +157,8 @@ function getAllUserFields(username, cbk){
 }
 
 function deleteAllUsers(cbk){
-    collection.remove({},function(err,numberRemoved){
-        cbk();
+    collection.remove({},function(err){
+        cbk(err);
     });
 }
 
@@ -250,7 +249,7 @@ function getStatus(cbk){
     };
 
     if(!db || !collection) return cbk(MONGO_ERR);
-    collection.count(function(err, count){
+    collection.count(function(err){
         if(err) return cbk(MONGO_ERR);
         cbk();
     });

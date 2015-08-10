@@ -1,7 +1,6 @@
 var request = require('request');
 var assert = require('assert');
 var ciphertoken = require('ciphertoken');
-var fs = require('fs');
 var clone = require('clone');
 var nock = require('nock');
 

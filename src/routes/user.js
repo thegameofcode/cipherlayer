@@ -1,6 +1,4 @@
 var debug = require('debug')('cipherlayer:routes:auth');
-var clone = require('clone');
-var request = require('request');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
@@ -45,7 +43,7 @@ function sendNewPassword(req, res, next){
                     fieldValue = [foundUser.password, encryptedPassword];
                 }
 
-                userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
+                userDao.updateField(foundUser._id, 'password', fieldValue, function(err){
                     if(err){
                         res.send(500, {
                             err: 'auth_proxy_error',
@@ -157,7 +155,7 @@ function setPassword(req, res, next){
         return next();
     }
 
-    userMng().setPassword(req.user._id, req.body, function(err, modified){
+    userMng().setPassword(req.user._id, req.body, function(err){
         if (err) {
             if (!err.code ) {
                 res.send(500, err);
