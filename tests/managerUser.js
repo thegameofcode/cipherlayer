@@ -653,7 +653,7 @@ describe('user Manager', function(){
 
 					userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
 						assert.equal(err, null);
-						assert.equal(tokens,undefined);
+						assert.notEqual(tokens, null);
 
 						userMng(testsConfigSettings).createUserByToken( token, function(err, tokens) {
 							assert.notEqual(err, null);
@@ -760,7 +760,7 @@ describe('user Manager', function(){
 							};
 
 							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
-								assert.notEqual(err, null);
+								assert.equal(err, null);
 								assert.equal(result, 1);
 								done();
 							});
