@@ -14,7 +14,7 @@ module.exports = function(){
 		name: 'cipherlayer-todo',
 		streams: [{
 			type: 'rotating-file',
-			path: process.cwd() + '/logs/todo.log',
+			path: process.cwd() + '/logs/cipherlayer-todo.log',
 			period: '1d',
 			count: 7
 		}]
