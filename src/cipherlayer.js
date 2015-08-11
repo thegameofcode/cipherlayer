@@ -65,7 +65,10 @@ function startListener(publicPort, privatePort, cbk){
 	});
 
 	server.on('after', function (req, res) {
-		req.log.info({res: res}, "finished");
+		req.log.info({response: {
+			statusCode:res.statusCode,
+			hasBody:res.hasBody
+		}}, "finished");
 	});
 
     server.use(headerCors);
