@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:routes:auth');
+var log = require('../logger/service.js');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
@@ -122,20 +122,15 @@ function createUserByToken(req, res, next) {
                 var check = exp.replace(/\*/g,'.*');
                 var match = userAgent.match(check);
                 var isCompatible = (match !== null && userAgent === match[0]);
-                debug('match \''+ userAgent +'\' with \'' + exp + '\' : ' + isCompatible);
                 if(isCompatible) {
                     match = userAgent.match(/.*Android.*/i);
                     var isAndroid = (match !== null && userAgent === match[0]);
                     var location = config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken;
 
-                    debug('device \''+userAgent+'\' is android:', isAndroid);
-
                     if(isAndroid){
                         location = 'intent://user/refreshToken/' + tokens.refreshToken + '/#Intent;scheme=' + config.emailVerification.scheme + ';end';
                     }
                     res.header('Location', location );
-                    debug('>> 302 redirect to > ' , location );
-
                     res.send(302);
                     return next(false);
                 }
@@ -180,7 +175,7 @@ function addRoutes(service){
 
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, setPassword);
 
-    debug('User routes added');
+    log.info('User routes added');
 }
 
 module.exports = addRoutes;

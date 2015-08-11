@@ -1,8 +1,8 @@
-var debug = require('debug')('cipherlayer:service');
+var log = require('../logger/service.js');
 
 function printTraces (req, res, next){
     var url = req.options.url;
-    debug('=> ' + req.method + ' ' + url);
+	log.info({method:req.method,url:url},'proxy call');
     next();
 }
 
