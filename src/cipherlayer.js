@@ -65,6 +65,7 @@ function startListener(publicPort, privatePort, cbk){
 					url: req.url,
 					method: req.method,
 					headers: req.headers,
+					params: req.params,
 					time: req._time
 				},
 				response: {
@@ -72,7 +73,8 @@ function startListener(publicPort, privatePort, cbk){
 					hasBody: res.hasBody,
 					time: res._time
 				},
-				user: req.user
+				user: req.user,
+				tokenInfo: req.tokenInfo
 			}, "response");
 	});
 
