@@ -59,14 +59,18 @@ function startListener(publicPort, privatePort, cbk){
 		log: log
     });
 
+	server.pre(function (req, res, next) {
+		req.log.info({req: req}, 'start');
+		next();
+	});
+
+	server.on('after', function (req, res) {
+		req.log.info({res: res}, "finished");
+	});
+
     server.use(headerCors);
     server.use(restify.queryParser());
     server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
-
-    server.use(function(req,res,next){
-        log.info({req: req });
-        next();
-    });
 
     var versionControlOptions = clone(config.version);
     versionControlOptions.public = [
@@ -78,10 +82,6 @@ function startListener(publicPort, privatePort, cbk){
         "/heartbeat"
     ];
     server.use(versionControl(versionControlOptions));
-
-    server.on('after', function(req, res, route, error){
-		log.error({res:res, route:route, err:error});
-    });
 
     server.on('uncaughtException', function(req, res, route, error) {
         log.error({exception:{req:req, res:res, route:route, err:error}});
