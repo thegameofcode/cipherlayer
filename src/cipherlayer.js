@@ -29,35 +29,35 @@ var userAppVersion = require('./middlewares/userAppVersion.js')();
 
 var server;
 
-function startDaos(cbk) {
-	userDao.connect(function () {
-		cbk();
-	});
+function startDaos(cbk){
+    userDao.connect(function(){
+        cbk();
+    });
 }
 
-function stopDaos(cbk) {
-	userDao.disconnect(function () {
-		cbk();
-	});
+function stopDaos(cbk){
+    userDao.disconnect(function(){
+        cbk();
+    });
 }
 
-function startRedis(cbk) {
-	redisMng.connect(function () {
-		cbk();
-	});
+function startRedis(cbk){
+    redisMng.connect(function(){
+        cbk();
+    });
 }
 
-function stopRedis(cbk) {
-	redisMng.disconnect(function () {
-		cbk();
-	});
+function stopRedis(cbk){
+    redisMng.disconnect(function(){
+        cbk();
+    });
 }
 
-function startListener(publicPort, privatePort, cbk) {
-	server = restify.createServer({
-		name: 'cipherlayer-server',
+function startListener(publicPort, privatePort, cbk){
+    server = restify.createServer({
+        name: 'cipherlayer-server',
 		log: log
-	});
+    });
 
 	server.on('after', function (req, res) {
 		req.log.info(
@@ -77,108 +77,107 @@ function startListener(publicPort, privatePort, cbk) {
 			}, "response");
 	});
 
-	server.use(headerCors);
-	server.use(restify.queryParser());
-	server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
+    server.use(headerCors);
+    server.use(restify.queryParser());
+    server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-	var versionControlOptions = clone(config.version);
-	versionControlOptions.public = [
-		"/auth/sf",
-		"/auth/sf/*",
-		"/auth/in",
-		"/auth/in/*",
-		"/user/activate*",
-		"/heartbeat"
-	];
-	server.use(versionControl(versionControlOptions));
+    var versionControlOptions = clone(config.version);
+    versionControlOptions.public = [
+        "/auth/sf",
+        "/auth/sf/*",
+        "/auth/in",
+        "/auth/in/*",
+        "/auth/google",
+        "/auth/google/*",
+        "/user/activate*",
+        "/heartbeat"
+    ];
+    server.use(versionControl(versionControlOptions));
 
-	server.on('uncaughtException', function (req, res, route, error) {
-		log.error({exception: {req: req, res: res, route: route, err: error}});
-		if (!res.statusCode) {
-			res.send(500, {err: 'internal_error', des: 'uncaught exception'});
-		}
-	});
+    server.on('uncaughtException', function(req, res, route, error) {
+        log.error({exception:{req:req, res:res, route:route, err:error}});
+        if(!res.statusCode){
+            res.send(500, {err:'internal_error', des: 'uncaught exception'});
+        }
+    });
 
-	var routesPath = path.join(__dirname, './routes/');
-	fs.readdirSync(routesPath).forEach(function (filename) {
-		require(routesPath + filename)(server);
-	});
+    var routesPath = path.join(__dirname, './routes/');
+    fs.readdirSync(routesPath).forEach(function(filename) {
+        require(routesPath + filename)(server);
+    });
 
-	var platformsPath = path.join(__dirname, '/platforms/');
-	fs.readdirSync(platformsPath).forEach(function (filename) {
-		require(platformsPath + filename).addRoutes(server, passport);
-	});
+    var platformsPath = path.join(__dirname, '/platforms/');
+    fs.readdirSync(platformsPath).forEach(function(filename) {
+        require(platformsPath + filename).addRoutes(server, passport);
+    });
 
-	server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-	server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-	server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-	server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-	server.opts(/(.*)/, function (req, res, next) {
-		res.send(200);
-		next();
-	});
+    server.get(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
 
-	server.use(function (req, res, next) {
-		log.info('< ' + res.statusCode);
-		next();
-	});
+    server.use(function(req, res, next){
+        log.info('< ' + res.statusCode);
+        next();
+    });
 
-	server.listen(publicPort, function () {
-		cbk();
-	});
+    server.listen(publicPort, function(){
+        cbk();
+    });
 }
 
-function stopListener(cbk) {
-	server.close(function () {
-		cbk();
-	});
+function stopListener(cbk){
+    server.close(function(){
+        cbk();
+    });
 }
 
-function start(publicPort, privatePort, cbk) {
-	//Validate the current config.json with the schema
-	//if( !jsonValidator.isValidJSON(config, configSchema)) {
-	//    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
-	//}
+function start(publicPort, privatePort, cbk){
+    //Validate the current config.json with the schema
+    //if( !jsonValidator.isValidJSON(config, configSchema)) {
+    //    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
+    //}
 
-	async.series([
-		startDaos,
-		startRedis,
-		function (done) {
-			startListener(publicPort, privatePort, done);
-		}
-	], function (err) {
-		cbk(err);
-	});
+    async.series([
+        startDaos,
+        startRedis,
+        function(done){
+            startListener(publicPort, privatePort, done);
+        }
+    ],function(err){
+        cbk(err);
+    });
 }
 
-function stop(cbk) {
-	async.series([
-		stopDaos,
-		stopRedis,
-		stopListener
-	], function (err) {
-		cbk(err);
-	});
+function stop(cbk){
+    async.series([
+        stopDaos,
+        stopRedis,
+        stopListener
+    ],function(err){
+        cbk(err);
+    });
 }
 
-function getStatus(cbk) {
-	async.series([
-		function (done) {
-			userDao.getStatus(done);
-		},
-		function (done) {
-			redisMng.getStatus(done);
-		}
-	], function (err) {
-		if (err) {
-			return cbk(err);
-		}
-		cbk();
-	});
+function getStatus(cbk){
+    async.series([
+        function(done){
+            userDao.getStatus(done);
+        },
+        function(done){
+            redisMng.getStatus(done);
+        }
+    ],function(err){
+        if(err){
+            return cbk(err);
+        }
+        cbk();
+    });
 }
 
 module.exports = {
-	start: start,
-	stop: stop,
-	getStatus: getStatus
+    start : start,
+    stop : stop,
+    getStatus: getStatus
 };
