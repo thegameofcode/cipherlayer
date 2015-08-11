@@ -14,7 +14,6 @@ var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
 var checkAuthHeader = require('./middlewares/authHeader.js');
 var decodeToken = require('./middlewares/decodeToken.js');
 var findUser = require('./middlewares/findUser.js');
-var printTraces = require('./middlewares/traces.js');
 var prepareOptions = require('./middlewares/prepareOptions.js');
 var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
@@ -111,10 +110,10 @@ function startListener(publicPort, privatePort, cbk){
         require(platformsPath + filename).addRoutes(server, passport);
     });
 
-    server.get(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
-    server.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, printTraces, propagateRequest);
+    server.get(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+    server.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+    server.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
     server.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
 
     server.use(function(req, res, next){
