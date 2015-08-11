@@ -81,6 +81,8 @@ function startListener(publicPort, privatePort, cbk){
         "/auth/sf/*",
         "/auth/in",
         "/auth/in/*",
+        "/auth/google",
+        "/auth/google/*",
         "/user/activate*",
         "/heartbeat"
     ];
