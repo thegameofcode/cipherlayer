@@ -6,6 +6,7 @@ var path = require('path');
 var config = require(process.cwd() + '/config.json');
 var passport = require('passport');
 var clone = require('clone');
+var _ = require('lodash');
 
 var userDao = require('./managers/dao');
 var redisMng = require('./managers/redis');
@@ -62,16 +63,19 @@ function startListener(publicPort, privatePort, cbk){
 		req.log.info(
 			{
 				request:{
-					url: req.url,
 					method: req.method,
 					headers: req.headers,
+					url: req.url,
+					path: req._url.pathname,
+					query: req._url.query,
 					params: req.params,
 					time: req._time
 				},
 				response: {
 					statusCode: res.statusCode,
 					hasBody: res.hasBody,
-					time: res._time
+					bodySize: _.size(res.body),
+					time: Date.now()
 				},
 				user: req.user,
 				tokenInfo: req.tokenInfo
