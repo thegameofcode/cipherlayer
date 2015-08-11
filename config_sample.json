@@ -51,6 +51,12 @@
     "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/in/callback"
   },
+  "google": {
+    "scope": ["profile", "https://www.googleapis.com/auth/plus.login"],
+    "clientId": "{{GOOGLE_CLIENT_ID}}",
+    "clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
+    "callbackURL": "http://localhost:3000/auth/google/callback"
+  },
   "aws":{
     "accessKeyId": "{{AWS_ACCESKEYID}}",
     "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
