@@ -59,18 +59,21 @@ function startListener(publicPort, privatePort, cbk) {
 		log: log
 	});
 
-	server.pre(function (req, res, next) {
-		req.log.info({req: req}, 'request');
-		next();
-	});
-
 	server.on('after', function (req, res) {
 		req.log.info(
 			{
+				request:{
+					url: req.url,
+					method: req.method,
+					headers: req.headers,
+					time: req._time
+				},
 				response: {
 					statusCode: res.statusCode,
-					hasBody: res.hasBody
-				}
+					hasBody: res.hasBody,
+					time: res._time
+				},
+				user: req.user
 			}, "response");
 	});
 
