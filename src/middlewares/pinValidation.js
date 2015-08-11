@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:middleware:pinValidation');
+var log = require('../logger/service.js');
 var clone = require('clone');
 var _ = require('lodash');
 var phoneMng = require('../managers/phone');
@@ -33,7 +33,6 @@ function pinValidation(req, res, next) {
 
         var match = path.match(check);
         requiresPinValidation = (match !== null && path == match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
-        debug('match \''+ path +'\' with \'' + exp + '\' : ' + requiresPinValidation);
         if(requiresPinValidation){
             var fieldsSchema = {
                 "id": "/MePhones",
@@ -56,7 +55,6 @@ function pinValidation(req, res, next) {
     if(!requiresPinValidation){
         return next();
     } else {
-        debug('Requires pin validation path \''+path+'\'');
         var user = req.user;
         if(!user){
             res.send(401, {err:'invalid_headers', des:'no user in headers'});
@@ -64,7 +62,7 @@ function pinValidation(req, res, next) {
         }
 
         if(!validBodySchema){
-            debug('Invalid body params');
+            log.warn('Invalid body params when checking for pin validation');
             res.send(400, errInvalidFields);
             return next(false);
         }
@@ -73,7 +71,7 @@ function pinValidation(req, res, next) {
         var countryISO = body[pinValidationConfig.fields.countryISO];
 
         var pin = req.headers ? req.headers['x-otp-pin'] : null;
-        debug('user try pin number', pin);
+        log.info({pinValidation:{user:user.id,pin:pin}});
         phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
             if (err) {
                 if (!err.code ) {

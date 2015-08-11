@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:routes:auth');
+var log = require('../logger/service.js');
 var userDao = require('../managers/dao');
 var tokenManager = require('../managers/token');
 var config = require(process.cwd() + '/config.json');
@@ -19,7 +19,7 @@ function postAuthLogin(req, res, next){
                 userDao.getAllUserFields(foundUser.username, function (err, result){
                     if(Array.isArray(result.password)){
                         userDao.updateField(foundUser._id, "password", encryptedPwd, function(err, result){
-                            debug('UpdatePasswordField', err, result);
+                            log.info({err:err,result:result}, 'UpdatePasswordField');
                         });
                     }
                 });
@@ -34,7 +34,7 @@ function postAuthLogin(req, res, next){
                 }
 
                 sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err, result){
-                    debug('AddDeviceRespose', err, result);
+                    log.info({err:err,result:result},'AddDeviceResponse');
                     tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                         if(err) {
                             res.send(409,{err: err.message});
@@ -157,7 +157,7 @@ function renewToken(req, res, next){
             return next();
         }
         sessionRequest(data.deviceId, tokenSet.userId, 'POST', userAgent, function(err, result){
-            debug('AddDeviceRespose', err, result);
+			log.info({err:err,result:result},'AddDeviceResponse');
             tokenManager.createAccessToken(tokenSet.userId, data, function(err, newToken){
                 var body = {
                     accessToken: newToken,
@@ -178,7 +178,7 @@ function authLogout(req, res, next){
     userId = userId.substr(3);
     var deviceId = req.body.deviceId;
     sessionRequest(deviceId , userId, 'DELETE', userAgent, function(err, result){
-        debug('RemoveDeviceRespose', err, result);
+		log.info({err:err,result:result},'RemoveDeviceResponse');
         res.send(204);
         return next();
     });
@@ -191,7 +191,7 @@ function addRoutes(service) {
     service.post('/auth/renew', renewToken);
     service.post('/auth/logout', authLogout);
 
-    debug('Auth routes added');
+    log.info('Auth routes added');
 }
 
 module.exports = addRoutes;

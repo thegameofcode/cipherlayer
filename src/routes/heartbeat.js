@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:routes:heartbeat');
+var log = require('../logger/service.js');
 
 var cipherlayer = require('../cipherlayer');
 
@@ -16,7 +16,7 @@ function getStatus(req, res, next){
 function addRoutes(service) {
     service.get('/heartbeat', getStatus);
 
-    debug('Heartbeat route added');
+    log.info('Heartbeat route added');
 }
 
 module.exports = addRoutes;

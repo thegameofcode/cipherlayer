@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:userAppVersion');
+var log = require('../logger/service.js');
 var userDao = require('../managers/dao');
 var _ = require('lodash');
 
@@ -16,10 +16,9 @@ function storeUserAppVersion(req, res, next){
     if(!req.headers[_settings.version.header] || req.user.appVersion === req.headers[_settings.version.header]) {
         return next();
     } else {
-        debug('appVersion [' + req.headers[_settings.version.header] + '] must be updated for the user [' + req.user._id + ']');
         userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function(err){
             if(err){
-                debug('error updating user appVersion ', err);
+                log.error({err:err});
                 res.send(500, updatingUserError);
                 return next(false);
             } else {

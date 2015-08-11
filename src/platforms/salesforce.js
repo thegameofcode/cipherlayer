@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:platforms:salesforce');
+var log = require('../logger/service.js');
 var request = require('request');
 var async = require('async');
 var countries = require('countries-info');
@@ -26,7 +26,7 @@ if(config.salesforce.tokenUrl){
 }
 
 function prepareSession(accessToken, refreshToken, profile, done){
-    debug('user '+ profile.id +' logged in using salesforce');
+    log.info('user '+ profile.id +' logged in using salesforce');
     async.series(
         [
             function uploadAvatar(done){
@@ -42,13 +42,12 @@ function prepareSession(accessToken, refreshToken, profile, done){
                     var oauthToken = "?oauth_token=" + accessToken.params.access_token;
 
                     var avatarPath = profile._raw.photos.picture + oauthToken;
-                    //TODO change this to use 'path' framework
                     var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
                     var name = profile.id.substring(idPos) + '.jpg';
 
                     fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
                         if(err){
-                            debug('Error uploading a profile picture to AWS');
+                            log.error({err:err}, 'Error uploading a profile picture to AWS');
                         } else {
                             profile.avatar = avatarUrl;
                         }
@@ -145,8 +144,7 @@ function salesforceCallback(req, res, next){
             //TODO check if setPlatformData and createBothTokens call can be made in parallel
             userManager.setPlatformData(foundUser._id, 'sf', platform, function(err){
                 if(err){
-                    debug('error updating sf tokens into user '+foundUser._id+':' + err);
-                    //TODO check if it's ok to ignore this error
+                    log.error({err:err}, 'error updating sf tokens into user '+foundUser._id+'');
                 }
                 var data = {};
                 if(foundUser.roles){
