@@ -33,8 +33,10 @@ function postAuthLogin(req, res, next){
                     data.deviceId = req.body.deviceId;
                 }
 
-                sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err, result){
-                    log.info({err:err,result:result},'AddDeviceResponse');
+                sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err){
+					if(err){
+						log.error({err:err});
+					}
                     tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                         if(err) {
                             res.send(409,{err: err.message});
@@ -156,9 +158,14 @@ function renewToken(req, res, next){
             res.send(401, errExpiredToken);
             return next();
         }
-        sessionRequest(data.deviceId, tokenSet.userId, 'POST', userAgent, function(err, result){
-			log.info({err:err,result:result},'AddDeviceResponse');
+        sessionRequest(data.deviceId, tokenSet.userId, 'POST', userAgent, function(err){
+			if(err){
+				log.error({err:err});
+			}
             tokenManager.createAccessToken(tokenSet.userId, data, function(err, newToken){
+				if(err){
+					log.error({err:err});
+				}
                 var body = {
                     accessToken: newToken,
                     expiresIn: config.accessToken.expiration
@@ -191,7 +198,7 @@ function addRoutes(service) {
     service.post('/auth/renew', renewToken);
     service.post('/auth/logout', authLogout);
 
-    log.info('Auth routes added');
+    console.log('Auth routes added');
 }
 
 module.exports = addRoutes;

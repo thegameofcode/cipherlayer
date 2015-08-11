@@ -1,4 +1,3 @@
-var log = require('../logger/service.js');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
@@ -175,7 +174,7 @@ function addRoutes(service){
 
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, setPassword);
 
-    log.info('User routes added');
+    console.log('User routes added');
 }
 
 module.exports = addRoutes;
