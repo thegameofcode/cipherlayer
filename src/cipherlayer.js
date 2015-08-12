@@ -79,7 +79,7 @@ function startListener(publicPort, privatePort, cbk){
 			user: req.user,
 			tokenInfo: req.tokenInfo
 		};
-		logInfo = _.omit(logInfo, 'request.params.password');
+		delete(logInfo.request.params.password);
 
 		req.log.info(logInfo, "response");
 	});
