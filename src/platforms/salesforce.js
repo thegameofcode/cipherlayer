@@ -10,22 +10,27 @@ var fileStoreMng = require('../managers/file_store');
 var config = require(process.cwd() + '/config.json');
 
 
-// PASSPORT
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
-var salesforceSettings = {
-    clientID : config.salesforce.clientId,
-    clientSecret : config.salesforce.clientSecret,
-    scope : config.salesforce.scope,
-    callbackURL : config.salesforce.callbackURL
-};
-if(config.salesforce.authUrl){
-    salesforceSettings.authorizationURL = config.salesforce.authUrl;
-}
-if(config.salesforce.tokenUrl){
-    salesforceSettings.tokenURL = config.salesforce.tokenUrl;
+
+function createSalesforceStrategy() {
+
+    var salesforceSettings = {
+        clientID : config.salesforce.clientId,
+        clientSecret : config.salesforce.clientSecret,
+        scope : config.salesforce.scope,
+        callbackURL : config.salesforce.callbackURL
+    };
+    if(config.salesforce.authUrl){
+        salesforceSettings.authorizationURL = config.salesforce.authUrl;
+    }
+    if(config.salesforce.tokenUrl){
+        salesforceSettings.tokenURL = config.salesforce.tokenUrl;
+    }
+
+    return new forcedotcomStrategy(salesforceSettings, prepareSession);
 }
 
-function prepareSession(accessToken, refreshToken, profile, done){
+function prepareSession(accessToken, refreshToken, profile, done) {
     log.info('user '+ profile.id +' logged in using salesforce');
     async.series(
         [
@@ -70,9 +75,8 @@ function prepareSession(accessToken, refreshToken, profile, done){
     );
 
 }
-var salesforceStrategy = new forcedotcomStrategy(salesforceSettings, prepareSession);
 
-function salesforceDenyPermisionFilter(req, res, next){
+function salesforceDenyPermisionFilter(req, res, next) {
     var errorCode = req.query.error;
 
     var errorDescription = req.query.error_description;
@@ -239,7 +243,13 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
     });
 }
 
-function addRoutes(server, passport){
+function addRoutes(server, passport) {
+	if(!config.salesforce){
+		return;
+	}
+
+    log.info('Adding Salesforce routes');
+    var salesforceStrategy = createSalesforceStrategy();
     passport.use(salesforceStrategy);
     server.get('/auth/sf', authSfBridge(passport));
     server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);

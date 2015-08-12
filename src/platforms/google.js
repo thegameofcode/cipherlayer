@@ -1,8 +1,27 @@
+var GoogleStrategy = require('passport-google-oauth2').Strategy;
+
 var log = require('../logger/service');
 var tokenManager = require('../managers/token');
 var userDao = require('../managers/dao');
 var userManager = require('../managers/user')();
 var config = require(process.cwd() + '/config.json');
+
+function createGoogleStrategy() {
+
+    return new GoogleStrategy({
+        clientID: config.google.clientId,
+        clientSecret: config.google.clientSecret,
+        callbackURL: config.google.callbackURL,
+        passReqToCallback: true
+    }, function(req, accessToken, refreshToken, profile, done) {
+        var data = {
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            profile: profile
+        };
+        done(null, data);
+    });
+}
 
 function googleCallback(req, res, next) {
     var googleData = req.user;
@@ -71,22 +90,8 @@ function addRoutes(server, passport){
 		return;
 	}
 
-	// PASSPORT
-	var GoogleStrategy = require('passport-google-oauth2').Strategy;
-	var googleStrategy = new GoogleStrategy({
-		clientID: config.google.clientId,
-		clientSecret: config.google.clientSecret,
-		callbackURL: config.google.callbackURL,
-		passReqToCallback: true
-	}, function(req, accessToken, refreshToken, profile, done) {
-		var data = {
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			profile: profile
-		};
-		done(null, data);
-	});
-
+    log.info('Adding LinkedIn routes');
+    var googleStrategy = createGoogleStrategy();
 	passport.use(googleStrategy);
     server.get('/auth/google', passport.authenticate('google', {scope: config.google.scope, accessType: 'offline', state: new Date().getTime() } ));
     server.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/auth/error', session: false} ), googleCallback);
