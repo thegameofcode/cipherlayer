@@ -60,26 +60,28 @@ function startListener(publicPort, privatePort, cbk){
     });
 
 	server.on('after', function (req, res) {
-		req.log.info(
-			{
-				request:{
-					method: req.method,
-					headers: req.headers,
-					url: req.url,
-					path: req._url.pathname,
-					query: req._url.query,
-					params: req.params,
-					time: req._time
-				},
-				response: {
-					statusCode: res.statusCode,
-					hasBody: res.hasBody,
-					bodySize: _.size(res.body),
-					time: Date.now()
-				},
-				user: req.user,
-				tokenInfo: req.tokenInfo
-			}, "response");
+		var logInfo = {
+			request:{
+				method: req.method,
+				headers: req.headers,
+				url: req.url,
+				path: req._url.pathname,
+				query: req._url.query,
+				params: req.params,
+				time: req._time
+			},
+			response: {
+				statusCode: res.statusCode,
+				hasBody: res.hasBody,
+				bodySize: _.size(res.body),
+				time: Date.now()
+			},
+			user: req.user,
+			tokenInfo: req.tokenInfo
+		};
+		logInfo = _.omit(logInfo, 'request.params.password');
+
+		req.log.info(logInfo, "response");
 	});
 
     server.use(headerCors);
