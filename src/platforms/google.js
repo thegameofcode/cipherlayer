@@ -90,7 +90,7 @@ function addRoutes(server, passport){
 		return;
 	}
 
-    log.info('Adding LinkedIn routes');
+    log.info('Adding Google routes');
     var googleStrategy = createGoogleStrategy();
 	passport.use(googleStrategy);
     server.get('/auth/google', passport.authenticate('google', {scope: config.google.scope, accessType: 'offline', state: new Date().getTime() } ));
