@@ -25,6 +25,10 @@ function postAuthLogin(req, res, next){
                 });
 
                 var data = {};
+				if(foundUser.signUpDate){
+					data.signUpDate = foundUser.signUpDate;
+				}
+
                 if(foundUser.roles){
                     data.roles = foundUser.roles;
                 }
