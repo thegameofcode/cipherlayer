@@ -12,7 +12,7 @@
     "features-only": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @only",
     "jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js",
     "coverage-1": "node --harmony node_modules/.bin/istanbul cover ./node_modules/.bin/cucumber.js --lcovonly -- --tags ~@ignore --format json > /dev/null",
-    "coverage-2": "mv coverage/lcov.info coverage/cucumber.lcov",
+    "coverage-2": "cp coverage/lcov.info coverage/cucumber.lcov",
     "coverage-3": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
     "coverage-4": "node_modules/.bin/lcov-result-merger 'coverage/*.lcov' 'coverage/merged.lcov'",
     "coverage-5": "cat ./coverage/merged.lcov | ./node_modules/coveralls/bin/coveralls.js"
