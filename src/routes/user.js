@@ -173,8 +173,6 @@ function addRoutes(service){
     service.get('/user/activate', createUserByToken);
 
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, setPassword);
-
-    console.log('User routes added');
 }
 
 module.exports = addRoutes;

@@ -13,8 +13,6 @@ function getStatus(req, res, next){
 
 function addRoutes(service) {
     service.get('/heartbeat', getStatus);
-
-    console.log('Heartbeat route added');
 }
 
 module.exports = addRoutes;

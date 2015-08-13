@@ -5,10 +5,17 @@
   "main": "src/cipherlayer.js",
   "scripts": {
     "test": "npm run-script jshint && npm run-script mocha && npm run-script features",
-    "mocha": "./node_modules/mocha/bin/mocha tests --recursive",
+    "mocha": "./node_modules/.bin/mocha tests --recursive",
+    "mocha-report-1": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
+    "mocha-report-2": "cat coverage/mocha.lcov | node_modules/coveralls/bin/coveralls.js",
     "features": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags ~@ignore",
     "features-only": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @only",
-    "jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js"
+    "jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js",
+    "coverage-1": "node --harmony node_modules/.bin/istanbul cover ./node_modules/.bin/cucumber.js --lcovonly -- --tags ~@ignore --format json > /dev/null",
+    "coverage-2": "cp coverage/lcov.info coverage/cucumber.lcov",
+    "coverage-3": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
+    "coverage-4": "node_modules/.bin/lcov-result-merger 'coverage/*.lcov' 'coverage/merged.lcov'",
+    "coverage-5": "cat ./coverage/merged.lcov | ./node_modules/coveralls/bin/coveralls.js"
   },
   "dependencies": {
     "async": "^0.9.0",
@@ -34,9 +41,14 @@
   },
   "devDependencies": {
     "assert": "^1.1.2",
+    "blanket": "^1.1.7",
+    "coveralls": "^2.11.4",
     "cucumber": "^0.5.2",
+    "istanbul": "^0.3.17",
     "jshint": "^2.8.0",
+    "lcov-result-merger": "^1.0.2",
     "mocha": "^2.0.1",
+    "mocha-lcov-reporter": "0.0.2",
     "nock": "^0.51.0",
     "pre-commit": "^1.0.7",
     "sinon": "^1.12.2",
@@ -60,5 +72,17 @@
     "node": true,
     "unused": true,
     "mocha": true
+  },
+  "config": {
+    "blanket": {
+      "pattern": [
+        "src",
+        "tests"
+      ],
+      "data-cover-never": [
+        "node_modules",
+        "tests"
+      ]
+    }
   }
 }

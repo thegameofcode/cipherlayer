@@ -201,8 +201,6 @@ function addRoutes(service) {
     service.del('/auth/user', checkAuthBasic, delAuthUser);
     service.post('/auth/renew', renewToken);
     service.post('/auth/logout', authLogout);
-
-    console.log('Auth routes added');
 }
 
 module.exports = addRoutes;
