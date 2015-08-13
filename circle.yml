@@ -7,6 +7,13 @@ machine:
 test:
   pre:
     - cp config_sample.json config.json
+  override:
+    - npm test
+    - npm run coverage-1
+    - npm run coverage-2
+    - npm run coverage-3
+    - npm run coverage-4
+    - npm run coverage-5
 deployment:
   npm:
     branch: master
