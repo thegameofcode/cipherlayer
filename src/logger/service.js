@@ -16,7 +16,7 @@ module.exports = function(){
 			type: 'rotating-file',
 			path: process.cwd() + '/logs/cipherlayer-service.log',
 			period: '1d',
-			count: 7
+			count: 30
 		}]
 	});
 	return log;
