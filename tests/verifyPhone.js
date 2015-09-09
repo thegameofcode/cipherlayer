@@ -3,7 +3,6 @@ var async = require('async');
 var request = require('request');
 var nock = require('nock');
 var clone = require('clone');
-var fs = require('fs');
 var config = require('../config.json');
 
 var dao = require('../src/managers/dao');

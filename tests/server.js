@@ -1,7 +1,6 @@
 var cipherlayer = require('../src/cipherlayer.js');
 var assert = require('assert');
 var net = require('net');
-var fs = require('fs');
 var config = require('../config.json');
 
 describe('server control ', function(){

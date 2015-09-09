@@ -1,28 +1,29 @@
-var debug = require('debug')('cipherlayer:platforms:linkedin');
+var log = require('../logger/service.js');
 var tokenManager = require('../managers/token');
 var userDao = require('../managers/dao');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
-
-// PASSPORT
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
-var linkedInStrategy = new LinkedInStrategy({
-    clientID: config.linkedin.consumerKey,
-    clientSecret: config.linkedin.consumerSecret,
-    callbackURL: config.linkedin.callbackURL,
-    scope: config.linkedin.scope,
-    passReqToCallback: true
-}, function(req, accessToken, refreshToken, profile, done) {
-    debug('user '+ profile.id +' logged in using linkedin');
-    var data = {
-        accessToken:accessToken,
-        refreshToken:refreshToken,
-        profile:profile
-    };
-    done(null, data);
-});
 
-function linkedInCallback(req, res, next){
+function createLinkedInStrategy() {
+
+    return new LinkedInStrategy({
+        clientID: config.linkedin.consumerKey,
+        clientSecret: config.linkedin.consumerSecret,
+        callbackURL: config.linkedin.callbackURL,
+        scope: config.linkedin.scope,
+        passReqToCallback: true
+    }, function(req, accessToken, refreshToken, profile, done) {
+        var data = {
+            accessToken:accessToken,
+            refreshToken:refreshToken,
+            profile:profile
+        };
+        done(null, data);
+    });
+}
+
+function linkedInCallback(req, res, next) {
     var data = req.user;
     var profile = data.profile;
     userDao.getFromUsername(profile._json.emailAddress, function(err, foundUser){
@@ -48,8 +49,8 @@ function linkedInCallback(req, res, next){
             }
         } else {
             var dataToken = {};
-            if(foundUser.role){
-                dataToken = {"role": foundUser.role};
+            if(foundUser.roles){
+                dataToken = {"roles": foundUser.roles};
             }
             tokenManager.createBothTokens(foundUser.username, dataToken, function(err, tokens){
                 if(err) {
@@ -122,7 +123,13 @@ function addUserPlatform(req, res, next){
     });
 }
 
-function addRoutes(server, passport){
+function addRoutes(server, passport) {
+    if (!config.linkedin) {
+        return;
+    }
+
+    log.info('Adding LinkedIn routes');
+    var linkedInStrategy = createLinkedInStrategy();
     passport.use(linkedInStrategy);
     server.get('/auth/in', passport.authenticate('linkedin', { state: new Date().getTime() } ));
     server.post('/auth/in', addUserPlatform);

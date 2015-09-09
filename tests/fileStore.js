@@ -1,6 +1,5 @@
 var fileStoreMng = require('../src/managers/file_store');
 var assert = require('assert');
-var async = require('async');
 var fs = require('fs');
 var config = require('../config.json');
 
@@ -67,7 +66,7 @@ describe('AWS', function() {
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            fileStoreMng.uploadFile('hola', uploadImage.name, file, function (err, file) {
+            fileStoreMng.uploadFile('hola', uploadImage.name, file, function (err) {
                 assert.notEqual(err, null);
                 done();
             });
@@ -80,7 +79,7 @@ describe('AWS', function() {
         fs.readFile(uploadImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            fileStoreMng.uploadFile(validBucket, '', file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, '', file, function (err) {
                 assert.notEqual(err, null);
                 done();
             });
@@ -93,7 +92,7 @@ describe('AWS', function() {
         fs.readFile(emptyImage.path, function (err, data) {
             assert.equal(err,null);
             var file = new Buffer(data, 'binary');
-            fileStoreMng.uploadFile(validBucket, emptyImage.name, file, function (err, file) {
+            fileStoreMng.uploadFile(validBucket, emptyImage.name, file, function (err) {
                 assert.notEqual(err, null);
                 done();
             });

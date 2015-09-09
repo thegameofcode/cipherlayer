@@ -1,11 +1,10 @@
 var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
-var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){
-    this.Given(/^a user of client app with valid credentials$/, function (callback) {
+    this.Given(/^a user with valid credentials$/, function (callback) {
         world.getUser().username = 'valid_user' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
         world.getUser().password = 'valid_password';
 
@@ -23,7 +22,7 @@ module.exports = function(){
 
         request(options, function(err,res,body) {
             assert.equal(err,null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 201, body);
             callback();
         });
     });

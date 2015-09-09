@@ -1,5 +1,4 @@
 var assert = require('assert');
-var async = require('async');
 var nock = require('nock');
 var request = require('request');
 var ciphertoken = require('ciphertoken');

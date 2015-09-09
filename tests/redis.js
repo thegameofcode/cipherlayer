@@ -77,7 +77,7 @@ describe('redis', function() {
             updateKey = function(done){
                 setTimeout(
                     function () {
-                        redisMng.updateKeyValue(baseKey, val, function (err, value) {
+                        redisMng.updateKeyValue(baseKey, val, function (err) {
                             assert.equal(err, null);
                             redisMng.getKeyValue(baseKey, function (err, value) {
                                 assert.equal(err, null);

@@ -1,7 +1,4 @@
 var request = require('request');
-var async = require('async');
-var fs = require('fs');
-var path = require('path');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
@@ -121,7 +118,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk){
 }
 
 module.exports = function(settings) {
-    var config = require('../../config.json');
+    var config = require(process.cwd() + '/config.json');
     _settings = _.assign({}, config, settings);
 
     return {

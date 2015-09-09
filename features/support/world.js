@@ -1,17 +1,7 @@
-var request = require('request');
-var assert = require('assert');
-
 var phoneMng= require("../../src/managers/phone");
 var redisMng= require("../../src/managers/redis");
-
 var nock = require("nock");
-
-var cipherlayer = require('../../src/cipherlayer');
-var world = require('./world');
-
-var fs = require('fs');
 var config = require('../../config.json');
-
 
 var user = {};
 
@@ -25,7 +15,7 @@ function resetUser(){
 
 function createPin(userId, phone, cbk){
 
-    var notifServiceURL = config.services.notifications;
+    var notifServiceURL = config.externalServices.notifications;
 
     nock(notifServiceURL)
         .post('/notification/sms')
@@ -37,7 +27,7 @@ function createPin(userId, phone, cbk){
 }
 
 function getPinNumber(userId, phone, cbk){
-    var redisKey = config.redisKeys.user_phone_verify.key;
+    var redisKey = config.phoneVerification.redis.key;
     redisKey = redisKey.replace('{userId}',userId).replace('{phone}',phone);
 
     redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {

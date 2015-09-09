@@ -2,14 +2,28 @@
   "name": "cipherlayer",
   "version": "0.0.1",
   "description": "cipherlayer",
-  "main": "cipherlayer.js",
+  "main": "src/cipherlayer.js",
+  "scripts": {
+    "test": "npm run-script jshint && npm run-script mocha && npm run-script features",
+    "mocha": "./node_modules/.bin/mocha tests --recursive",
+    "mocha-report-1": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
+    "mocha-report-2": "cat coverage/mocha.lcov | node_modules/coveralls/bin/coveralls.js",
+    "features": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags ~@ignore",
+    "features-only": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @only",
+    "jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js",
+    "coverage-1": "node --harmony node_modules/.bin/istanbul cover ./node_modules/.bin/cucumber.js --lcovonly -- --tags ~@ignore --format json > /dev/null",
+    "coverage-2": "cp coverage/lcov.info coverage/cucumber.lcov",
+    "coverage-3": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
+    "coverage-4": "node_modules/.bin/lcov-result-merger 'coverage/*.lcov' 'coverage/merged.lcov'",
+    "coverage-5": "cat ./coverage/merged.lcov | ./node_modules/coveralls/bin/coveralls.js"
+  },
   "dependencies": {
     "async": "^0.9.0",
     "aws-sdk": "^2.1.0",
+    "bunyan": "^1.4.0",
     "ciphertoken": "^0.9.5",
     "clone": "^0.1.18",
     "countries-info": "^1.0.6",
-    "debug": "^2.1.0",
     "escape-regexp": "0.0.1",
     "http-proxy": "^1.8.1",
     "jsonschema": "^1.0.0",
@@ -17,39 +31,28 @@
     "mongodb": "^1.4.22",
     "passport": "^0.2.1",
     "passport-forcedotcom": "^0.1.1",
+    "passport-google-oauth2": "^0.1.6",
     "passport-linkedin-oauth2": "^1.2.1",
     "randexp": "^0.4.0",
     "redis": "^0.12.1",
+    "request": "^2.47.0",
     "restify": "^2.8.3",
     "version-control": "^1.2.1"
   },
   "devDependencies": {
     "assert": "^1.1.2",
-    "cucumber": "^0.4.4",
-    "cucumber-junit": "^1.1.10",
-    "gulp": "^3.8.10",
-    "gulp-jshint": "^1.9.0",
-    "jshint-junit-reporter": "^0.1.0",
+    "blanket": "^1.1.7",
+    "coveralls": "^2.11.4",
+    "cucumber": "^0.5.2",
+    "istanbul": "^0.3.17",
+    "jshint": "^2.8.0",
+    "lcov-result-merger": "^1.0.2",
     "mocha": "^2.0.1",
+    "mocha-lcov-reporter": "0.0.2",
     "nock": "^0.51.0",
     "pre-commit": "^1.0.7",
-    "request": "^2.47.0",
     "sinon": "^1.12.2",
     "which": "^1.0.8"
-  },
-  "scripts": {
-    "test": "npm run-script lint && npm run-script mocha && npm run-script cucumber",
-    "test-go": "npm run-script lint-go && npm run-script mocha-go && npm run-script cucumber-go",
-    "mocha": "./node_modules/mocha/bin/mocha tests --recursive",
-    "mocha-go": "./node_modules/mocha/bin/mocha --recursive -R xunit ./tests > unit-tests-reports.xml",
-    "cucumber": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @feature",
-    "cucumber-go": "./node_modules/cucumber/bin/cucumber.js features --tags @feature --format=json | ./node_modules/cucumber-junit/bin/cucumber-junit > cucumber-tests-reports.xml",
-    "local": "DEBUG=cipherlayer* node main.js",
-    "int": "DEBUG=cipherlayer* node main.js",
-    "pro": "DEBUG=cipherlayer* node main.js",
-    "lint": "./node_modules/.bin/gulp jshint",
-    "lint-go": "./node_modules/.bin/gulp jshint-go",
-    "fixtures": "node scripts/add_users.js"
   },
   "repository": {
     "type": "git",
@@ -62,7 +65,24 @@
   },
   "homepage": "https://github.com/thegameofcode/cipherlayer",
   "pre-commit": [
-    "lint",
-    "test"
-  ]
+    "jshint"
+  ],
+  "jshintConfig": {
+    "esnext": true,
+    "node": true,
+    "unused": true,
+    "mocha": true
+  },
+  "config": {
+    "blanket": {
+      "pattern": [
+        "src",
+        "tests"
+      ],
+      "data-cover-never": [
+        "node_modules",
+        "tests"
+      ]
+    }
+  }
 }

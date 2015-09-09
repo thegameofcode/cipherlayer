@@ -1,8 +1,6 @@
 var world = require('../support/world');
 var request = require('request');
 var assert = require('assert');
-
-var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){
@@ -26,6 +24,8 @@ module.exports = function(){
             world.getResponse().statusCode = res.statusCode;
             if(body){
                 world.getResponse().body = JSON.parse(body);
+            } else {
+                world.getResponse().body = null;
             }
             callback();
         });

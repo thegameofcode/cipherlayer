@@ -1,14 +1,13 @@
-var world = require('../support/world');
+var world = require('../../support/world');
 var request = require('request');
 var assert = require('assert');
-var fs = require('fs');
-var config = require('../../config.json');
+var config = require('../../../config.json');
 
 module.exports = function(){
-    this.Given(/^a admin user of client app with valid credentials$/, function (callback) {
+    this.Given(/^a user with valid credentials in Google not linked to Google/, function (callback) {
+        world.getUser().id = 'a1b2c3d4e5f6';
         world.getUser().username = 'valid_user' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
         world.getUser().password = 'valid_password';
-        world.getUser().role = 'admin';
 
         var options = {
             url: 'http://localhost:'+config.public_port+'/auth/user',
@@ -24,7 +23,7 @@ module.exports = function(){
 
         request(options, function(err,res,body) {
             assert.equal(err,null);
-            assert.equal(res.statusCode, 201);
+            assert.equal(res.statusCode, 201, body);
             callback();
         });
     });

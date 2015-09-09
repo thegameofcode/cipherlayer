@@ -3,13 +3,12 @@ var nock = require('nock');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var assert = require('assert');
-var fs = require('fs');
 var redisMng = require('../../src/managers/redis');
 
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
-var notifServiceURL = config.externalServices.notifications;
+var notificationsServiceURL = config.externalServices.notifications;
 
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){
@@ -133,7 +132,7 @@ module.exports = {
                         };
                         options.headers[config.version.header] = "test/1";
 
-                        nock(notifServiceURL)
+                        nock(notificationsServiceURL)
                             .post('/notification/email')
                             .reply(204);
 
@@ -212,7 +211,7 @@ module.exports = {
                     };
                     options.headers[config.version.header] = "test/1";
 
-                    nock(notifServiceURL)
+                    nock(notificationsServiceURL)
                         .post('/notification/email')
                         .reply(204);
 
@@ -264,7 +263,7 @@ module.exports = {
             });
         });
     },
-    itCreatedVerifyMail: function createdVerifyMail(accessTokenSettings, refreshTokenSettings){
+    itCreatedVerifyMail: function createdVerifyMail(){
         it.skip('201 Created (Verify email)', function (done) {
             var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
@@ -284,7 +283,7 @@ module.exports = {
                 .times(2)
                 .reply(201, {id: expectedUserId});
 
-            nock(notifServiceURL)
+            nock(notificationsServiceURL)
                 .post('/notification/email')
                 .reply(204);
 

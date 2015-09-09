@@ -1,7 +1,3 @@
-var assert = require('assert');
-var request = require('request');
-var fs = require('fs');
-
 var cipherlayer = require('../src/cipherlayer.js');
 var config = require('../config.json');
 
@@ -9,6 +5,7 @@ var describeLogin = require('./auth/login.js');
 var describeUser = require('./auth/user.js');
 var describeSf = require('./auth/sf.js');
 var describeIn = require('./auth/in.js');
+var describeGoogle = require('./auth/google.js');
 var describeRenew = require('./auth/renew.js');
 
 var accessTokenSettings = {
@@ -36,5 +33,6 @@ describe('/auth', function(){
     describeUser.describe();
     describeSf.describe(accessTokenSettings, refreshTokenSettings);
     describeIn.describe();
+    describeGoogle.describe();
     describeRenew.describe();
 });

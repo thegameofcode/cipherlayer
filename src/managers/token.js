@@ -1,6 +1,6 @@
 var async = require('async');
 var ciphertoken = require('ciphertoken');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,

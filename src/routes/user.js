@@ -1,10 +1,7 @@
-var debug = require('debug')('cipherlayer:routes:auth');
-var clone = require('clone');
-var request = require('request');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
-var config = JSON.parse(require('fs').readFileSync('config.json','utf8'));
+var config = require(process.cwd() + '/config.json');
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var emailMng = require('../managers/email');
 var tokenManager = require('../managers/token');
@@ -45,7 +42,7 @@ function sendNewPassword(req, res, next){
                     fieldValue = [foundUser.password, encryptedPassword];
                 }
 
-                userDao.updateField(foundUser._id, 'password', fieldValue, function(err, result){
+                userDao.updateField(foundUser._id, 'password', fieldValue, function(err){
                     if(err){
                         res.send(500, {
                             err: 'auth_proxy_error',
@@ -56,8 +53,8 @@ function sendNewPassword(req, res, next){
 
                     }else{
 						var data = {};
-						if(foundUser.role){
-							data.role = foundUser.role;
+						if(foundUser.roles){
+							data.roles = foundUser.roles;
 						}
 						tokenManager.createBothTokens(foundUser._id, data , function(err, tokens) {
 
@@ -117,17 +114,22 @@ function createUserByToken(req, res, next) {
             return next(false);
         } else {
             var compatibleDevices = config.emailVerification.compatibleEmailDevices;
-            var device = String(req.headers['user-agent']);
+            var userAgent = String(req.headers['user-agent']);
 
             for(var i = 0; i < compatibleDevices.length; i++){
                 var exp = compatibleDevices[i];
                 var check = exp.replace(/\*/g,'.*');
-                var match = device.match(check);
-                var isCompatible = (match !== null && device === match[0]);
-                debug('match \''+ device +'\' with \'' + exp + '\' : ' + isCompatible);
+                var match = userAgent.match(check);
+                var isCompatible = (match !== null && userAgent === match[0]);
                 if(isCompatible) {
-                    debug('device \''+device+'\'');
-                    res.header('Location', config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken );
+                    match = userAgent.match(/.*Android.*/i);
+                    var isAndroid = (match !== null && userAgent === match[0]);
+                    var location = config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken;
+
+                    if(isAndroid){
+                        location = 'intent://user/refreshToken/' + tokens.refreshToken + '/#Intent;scheme=' + config.emailVerification.scheme + ';end';
+                    }
+                    res.header('Location', location );
                     res.send(302);
                     return next(false);
                 }
@@ -178,10 +180,16 @@ function validateOldPassword(req, res, next) {
     });
 
 }
-
 function setPassword(req, res, next){
+    if(!req.body){
+        res.send(400, {
+            err: 'invalid_body',
+            des: 'The call to this url must have body.'
+        } );
+        return next();
+    }
 
-    userMng().setPassword(req.user._id, req.body, function(err, modified){
+    userMng().setPassword(req.user._id, req.body, function(err){
         if (err) {
             if (!err.code ) {
                 res.send(500, err);
@@ -205,8 +213,6 @@ function addRoutes(service){
     service.get('/user/activate', createUserByToken);
 
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
-
-    debug('User routes added');
 }
 
 module.exports = addRoutes;

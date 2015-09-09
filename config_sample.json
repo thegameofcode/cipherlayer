@@ -16,13 +16,14 @@
   },
   "management":{
     "clientId": "Cipher Layer User",
-    "clientSecret": "Q0lQSEVSTEFZRVI"
+    "clientSecret": "unsecureKey5"
   },
   "db": {
     "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
   "redis":{
-    "host":"127.0.0.1"
+    "host":"127.0.0.1",
+    "port":6379
   },
   "passThroughEndpoint" : {
     "path": "/api/profile",
@@ -32,8 +33,8 @@
   },
   "salesforce" : {
     "scope": ["profile", "id", "email", "address", "phone", "refresh_token", "offline_access", "api"],
-    "clientId": "{{SALESFORCE_CLIENT_ID}}",
-    "clientSecret": "{{SALESFORCE_CLIENT_SECRET}}",
+    "clientId": "1a2b3c4d5e6f",
+    "clientSecret": "6f5e4d3c2b1a",
     "callbackURL": "http://localhost:3000/auth/sf/callback",
     "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
     "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
@@ -49,6 +50,12 @@
     "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
     "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/in/callback"
+  },
+  "google": {
+    "scope": ["profile", "https://www.googleapis.com/auth/plus.login"],
+    "clientId": "{{GOOGLE_CLIENT_ID}}",
+    "clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
+    "callbackURL": "http://localhost:3000/auth/google/callback"
   },
   "aws":{
     "accessKeyId": "{{AWS_ACCESKEYID}}",
@@ -79,13 +86,13 @@
   "emailVerification":{
     "subject": "Example email verification",
     "body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
-    "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" ],
+    "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" , "*Android*"],
     "nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",
     "redis": {
       "key":"user.{username}.transaction",
       "expireInSec": 86400
     },
-    "redirectProtocol":"mycomms"
+    "scheme":"mycomms"
   },
   "externalServices":{
     "notifications": "http://localhost:3002"
@@ -98,7 +105,8 @@
         "1" : true
       }
     },
-    "installPath" : "/install"
+    "installPath" : "/install",
+    "db":"mongodb://localhost/versionControl?w=1"
   },
   "allowedDomains":[
     "*@a.com"
@@ -111,10 +119,25 @@
     "subject" :"Recover Example User Password",
     "body" : "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
   },
-  "restrictEndpoints" : [
+  "endpoints" : [
     {
-      "path" : "/api/profile",
-      "methods" : ["GET", "PUT"]
+      "path" : "\/api\/profile",
+      "methods" : ["POST", "PUT"],
+      "roles" : ["admin"]
+    },
+    {
+      "path": "\/.*",
+      "methods":["GET", "POST", "PUT"],
+      "roles":["user", "admin"]
+    }
+  ],
+  "accessControlAllow" : [
+    {
+      "enabled" : true,
+      "methods" : "OPTION,GET,PUT,POST,HEAD",
+      "headers" : "x-mycomms-version,content-type,Authorization",
+      "credentials" : "true",
+      "origin": "http://192.168.1.116:9000"
     }
   ],
   "directProxyUrls": [

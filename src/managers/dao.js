@@ -1,9 +1,9 @@
-var debug = require('debug')('cipherlayer:dao');
 var clone = require('clone');
 var assert = require('assert');
+var async = require('async');
 var extend = require('util')._extend;
 var escapeRegexp = require('escape-regexp');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -21,12 +21,22 @@ function connect(cbk){
         db = connectedDb;
 
         collection = connectedDb.collection('users');
-        cbk();
+        async.series([
+            function(done){
+                collection.ensureIndex('_id', done);
+            },
+            function(done){
+                collection.ensureIndex('username', done);
+            },
+            function(done){
+                collection.ensureIndex('password', done);
+            }
+        ], cbk);
     });
 }
 
 function disconnect(cbk){
-    db.close(function(err,result){
+    db.close(function(err){
         cbk(err);
     });
 }
@@ -48,11 +58,15 @@ function _addUser(userToAdd, cbk){
     var signUpDate = new Date().getTime();
     user.signUpDate = signUpDate;
 
-    getFromUsername(user.username, function(err, foundUser){
+    getFromUsername(user.username, function(err){
         if(err){
             if(err.message == ERROR_USER_NOT_FOUND) {
                 user._id = user.id;
                 delete(user.id);
+
+                if(!user.roles || !user.roles.length){
+                    user.roles = ['user'];
+                }
 
                 collection.insert(user, function(err, result){
                     if(err) {
@@ -143,8 +157,8 @@ function getAllUserFields(username, cbk){
 }
 
 function deleteAllUsers(cbk){
-    collection.remove({},function(err,numberRemoved){
-        cbk();
+    collection.remove({},function(err){
+        cbk(err);
     });
 }
 
@@ -204,28 +218,27 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     var update = {$set:data};
 
     //first tries to update array item if already exists
-    collection.update(query, update, {upsert:true} , function(err, updatedUsers){
+    collection.update(query, update , function(err, updatedUsers){
         if(err) {
-            if(err.code == 16836){
-                //item is not found, we add it
-                var update = {
-                    $addToSet:{}
-                };
-                update.$addToSet[arrayName] = itemValue;
-
-                collection.update({ _id: userId }, update, function(err, updatedUsers){
-                    if(err){
-                        return cbk(err, null);
-                    }
-                    cbk(null, updatedUsers);
-                });
-                return;
-            }
-
-            cbk(err, null);
-        } else {
-            cbk(null, updatedUsers);
+            return cbk(err, null);
         }
+
+        if(updatedUsers === 0){
+            var update = {
+                $push:{}
+            };
+            update.$push[arrayName] = itemValue;
+
+            collection.update({ _id: userId }, update, function(err, updatedUsers){
+                if(err){
+                    return cbk(err, null);
+                }
+                cbk(null, updatedUsers);
+            });
+            return;
+        }
+
+        cbk(null, updatedUsers);
     });
 }
 
@@ -236,7 +249,7 @@ function getStatus(cbk){
     };
 
     if(!db || !collection) return cbk(MONGO_ERR);
-    collection.count(function(err, count){
+    collection.count(function(err){
         if(err) return cbk(MONGO_ERR);
         cbk();
     });

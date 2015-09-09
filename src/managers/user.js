@@ -1,9 +1,7 @@
-var debug = require('debug')('cipherlayer:manager:user');
-var clone = require('clone');
+var log = require('../logger/service.js');
 var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
-var countries = require('countries-info');
 var ciphertoken = require('ciphertoken');
 
 var userDao = require('./dao');
@@ -50,12 +48,13 @@ function createUser(body, pin, cbk) {
     body[_settings.passThroughEndpoint.username] = body[_settings.passThroughEndpoint.username].toLowerCase();
 
     if(!isValidDomain(body[_settings.passThroughEndpoint.username])) {
-        debug('Invalid email domain \''+body[_settings.passThroughEndpoint.username]+'\'');
-        return cbk({
-            err: 'user_domain_not_allowed',
-            des: ERR_INVALID_USER_DOMAIN,
-            code: 400
-        }, null);
+		var err = {
+			err: 'user_domain_not_allowed',
+			des: ERR_INVALID_USER_DOMAIN,
+			code: 400
+		};
+        log.warn({err:err});
+        return cbk(err, null);
     }
 
     if (!body[_settings.passThroughEndpoint.password]) {
@@ -69,8 +68,8 @@ function createUser(body, pin, cbk) {
     } else {
         if(!validatePwd(body.password, _settings.password.regexValidation)) {
             ERR_INVALID_PWD.des = _settings.password.message;
-            var err = ERR_INVALID_PWD;
-            return cbk(err);
+            var invalidPasswordError = ERR_INVALID_PWD;
+            return cbk(invalidPasswordError);
         }
     }
 
@@ -90,7 +89,7 @@ function createUser(body, pin, cbk) {
 
         var phone = body.phone;
         var countryISO = body.country;
-        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err, verified) {
+        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
             if (err) {
                 return cbk(err);
             }
@@ -181,12 +180,13 @@ function createUserByToken(token, cbk) {
                 delete(body[_settings.passThroughEndpoint.password]);
 
                 if(!isValidDomain(user.username)) {
-                    debug('Invalid email domain \''+user.username+'\'');
-                    return cbk({
-                        err:'user_domain_not_allowed',
-                        des: ERR_INVALID_USER_DOMAIN,
-                        code: 400
-                    }, null);
+					var domainNotAllowedError = {
+						err:'user_domain_not_allowed',
+						des: ERR_INVALID_USER_DOMAIN,
+						code: 400
+					};
+					log.warn({err:domainNotAllowedError});
+                    return cbk(domainNotAllowedError, null);
                 }
 
                 userDao.getFromUsername(user.username, function (err, foundUser) {
@@ -222,24 +222,22 @@ function createUserPrivateCall(body, user, cbk){
         body: JSON.stringify(body)
     };
 
-    debug('=> POST ' + options.url);
+    log.info('=> POST ' + options.url);
     request(options, function (err, private_res, body) {
         if (err) {
-            debug('<= error: ' + err);
+            log.error('<= error: ' + err);
             return cbk({
                 err: 'auth_proxy_error',
                 des: 'there was an internal error when redirecting the call to protected service',
                 code: 500
             });
         } else {
-            debug('<= ' + private_res.statusCode);
+            log.info('<= ' + private_res.statusCode);
             body = JSON.parse(body);
             user.id = body.id;
 
             if (!user.password) {
-                debug('user has no password ', user.username);
                 user.password = random(12);
-                debug('created user password ', user.password);
             }
 
             cryptoMng.encrypt(user.password, function(encrypted){
@@ -247,7 +245,7 @@ function createUserPrivateCall(body, user, cbk){
 
                 userDao.addUser()(user, function (err, createdUser) {
                     if (err) {
-                        debug('error adding user: ', err);
+                        log.error({err:err,des:'error adding user to DB'});
                         return cbk({
                             err: err.err,
                             des: 'error adding user to DB',
@@ -256,7 +254,7 @@ function createUserPrivateCall(body, user, cbk){
                     } else {
                         userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                             if (err) {
-                                debug('error obtaining user: ', err);
+                                log.error({err:err,des:'error obtaining user'});
                                 return cbk({
                                     err: err.message,
                                     code: 409
@@ -264,13 +262,13 @@ function createUserPrivateCall(body, user, cbk){
                             } else {
 
                                 var data = {};
-                                if(foundUser.role){
-                                    data = {"role": foundUser.role};
+                                if(foundUser.roles){
+                                    data = {"roles": foundUser.roles};
                                 }
 
                                 tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
                                     if (err) {
-                                        debug('error creating tokens: ', err);
+                                        log.error({err:err, des:'error creating tokens'});
                                         return cbk({
                                             err: err.message,
                                             code: 409
@@ -305,7 +303,6 @@ function setPassword(id, body, cbk){
     } else {
         cryptoMng.encrypt(body.password, function(encryptedPwd){
             userDao.updateField(id, 'password', encryptedPwd, function(err, result){
-                debug('UpdatePasswordField', err, result);
                 return cbk(err, result);
             });
         });
@@ -348,7 +345,6 @@ function random (howMany, chars) {
 }
 
 function isValidDomain(email){
-    debug('Domain control for email \''+email+'\'');
     var validDomain = true;
     if(_settings.allowedDomains){
         for(var i = 0; i < _settings.allowedDomains.length; i++){
@@ -358,7 +354,6 @@ function isValidDomain(email){
             var check = domain.replace(/\*/g,'.*');
             var match = email.match(check);
             validDomain = (match !== null && email === match[0]);
-            debug('match \''+ email +'\' with \'' + domain + '\' : ' + validDomain);
             if(validDomain) break;
         }
     }
@@ -372,7 +367,7 @@ function validatePwd(pwd, regexp){
 
 
 module.exports = function(settings) {
-    var config = require('../../config.json');
+    var config = require(process.cwd() + '/config.json');
     _settings = _.assign({}, config, settings);
 
     return {

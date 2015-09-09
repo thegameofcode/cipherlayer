@@ -2,8 +2,6 @@ var assert = require('assert');
 var clone = require('clone');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
-var fs = require('fs');
-
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 var nock = require('nock');
@@ -98,7 +96,7 @@ module.exports = {
                 id: 'a1b2c3d4e5f6',
                 username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
                 password: 'validpassword',
-                role : "admin",
+                roles : ["admin"],
                 deviceId: "0987654321"
             };
 
@@ -141,7 +139,7 @@ module.exports = {
                     ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function (err, accessTokenInfo) {
                         assert.equal(err, null);
                         assert.equal(accessTokenInfo.userId, user.id);
-                        assert.equal(accessTokenInfo.data.role, user.role);
+                        assert.deepEqual(accessTokenInfo.data.roles, user.roles);
                         assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
                         assert.notEqual(body.refreshToken, undefined);
                         ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, refreshTokenInfo) {

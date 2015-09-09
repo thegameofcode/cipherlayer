@@ -1,7 +1,5 @@
 var world = require('../support/world');
 var nock = require('nock');
-
-var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){
@@ -28,7 +26,7 @@ module.exports = function(){
     this.Given(/^a protected service replies to a PUT request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
         nock('http://localhost:'+config.private_port)
             .put(PATH, JSON.parse(REQUEST_PAYLOAD))
-            .reply(Number(STATUS));
+            .reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
 
         callback();
     });

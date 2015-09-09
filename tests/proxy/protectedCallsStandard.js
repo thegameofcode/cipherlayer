@@ -1,7 +1,6 @@
 var request = require('request');
 var assert = require('assert');
 var ciphertoken = require('ciphertoken');
-var fs = require('fs');
 var nock = require('nock');
 
 var dao = require('../../src/managers/dao.js');

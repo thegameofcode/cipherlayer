@@ -1,4 +1,4 @@
-var debug = require('debug')('cipherlayer:platforms:salesforce');
+var log = require('../logger/service.js');
 var request = require('request');
 var async = require('async');
 var countries = require('countries-info');
@@ -7,26 +7,31 @@ var userDao = require('../managers/dao');
 var userManager = require('../managers/user')();
 var tokenManager = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 
-// PASSPORT
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
-var salesforceSettings = {
-    clientID : config.salesforce.clientId,
-    clientSecret : config.salesforce.clientSecret,
-    scope : config.salesforce.scope,
-    callbackURL : config.salesforce.callbackURL
-};
-if(config.salesforce.authUrl){
-    salesforceSettings.authorizationURL = config.salesforce.authUrl;
-}
-if(config.salesforce.tokenUrl){
-    salesforceSettings.tokenURL = config.salesforce.tokenUrl;
+
+function createSalesforceStrategy() {
+
+    var salesforceSettings = {
+        clientID : config.salesforce.clientId,
+        clientSecret : config.salesforce.clientSecret,
+        scope : config.salesforce.scope,
+        callbackURL : config.salesforce.callbackURL
+    };
+    if(config.salesforce.authUrl){
+        salesforceSettings.authorizationURL = config.salesforce.authUrl;
+    }
+    if(config.salesforce.tokenUrl){
+        salesforceSettings.tokenURL = config.salesforce.tokenUrl;
+    }
+
+    return new forcedotcomStrategy(salesforceSettings, prepareSession);
 }
 
-function prepareSession(accessToken, refreshToken, profile, done){
-    debug('user '+ profile.id +' logged in using salesforce');
+function prepareSession(accessToken, refreshToken, profile, done) {
+    log.info('user '+ profile.id +' logged in using salesforce');
     async.series(
         [
             function uploadAvatar(done){
@@ -42,13 +47,12 @@ function prepareSession(accessToken, refreshToken, profile, done){
                     var oauthToken = "?oauth_token=" + accessToken.params.access_token;
 
                     var avatarPath = profile._raw.photos.picture + oauthToken;
-                    //TODO change this to use 'path' framework
                     var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
                     var name = profile.id.substring(idPos) + '.jpg';
 
                     fileStoreMng.uploadAvatarToAWS(avatarPath, name, function(err, avatarUrl){
                         if(err){
-                            debug('Error uploading a profile picture to AWS');
+                            log.error({err:err}, 'Error uploading a profile picture to AWS');
                         } else {
                             profile.avatar = avatarUrl;
                         }
@@ -71,9 +75,8 @@ function prepareSession(accessToken, refreshToken, profile, done){
     );
 
 }
-var salesforceStrategy = new forcedotcomStrategy(salesforceSettings, prepareSession);
 
-function salesforceDenyPermisionFilter(req, res, next){
+function salesforceDenyPermisionFilter(req, res, next) {
     var errorCode = req.query.error;
 
     var errorDescription = req.query.error_description;
@@ -145,12 +148,11 @@ function salesforceCallback(req, res, next){
             //TODO check if setPlatformData and createBothTokens call can be made in parallel
             userManager.setPlatformData(foundUser._id, 'sf', platform, function(err){
                 if(err){
-                    debug('error updating sf tokens into user '+foundUser._id+':' + err);
-                    //TODO check if it's ok to ignore this error
+                    log.error({err:err}, 'error updating sf tokens into user '+foundUser._id+'');
                 }
                 var data = {};
-                if(foundUser.role){
-                    data = {"role": foundUser.role};
+                if(foundUser.roles){
+                    data = {"roles": foundUser.roles};
                 }
 
                 tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
@@ -231,7 +233,7 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
             "refreshToken": platform.refreshToken,
             "expiry": new Date().getTime() + config.salesforce.expiration * 60 * 1000
         };
-        userDao.updateArrayItem(user._id, 'platforms', 'sf', newSFplatformItem, function(err, updatedUsers){
+        userDao.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function(err){
             if (err){
                 return cbk(err);
             } else {
@@ -241,7 +243,13 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
     });
 }
 
-function addRoutes(server, passport){
+function addRoutes(server, passport) {
+	if(!config.salesforce){
+		return;
+	}
+
+    log.info('Adding Salesforce routes');
+    var salesforceStrategy = createSalesforceStrategy();
     passport.use(salesforceStrategy);
     server.get('/auth/sf', authSfBridge(passport));
     server.get('/auth/sf/callback', salesforceDenyPermisionFilter, passport.authenticate('forcedotcom', { failureRedirect: '/auth/error', session: false} ), salesforceCallback);

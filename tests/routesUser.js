@@ -37,7 +37,8 @@ describe('user', function () {
     }
 
     beforeEach(function (done) {
-        cipherlayer.start(config.public_port, config.private_port, function(err, result){
+        cipherlayer.start(config.public_port, config.private_port, function(err){
+			assert.equal(err, null);
             dao.deleteAllUsers(function (err) {
                 assert.equal(err, null);
                 var userToCreate = clone(baseUser);
@@ -121,7 +122,7 @@ describe('user', function () {
 
                     request(options, function (err2, res2, body) {
                         assert.equal(err2, null);
-                        assert.equal(res2.statusCode, 204);
+                        assert.equal(res2.statusCode, 204, body);
                         dao.getAllUserFields(baseUser.username, function(err, result){
                             assert.equal(err, null);
                             assert.equal(result.password.length, 2);
@@ -243,7 +244,7 @@ describe('user', function () {
             });
         });
 
-        it('500 (invalid authorization)', function (done) {
+        it('403 (invalid authorization)', function (done) {
             var newPassword = {
                 password: 'n3wPas5W0rd'
             };
@@ -252,7 +253,7 @@ describe('user', function () {
                 url: 'http://localhost:' + config.public_port + '/user/me/password',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8',
-                    'Authorization': 'bearer dsoiafobadjsbahof2345245boadsbkcbiilaSDFGERTFGsdfn4302984252hds'
+                    'Authorization': 'bearer dsoiafobadjsbahof2345245boadsbkcbiilaSDGERTFGsdfn4302984252hds'
                 },
                 method: 'PUT',
                 body : JSON.stringify(newPassword)
@@ -260,13 +261,13 @@ describe('user', function () {
             options.headers[config.version.header] = "test/1";
 
             var expectedResult = {
-                err: "internal_error",
-                des: "uncaught exception"
+                err: "invalid_token",
+                des: "invalid authorization header"
             };
 
             request(options, function (err, res, body) {
                 assert.equal(err, null, body);
-                assert.equal(res.statusCode, 500, body);
+                assert.equal(res.statusCode, 403, body);
                 body = JSON.parse(body);
                 assert.deepEqual(body, expectedResult);
                 done();

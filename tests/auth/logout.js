@@ -2,8 +2,6 @@ var assert = require('assert');
 var clone = require('clone');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
-var fs = require('fs');
-
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 
@@ -67,7 +65,7 @@ module.exports = {
                             options.body({"userId":user.id, "deviceId": user.deviceId});
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
-                                assert.equal(res.statusCode, 204);
+                                assert.equal(res.statusCode, 204, body);
                                 done();
                             });
 

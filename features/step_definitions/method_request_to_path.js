@@ -22,7 +22,7 @@ var myStepDefinitionsWrapper = function () {
             .post('/notification/email')
             .reply(204);
 
-        request(options, function(err,res,body) {
+        request(options, function(err,res) {
             assert.equal(err,null);
             world.getResponse().statusCode = res.statusCode;
             callback();

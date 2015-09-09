@@ -1,7 +1,6 @@
 var AWS = require('aws-sdk');
-var fs = require('fs');
 var https = require('https');
-var config = require('../../config.json');
+var config = require(process.cwd() + '/config.json');
 
 var s3;
 
@@ -124,14 +123,12 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk){
             }
 
             //Save in S3
-            uploadFile(validBucket, avatarName, buf, function (err, file) {
+            uploadFile(validBucket, avatarName, buf, function (err) {
                 if(err){
-                    //TODO line on debug with the error
                     return cbk({err: 'avatar_not_uploaded'});
                 } else {
                     getFileURL(validBucket, avatarName, function(err, fileURL){
                         if(err){
-                            //TODO line on debug with the error
                             return cbk({err: 'avatar_address_inaccessible'});
                         } else {
                             return cbk(null,fileURL);

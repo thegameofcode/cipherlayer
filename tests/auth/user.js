@@ -1,6 +1,5 @@
 var assert = require('assert');
 var request = require('request');
-var fs = require('fs');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
 var crypto = require('crypto');
@@ -146,7 +145,7 @@ module.exports = {
                         });
 
                         options.headers = HEADERS_WITH_AUTHORIZATION_BASIC;
-                        request(options, function(err, res){
+                        request(options, function(err){
                             assert.equal(err, null);
                             dao.countUsers(function(err, count){
                                 assert.equal(err, null);
@@ -215,6 +214,7 @@ module.exports = {
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 302, body);
+                                assert.notEqual(res.headers.location.indexOf(config.emailVerification.scheme + '://user/refreshToken/'), -1);
                                 done();
                             });
                         });
@@ -222,7 +222,53 @@ module.exports = {
                     });
                 });
 
-                it('Create OK (not an iOS device) ', function(done) {
+                it('Create OK (Android device) ', function(done) {
+                    var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+
+                    var bodyData = {
+                        firstName: 'Firstname',
+                        lastName: 'Lastname',
+                        password: password,
+                        country: 'US',
+                        phone: phone,
+                        email: username,
+                        transactionId: transactionId
+                    };
+
+                    var redisKey = config.emailVerification.redis.key;
+                    redisKey = redisKey.replace('{username}', bodyData.email);
+                    var redisExp = config.emailVerification.redis.expireInSec;
+
+                    redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
+                        assert.equal(err, null);
+
+                        ciphertoken.createToken(tokenSettings, username, null, bodyData, function(err, token){
+                            assert.equal(err, null);
+
+                            var options = {
+                                url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate?verifyToken=' + token ,
+                                method:'GET',
+                                headers: {},
+                                followRedirect: false
+                            };
+                            options.headers['user-agent'] = "Mozilla/5.0 (Linux; U; Android 2.2; nb-no; HTC Desire Build/FRF91)";
+
+                            nock('http://' + config.private_host + ':' + config.private_port)
+                                .post(config.passThroughEndpoint.path)
+                                .reply(201, {id: USER.id});
+
+                            request(options, function(err, res, body){
+                                assert.equal(err, null);
+                                assert.equal(res.statusCode, 302, body);
+                                assert.notEqual(res.headers.location.indexOf('intent://user/refreshToken/'), -1);
+                                done();
+                            });
+                        });
+
+                    });
+                });
+
+                it('Create OK (not an iOS or Android device) ', function(done) {
                     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
                     var bodyData = {

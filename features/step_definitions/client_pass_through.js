@@ -2,14 +2,12 @@ var request = require('request');
 var assert = require('assert');
 var world = require('../support/world');
 var nock = require('nock');
-
-var fs = require('fs');
 var config = require('../../config.json');
 
 module.exports = function(){
     this.When(/^the client makes a pass through (.*) with the following (.*) in the body$/, function (METHOD, PUBLIC_PAYLOAD, callback) {
 
-        var notifServiceURL = config.services.notifications;
+        var notifServiceURL = config.externalServices.notifications;
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
