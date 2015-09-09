@@ -309,6 +309,28 @@ function setPassword(id, body, cbk){
     }
 }
 
+function validateOldPassword(username, oldPassword, cbk) {
+
+    userDao.getAllUserFields(username, function(err, user) {
+        if (err) {
+            res.send(401, err);
+            return next();
+        }
+
+        cryptoMng.encrypt(oldPassword, function(encrypted){
+            if (user.password !== encrypted)  {
+                return cbk({
+                    err: 'invalid_old_password',
+                    des: 'invalid password',
+                    code: 401
+                });
+            }
+
+            return cbk();
+        });
+    });
+}
+
 //Aux functions
 function random (howMany, chars) {
     chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
@@ -352,6 +374,7 @@ module.exports = function(settings) {
         setPlatformData : setPlatformData,
         createUser : createUser,
         createUserByToken : createUserByToken,
-        setPassword: setPassword
+        setPassword: setPassword,
+        validateOldPassword: validateOldPassword
     };
 };
