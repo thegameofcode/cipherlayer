@@ -37,7 +37,7 @@
     "redis": "^0.12.1",
     "request": "^2.47.0",
     "restify": "^2.8.3",
-    "version-control": "^1.2.1"
+    "version-control": "^1.2.4"
   },
   "devDependencies": {
     "assert": "^1.1.2",
