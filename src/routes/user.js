@@ -1,3 +1,4 @@
+var log = require('../logger/service.js');
 var RandExp = require('randexp');
 
 var userDao = require('../managers/dao');
@@ -140,14 +141,56 @@ function createUserByToken(req, res, next) {
     });
 }
 
-function setPassword(req, res, next){
-    if(!req.body){
-        res.send(400, {
+function checkBody(req, res, next) {
+    var err;
+    if (!req.body){
+        err = {
             err: 'invalid_body',
             des: 'The call to this url must have body.'
-        } );
+        };
+        res.send(400, err);
+        return next(false);
+    }
+
+    if (!req.body.password){
+        err = {
+            err: 'auth_proxy_error',
+            des: 'invalid body request',
+        };
+        res.send(400, err);
+        return next(false);
+    }
+
+    return next();
+}
+
+function validateOldPassword(req, res, next) {
+    var err;
+    if (!config.password.validateOldPassword) {
         return next();
     }
+
+    if (!req.body.oldPassword) {
+        err = {
+            err: 'missing_password',
+            des: 'Missing old password validation'
+        };
+        res.send(400, err);
+        return next(false);
+    }
+
+    log.info('validating old password', req.user.password, req.body);
+
+    userMng().validateOldPassword(req.user.username, req.body.oldPassword, function(err){
+        if (err) {
+            res.send(401, err);
+            return next(false);
+        }
+        return next();
+    });
+
+}
+function setPassword(req, res, next){
 
     userMng().setPassword(req.user._id, req.body, function(err){
         if (err) {
@@ -172,7 +215,7 @@ function addRoutes(service){
     service.post(config.passThroughEndpoint.path, createUserEndpoint);
     service.get('/user/activate', createUserByToken);
 
-    service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, setPassword);
+    service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
 }
 
 module.exports = addRoutes;

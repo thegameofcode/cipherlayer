@@ -137,7 +137,8 @@ describe('user', function () {
     describe('Update Password', function () {
         it('204 Ok', function (done) {
             var newPassword = {
-                password: 'n3wPas5W0rd'
+                password: 'n3wPas5W0rd',
+                oldPassword: 'validpassword'
             };
 
             var options = {
@@ -212,6 +213,76 @@ describe('user', function () {
             request(options, function (err, res, body) {
                 assert.equal(err, null, body);
                 assert.equal(res.statusCode, 400, body);
+                body = JSON.parse(body);
+                assert.deepEqual(body, expectedResult);
+                done();
+            });
+        });
+
+        it('400 (no old password)', function (done) {
+            var newPassword = {
+                password: 'n3wPas5W0rd'
+            };
+
+            if (!config.password.validateOldPassword) {
+                return done();
+            }
+
+            var options = {
+                url: 'http://localhost:' + config.public_port + '/user/me/password',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': AUTHORIZATION
+                },
+                method: 'PUT',
+                body : JSON.stringify(newPassword)
+            };
+            options.headers[config.version.header] = "test/1";
+
+            var expectedResult = {
+                err: "missing_password",
+                des: "Missing old password validation"
+            };
+
+            request(options, function (err, res, body) {
+                assert.equal(err, null, body);
+                assert.equal(res.statusCode, 400, body);
+                body = JSON.parse(body);
+                assert.deepEqual(body, expectedResult);
+                done();
+            });
+        });
+
+        it('401 (invalid old password)', function (done) {
+            var newPassword = {
+                password: 'n3wPas5W0rd',
+                oldPassword: 'invalidPassword'
+            };
+
+            if (!config.password.validateOldPassword) {
+                return done();
+            }
+
+            var options = {
+                url: 'http://localhost:' + config.public_port + '/user/me/password',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': AUTHORIZATION
+                },
+                method: 'PUT',
+                body : JSON.stringify(newPassword)
+            };
+            options.headers[config.version.header] = "test/1";
+
+            var expectedResult = {
+                err: "invalid_old_password",
+                des:"invalid password",
+                code: 401
+            };
+
+            request(options, function (err, res, body) {
+                assert.equal(err, null, body);
+                assert.equal(res.statusCode, 401, body);
                 body = JSON.parse(body);
                 assert.deepEqual(body, expectedResult);
                 done();
