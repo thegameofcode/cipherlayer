@@ -18,6 +18,8 @@ var accessTokenSettings = {
 };
 
 var AUTHORIZATION;
+var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
+var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.email;
 
 var createdUserId;
 
@@ -73,10 +75,11 @@ describe('user', function () {
                 },
                 method: 'GET'
             };
+
             options.headers[config.version.header] = "test/1";
 
-            nock(config.externalServices.notifications)
-                .post('/notification/email')
+            nock(NOTIFICATION_SERVICE_URL)
+                .post(NOTIFICATION_EMAIL_SERVICE_PATH)
                 .reply(201);
 
             request(options, function (err, res, body) {
@@ -108,8 +111,8 @@ describe('user', function () {
             };
             options.headers[config.version.header] = "test/1";
 
-            nock(config.externalServices.notifications)
-                .post('/notification/email')
+            nock(NOTIFICATION_SERVICE_URL)
+                .post(NOTIFICATION_EMAIL_SERVICE_PATH)
                 .times(2)
                 .reply(204);
 

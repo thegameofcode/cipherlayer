@@ -154,14 +154,14 @@ function createUserByToken(token, cbk) {
         }
         var body = bodyData.data;
 
-        var profileSchema = config.validators.profile.mustUse ? require('./json_formats/' + config.validators.profile) : null;
+        var profileSchema = config.validators.profile.mustUse ? require('./json_formats/' + config.validators.profile.filename) : null;
 
         //Validate the current bodyData with the schema profile_create.json
         if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
 
             return cbk({
                 err:'invalid_profile_data',
-                des:'The data format provided is nor valid.',
+                des:'The data format provided is not valid.',
                 code: 400
             });
         }

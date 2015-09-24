@@ -5,6 +5,9 @@ var nock = require('nock');
 var request = require('request');
 var assert = require('assert');
 
+var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
+var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.email;
+
 var myStepDefinitionsWrapper = function () {
     this.When(/^the client makes a (.*) request to (.*)$/, function (METHOD, PATH, callback) {
 
@@ -18,8 +21,8 @@ var myStepDefinitionsWrapper = function () {
         };
         options.headers[config.version.header] = "test/1";
 
-        nock(config.externalServices.notifications)
-            .post('/notification/email')
+        nock(NOTIFICATION_SERVICE_URL)
+            .post(NOTIFICATION_EMAIL_SERVICE_PATH)
             .reply(204);
 
         request(options, function(err,res) {
