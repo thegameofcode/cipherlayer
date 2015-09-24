@@ -3,7 +3,7 @@ var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
-
+var config = require(process.cwd() + '/config.json');
 var userDao = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
@@ -154,9 +154,11 @@ function createUserByToken(token, cbk) {
         }
         var body = bodyData.data;
 
-        var profileSchema = require('./json_formats/profile_create.json');
+        var profileSchema = config.validators.profile.mustUse ? require('./json_formats/' + config.validators.profile) : null;
+
         //Validate the current bodyData with the schema profile_create.json
         if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
+
             return cbk({
                 err:'invalid_profile_data',
                 des:'The data format provided is nor valid.',
