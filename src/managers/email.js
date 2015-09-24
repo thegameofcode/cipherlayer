@@ -15,7 +15,7 @@ function sendEmailVerification(email, subject, emailBody, cbk){
     };
 
     var options = {
-        url: notifServiceURL + _settings.externalServices.notifications.email,
+        url: notifServiceURL + _settings.externalServices.notifications.pathEmail,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
@@ -96,7 +96,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk){
     };
 
     var options = {
-        url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.email ,
+        url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail ,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },

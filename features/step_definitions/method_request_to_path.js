@@ -6,7 +6,7 @@ var request = require('request');
 var assert = require('assert');
 
 var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
-var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.email;
+var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;
 
 var myStepDefinitionsWrapper = function () {
     this.When(/^the client makes a (.*) request to (.*)$/, function (METHOD, PATH, callback) {
@@ -26,7 +26,7 @@ var myStepDefinitionsWrapper = function () {
             .reply(204);
 
         request(options, function(err,res) {
-            assert.equal(err,null);
+          assert.equal(err,null);
             world.getResponse().statusCode = res.statusCode;
             callback();
         });

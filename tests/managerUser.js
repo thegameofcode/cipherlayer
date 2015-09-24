@@ -12,7 +12,7 @@ var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
 var config = require('../config.json');
 
 var notifServiceURL = config.externalServices.notifications.base;
-var notifServicePath = config.externalServices.notifications.email;
+var notifServicePath = config.externalServices.notifications.pathEmail;
 
 var accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,

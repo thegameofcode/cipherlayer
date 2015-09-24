@@ -6,7 +6,7 @@ var redisMng = require('../src/managers/redis');
 
 var config = require('../config.json');
 var notifServiceURL = config.externalServices.notifications.base;
-var notifServicePath = config.externalServices.notifications.email;
+var notifServicePath = config.externalServices.notifications.pathEmail;
 
 describe('email', function() {
 

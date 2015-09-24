@@ -19,7 +19,7 @@ var accessTokenSettings = {
 
 var AUTHORIZATION;
 var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
-var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.email;
+var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;
 
 var createdUserId;
 

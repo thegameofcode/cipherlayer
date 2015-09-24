@@ -67,7 +67,7 @@
   },
   "validators": {
     "profile": {
-      "mustUse": true,
+      "path": "",
       "filename": "profile_create.json"
     }
   },
@@ -103,23 +103,19 @@
   "externalServices":{
     "notifications": {
       "base": "http://localhost:3002",
-      "email": "/api/notification/email"
-    },
-    "useResonator": false
+      "pathEmail": "/api/notification/email"
+    }
   },
   "version" : {
-    "header" : "x-app-version",
+    "header" : "x-example-version",
     "platforms" : {
       "test" : {
         "link" : "http://testLink",
         "1" : true
       },
-      "downloader" : {
-        "link" : "http://testLink",
-        "1" : true
-      }
-    },
-    "installPath" : "/install"
+    "installPath" : "/install",
+    "db":"mongodb://localhost/versionControl?w=1"
+  }
   },
   "allowedDomains":[
     "*@a.com"
@@ -132,6 +128,27 @@
     "subject" :"Recover Example User Password",
     "body" : "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
   },
+    "endpoints" : [
+      {
+      "path" : "\/api\/profile",
+      "methods" : ["POST", "PUT"],
+      "roles" : ["admin"]
+    },
+    {
+      "path": "\/.*",
+      "methods":["GET", "POST", "PUT"],
+      "roles":["user", "admin"]
+    }
+  ],
+  "accessControlAllow" : [
+    {
+      "enabled" : true,
+      "methods" : "OPTION,GET,PUT,POST,HEAD",
+      "headers" : "x-mycomms-version,content-type,Authorization",
+      "credentials" : "true",
+      "origin": "http://192.168.1.116:9000"
+    }
+  ],
   "directProxyUrls": [
     "\/upload$"
   ]

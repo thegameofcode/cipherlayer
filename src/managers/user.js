@@ -154,7 +154,7 @@ function createUserByToken(token, cbk) {
         }
         var body = bodyData.data;
 
-        var profileSchema = config.validators.profile.mustUse ? require('./json_formats/' + config.validators.profile.filename) : null;
+        var profileSchema = _.isEmpty(config.validators.profile.path) ? require('./json_formats/' + config.validators.profile.filename) : config.validators.profile.path;
 
         //Validate the current bodyData with the schema profile_create.json
         if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
