@@ -19,10 +19,10 @@
     "clientSecret": "unsecureKey5"
   },
   "db": {
-    "conn": "mongodb://mongodb:27017/cipherlayer?w=1"
+    "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
   },
   "redis":{
-    "host":"redis",
+    "host":"127.0.0.1",
     "port":6379
   },
   "passThroughEndpoint" : {
