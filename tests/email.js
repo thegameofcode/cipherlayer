@@ -5,7 +5,8 @@ var nock = require('nock');
 var redisMng = require('../src/managers/redis');
 
 var config = require('../config.json');
-var notifServiceURL = config.externalServices.notifications;
+var notifServiceURL = config.externalServices.notifications.base;
+var notifServicePath = config.externalServices.notifications.pathEmail;
 
 describe('email', function() {
 
@@ -26,7 +27,7 @@ describe('email', function() {
         });
 
         nock(notifServiceURL)
-            .post('/notification/email')
+            .post(notifServicePath)
             .reply(204);
 
         var email = "test@test.com";
