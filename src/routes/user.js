@@ -134,6 +134,12 @@ function createUserByToken(req, res, next) {
                     return next(false);
                 }
             }
+
+            if (config.emailVerification.redirectUrl) {
+              res.setHeader('Location', config.emailVerification.redirectUrl);
+              res.send(301);
+              return next();
+            }
             res.send(200, { msg: config.emailVerification.nonCompatibleEmailMsg } );
             return next();
         }

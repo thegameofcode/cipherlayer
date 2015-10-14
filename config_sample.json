@@ -98,7 +98,8 @@
       "key":"user.{username}.transaction",
       "expireInSec": 86400
     },
-    "scheme":"mycomms"
+    "scheme":"mycomms",
+    "redirectUrl": "http://www.google.com"
   },
   "externalServices":{
     "notifications": {
