@@ -91,6 +91,7 @@
   },
   "emailVerification": {
     "subject": "Example email verification",
+    "from": "hello@example.com",
     "body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
     "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" , "*Android*"],
     "nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",

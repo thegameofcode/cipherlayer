@@ -11,7 +11,8 @@ function sendEmailVerification(email, subject, emailBody, cbk){
     var emailOptions = {
         to: email,
         subject: subject,
-        html: emailBody
+        html: emailBody,
+        from: _settings.emailVerification.from
     };
 
     var options = {
@@ -72,7 +73,6 @@ function emailVerification(email, bodyData, cbk){
             var emailText = (_settings.emailVerification.body).replace('{link}', link);
 
             var subject = _settings.emailVerification.subject;
-
             //Send verify email
             sendEmailVerification(email, subject, emailText, function(err){
                 if (err) {
