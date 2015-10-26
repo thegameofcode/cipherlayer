@@ -4,12 +4,13 @@ var request = require('request');
 var ciphertoken = require('ciphertoken');
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
+var nock = require('nock');
 
 var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
-        describe('/login', function () {
+        describe('/logout', function () {
             var baseUser = {
                 id: 'a1b2c3d4e5f6',
                 username: 'validuser' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
@@ -43,6 +44,10 @@ module.exports = {
                 };
                 options.headers[config.version.header] = "test/1";
 
+                nock('http://localhost:'+ config.private_port)
+                  .post('/api/me/session')
+                  .reply(204);
+
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
                     assert.equal(res.statusCode, 200, body);
@@ -61,8 +66,8 @@ module.exports = {
                             assert.equal(refreshTokenInfo.userId, user.id);
                             assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
 
-                            options.url = 'http://localhost:' + config.public_port + '/auth/login';
-                            options.body({"userId":user.id, "deviceId": user.deviceId});
+                            options.url = 'http://localhost:' + config.public_port + '/auth/logout';
+                            options.body = JSON.stringify({"userId":user.id, "deviceId": user.deviceId});
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 204, body);
