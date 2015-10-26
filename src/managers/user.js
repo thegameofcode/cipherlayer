@@ -226,6 +226,7 @@ function createUserPrivateCall(body, user, cbk){
 
     log.info('=> POST ' + options.url);
     request(options, function (err, private_res, body) {
+
         if (err) {
             log.error('<= error: ' + err);
             return cbk({
