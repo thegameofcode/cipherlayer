@@ -24,7 +24,7 @@ function disconnect(cbk){
 }
 
 function insertKeyValue(key, value, expSeconds, cbk){
-    if(!redisClient){
+    if(!isConnected){
         return cbk({err:'redis_not_connected'});
     }
 
@@ -47,7 +47,7 @@ function insertKeyValue(key, value, expSeconds, cbk){
 }
 
 function updateKeyValue(key, value, cbk){
-    if(!redisClient){
+    if(!isConnected){
         return cbk({err:'redis_not_connected'});
     }
 
@@ -58,7 +58,7 @@ function updateKeyValue(key, value, cbk){
 }
 
 function getKeyValue(key, cbk){
-    if(!redisClient){
+    if(!isConnected){
         return cbk({err:'redis_not_connected'});
     }
 
@@ -68,7 +68,7 @@ function getKeyValue(key, cbk){
 }
 
 function deleteKeyValue(key, cbk){
-    if(!redisClient){
+    if(!isConnected){
         return cbk({err:'redis_not_connected'});
     }
 
@@ -78,7 +78,7 @@ function deleteKeyValue(key, cbk){
 }
 
 function deleteAllKeys(cbk){
-    if(!redisClient){
+    if(!isConnected){
         return cbk({err:'redis_not_connected'});
     }
 
