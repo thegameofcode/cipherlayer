@@ -109,6 +109,14 @@ describe('token manager', function(){
                 });
             });
         });
+        it('empty, callback', function(done) {
+            tokenManager.createBothTokens(null, {}, function(error, tokens){
+                assert.notEqual(error, null);
+                assert.equal(error.err, 'user_id_required');
+                assert.equal(tokens, undefined);
+                done();
+            });
+        });
     });
 });
 
