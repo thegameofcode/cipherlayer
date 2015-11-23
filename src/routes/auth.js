@@ -3,7 +3,6 @@ var userDao = require('../managers/dao');
 var tokenManager = require('../managers/token');
 var config = require(process.cwd() + '/config.json');
 var ObjectID = require('mongodb').ObjectID;
-var config = require(process.cwd() + '/config.json');
 var cryptoMng = require('../managers/crypto')({ password : 'password' });
 var request = require("request");
 
@@ -36,6 +35,10 @@ function postAuthLogin(req, res, next){
                 if(req.body.deviceId){
                     data.deviceId = req.body.deviceId;
                 }
+
+				if(config.version){
+					data.deviceVersion = req.headers;
+				}
 
                 sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err){
 					if(err){
@@ -143,7 +146,11 @@ function renewToken(req, res, next){
         data.deviceId = req.body.deviceId;
     }
 
-    tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
+	if(config.version){
+		data.deviceVersion = req.headers;
+	}
+
+	tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
         var userAgent = String(req.headers['user-agent']);
 
         if (err){
