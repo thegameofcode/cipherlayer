@@ -37,7 +37,7 @@ function postAuthLogin(req, res, next){
                 }
 
 				if(config.version){
-					data.deviceVersion = req.headers['config.version.header'];
+					data.deviceVersion = req.headers[config.version.header];
 				}
 
                 sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function(err){
@@ -147,7 +147,7 @@ function renewToken(req, res, next){
     }
 
 	if(config.version){
-		data.deviceVersion = req.headers['config.version.header'];
+		data.deviceVersion = req.headers[config.version.header];
 	}
 
 	tokenManager.getRefreshTokenInfo(refreshToken, function(err, tokenSet){
