@@ -99,6 +99,7 @@ function salesforceCallback(req, res, next){
                     accessToken:sfData.accessToken,
                     refreshToken:sfData.refreshToken
                 };
+				
                 tokenManager.createAccessToken(profile.id, tokenData, function(err, token){
                     countries.countryFromPhone(profile._raw.mobile_phone, function(err, country){
                         var returnProfile = {
@@ -154,6 +155,10 @@ function salesforceCallback(req, res, next){
                 if(foundUser.roles){
                     data = {"roles": foundUser.roles};
                 }
+
+				if(config.version){
+					data.deviceVersion = req.headers[config.version.header];
+				}
 
                 tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
                     if(err) {
