@@ -77,20 +77,32 @@ function sendNewPassword(req, res, next){
 
 function createUserEndpoint(req, res, next) {
     userMng().createUser(req.body, req.headers['x-otp-pin'], function(err, tokens){
-        if (err) {
-            if (!err.code ) {
-                res.send(500, err);
-            } else {
-                var errCode = err.code;
-                delete(err.code);
-                res.send(errCode, err);
-            }
-            return next(false);
-        } else {
-            res.send(201, tokens);
-            return next();
-        }
-    });
+
+		tokenManager.getRefreshTokenInfo(tokens.refreshToken, function(err, tokenSet){
+			var userId = tokenSet.userId;
+			var tokenData = tokenSet.data;
+
+			if(config.version){
+				tokenData.deviceVersion = req.headers[config.version.header];
+			}
+
+			tokenManager.createBothTokens(userId, tokenData, function(err, tokens){
+				if (err) {
+					if (!err.code ) {
+						res.send(500, err);
+					} else {
+						var errCode = err.code;
+						delete(err.code);
+						res.send(errCode, err);
+					}
+					return next(false);
+				} else {
+					res.send(201, tokens);
+					return next();
+				}
+			});
+		});
+	});
 }
 
 function createUserByToken(req, res, next) {
