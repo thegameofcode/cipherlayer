@@ -19,6 +19,5 @@ deployment:
     branch: master
     commands:
       - npm version 1.1.$CIRCLE_BUILD_NUM --no-git-tag-version
-      - printf "//registry.npmjs.org/:_authToken=$NPM_ACCESS_TOKEN" > npmrc
-      - npm publish --userconfig npmrc
-      - rm npmrc
+      - echo -e "$NPM_USERNAME\n$NPM_PASSWORD\n$NPM_EMAIL" | npm login
+      - npm publish
