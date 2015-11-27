@@ -11,7 +11,8 @@ var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
 
 var config = require('../config.json');
 
-var notifServiceURL = config.externalServices.notifications;
+var notifServiceURL = config.externalServices.notifications.base;
+var notifServicePath = config.externalServices.notifications.pathEmail;
 
 var accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,
@@ -195,7 +196,7 @@ describe('user Manager', function(){
 						.reply(201, {id: expectedUserId});
 
 					nock(notifServiceURL)
-						.post('/notification/email')
+						.post(notifServicePath)
 						.reply(204);
 
 					userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
@@ -225,7 +226,7 @@ describe('user Manager', function(){
 				.reply(201, {id: expectedUserId});
 
 			nock(notifServiceURL)
-				.post('/notification/email')
+				.post(notifServicePath)
 				.reply(204);
 
 			userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
@@ -545,7 +546,7 @@ describe('user Manager', function(){
 
 			var expectedError = {
 				err:"invalid_profile_data",
-				des:"The data format provided is nor valid.",
+				des:"The data format provided is not valid.",
 				code:400
 			};
 

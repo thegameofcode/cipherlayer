@@ -8,7 +8,7 @@ var redisMng = require('../../src/managers/redis');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
-var notificationsServiceURL = config.externalServices.notifications;
+var notificationsServiceURL = config.externalServices.notifications.base;
 
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){

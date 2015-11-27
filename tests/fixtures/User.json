@@ -1,0 +1,23 @@
+[
+  {
+    "_id": {"$oid": "01f0000000000000003f0004"},
+    "phone": "555-7891-2365",
+    "email": "nick@intelygenz.com",
+    "password": "1234",
+    "country": "PL"
+  },
+  {
+    "_id": {"$oid": "01f0000000000000003f0002"},
+    "phone": "555-8899-1324",
+    "email": "gustavo@intelygenz.com",
+    "password": "asdf",
+    "country": "AR"
+  },
+  {
+    "_id": {"$oid": "01f0000000000000003f0003"},
+    "phone": "555-0012-7453",
+    "email": "josemanuel@intelygenz.com",
+    "password": "abcd",
+    "country": "ES"
+  }
+]
