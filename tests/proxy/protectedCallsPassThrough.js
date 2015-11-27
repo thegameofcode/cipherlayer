@@ -8,40 +8,38 @@ var redisMng = require('../../src/managers/redis');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
-var notificationsServiceURL = config.externalServices.notifications;
+var notificationsServiceURL = config.externalServices.notifications.base;
+var notificationsServicePath = config.externalServices.notifications.pathEmail;
 
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){
-        it.skip('201 Created', function (done) {
+        it('201 Created', function (done) {
+
+            // This is required to skip the email verification step and avoid a hanging request targeted at the email verification endpoint
+            config.emailVerification = false;
+
             var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
             var expectedUserCountry = 'US';
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
-            expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
+            expectedPublicRequest[config.passThroughEndpoint.password] = 'P4ssword';
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
-            var expectedPrivateResponse = clone(expectedPublicRequest);
-            delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
-
-            nock('http://' + config.private_host + ':' + config.private_port)
-                .post(config.passThroughEndpoint.path, expectedPrivateResponse)
-                .reply(201, {id: expectedUserId});
-
-            var redisKey = config.redisKeys.user_phone_verify.key;
+            var redisKey = config.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
             var pin = 'xxxx';
 
-            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+            redisMng.insertKeyValue(redisKey + '.pin', pin, config.phoneVerification.redis.expireInSec, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', config.phoneVerification.attempts , config.phoneVerification.redis.expireInSec, function(err){
                     assert.equal(err, null);
 
                     nock('http://' + config.private_host + ':' + config.private_port)
-                        .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                        .post(config.passThroughEndpoint.path, expectedPublicRequest)
                         .reply(201, {id: expectedUserId});
 
                     var options = {
@@ -86,7 +84,10 @@ module.exports = {
         });
     },
     itPlatformInfo: function platformInfo(accessTokenSettings, refreshTokenSettings){
-        it.skip('203 Platform Info', function (done) {
+        it('203 Platform Info', function (done) {
+
+            // This is required to skip the email verification step and avoid a hanging request targeted at the email verification endpoint
+            config.emailVerification = false;
 
             var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
@@ -111,14 +112,14 @@ module.exports = {
                     .post(config.passThroughEndpoint.path, expectedPrivateResponse)
                     .reply(203, {id: expectedUserId});
 
-                var redisKey = config.redisKeys.user_phone_verify.key;
+                var redisKey = config.phoneVerification.redis.key;
                 redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
                 var pin = 'xxxx';
 
-                redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.pin', pin, config.phoneVerification.redis.expireInSec, function(err){
                     assert.equal(err, null);
-                    redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                    redisMng.insertKeyValue(redisKey + '.attempts', config.phoneVerification.attempts , config.phoneVerification.redis.expireInSec, function(err){
                         assert.equal(err, null);
 
                         var options = {
@@ -172,32 +173,33 @@ module.exports = {
         });
     },
     itAlreadyExists: function alreadyExists(accessTokenSettings, refreshTokenSettings){
-        it.skip('409 already exists', function (done) {
+        it('409 already exists', function (done) {
+            // This is required to skip the email verification step and avoid a hanging request targeted at the email verification endpoint
+            config.emailVerification = false;
+
             var expectedUsername = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedPublicRequest = {};
             var expectedUserPhone = '222222222';
             var expectedUserCountry = 'US';
+
             expectedPublicRequest[config.passThroughEndpoint.username] = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
-            expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
+            expectedPublicRequest[config.passThroughEndpoint.password] = 'P4ssword';
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
-            var expectedPrivateResponse = clone(expectedPublicRequest);
-            delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
-
             nock('http://' + config.private_host + ':' + config.private_port)
-                .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                .post(config.passThroughEndpoint.path, expectedPublicRequest)
                 .reply(201, {id: expectedUserId});
 
-            var redisKey = config.redisKeys.user_phone_verify.key;
+            var redisKey = config.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1'+expectedUserPhone);
 
             var pin = 'xxxx';
 
-            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+            redisMng.insertKeyValue(redisKey + '.pin', pin, config.phoneVerification.redis.expireInSec, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts , config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', config.phoneVerification.attempts , config.phoneVerification.redis.expireInSec, function(err){
                     assert.equal(err, null);
 
                     var options = {
@@ -240,6 +242,10 @@ module.exports = {
     },
     itNotSecurityToken: function notSecurityToken(){
         it('400 not security token', function (done) {
+
+            // This is required to skip the email verification step and avoid a hanging request targeted at the email verification endpoint
+            config.emailVerification = false;
+
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
 
@@ -264,14 +270,29 @@ module.exports = {
         });
     },
     itCreatedVerifyMail: function createdVerifyMail(){
-        it.skip('201 Created (Verify email)', function (done) {
+        it('201 Created (Verify email)', function (done) {
+
+            config.emailVerification = {
+              "subject": "Example email verification",
+              "from": "hello@example.com",
+              "body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
+              "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" , "*Android*"],
+              "nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",
+              "redis": {
+                "key":"user.{username}.transaction",
+                "expireInSec": 86400
+              },
+              "scheme":"mycomms",
+              "redirectUrl": "http://www.google.com"
+            };
+
             var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
             var expectedUserCountry = 'US';
             var expectedPublicRequest = {};
             expectedPublicRequest[config.passThroughEndpoint.username] = expectedUsername;
-            expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
+            expectedPublicRequest[config.passThroughEndpoint.password] = 'P4ssword';
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
@@ -279,22 +300,22 @@ module.exports = {
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
             nock('http://' + config.private_host + ':' + config.private_port)
-                .post(config.passThroughEndpoint.path, expectedPrivateResponse)
+                .post(config.passThroughEndpoint.path, expectedPublicRequest)
                 .times(2)
                 .reply(201, {id: expectedUserId});
 
             nock(notificationsServiceURL)
-                .post('/notification/email')
-                .reply(204);
+                .post(notificationsServicePath)
+                .reply(200, {des: expectedUsername});
 
-            var redisKey = config.redisKeys.user_phone_verify.key;
+            var redisKey = config.phoneVerification.redis.key;
             redisKey = redisKey.replace('{userId}',expectedUsername).replace('{phone}','+1' + expectedUserPhone);
 
             var pin = 'xxxx';
 
-            redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function(err){
+            redisMng.insertKeyValue(redisKey + '.pin', pin, config.phoneVerification.redis.expireInSec, function(err){
                 assert.equal(err, null);
-                redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function(err){
+                redisMng.insertKeyValue(redisKey + '.attempts', config.phoneVerification.attempts, config.phoneVerification.redis.expireInSec, function(err){
                     assert.equal(err, null);
 
                     var options = {
@@ -309,13 +330,13 @@ module.exports = {
                     options.headers[config.version.header] = "test/1";
 
                     request(options, function (err, res, body) {
-                        assert.equal(err, null);
+                      assert.equal(err, null);
                         assert.equal(res.statusCode, 200, body);
                         body = JSON.parse(body);
                         assert.deepEqual(body, {des: expectedUsername}, body);
 
                         //Check the redis transactionId for the user
-                        var redisKey = config.redisKeys.direct_login_transaction.key;
+                        var redisKey = config.emailVerification.redis.key;
                         redisKey = redisKey.replace('{username}', expectedUsername);
 
                         redisMng.getKeyValue(redisKey, function(err, transactionId) {

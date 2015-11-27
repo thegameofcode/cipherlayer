@@ -15,6 +15,11 @@ var refreshTokenSettings = {
 };
 
 function createAccessToken(userId, data ,cbk){
+
+    if (!userId) {
+      return cbk({err: 'user_id_required'});
+    }
+
     if(typeof data === 'function'){
         cbk = data;
         data = {};
@@ -31,6 +36,11 @@ function getRefreshTokenInfo(refreshToken, cbk){
 }
 
 function createRefreshToken(userId, data, cbk){
+
+    if (!userId) {
+        return cbk({err: 'user_id_required'});
+    }
+
     if(typeof data === 'function'){
         cbk = data;
         data = {};

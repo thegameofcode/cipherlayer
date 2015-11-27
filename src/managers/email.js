@@ -7,15 +7,16 @@ var redisMng = require('./redis');
 var _settings = {};
 
 function sendEmailVerification(email, subject, emailBody, cbk){
-    var notifServiceURL = _settings.externalServices.notifications;
+    var notifServiceURL = _settings.externalServices.notifications.base;
     var emailOptions = {
         to: email,
         subject: subject,
-        html: emailBody
+        html: emailBody,
+        from: _settings.emailVerification.from
     };
 
     var options = {
-        url: notifServiceURL + '/notification/email',
+        url: notifServiceURL + _settings.externalServices.notifications.pathEmail,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
@@ -72,7 +73,6 @@ function emailVerification(email, bodyData, cbk){
             var emailText = (_settings.emailVerification.body).replace('{link}', link);
 
             var subject = _settings.emailVerification.subject;
-
             //Send verify email
             sendEmailVerification(email, subject, emailText, function(err){
                 if (err) {
@@ -96,7 +96,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk){
     };
 
     var options = {
-        url: _settings.externalServices.notifications + '/notification/email',
+        url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail ,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },

@@ -14,9 +14,31 @@ describe('redis', function() {
     var baseKey = 'key';
     var baseValue = 'value';
 
-    it('insert', function (done) {
+    it('insert: success', function (done) {
         redisMng.insertKeyValue(baseKey, baseValue, 3, function(err){
             assert.equal(err, null);
+            done();
+        });
+    });
+
+    it('insert: connection error', function(done) {
+        async.series([
+            disconnectRedis = function(miniDone) {
+                redisMng.disconnect(miniDone);
+            },
+            attemptInsert = function(miniDone) {
+                redisMng.insertKeyValue(baseKey, baseValue, 3, function(error) {
+                    assert.notEqual(error, null);
+                    assert.equal(error.err, 'redis_not_connected');
+                    miniDone();
+                });
+            }
+        ], done);
+    });
+
+    it('insert: setKey error', function(done) {
+        redisMng.insertKeyValue(baseKey, null, 3, function(error) {
+            assert.notEqual(error, null);
             done();
         });
     });
@@ -29,7 +51,22 @@ describe('redis', function() {
         });
     });
 
-    it('delete', function (done) {
+    it('get: connection error', function(done) {
+      async.series([
+        disconnectRedis = function(miniDone) {
+          redisMng.disconnect(miniDone);
+        },
+        attemptGet = function(miniDone) {
+          redisMng.getKeyValue(null, function(error, value) {
+            assert.equal(error.err, 'redis_not_connected');
+            assert.equal(value, undefined);
+            miniDone();
+          });
+        }
+      ], done);
+    });
+
+    it('delete: success', function (done) {
         redisMng.deleteKeyValue(baseKey, function(err, deleted){
             assert.equal(err, null);
             assert.equal(deleted, true);
@@ -39,6 +76,22 @@ describe('redis', function() {
                 done();
             });
         });
+    });
+
+    it('delete: connection error', function(done) {
+        async.series([
+            disconnectRedis = function(miniDone) {
+                redisMng.disconnect(miniDone);
+            },
+            attemptDelete = function(miniDone) {
+                redisMng.deleteKeyValue(baseKey, function(error, deleted) {
+                    assert.notEqual(error, null);
+                    assert.equal(error.err, 'redis_not_connected');
+                    assert.equal(deleted, undefined);
+                    miniDone();
+                });
+            }
+        ], done);
     });
 
     it('expire', function (done) {
@@ -64,7 +117,7 @@ describe('redis', function() {
         ], done);
     });
 
-    it('update', function (done) {
+    it('update: success', function (done) {
         this.timeout(4000);
         var val = 'new value';
         async.series([
@@ -102,7 +155,23 @@ describe('redis', function() {
         ], done);
     });
 
-    it('delete all', function (done) {
+    it('update: connection error', function(done) {
+        async.series([
+            disconnectRedis = function(miniDone) {
+                redisMng.disconnect(miniDone);
+            },
+            attemptUpdate = function(miniDone) {
+                redisMng.updateKeyValue(baseKey, baseValue, function(error, value) {
+                    assert.notEqual(error, null);
+                    assert.equal(error.err, 'redis_not_connected');
+                    assert.equal(value, undefined);
+                    miniDone();
+                });
+            }
+        ], done);
+    });
+
+    it('delete all: success', function (done) {
         async.series([
             createKey = function(done){
                 redisMng.insertKeyValue(baseKey, baseValue, 10, function(err){
@@ -124,6 +193,21 @@ describe('redis', function() {
                 });
             }
 
+        ], done);
+    });
+
+    it('delete all: connection error', function(done) {
+        async.series([
+            disconnectRedis = function(miniDone) {
+                redisMng.disconnect(miniDone);
+            },
+            attemptDeleteAll = function(miniDone) {
+                redisMng.deleteAllKeys(function(error) {
+                    assert.notEqual(error, null);
+                    assert.equal(error.err, 'redis_not_connected');
+                    miniDone();
+                });
+            }
         ], done);
     });
 });

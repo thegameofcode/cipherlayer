@@ -3,7 +3,7 @@ var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
-
+var config = require(process.cwd() + '/config.json');
 var userDao = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
@@ -154,12 +154,14 @@ function createUserByToken(token, cbk) {
         }
         var body = bodyData.data;
 
-        var profileSchema = require('./json_formats/profile_create.json');
+        var profileSchema = _.isEmpty(config.validators.profile.path) ? require('./json_formats/' + config.validators.profile.filename) : config.validators.profile.path;
+
         //Validate the current bodyData with the schema profile_create.json
         if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
+
             return cbk({
                 err:'invalid_profile_data',
-                des:'The data format provided is nor valid.',
+                des:'The data format provided is not valid.',
                 code: 400
             });
         }
@@ -224,6 +226,7 @@ function createUserPrivateCall(body, user, cbk){
 
     log.info('=> POST ' + options.url);
     request(options, function (err, private_res, body) {
+
         if (err) {
             log.error('<= error: ' + err);
             return cbk({
@@ -309,6 +312,28 @@ function setPassword(id, body, cbk){
     }
 }
 
+function validateOldPassword(username, oldPassword, cbk) {
+
+    userDao.getAllUserFields(username, function(err, user) {
+        if (err) {
+            res.send(401, err);
+            return next();
+        }
+
+        cryptoMng.encrypt(oldPassword, function(encrypted){
+            if (user.password !== encrypted)  {
+                return cbk({
+                    err: 'invalid_old_password',
+                    des: 'invalid password',
+                    code: 401
+                });
+            }
+
+            return cbk();
+        });
+    });
+}
+
 //Aux functions
 function random (howMany, chars) {
     chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
@@ -352,6 +377,7 @@ module.exports = function(settings) {
         setPlatformData : setPlatformData,
         createUser : createUser,
         createUserByToken : createUserByToken,
-        setPassword: setPassword
+        setPassword: setPassword,
+        validateOldPassword: validateOldPassword
     };
 };

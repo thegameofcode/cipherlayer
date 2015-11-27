@@ -7,7 +7,7 @@
   "accessToken" : {
     "cipherKey" : "unsecureKey1",
     "signKey" : "unsecureKey2",
-    "expiration" : 10
+    "expiration" : 1000
   },
   "refreshToken" : {
     "cipherKey" : "unsecureKey3",
@@ -65,6 +65,12 @@
       "avatars": "example-avatars"
     }
   },
+  "validators": {
+    "profile": {
+      "path": "",
+      "filename": "profile_create.json"
+    }
+  },
   "phoneVerification": {
     "pinSize": 4,
     "attempts": 3,
@@ -83,8 +89,9 @@
       }
     ]
   },
-  "emailVerification":{
+  "emailVerification": {
     "subject": "Example email verification",
+    "from": "hello@example.com",
     "body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
     "compatibleEmailDevices": [ "*iPhone*", "*iPad*", "*iPod*" , "*Android*"],
     "nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",
@@ -92,10 +99,14 @@
       "key":"user.{username}.transaction",
       "expireInSec": 86400
     },
-    "scheme":"mycomms"
+    "scheme":"mycomms",
+    "redirectUrl": "http://www.google.com"
   },
   "externalServices":{
-    "notifications": "http://localhost:3002"
+    "notifications": {
+      "base": "http://localhost:3002",
+      "pathEmail": "/api/notification/email"
+    }
   },
   "version" : {
     "header" : "x-example-version",
@@ -103,23 +114,24 @@
       "test" : {
         "link" : "http://testLink",
         "1" : true
-      }
-    },
+      },
     "installPath" : "/install",
     "db":"mongodb://localhost/versionControl?w=1"
+  }
   },
   "allowedDomains":[
     "*@a.com"
   ],
   "password":{
+    "validateOldPassword": false,
     "regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
     "message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
     "generatedRegex": "([a-z][\\d][A-Z]){3,4}",
     "subject" :"Recover Example User Password",
     "body" : "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
   },
-  "endpoints" : [
-    {
+    "endpoints" : [
+      {
       "path" : "\/api\/profile",
       "methods" : ["POST", "PUT"],
       "roles" : ["admin"]
@@ -140,6 +152,9 @@
     }
   ],
   "directProxyUrls": [
-     "\/upload$"
+    "\/upload$"
+  ],
+  "allowedHeaders": [
+      "x-custom-header"
   ]
 }

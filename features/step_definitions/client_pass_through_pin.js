@@ -26,6 +26,9 @@ var myStepDefinitionsWrapper = function () {
                 .post(config.passThroughEndpoint.path)
                 .reply(201, {id: "a1b2c3d4e5f6"});
 
+            // This is required to skip the email verification step and avoid a hanging request targeted at the email verification endpoint
+            config.emailVerification = null;
+
             request(options, function(err,res,body) {
                 assert.equal(err,null);
                 world.getResponse().statusCode = res.statusCode;
@@ -33,7 +36,6 @@ var myStepDefinitionsWrapper = function () {
                 callback();
             });
         });
-
 
     });
 };

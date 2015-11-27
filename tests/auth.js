@@ -2,6 +2,8 @@ var cipherlayer = require('../src/cipherlayer.js');
 var config = require('../config.json');
 
 var describeLogin = require('./auth/login.js');
+var describeLogout = require('./auth/logout.js');
+
 var describeUser = require('./auth/user.js');
 var describeSf = require('./auth/sf.js');
 var describeIn = require('./auth/in.js');
@@ -30,6 +32,7 @@ describe('/auth', function(){
     });
 
     describeLogin.describe(accessTokenSettings, refreshTokenSettings);
+    describeLogout.describe(accessTokenSettings, refreshTokenSettings);
     describeUser.describe();
     describeSf.describe(accessTokenSettings, refreshTokenSettings);
     describeIn.describe();

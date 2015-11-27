@@ -27,6 +27,8 @@ module.exports = function(){
             } else {
                 world.getResponse().body = null;
             }
+
+            world.getResponse().headers = res.headers;
             callback();
         });
     });

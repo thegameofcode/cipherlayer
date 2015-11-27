@@ -5,12 +5,14 @@ module.exports = {
 		if( !json || Object.keys(json).length === 0) {
 			return false;
 		}
-		if(schema) {
+
+      if (!schema) {
+        return true;
+      }
 			var result = (new Validator()).validate(json, schema);
 			if (result.errors.length > 0) {
 				return false;
 			}
-		}
-		return true;
+      return true;
 	}
 };
