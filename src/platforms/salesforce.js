@@ -153,7 +153,7 @@ function salesforceCallback(req, res, next){
                 }
                 var data = {};
                 if(foundUser.roles){
-                    data = {"roles": foundUser.roles};
+                    data.roles = foundUser.roles;
                 }
 
 				if(config.version){
