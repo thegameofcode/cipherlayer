@@ -175,7 +175,6 @@ function validateOldPassword(req, res, next) {
         return next(false);
     }
 
-    debug('validating old password', req.user.password, req.body);
 
     userMng().validateOldPassword(req.user.username, req.body.oldPassword, function(err){
         if (err) {
