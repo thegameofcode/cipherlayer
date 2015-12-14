@@ -89,6 +89,29 @@ module.exports = {
                     done();
                 });
             });
+
+            it('POST 409 username substring', function (done) {
+                var user = clone(baseUser);
+                var username = user.username;
+                user.username = username.slice(0, username.length / 2);
+                var options = {
+                    url: 'http://localhost:' + config.public_port + '/auth/login',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(user)
+                };
+                options.headers[config.version.header] = "test/1";
+
+                request(options, function (err, res, body) {
+                    assert.equal(err, null);
+                    assert.equal(res.statusCode, 409);
+                    body = JSON.parse(body);
+                    assert.notEqual(body.err, 'invalid_credentials');
+                    done();
+                });
+            });
         });
 
         describe('Admin /login', function () {
