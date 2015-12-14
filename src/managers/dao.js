@@ -116,7 +116,7 @@ function getFromUsername(username, cbk){
 }
 
 function getFromUsernamePassword(username, password, cbk){
-    username = new RegExp(escapeRegexp(username.toLowerCase()), "i");
+    username = new RegExp("^"+escapeRegexp(username.toLowerCase())+"$", "i");
     collection.find({username: username, password: password}, {password:0}, function(err, users){
         if(err) {
             return cbk(err, null);
@@ -138,7 +138,7 @@ function getAllUserFields(username, cbk){
     if(!username){
         return cbk({err:'invalid_username'}, null);
     }
-    username = new RegExp(escapeRegexp(username.toLowerCase()), "i");
+    username = new RegExp("^"+escapeRegexp(username.toLowerCase())+"$", "i");
     collection.find({username: username}, function(err, users){
         if(err) {
             return cbk(err, null);
