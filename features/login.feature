@@ -13,3 +13,9 @@ Feature: client application logs in into a protected backend
     When the client app requests log in the protected application with invalid credentials
     Then the response status code is 409
     And the response body contains json attribute "err"
+
+  Scenario: client app logs in with incorrect username
+    Given a user with valid credentials
+    When the client app requests log in the protected application with username substring
+    Then the response status code is 409
+    And the response body contains json attribute "err"
