@@ -18,7 +18,7 @@ describe('/api/profile (verify phone)', function(){
     var notifServiceURL = config.externalServices.notifications;
 
     var baseUser = {
-        email : "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        email : "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
         password : "n3wPas5W0rd",
         phone : "444444444",
         country: "US"

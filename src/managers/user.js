@@ -3,8 +3,9 @@ var request = require('request');
 var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
+var async = require('async');
 
-var userDao = require('./dao');
+var daoMng = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
 var cryptoMng = require('./crypto')({ password : 'password' });
@@ -24,7 +25,7 @@ var _settings = {};
 var ERR_INVALID_USER_DOMAIN = 'Sorry your email domain is not authorised for this service';
 
 function setPlatformData(userId, platform, data, cbk){
-    userDao.updateArrayItem(userId, 'platforms', 'platform', data, function(err, updates){
+    daoMng.updateArrayItem(userId, 'platforms', 'platform', data, function(err, updates){
         if(err) {
             return cbk(err);
         }
@@ -47,88 +48,91 @@ function createUser(body, pin, cbk) {
     }
     body[_settings.passThroughEndpoint.username] = body[_settings.passThroughEndpoint.username].toLowerCase();
 
-    if(!isValidDomain(body[_settings.passThroughEndpoint.username])) {
-		var err = {
-			err: 'user_domain_not_allowed',
-			des: ERR_INVALID_USER_DOMAIN,
-			code: 400
-		};
-        log.warn({err:err});
-        return cbk(err, null);
-    }
-
-    if (!body[_settings.passThroughEndpoint.password]) {
-        if (!body.sf) {
-            return cbk({
-                err: 'invalid_security_token',
-                des: 'you must provide a password or a salesforce token to create the user',
+    isValidDomain(body[_settings.passThroughEndpoint.username], function(isValid){
+        if(!isValid) {
+            var err = {
+                err: 'user_domain_not_allowed',
+                des: ERR_INVALID_USER_DOMAIN,
                 code: 400
-            });
-        }
-    } else {
-        if(!validatePwd(body.password, _settings.password.regexValidation)) {
-            ERR_INVALID_PWD.des = _settings.password.message;
-            var invalidPasswordError = ERR_INVALID_PWD;
-            return cbk(invalidPasswordError);
-        }
-    }
-
-    var user = {
-        username: body[_settings.passThroughEndpoint.username],
-        password: body[_settings.passThroughEndpoint.password]
-    };
-
-    userDao.getFromUsername(user.username, function (err, foundUser) {
-        if (foundUser) {
-            return cbk({
-                err: 'auth_proxy_user_error',
-                des: 'user already exists',
-                code: 403
-            });
+            };
+            log.warn({err:err});
+            return cbk(err, null);
         }
 
-        var phone = body.phone;
-        var countryISO = body.country;
-        phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
-            if (err) {
-                return cbk(err);
-            }
-
-            if (body.sf) {
-                delete(body[_settings.passThroughEndpoint.password]);
-                tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
-                    if (err) {
-                        return cbk({
-                            err: 'invalid_platform_token',
-                            des: 'you must provide a valid salesforce token',
-                            code: 400
-                        });
-                    }
-
-                    user.platforms = [{
-                        platform: 'sf',
-                        accessToken: tokenInfo.data.accessToken,
-                        refreshToken: tokenInfo.data.refreshToken,
-                        expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
-                    }];
-                    createUserPrivateCall(body, user, cbk);
-                });
-            } else {
-                emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
-                    if(err){
-                        return cbk(err);
-                    }
-                    if(destinationEmail){
-                        return cbk({
-                            des: destinationEmail,
-                            code: 200
-                        });
-                    }
-                    createUserPrivateCall(body, user, cbk);
+        if (!body[_settings.passThroughEndpoint.password]) {
+            if (!body.sf) {
+                return cbk({
+                    err: 'invalid_security_token',
+                    des: 'you must provide a password or a salesforce token to create the user',
+                    code: 400
                 });
             }
+        } else {
+            if(!validatePwd(body.password, _settings.password.regexValidation)) {
+                ERR_INVALID_PWD.des = _settings.password.message;
+                var invalidPasswordError = ERR_INVALID_PWD;
+                return cbk(invalidPasswordError);
+            }
+        }
+
+        var user = {
+            username: body[_settings.passThroughEndpoint.username],
+            password: body[_settings.passThroughEndpoint.password]
+        };
+
+        daoMng.getFromUsername(user.username, function (err, foundUser) {
+            if (foundUser) {
+                return cbk({
+                    err: 'auth_proxy_user_error',
+                    des: 'user already exists',
+                    code: 403
+                });
+            }
+
+            var phone = body.phone;
+            var countryISO = body.country;
+            phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
+                if (err) {
+                    return cbk(err);
+                }
+
+                if (body.sf) {
+                    delete(body[_settings.passThroughEndpoint.password]);
+                    tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
+                        if (err) {
+                            return cbk({
+                                err: 'invalid_platform_token',
+                                des: 'you must provide a valid salesforce token',
+                                code: 400
+                            });
+                        }
+
+                        user.platforms = [{
+                            platform: 'sf',
+                            accessToken: tokenInfo.data.accessToken,
+                            refreshToken: tokenInfo.data.refreshToken,
+                            expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
+                        }];
+                        createUserPrivateCall(body, user, cbk);
+                    });
+                } else {
+                    emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
+                        if(err){
+                            return cbk(err);
+                        }
+                        if(destinationEmail){
+                            return cbk({
+                                des: destinationEmail,
+                                code: 200
+                            });
+                        }
+                        createUserPrivateCall(body, user, cbk);
+                    });
+                }
+            });
         });
     });
+
 }
 
 function createUserByToken(token, cbk) {
@@ -179,27 +183,30 @@ function createUserByToken(token, cbk) {
                 };
                 delete(body[_settings.passThroughEndpoint.password]);
 
-                if(!isValidDomain(user.username)) {
-					var domainNotAllowedError = {
-						err:'user_domain_not_allowed',
-						des: ERR_INVALID_USER_DOMAIN,
-						code: 400
-					};
-					log.warn({err:domainNotAllowedError});
-                    return cbk(domainNotAllowedError, null);
-                }
 
-                userDao.getFromUsername(user.username, function (err, foundUser) {
-                    if (foundUser) {
-                        return cbk({
-                            err: 'auth_proxy_error',
-                            des: 'user already exists',
-                            code: 403
-                        });
+                isValidDomain(user.username, function(isValid){
+                    if(!isValid) {
+                        var domainNotAllowedError = {
+                            err:'user_domain_not_allowed',
+                            des: ERR_INVALID_USER_DOMAIN,
+                            code: 400
+                        };
+                        log.warn({err:domainNotAllowedError});
+                        return cbk(domainNotAllowedError, null);
                     }
 
-                    delete(body[_settings.passThroughEndpoint.password]);
-                    createUserPrivateCall(body, user, cbk);
+                    daoMng.getFromUsername(user.username, function (err, foundUser) {
+                        if (foundUser) {
+                            return cbk({
+                                err: 'auth_proxy_error',
+                                des: 'user already exists',
+                                code: 403
+                            });
+                        }
+
+                        delete(body[_settings.passThroughEndpoint.password]);
+                        createUserPrivateCall(body, user, cbk);
+                    });
                 });
             } else {
                 return cbk({
@@ -243,7 +250,7 @@ function createUserPrivateCall(body, user, cbk){
             cryptoMng.encrypt(user.password, function(encrypted){
                 user.password = encrypted;
 
-                userDao.addUser()(user, function (err, createdUser) {
+                daoMng.addUser()(user, function (err, createdUser) {
                     if (err) {
                         log.error({err:err,des:'error adding user to DB'});
                         return cbk({
@@ -252,7 +259,7 @@ function createUserPrivateCall(body, user, cbk){
                             code: 409
                         });
                     } else {
-                        userDao.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
+                        daoMng.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                             if (err) {
                                 log.error({err:err,des:'error obtaining user'});
                                 return cbk({
@@ -302,7 +309,7 @@ function setPassword(id, body, cbk){
         return cbk(err);
     } else {
         cryptoMng.encrypt(body.password, function(encryptedPwd){
-            userDao.updateField(id, 'password', encryptedPwd, function(err, result){
+            daoMng.updateField(id, 'password', encryptedPwd, function(err, result){
                 return cbk(err, result);
             });
         });
@@ -322,20 +329,67 @@ function random (howMany, chars) {
     return value.join('');
 }
 
-function isValidDomain(email){
-    var validDomain = true;
-    if(_settings.allowedDomains){
-        for(var i = 0; i < _settings.allowedDomains.length; i++){
-            var domain = _settings.allowedDomains[i];
+function isValidDomain(email, cbk){
+    var validDomain = false;
 
-            //wildcard
-            var check = domain.replace(/\*/g,'.*');
-            var match = email.match(check);
-            validDomain = (match !== null && email === match[0]);
-            if(validDomain) break;
+    daoMng.getRealms(function(err, realms){
+        if((err || !realms) && !_settings.allowedDomains){
+            return cbk(validDomain);
         }
-    }
-    return validDomain;
+
+        async.eachSeries(realms, function(realm, next){
+            if(validDomain || !realm.allowedDomains || !realm.allowedDomains.length){
+                return next();
+            }
+
+            async.eachSeries(realm.allowedDomains, function(domain, more){
+                if(validDomain){
+                    return more();
+                }
+
+                //wildcard
+                var check = domain.replace(/\*/g,'.*');
+                var match = email.match(check);
+                validDomain = (match !== null && email === match[0]);
+                more();
+            }, next);
+        }, function(){
+            console.log('>>>>>', validDomain);
+            if(!validDomain){
+                validDomain = true;
+                if(_settings.allowedDomains){
+                    for(var i = 0; i < _settings.allowedDomains.length; i++){
+                        var domain = _settings.allowedDomains[i];
+
+                        //wildcard
+                        var check = domain.replace(/\*/g,'.*');
+                        var match = email.match(check);
+                        validDomain = (match !== null && email === match[0]);
+                        if(validDomain) break;
+                    }
+                }
+            }
+
+            console.log('>>>>>', validDomain);
+            return cbk(validDomain);
+        });
+
+
+
+        //if(_settings.allowedDomains){
+        //    for(var i = 0; i < _settings.allowedDomains.length; i++){
+        //        var domain = _settings.allowedDomains[i];
+        //
+        //        //wildcard
+        //        var check = domain.replace(/\*/g,'.*');
+        //        var match = email.match(check);
+        //        validDomain = (match !== null && email === match[0]);
+        //        if(validDomain) break;
+        //    }
+        //}
+
+        //return validDomain;
+    });
 }
 
 function validatePwd(pwd, regexp){

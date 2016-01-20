@@ -16,7 +16,7 @@ var SF_DATA = {
 };
 var USER = {
     id: 'a1b2c3d4e5f6',
-    username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+    username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
     password: "12345678",
     platforms: [
         {
