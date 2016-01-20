@@ -354,7 +354,6 @@ function isValidDomain(email, cbk){
                 more();
             }, next);
         }, function(){
-            console.log('>>>>>', validDomain);
             if(!validDomain){
                 validDomain = true;
                 if(_settings.allowedDomains){
@@ -369,26 +368,8 @@ function isValidDomain(email, cbk){
                     }
                 }
             }
-
-            console.log('>>>>>', validDomain);
             return cbk(validDomain);
         });
-
-
-
-        //if(_settings.allowedDomains){
-        //    for(var i = 0; i < _settings.allowedDomains.length; i++){
-        //        var domain = _settings.allowedDomains[i];
-        //
-        //        //wildcard
-        //        var check = domain.replace(/\*/g,'.*');
-        //        var match = email.match(check);
-        //        validDomain = (match !== null && email === match[0]);
-        //        if(validDomain) break;
-        //    }
-        //}
-
-        //return validDomain;
     });
 }
 
