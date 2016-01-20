@@ -5,6 +5,7 @@ Feature: client application POST a profile to create
   @ignore
   Scenario Outline: Client post data for a new profile
     Given a protected service replies to a <METHOD> request with <PROTECTED_REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <PROTECTED_PAYLOAD>
+    And config has no param emailverification
     When the client makes a pass through <METHOD> with the following <PUBLIC_REQUEST_PAYLOAD> in the body
     Then the response status code is 403
     When the client makes a pass through <METHOD> with the following <PUBLIC_REQUEST_PAYLOAD> in the body with a pin header

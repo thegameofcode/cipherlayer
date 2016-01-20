@@ -1,5 +1,6 @@
 var request = require('request');
 var assert = require('assert');
+var clone = require('clone');
 
 var cipherlayer = require('../../src/cipherlayer');
 var world = require('./world');
@@ -10,6 +11,7 @@ module.exports = function(){
     this.Before(function(done){
 
         world.resetUser();
+        world.config = clone(config);
 
         cipherlayer.start(config.public_port, config.private_port, function(err){
 
@@ -34,6 +36,7 @@ module.exports = function(){
     });
 
     this.After(function(done){
-       cipherlayer.stop(done);
+        config = world.config;
+        cipherlayer.stop(done);
     });
 };
