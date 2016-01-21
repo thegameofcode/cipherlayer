@@ -7,6 +7,8 @@ var config = require(process.cwd() + '/config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
+var redisMng = require('./redis.js');
+
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
 
@@ -15,6 +17,8 @@ var url = config.db.conn;
 var db;
 var usersCollection;
 var realmsCollection;
+
+var localStoredRealms;
 
 function connect(cbk){
     mongoClient.connect(url, function(err, connectedDb){
@@ -263,8 +267,24 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
 }
 
 function getRealms(cbk){
-    realmsCollection.find().toArray(function(err, realms){
-        return cbk(err, realms);
+    var redisKey = 'getRealmsFromMemory';
+
+    redisMng.getKeyValue(redisKey, function(err, value){
+        if(value && localStoredRealms) {
+            return cbk(err, localStoredRealms);
+        }
+
+        realmsCollection.find().toArray(function(err, realms){
+            if(err){
+                return cbk(null, localStoredRealms);
+            }
+
+            var expiresIn = 60*60; //secs
+            redisMng.insertKeyValue(redisKey, new Date().getTime(), expiresIn, function(){
+                localStoredRealms = realms;
+                return cbk(null, realms);
+            });
+        });
     });
 }
 
