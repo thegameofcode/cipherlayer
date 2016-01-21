@@ -18,10 +18,10 @@ function prepareOptions (req, res, next){
 
     if(req.tokenInfo.data){
         if(req.tokenInfo.data.realms){
-            options.headers['x-user-realms'] = req.tokenInfo.data.realms;
+            options.headers['x-user-realms'] = req.tokenInfo.data.realms.join(',');
         }
         if(req.tokenInfo.data.capabilities){
-            options.headers['x-user-capabilities'] = req.tokenInfo.data.capabilities;
+            options.headers['x-user-capabilities'] = JSON.stringify(req.tokenInfo.data.capabilities);
         }
     }
 
