@@ -10,7 +10,6 @@ var myStepDefinitionsWrapper = function () {
         var payload = JSON.parse(PUBLIC_PAYLOAD);
 
         world.getPinNumber(payload.email, '+34'+payload.phone, function(err, pin){
-
             var options = {
                 url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
                 headers: {

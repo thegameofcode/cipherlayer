@@ -12,7 +12,7 @@ module.exports = {
         describe('/login', function () {
             var baseUser = {
                 id: 'a1b2c3d4e5f6',
-                username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
                 password: 'validpassword',
                 deviceId: '1234567890'
             };

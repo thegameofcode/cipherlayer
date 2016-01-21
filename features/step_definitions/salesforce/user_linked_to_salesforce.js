@@ -6,7 +6,7 @@ var config = require('../../../config.json');
 module.exports = function(){
     this.Given(/^a user with valid credentials in SalesForce linked to SalesForce$/, function (callback) {
         world.getUser().id = 'a1b2c3d4e5f6';
-        world.getUser().username = 'name.lastname'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : '');
+        world.getUser().username = 'name.lastname'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
         world.getUser().password = 'valid_password';
         world.getUser().platforms = [{
             platform: 'sf',

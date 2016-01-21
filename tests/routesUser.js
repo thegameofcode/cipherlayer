@@ -25,7 +25,7 @@ describe('user', function () {
 
     var baseUser = {
         id: 'a1b2c3d4e5f6',
-        username: 'jie.lee' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        username: 'jie.lee' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
         password: 'validpassword'
     };
 

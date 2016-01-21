@@ -176,45 +176,44 @@ function createUserByToken(token, cbk) {
                 return cbk(err);
             }
 
-            if(body.transactionId === transactionId){
-                var user = {
-                    username: body[_settings.passThroughEndpoint.username],
-                    password: body[_settings.passThroughEndpoint.password]
-                };
-                delete(body[_settings.passThroughEndpoint.password]);
-
-
-                isValidDomain(user.username, function(isValid){
-                    if(!isValid) {
-                        var domainNotAllowedError = {
-                            err:'user_domain_not_allowed',
-                            des: ERR_INVALID_USER_DOMAIN,
-                            code: 400
-                        };
-                        log.warn({err:domainNotAllowedError});
-                        return cbk(domainNotAllowedError, null);
-                    }
-
-                    daoMng.getFromUsername(user.username, function (err, foundUser) {
-                        if (foundUser) {
-                            return cbk({
-                                err: 'auth_proxy_error',
-                                des: 'user already exists',
-                                code: 403
-                            });
-                        }
-
-                        delete(body[_settings.passThroughEndpoint.password]);
-                        createUserPrivateCall(body, user, cbk);
-                    });
-                });
-            } else {
+            if(body.transactionId !== transactionId){
                 return cbk({
                     err:'invalid_profile_data',
                     des:'Incorrect or expired transaction.',
                     code: 400
                 });
             }
+
+            var user = {
+                username: body[_settings.passThroughEndpoint.username],
+                password: body[_settings.passThroughEndpoint.password]
+            };
+            delete(body[_settings.passThroughEndpoint.password]);
+
+            isValidDomain(user.username, function(isValid){
+                if(!isValid) {
+                    var domainNotAllowedError = {
+                        err:'user_domain_not_allowed',
+                        des: ERR_INVALID_USER_DOMAIN,
+                        code: 400
+                    };
+                    log.warn({err:domainNotAllowedError});
+                    return cbk(domainNotAllowedError, null);
+                }
+
+                daoMng.getFromUsername(user.username, function (err, foundUser) {
+                    if (foundUser) {
+                        return cbk({
+                            err: 'auth_proxy_error',
+                            des: 'user already exists',
+                            code: 403
+                        });
+                    }
+
+                    delete(body[_settings.passThroughEndpoint.password]);
+                    createUserPrivateCall(body, user, cbk);
+                });
+            });
         });
     });
 }
@@ -238,59 +237,104 @@ function createUserPrivateCall(body, user, cbk){
                 des: 'there was an internal error when redirecting the call to protected service',
                 code: 500
             });
-        } else {
-            log.info('<= ' + private_res.statusCode);
-            body = JSON.parse(body);
-            user.id = body.id;
+        }
 
-            if (!user.password) {
-                user.password = random(12);
-            }
+        log.info('<= ' + private_res.statusCode);
+        body = JSON.parse(body);
+        user.id = body.id;
 
-            cryptoMng.encrypt(user.password, function(encrypted){
-                user.password = encrypted;
+        if (!user.password) {
+            user.password = random(12);
+        }
 
-                daoMng.addUser()(user, function (err, createdUser) {
+        cryptoMng.encrypt(user.password, function(encrypted){
+            user.password = encrypted;
+
+            daoMng.addUser()(user, function (err, createdUser) {
+                if (err) {
+                    log.error({err:err,des:'error adding user to DB'});
+                    return cbk({
+                        err: err.err,
+                        des: 'error adding user to DB',
+                        code: 409
+                    });
+                }
+
+                daoMng.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
                     if (err) {
-                        log.error({err:err,des:'error adding user to DB'});
+                        log.error({err:err,des:'error obtaining user'});
                         return cbk({
-                            err: err.err,
-                            des: 'error adding user to DB',
+                            err: err.message,
                             code: 409
                         });
-                    } else {
-                        daoMng.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
+                    }
+
+                    var data = {};
+                    if(foundUser.roles){
+                        data.roles = foundUser.roles;
+                    }
+
+                    async.series([
+                        function(done){
+                            //Add "realms" & "capabilities"
+                            daoMng.getRealms(function(err, realms){
+                                if(err){
+                                    log.error({err:err,des:'error obtaining user realms'});
+                                    return done();
+                                }
+
+                                if(!realms || !realms.length) {
+                                    log.info({des:'there are no REALMS in DB'});
+                                    return done();
+                                }
+
+                                async.eachSeries(realms, function(realm, next){
+                                    if(!realm.allowedDomains || !realm.allowedDomains.length){
+                                        return next();
+                                    }
+                                    async.eachSeries(realm.allowedDomains, function(domain, more){
+                                        //wildcard
+                                        var check = domain.replace(/\*/g,'.*');
+                                        var match = foundUser.username.match(check);
+                                        if(!match || foundUser.username !== match[0]){
+                                            return more();
+                                        }
+
+                                        if(!data.realms){
+                                            data.realms = [];
+                                        }
+                                        data.realms.push(realm.name);
+
+                                        async.each(Object.keys(realm.capabilities), function(capName, added){
+                                            if(!data.capabilities){
+                                                data.capabilities = {};
+                                            }
+
+                                            data.capabilities[capName] = realm.capabilities[capName];
+                                            added();
+                                        }, more);
+                                    }, next);
+                                }, done);
+                            });
+                        }
+                    ], function(){
+                        tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
                             if (err) {
-                                log.error({err:err,des:'error obtaining user'});
+                                log.error({err:err, des:'error creating tokens'});
                                 return cbk({
                                     err: err.message,
                                     code: 409
                                 });
-                            } else {
-
-                                var data = {};
-                                if(foundUser.roles){
-                                    data = {"roles": foundUser.roles};
-                                }
-
-                                tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
-                                    if (err) {
-                                        log.error({err:err, des:'error creating tokens'});
-                                        return cbk({
-                                            err: err.message,
-                                            code: 409
-                                        });
-                                    } else {
-                                        tokens.expiresIn = _settings.accessToken.expiration * 60;
-                                        cbk(null, tokens);
-                                    }
-                                });
                             }
+                            tokens.expiresIn = _settings.accessToken.expiration * 60;
+                            cbk(null, tokens);
                         });
-                    }
+                    });
+
                 });
             });
-        }
+        });
+
     });
 }
 
@@ -332,9 +376,15 @@ function random (howMany, chars) {
 function isValidDomain(email, cbk){
     var validDomain = false;
 
+    var domainsInConfig = (_settings.allowedDomains && _settings.allowedDomains.length);
+
     daoMng.getRealms(function(err, realms){
-        if((err || !realms) && !_settings.allowedDomains){
-            return cbk(validDomain);
+        if(err){
+            return cbk(false);
+        }
+
+        if((!realms || !realms.length) && !domainsInConfig){
+            return cbk(true);
         }
 
         async.eachSeries(realms, function(realm, next){
@@ -355,17 +405,15 @@ function isValidDomain(email, cbk){
             }, next);
         }, function(){
             if(!validDomain){
-                validDomain = true;
-                if(_settings.allowedDomains){
-                    for(var i = 0; i < _settings.allowedDomains.length; i++){
-                        var domain = _settings.allowedDomains[i];
+                //Check domains in config file
+                for(var i = 0; i < _settings.allowedDomains.length; i++){
+                    var domain = _settings.allowedDomains[i];
 
-                        //wildcard
-                        var check = domain.replace(/\*/g,'.*');
-                        var match = email.match(check);
-                        validDomain = (match !== null && email === match[0]);
-                        if(validDomain) break;
-                    }
+                    //wildcard
+                    var check = domain.replace(/\*/g,'.*');
+                    var match = email.match(check);
+                    validDomain = (match !== null && email === match[0]);
+                    if(validDomain) break;
                 }
             }
             return cbk(validDomain);

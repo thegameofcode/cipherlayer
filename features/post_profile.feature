@@ -2,7 +2,7 @@ Feature: client application POST a profile to create
 
   #TODO: update to validate the domain with the first item of the allowedDomains in the config (if it exists)
 
-  @ignore
+  @only
   Scenario Outline: Client post data for a new profile
     Given a protected service replies to a <METHOD> request with <PROTECTED_REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <PROTECTED_PAYLOAD>
     And config has no param emailverification
@@ -12,7 +12,7 @@ Feature: client application POST a profile to create
     Then the response status code is 201
     And the response body contains json attribute "accessToken"
     And the response body contains json attribute "refreshToken"
-    And the response body contains json attribute "expiresIn"
+#    And the response body contains json attribute "expiresIn"
 
   Examples:
   | METHOD | PATH         | STATUS | PROTECTED_REQUEST_PAYLOAD           | PUBLIC_REQUEST_PAYLOAD                                                                        | PROTECTED_PAYLOAD     |

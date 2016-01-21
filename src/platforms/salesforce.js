@@ -3,9 +3,9 @@ var request = require('request');
 var async = require('async');
 var countries = require('countries-info');
 
-var userDao = require('../managers/dao');
-var userManager = require('../managers/user')();
-var tokenManager = require('../managers/token');
+var daoMng = require('../managers/dao');
+var userMng = require('../managers/user')();
+var tokenMng = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');
 var config = require(process.cwd() + '/config.json');
 
@@ -92,15 +92,16 @@ function salesforceCallback(req, res, next){
     var sfData = req.user;
     var profile = sfData.profile;
 
-    userDao.getFromUsername(profile._raw.email, function(err, foundUser){
+    daoMng.getFromUsername(profile._raw.email, function(err, foundUser){
         if(err){
-            if(err.message == userDao.ERROR_USER_NOT_FOUND){
+
+            if(err.message == daoMng.ERROR_USER_NOT_FOUND){
                 var tokenData = {
                     accessToken:sfData.accessToken,
                     refreshToken:sfData.refreshToken
                 };
 				
-                tokenManager.createAccessToken(profile.id, tokenData, function(err, token){
+                tokenMng.createAccessToken(profile.id, tokenData, function(err, token){
                     countries.countryFromPhone(profile._raw.mobile_phone, function(err, country){
                         var returnProfile = {
                             name: profile._raw.first_name,
@@ -147,7 +148,7 @@ function salesforceCallback(req, res, next){
             };
 
             //TODO check if setPlatformData and createBothTokens call can be made in parallel
-            userManager.setPlatformData(foundUser._id, 'sf', platform, function(err){
+            userMng.setPlatformData(foundUser._id, 'sf', platform, function(err){
                 if(err){
                     log.error({err:err}, 'error updating sf tokens into user '+foundUser._id+'');
                 }
@@ -160,14 +161,60 @@ function salesforceCallback(req, res, next){
 					data.deviceVersion = req.headers[config.version.header];
 				}
 
-                tokenManager.createBothTokens(foundUser._id, data , function(err, tokens){
-                    if(err) {
-                        res.send(409,{err: err.message});
-                    } else {
-                        tokens.expiresIn = config.accessToken.expiration * 60;
-                        res.send(200,tokens);
+                async.series([
+                    function(done){
+                        //Add "realms" & "capabilities"
+                        daoMng.getRealms(function(err, realms){
+                            if(err){
+                                log.error({err:err,des:'error obtaining user realms'});
+                                return done();
+                            }
+
+                            if(!realms || !realms.length) {
+                                log.info({des:'there are no REALMS in DB'});
+                                return done();
+                            }
+
+                            async.eachSeries(realms, function(realm, next){
+                                if(!realm.allowedDomains || !realm.allowedDomains.length){
+                                    return next();
+                                }
+                                async.eachSeries(realm.allowedDomains, function(domain, more){
+                                    //wildcard
+                                    var check = domain.replace(/\*/g,'.*');
+                                    var match = foundUser.username.match(check);
+
+                                    if(!match || foundUser.username !== match[0]){
+                                        return more();
+                                    }
+
+                                    if(!data.realms){
+                                        data.realms = [];
+                                    }
+                                    data.realms.push(realm.name);
+
+                                    async.each(Object.keys(realm.capabilities), function(capName, added){
+                                        if(!data.capabilities){
+                                            data.capabilities = {};
+                                        }
+
+                                        data.capabilities[capName] = realm.capabilities[capName];
+                                        added();
+                                    }, more);
+                                }, next);
+                            }, done);
+                        });
                     }
-                    next(false);
+                ], function(){
+                    tokenMng.createBothTokens(foundUser._id, data , function(err, tokens){
+                        if(err) {
+                            res.send(409,{err: err.message});
+                        } else {
+                            tokens.expiresIn = config.accessToken.expiration * 60;
+                            res.send(200, tokens);
+                        }
+                        next(false);
+                    });
                 });
             });
         }
@@ -238,7 +285,7 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk){
             "refreshToken": platform.refreshToken,
             "expiry": new Date().getTime() + config.salesforce.expiration * 60 * 1000
         };
-        userDao.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function(err){
+        daoMng.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function(err){
             if (err){
                 return cbk(err);
             } else {

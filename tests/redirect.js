@@ -35,7 +35,7 @@ describe('redirect', function(){
 
         var expectedUser = {
             id:'a1b2c3d4e5f6',
-            username:'user1'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+            username:'user1'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
             password:'pass1'
         };
         dao.addUser()(expectedUser, function(err,createdUser) {

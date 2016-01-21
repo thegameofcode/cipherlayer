@@ -22,7 +22,7 @@ describe('middleware userAppVersion', function(){
 
     var baseUser = {
         id:'a1b2c3d4e5f6',
-        username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
         password: '12345678'
     };
 

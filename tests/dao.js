@@ -10,7 +10,7 @@ describe('user dao', function(){
 
     var baseUser = {
         id:'a1b2c3d4e5f6',
-        username:'user1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : '') ,
+        username:'user1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '') ,
         password:'pass1'
     };
 
@@ -145,7 +145,7 @@ describe('user dao', function(){
         sinon.stub(fakeUsersFind,'nextObject').yields(null, fakeUser);
 
         var expectedUser = _.assign({},baseUser);
-        expectedUser.username = 'UsEr1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : '');
+        expectedUser.username = 'UsEr1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
         dao.addUser()(expectedUser,function(err,createdUser){
             assert.equal(err.err,'username_already_exists');
             assert.equal(createdUser,null);

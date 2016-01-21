@@ -5,7 +5,7 @@ var config = require('../../config.json');
 
 module.exports = function(){
     this.Given(/^a user with valid credentials$/, function (callback) {
-        world.getUser().username = 'valid_user' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0] : '');
+        world.getUser().username = 'valid_user' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
         world.getUser().password = 'valid_password';
 
         var options = {
