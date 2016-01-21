@@ -16,6 +16,15 @@ function prepareOptions (req, res, next){
         followRedirect: false
     };
 
+    if(req.tokenInfo.data){
+        if(req.tokenInfo.data.realms){
+            options.headers['x-user-realms'] = req.tokenInfo.data.realms;
+        }
+        if(req.tokenInfo.data.capabilities){
+            options.headers['x-user-capabilities'] = req.tokenInfo.data.capabilities;
+        }
+    }
+
     // TODO pass all file data correctly
     if(req.header('Content-Type') && req.header('Content-Type').indexOf('multipart/form-data') > -1){
         var formData = {};
