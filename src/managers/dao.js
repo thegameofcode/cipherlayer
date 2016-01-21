@@ -274,7 +274,7 @@ function getRealms(cbk){
             return cbk(err, localStoredRealms);
         }
 
-        realmsCollection.find().toArray(function(err, realms){
+        realmsCollection.find({},{_id:0}).toArray(function(err, realms){
             if(err){
                 return cbk(null, localStoredRealms);
             }
