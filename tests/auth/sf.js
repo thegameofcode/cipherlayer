@@ -243,6 +243,6 @@ function nockSFGetOptInfo(){
         .get('/services/data/v26.0/chatter/users/005e0000001uNIyAAM')
         .reply(200, {
             position: 'Backend Developer',
-            company: 'Vodafone'
+            company: 'Company'
         });
 }

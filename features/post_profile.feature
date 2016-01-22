@@ -2,7 +2,7 @@ Feature: client application POST a profile to create
 
   #TODO: update to validate the domain with the first item of the allowedDomains in the config (if it exists)
 
-  @only
+  
   Scenario Outline: Client post data for a new profile
     Given a protected service replies to a <METHOD> request with <PROTECTED_REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <PROTECTED_PAYLOAD>
     And config has no param emailverification
@@ -15,5 +15,5 @@ Feature: client application POST a profile to create
 #    And the response body contains json attribute "expiresIn"
 
   Examples:
-  | METHOD | PATH         | STATUS | PROTECTED_REQUEST_PAYLOAD           | PUBLIC_REQUEST_PAYLOAD                                                                        | PROTECTED_PAYLOAD     |
-  | POST   | /api/profile | 201    | { "email" : "valid@vodafone.com" }  | { "email":"valid@vodafone.com", "password":"i2E45678", "phone":"631014231", "country":"ES" }  | { "id" : "a1b2c3d4" } |
+  | METHOD | PATH         | STATUS | PROTECTED_REQUEST_PAYLOAD    | PUBLIC_REQUEST_PAYLOAD                                                                 | PROTECTED_PAYLOAD     |
+  | POST   | /api/profile | 201    | { "email" : "valid@a.com" }  | { "email":"valid@a.com", "password":"i2E45678", "phone":"631014231", "country":"ES" }  | { "id" : "a1b2c3d4" } |

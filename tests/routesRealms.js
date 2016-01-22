@@ -13,8 +13,8 @@ describe('realms', function () {
         {
             "name" : "default",
             "allowedDomains" : [
-                "*@vodafone.com",
-                "*@igzinc.com"
+                "*@a.com",
+                "*@b.com"
             ],
             "capabilities" : {
                 "news" : true,
@@ -25,7 +25,7 @@ describe('realms', function () {
         {
             "name" : "test",
             "allowedDomains" : [
-                "*@vodafone.com"
+                "*@a.com"
             ],
             "capabilities" : {
                 "test" : true
@@ -34,7 +34,7 @@ describe('realms', function () {
         {
             "name" : "valid",
             "allowedDomains" : [
-                "valid@vodafone.com"
+                "valid@a.com"
             ],
             "capabilities" : {
                 "valid" : true
