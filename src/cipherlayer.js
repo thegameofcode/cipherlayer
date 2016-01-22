@@ -62,6 +62,8 @@ function startListener(publicPort, internalPort, cbk){
                 log: log
             });
 
+            log.info('PUBLIC SERVICE starting on PORT ' + publicPort);
+
             publicServer.on('after', function (req, res) {
                 var logInfo = {
                     request:{
@@ -132,15 +134,19 @@ function startListener(publicPort, internalPort, cbk){
                 next();
             });
 
-
             publicServer.listen(publicPort, function(){
+                log.info('PUBLIC SERVICE listening on PORT ' + publicPort);
                 done();
             });
         },
         function(done){
             if(!internalPort){
+                log.info('INTERNAL SERVICE not startied because there is no internal port in config');
                 return done();
             }
+
+            log.info('INTERNAL SERVICE starting on PORT ' + internalPort);
+
             internalServer = restify.createServer({
                 name: 'cipherlayer-internal-server',
                 log: log
@@ -186,6 +192,7 @@ function startListener(publicPort, internalPort, cbk){
             });
 
             internalServer.listen(internalPort, function(){
+                log.info('INTERNAL SERVICE listening on PORT ' + internalPort);
                 done();
             });
         }
@@ -206,7 +213,7 @@ function stopListener(cbk){
             internalServer.close(function(){
                 done();
             });
-        },
+        }
     ], cbk);
 }
 
