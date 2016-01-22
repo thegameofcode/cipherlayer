@@ -41,7 +41,7 @@ describe('phone', function() {
     beforeEach(function(done){
         async.parallel([
             function(done){
-                cipherlayer.start(config.public_port, config.private_port, done);
+                cipherlayer.start(config.public_port, config.internal_port, done);
             },
             function(done){
                 async.series([

@@ -266,6 +266,15 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
     });
 }
 
+function addRealm(realmToAdd, cbk){
+    realmsCollection.insert(realmToAdd, function(err, result){
+        if(err) {
+            return cbk(err, null);
+        }
+        cbk(null, result[0]);
+    });
+}
+
 function getRealms(cbk){
     var now = new Date().getTime();
     var timeSinceLastRefresh = now - lastTimeRefresedRealms;
@@ -288,6 +297,12 @@ function getRealms(cbk){
 function resetRealmsVariables(){
     localStoredRealms = null;
     lastTimeRefresedRealms = null;
+}
+
+function deleteAllRealms(cbk){
+    realmsCollection.remove({},function(err){
+        cbk(err);
+    });
 }
 
 function getStatus(cbk){
@@ -327,8 +342,10 @@ module.exports = {
     ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
 
+    addRealm: addRealm,
     getRealms: getRealms,
     resetRealmsVariables: resetRealmsVariables,
+    deleteAllRealms: deleteAllRealms,
 
     getStatus: getStatus
 };

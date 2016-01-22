@@ -27,7 +27,8 @@ var versionControl = require('version-control');
 var pinValidation = require('./middlewares/pinValidation.js')();
 var userAppVersion = require('./middlewares/userAppVersion.js')();
 
-var server;
+var publicServer;
+var internalServer;
 
 function startDaos(cbk){
     userDao.connect(function(){
@@ -53,94 +54,163 @@ function stopRedis(cbk){
     });
 }
 
-function startListener(publicPort, privatePort, cbk){
-    server = restify.createServer({
-        name: 'cipherlayer-server',
-		log: log
-    });
+function startListener(publicPort, internalPort, cbk){
+    async.parallel([
+        function(done){
+            publicServer = restify.createServer({
+                name: 'cipherlayer-server',
+                log: log
+            });
 
-	server.on('after', function (req, res) {
-		var logInfo = {
-			request:{
-				method: req.method,
-				headers: req.headers,
-				url: req.url,
-				path: req._url.pathname,
-				query: req._url.query,
-				params: req.params,
-				time: req._time
-			},
-			response: {
-				statusCode: res.statusCode,
-				hasBody: res.hasBody,
-				bodySize: _.size(res.body),
-				time: Date.now()
-			},
-			user: req.user,
-			tokenInfo: req.tokenInfo
-		};
-		delete(logInfo.request.params.password);
+            publicServer.on('after', function (req, res) {
+                var logInfo = {
+                    request:{
+                        method: req.method,
+                        headers: req.headers,
+                        url: req.url,
+                        path: req._url.pathname,
+                        query: req._url.query,
+                        params: req.params,
+                        time: req._time
+                    },
+                    response: {
+                        statusCode: res.statusCode,
+                        hasBody: res.hasBody,
+                        bodySize: _.size(res.body),
+                        time: Date.now()
+                    },
+                    user: req.user,
+                    tokenInfo: req.tokenInfo
+                };
+                delete(logInfo.request.params.password);
 
-		req.log.info(logInfo, "response");
-	});
+                req.log.info(logInfo, "response");
+            });
 
-    server.use(headerCors);
-    server.use(restify.queryParser());
-    server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
+            publicServer.use(headerCors);
+            publicServer.use(restify.queryParser());
+            publicServer.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-    var versionControlOptions = clone(config.version);
-    versionControlOptions.public = [
-        "/auth/sf",
-        "/auth/sf/*",
-        "/auth/in",
-        "/auth/in/*",
-        "/auth/google",
-        "/auth/google/*",
-        "/user/activate*",
-        "/heartbeat"
-    ];
-    server.use(versionControl(versionControlOptions));
+            var versionControlOptions = clone(config.version);
+            versionControlOptions.public = [
+                "/auth/sf",
+                "/auth/sf/*",
+                "/auth/in",
+                "/auth/in/*",
+                "/auth/google",
+                "/auth/google/*",
+                "/user/activate*",
+                "/heartbeat"
+            ];
+            publicServer.use(versionControl(versionControlOptions));
 
-    server.on('uncaughtException', function(req, res, route, error) {
-        log.error({exception:{req:req, res:res, route:route, err:error}});
-        if(!res.statusCode){
-            res.send(500, {err:'internal_error', des: 'uncaught exception'});
+            publicServer.on('uncaughtException', function(req, res, route, error) {
+                log.error({exception:{req:req, res:res, route:route, err:error}});
+                if(!res.statusCode){
+                    res.send(500, {err:'internal_error', des: 'uncaught exception'});
+                }
+            });
+
+            var routesPath = path.join(__dirname, './public_routes/');
+            fs.readdirSync(routesPath).forEach(function(filename) {
+                require(routesPath + filename)(publicServer);
+            });
+
+            var platformsPath = path.join(__dirname, '/platforms/');
+            fs.readdirSync(platformsPath).forEach(function(filename) {
+                require(platformsPath + filename).addRoutes(publicServer, passport);
+            });
+
+            publicServer.get(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+            publicServer.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+            publicServer.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+            publicServer.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+            publicServer.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
+
+            publicServer.use(function(req, res, next){
+                log.info('< ' + res.statusCode);
+                next();
+            });
+
+
+            publicServer.listen(publicPort, function(){
+                done();
+            });
+        },
+        function(done){
+            if(!internalPort){
+                return done();
+            }
+            internalServer = restify.createServer({
+                name: 'cipherlayer-internal-server',
+                log: log
+            });
+
+            internalServer.on('after', function (req, res) {
+                var logInfo = {
+                    request:{
+                        method: req.method,
+                        headers: req.headers,
+                        url: req.url,
+                        path: req._url.pathname,
+                        query: req._url.query,
+                        params: req.params,
+                        time: req._time
+                    },
+                    response: {
+                        statusCode: res.statusCode,
+                        hasBody: res.hasBody,
+                        bodySize: _.size(res.body),
+                        time: Date.now()
+                    },
+                    user: req.user,
+                    tokenInfo: req.tokenInfo
+                };
+                delete(logInfo.request.params.password);
+
+                req.log.info(logInfo, "response");
+            });
+
+            internalServer.use(headerCors);
+            internalServer.use(restify.queryParser());
+            internalServer.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
+
+            var routesPath = path.join(__dirname, './internal_routes/');
+            fs.readdirSync(routesPath).forEach(function(filename) {
+                require(routesPath + filename)(internalServer);
+            });
+
+            internalServer.use(function(req, res, next){
+                log.info('< ' + res.statusCode);
+                next();
+            });
+
+            internalServer.listen(internalPort, function(){
+                done();
+            });
         }
-    });
-
-    var routesPath = path.join(__dirname, './routes/');
-    fs.readdirSync(routesPath).forEach(function(filename) {
-        require(routesPath + filename)(server);
-    });
-
-    var platformsPath = path.join(__dirname, '/platforms/');
-    fs.readdirSync(platformsPath).forEach(function(filename) {
-        require(platformsPath + filename).addRoutes(server, passport);
-    });
-
-    server.get(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-    server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-    server.del(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-    server.put(/(.*)/,  checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-    server.opts(/(.*)/, function (req, res, next) {res.send(200); next();});
-
-    server.use(function(req, res, next){
-        log.info('< ' + res.statusCode);
-        next();
-    });
-
-    server.listen(publicPort, function(){
-        cbk();
-    });
+    ], cbk);
 }
 
 function stopListener(cbk){
-    server.close(function(){
-        cbk();
-    });
+    async.parallel([
+        function(done){
+            publicServer.close(function(){
+                done();
+            });
+        },
+        function(done){
+            if(!internalServer){
+                return done();
+            }
+            internalServer.close(function(){
+                done();
+            });
+        },
+    ], cbk);
 }
 
-function start(publicPort, privatePort, cbk){
+function start(publicPort, internalPort, cbk){
     //Validate the current config.json with the schema
     //if( !jsonValidator.isValidJSON(config, configSchema)) {
     //    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
@@ -150,7 +220,7 @@ function start(publicPort, privatePort, cbk){
         startDaos,
         startRedis,
         function(done){
-            startListener(publicPort, privatePort, done);
+            startListener(publicPort, internalPort, done);
         }
     ],function(err){
         cbk(err);

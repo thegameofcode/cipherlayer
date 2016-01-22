@@ -3,7 +3,7 @@ var fs = require('fs');
 var config = require(process.cwd() + '/config.json');
 
 console.log('starting cipherlayer proxy');
-cipherLayer.start(config.public_port, config.private_port, function(err){
+cipherLayer.start(config.public_port, config.internal_port, function(err){
     if(err){
         console.error('error on launch: ' + err);
     } else {

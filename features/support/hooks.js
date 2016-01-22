@@ -13,7 +13,7 @@ module.exports = function(){
         world.resetUser();
         world.config = clone(config);
 
-        cipherlayer.start(config.public_port, config.private_port, function(err){
+        cipherlayer.start(config.public_port, config.internal_port, function(err){
 
             assert.equal(err,null);
             var options = {
