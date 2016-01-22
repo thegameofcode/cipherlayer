@@ -55,7 +55,7 @@ function stopRedis(cbk){
 }
 
 function startListener(publicPort, internalPort, cbk){
-    async.parallel([
+    async.series([
         function(done){
             publicServer = restify.createServer({
                 name: 'cipherlayer-server',
@@ -141,7 +141,7 @@ function startListener(publicPort, internalPort, cbk){
         },
         function(done){
             if(!internalPort){
-                log.info('INTERNAL SERVICE not startied because there is no internal port in config');
+                log.info('INTERNAL SERVICE not started because there is no internal_port in config');
                 return done();
             }
 
