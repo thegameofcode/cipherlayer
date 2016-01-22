@@ -18,7 +18,7 @@ describe('/api/profile (verify phone)', function(){
     var notifServiceURL = config.externalServices.notifications;
 
     var baseUser = {
-        email : "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        email : "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
         password : "n3wPas5W0rd",
         phone : "444444444",
         country: "US"
@@ -27,7 +27,7 @@ describe('/api/profile (verify phone)', function(){
     beforeEach(function(done){
         async.series([
             function(done){
-                cipherlayer.start(config.public_port, config.private_port, done);
+                cipherlayer.start(config.public_port, config.internal_port, done);
             },
             function(done){
                 redisMng.deleteAllKeys(done);

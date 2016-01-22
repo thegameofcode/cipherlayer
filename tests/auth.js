@@ -22,7 +22,7 @@ var refreshTokenSettings = {
 
 describe('/auth', function(){
     beforeEach(function(done){
-        cipherlayer.start(config.public_port, config.private_port, done);
+        cipherlayer.start(config.public_port, config.internal_port, done);
     });
 
     afterEach(function(done){

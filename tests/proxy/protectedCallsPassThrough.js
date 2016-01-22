@@ -13,7 +13,7 @@ var notificationsServiceURL = config.externalServices.notifications;
 module.exports = {
     itCreated: function created(accessTokenSettings, refreshTokenSettings){
         it.skip('201 Created', function (done) {
-            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
             var expectedUserCountry = 'US';
@@ -88,7 +88,7 @@ module.exports = {
     itPlatformInfo: function platformInfo(accessTokenSettings, refreshTokenSettings){
         it.skip('203 Platform Info', function (done) {
 
-            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '222222222';
             var expectedUserCountry = 'US';
@@ -173,12 +173,12 @@ module.exports = {
     },
     itAlreadyExists: function alreadyExists(accessTokenSettings, refreshTokenSettings){
         it.skip('409 already exists', function (done) {
-            var expectedUsername = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            var expectedUsername = 'valid'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedPublicRequest = {};
             var expectedUserPhone = '222222222';
             var expectedUserCountry = 'US';
-            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
             expectedPublicRequest[config.passThroughEndpoint.password] = '12345678';
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
@@ -241,7 +241,7 @@ module.exports = {
     itNotSecurityToken: function notSecurityToken(){
         it('400 not security token', function (done) {
             var expectedPublicRequest = {};
-            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
 
             var options = {
                 url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
@@ -265,7 +265,7 @@ module.exports = {
     },
     itCreatedVerifyMail: function createdVerifyMail(){
         it.skip('201 Created (Verify email)', function (done) {
-            var expectedUsername = 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+            var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
             var expectedUserId = 'a1b2c3d4e5f6';
             var expectedUserPhone = '111111111';
             var expectedUserCountry = 'US';

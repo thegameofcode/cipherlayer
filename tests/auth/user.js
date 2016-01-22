@@ -345,7 +345,7 @@ module.exports = {
 };
 
 
-var username = 'validuser'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+var username = 'validuser'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
 var password = 'validpassword';
 var phone = '111111111';
 
