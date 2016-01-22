@@ -2,7 +2,6 @@ var assert = require('assert');
 var _ = require('lodash');
 var config = require('../config.json');
 var dao = require('../src/managers/dao.js');
-var redisMng = require('../src/managers/redis.js');
 var sinon = require('sinon');
 
 var mongoClient = require('mongodb').MongoClient;
@@ -55,34 +54,24 @@ describe('user dao', function () {
         sinon.stub(fakeDb, 'collection').returns(fakeCollection);
         sinon.stub(mongoClient, 'connect').yields(null, fakeDb);
 
+        dao.resetRealmsVariables();
 
-        redisMng.connect(function(err){
+        dao.connect(function (err) {
             assert.equal(err, null);
-            redisMng.deleteAllKeys(function(err) {
-                assert.equal(err, null);
-                dao.connect(function (err) {
-                    assert.equal(err, null);
-                    done();
-                });
-            });
+            done();
         });
-
     });
 
     afterEach(function (done) {
         sinon.stub(fakeDb, 'close').yields(null);
 
-        redisMng.deleteAllKeys(function(err){
-            assert.equal(err, null);
-            redisMng.disconnect(function(err){
-                assert.equal(err, null);
-                dao.disconnect(function (err) {
-                    assert.equal(err, null);
+        dao.resetRealmsVariables();
 
-                    mongoClient.connect.restore();
-                    done();
-                });
-            });
+        dao.disconnect(function (err) {
+            assert.equal(err, null);
+
+            mongoClient.connect.restore();
+            done();
         });
     });
 
@@ -238,18 +227,11 @@ describe('user dao', function () {
             assert.equal(realms.length, 1);
             assert.deepEqual(realms[0], expectedRealm);
 
-            var redisKey = 'getRealmsFromMemory';
-
-            redisMng.getKeyValue(redisKey, function(err, value) {
+            dao.getRealms(function (err, realms) {
                 assert.equal(err, null);
-                assert.notEqual(value, null);
-
-                dao.getRealms(function (err, realms) {
-                    assert.equal(err, null);
-                    assert.equal(realms.length, 1);
-                    assert.deepEqual(realms[0], expectedRealm);
-                    done();
-                });
+                assert.equal(realms.length, 1);
+                assert.deepEqual(realms[0], expectedRealm);
+                done();
             });
         });
     });

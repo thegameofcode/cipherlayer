@@ -7,8 +7,6 @@ var config = require(process.cwd() + '/config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
-var redisMng = require('./redis.js');
-
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
 
@@ -19,6 +17,8 @@ var usersCollection;
 var realmsCollection;
 
 var localStoredRealms;
+var lastTimeRefresedRealms;
+var TIME_TO_REFRESH = 1000*60*60;
 
 function connect(cbk){
     mongoClient.connect(url, function(err, connectedDb){
@@ -267,25 +267,27 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk){
 }
 
 function getRealms(cbk){
-    var redisKey = 'getRealmsFromMemory';
+    var now = new Date().getTime();
+    var timeSinceLastRefresh = now - lastTimeRefresedRealms;
 
-    redisMng.getKeyValue(redisKey, function(err, value){
-        if(value && localStoredRealms) {
-            return cbk(err, localStoredRealms);
+    if(lastTimeRefresedRealms && timeSinceLastRefresh < TIME_TO_REFRESH ){
+        return cbk(null, localStoredRealms);
+    }
+
+    realmsCollection.find({},{_id:0}).toArray(function(err, realms){
+        if(err){
+            return cbk(null, localStoredRealms);
         }
 
-        realmsCollection.find({},{_id:0}).toArray(function(err, realms){
-            if(err){
-                return cbk(null, localStoredRealms);
-            }
-
-            var expiresIn = 60*60; //secs
-            redisMng.insertKeyValue(redisKey, new Date().getTime(), expiresIn, function(){
-                localStoredRealms = realms;
-                return cbk(null, realms);
-            });
-        });
+        lastTimeRefresedRealms = now;
+        localStoredRealms = realms;
+        return cbk(null, realms);
     });
+}
+
+function resetRealmsVariables(){
+    localStoredRealms = null;
+    lastTimeRefresedRealms = null;
 }
 
 function getStatus(cbk){
@@ -326,6 +328,7 @@ module.exports = {
     ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
 
     getRealms: getRealms,
+    resetRealmsVariables: resetRealmsVariables,
 
     getStatus: getStatus
 };
