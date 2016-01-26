@@ -108,7 +108,7 @@ describe('user Manager', function(){
 
 		var expectedUser = {
 			id:'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 			password: '12345678'
 		};
 
@@ -132,7 +132,7 @@ describe('user Manager', function(){
 
 	describe('Create user', function(){
 		var profileBody = {
-			email: 'valid' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+			email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 			password: 'n3wPas5W0rd',
 			phone: '111111111',
 			country: 'US'
@@ -436,7 +436,7 @@ describe('user Manager', function(){
 					assert.equal(tokens, undefined);
 
 					//3rd call must fail (same username with capital letters)
-					profileBody.email = 'VALID' + (config.allowedDomains[0] ? config.allowedDomains[0] : '');
+					profileBody.email = 'VALID' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
 					userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
 						assert.notEqual(err, null);
 						assert.deepEqual(err, expectedError);
@@ -497,7 +497,7 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 				position: "",
 				transactionId: transactionId
 			};
@@ -539,7 +539,7 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 				position: "",
 				transactionId: transactionId
 			};
@@ -581,7 +581,7 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 				transactionId: 'abcde'
 			};
 
@@ -628,7 +628,7 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 				transactionId: transactionId
 			};
 
@@ -672,7 +672,7 @@ describe('user Manager', function(){
 
 		var expectedUser = {
 			id:'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
 			password: '12345678'
 		};
 

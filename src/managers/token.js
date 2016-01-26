@@ -56,10 +56,9 @@ function createBothTokens(userId, data, cbk){
         }
     ], function(err){
         if(err) {
-            cbk(err,null);
-        } else {
-            cbk(null, tokens);
+            return cbk(err,null);
         }
+        cbk(null, tokens);
     });
 }
 

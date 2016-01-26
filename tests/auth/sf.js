@@ -57,7 +57,7 @@ module.exports = {
 
                     assert.equal(body.name, 'Name');
                     assert.equal(body.lastname, 'Lastname');
-                    assert.equal(body.email, 'name.lastname'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '') );
+                    assert.equal(body.email, 'name.lastname'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '') );
 
                     if ( config.salesforce.replaceDefaultAvatar){
                         assert.equal(body.avatar, config.salesforce.replaceDefaultAvatar.replacementAvatar );
@@ -141,7 +141,7 @@ module.exports = {
             it('200 OK', function(done){
                 var user = {
                     id: 'a1b2c3d4e5f6',
-                    username: 'name.lastname' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                    username: 'name.lastname' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
                     password: '12345678'
                 };
 
@@ -243,6 +243,6 @@ function nockSFGetOptInfo(){
         .get('/services/data/v26.0/chatter/users/005e0000001uNIyAAM')
         .reply(200, {
             position: 'Backend Developer',
-            company: 'Vodafone'
+            company: 'Company'
         });
 }

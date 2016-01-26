@@ -5,7 +5,7 @@ var config = require('../config.json');
 
 describe('server control ', function(){
     it('start', function(done){
-        cipherlayer.start(config.public_port, config.private_port, function(err) {
+        cipherlayer.start(config.public_port, config.internal_port, function(err) {
             assert.equal(err,null);
             var client = net.connect({port:config.public_port}, function(){
                 client.destroy();

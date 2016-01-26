@@ -33,7 +33,7 @@ module.exports = {
         it('200 without platforms', function (done) {
             var user = {
                 id: 'a1b2c3d4e5f6',
-                username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
                 password: "12345678"
             };
 
@@ -77,7 +77,7 @@ module.exports = {
         it('body response is not a json', function (done) {
             var user = {
                 id: 'a1b2c3d4e5f6',
-                username: "valid" + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+                username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
                 password: "12345678"
             };
 

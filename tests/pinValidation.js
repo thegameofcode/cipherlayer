@@ -10,40 +10,37 @@ var notifServiceURL = config.externalServices.notifications.base;
 describe('middleware pinValidation', function(){
 
     var settings = {
-        "pinValidationEndpoints" : [
-            {
-                "path": "/api/me/phones",
-                "method": "post",
-                "fields": {
-                    "phoneNumber": "phone"
-                }
-            },
-            {
-                "path": "/api/me/phones",
-                "method": "post",
-                "fields": {
-                    "countryISO": "country",
-                    "phoneNumber": "phone"
-                }
-            },
-            {
-                "path": "/api/me/phones",
-                "method": "post",
-                "fields": {
-                    "countryISO": "country"
-                }
-            }
-        ],
-        "redisKeys": {
-            "user_phone_verify": {
+        "phoneVerification": {
+            "pinSize": 4,
+            "attempts": 3,
+            "redis":{
                 "key":"user.{userId}.phone.{phone}",
                 "expireInSec": 300
-            }
-        },
-        "usePinVerification": true,
-        "userPIN": {
-            "size": 4,
-            "attempts": 3
+            },
+            "pinValidationEndpoints" : [
+                {
+                    "path": "/api/me/phones",
+                    "method": "post",
+                    "fields": {
+                        "phoneNumber": "phone"
+                    }
+                },
+                {
+                    "path": "/api/me/phones",
+                    "method": "post",
+                    "fields": {
+                        "countryISO": "country",
+                        "phoneNumber": "phone"
+                    }
+                },
+                {
+                    "path": "/api/me/phones",
+                    "method": "post",
+                    "fields": {
+                        "countryISO": "country"
+                    }
+                }
+            ]
         }
     };
 
@@ -51,7 +48,7 @@ describe('middleware pinValidation', function(){
         countries.countryFromIso(country, function (err, returnedCountry) {
             assert.equal(err, null);
             phone = '+' + returnedCountry.Dial + phone;
-            var redisKey = settings.redisKeys.user_phone_verify.key;
+            var redisKey = settings.phoneVerification.redis.key;
             redisKey =  redisKey.replace('{userId}',userId).replace('{phone}',phone);
 
             redisMng.getKeyValue(redisKey + '.pin', function(err, redisPhonePin) {
@@ -360,19 +357,19 @@ describe('middleware pinValidation', function(){
                     });
                 }
                 //At this attempt pin must EXPIRE
-                else if(invalidResponseAttemps === settings.userPIN.attempts) {
+                else if(invalidResponseAttemps === settings.phoneVerification.attempts) {
                     expectedError.des= 'PIN used has expired.';
 
                     pinValidation(settings)(req, res, next);
                 }
                 //This attempt is to check the expiration of the 1st pin
-                else if(invalidResponseAttemps === settings.userPIN.attempts+1 ) {
+                else if(invalidResponseAttemps === settings.phoneVerification.attempts+1 ) {
                     req.headers['x-otp-pin'] = firstValidPin;
 
                     pinValidation(settings)(req, res, next);
                 }
                 //This attempt is to check that the new generated pin is correct
-                else if(invalidResponseAttemps > settings.userPIN.attempts+1){
+                else if(invalidResponseAttemps > settings.phoneVerification.attempts+1){
                     getPinNumber(req.user.id, req.body.phone, req.body.country, function(err, returnedPin){
                         assert.notEqual(returnedPin, null, 'invalid or not created pin');
 

@@ -1,9 +1,10 @@
-var log = require('../logger/service.js');
-var tokenManager = require('../managers/token');
-var userDao = require('../managers/dao');
-var config = require(process.cwd() + '/config.json');
-
+var async = require('async');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+
+var log = require('../logger/service.js');
+var tokenMng = require('../managers/token');
+var daoMng = require('../managers/dao');
+var config = require(process.cwd() + '/config.json');
 
 function createLinkedInStrategy() {
 
@@ -26,14 +27,14 @@ function createLinkedInStrategy() {
 function linkedInCallback(req, res, next) {
     var data = req.user;
     var profile = data.profile;
-    userDao.getFromUsername(profile._json.emailAddress, function(err, foundUser){
+    daoMng.getFromUsername(profile._json.emailAddress, function(err, foundUser){
         if(err){
-            if(err.message == userDao.ERROR_USER_NOT_FOUND){
+            if(err.message == daoMng.ERROR_USER_NOT_FOUND){
                 var inData = {
                     accessToken:data.accessToken,
                     refreshToken:data.refreshToken
                 };
-                tokenManager.createAccessToken(profile.id, inData, function(err, token){
+                tokenMng.createAccessToken(profile.id, inData, function(err, token){
                     var returnProfile = {
                         name: profile._json.formattedName,
                         email: profile._json.emailAddress,
@@ -48,18 +49,63 @@ function linkedInCallback(req, res, next) {
                 next(false);
             }
         } else {
-            var dataToken = {};
+            var tokenData = {};
             if(foundUser.roles){
-                dataToken = {"roles": foundUser.roles};
+                tokenData = {"roles": foundUser.roles};
             }
-            tokenManager.createBothTokens(foundUser.username, dataToken, function(err, tokens){
-                if(err) {
-                    res.send(409,{err: err.message});
-                } else {
-                    tokens.expiresIn = config.accessToken.expiration * 60;
-                    res.send(200,tokens);
+
+            async.series([
+                function(done){
+                    //Add "realms" & "capabilities"
+                    daoMng.getRealms(function(err, realms){
+                        if(err){
+                            log.error({err:err,des:'error obtaining user realms'});
+                            return done();
+                        }
+
+                        if(!realms || !realms.length) {
+                            log.info({des:'there are no REALMS in DB'});
+                            return done();
+                        }
+                        async.eachSeries(realms, function(realm, next){
+                            if(!realm.allowedDomains || !realm.allowedDomains.length){
+                                return next();
+                            }
+                            async.eachSeries(realm.allowedDomains, function(domain, more){
+                                //wildcard
+                                var check = domain.replace(/\*/g,'.*');
+                                var match = foundUser.username.match(check);
+                                if(!match || foundUser.username !== match[0]){
+                                    return more();
+                                }
+
+                                if(!tokenData.realms){
+                                    tokenData.realms = [];
+                                }
+                                tokenData.realms.push(realm.name);
+
+                                async.each(Object.keys(realm.capabilities), function(capName, added){
+                                    if(!tokenData.capabilities){
+                                        tokenData.capabilities = {};
+                                    }
+
+                                    tokenData.capabilities[capName] = realm.capabilities[capName];
+                                    added();
+                                }, more);
+                            }, next);
+                        }, done);
+                    });
                 }
-                next(false);
+            ], function(){
+                tokenMng.createBothTokens(foundUser.username, tokenData, function(err, tokens){
+                    if(err) {
+                        res.send(409,{err: err.message});
+                    } else {
+                        tokens.expiresIn = config.accessToken.expiration * 60;
+                        res.send(200,tokens);
+                    }
+                    next(false);
+                });
             });
         }
         next(false);
@@ -70,9 +116,9 @@ function addUserPlatform(req, res, next){
     var data = req.user;
     var profile = data.profile;
 
-    userDao.getFromUsername(profile._json.emailAddress, function(err, foundUser){
+    daoMng.getFromUsername(profile._json.emailAddress, function(err, foundUser){
         if(err){
-            if(err.message == userDao.ERROR_USER_NOT_FOUND){
+            if(err.message == daoMng.ERROR_USER_NOT_FOUND){
                 res.send(500, {err:'internal_error', des:'User not found'});
                 next(false);
             } else {
@@ -106,7 +152,7 @@ function addUserPlatform(req, res, next){
                 updatedPlatforms.push(linkedInPlatform);
             }
 
-            userDao.updateFieldById(foundUser.id.toString(), {platforms: updatedPlatforms}, function(err, updatedUsers){
+            daoMng.updateFieldById(foundUser.id.toString(), {platforms: updatedPlatforms}, function(err, updatedUsers){
                 if(err){
                     res.send(500, {err:'internal_error', des:'Error updating the user'});
                     return next(false);
