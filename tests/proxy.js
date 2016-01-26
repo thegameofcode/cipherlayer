@@ -48,7 +48,7 @@ describe('proxy', function(){
 
     describe('protected calls', function(){
         beforeEach(function (done) {
-            cipherlayer.start(config.public_port, config.private_port, function (err) {
+            cipherlayer.start(config.public_port, config.internal_port, function (err) {
                 assert.equal(err, null);
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);

@@ -138,7 +138,7 @@ function getLoginTokens(user, cbk){
 
 var USER = {
     id: 'a1b2c3d4e5f6',
-    username: 'validUser'+ (config.allowedDomains[0] ? config.allowedDomains[0] : '') ,
+    username: 'validUser'+ (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '') ,
     password: 'validPassword123',
     deviceId: 1234567890
 };

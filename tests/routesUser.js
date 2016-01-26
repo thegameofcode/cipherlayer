@@ -27,7 +27,7 @@ describe('user', function () {
 
     var baseUser = {
         id: 'a1b2c3d4e5f6',
-        username: 'jie.lee' + (config.allowedDomains[0] ? config.allowedDomains[0] : ''),
+        username: 'jie.lee' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
         password: 'validpassword'
     };
 
@@ -39,7 +39,7 @@ describe('user', function () {
     }
 
     beforeEach(function (done) {
-        cipherlayer.start(config.public_port, config.private_port, function(err){
+        cipherlayer.start(config.public_port, config.internal_port, function(err){
 			assert.equal(err, null);
             dao.deleteAllUsers(function (err) {
                 assert.equal(err, null);

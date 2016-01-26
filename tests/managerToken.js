@@ -15,7 +15,6 @@ describe('token manager', function(){
                 ciphertoken.getTokenSet(accessTokenSettings, accessToken, function(err, accessTokenInfo){
                     assert.equal(err, null);
                     assert.equal(accessTokenInfo.userId, expectedUserId);
-
                     done();
                 });
             });

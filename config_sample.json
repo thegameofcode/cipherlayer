@@ -1,6 +1,7 @@
 {
   "public_port" : 3000,
   "private_port" : 3001,
+  "internal_port" : 3010,
   "private_host": "localhost",
   "public_url" : "https://pro.example.com",
   "authHeaderKey": "bearer ",
