@@ -127,6 +127,7 @@ function createUser(body, pin, cbk) {
                                 code: 200
                             });
                         }
+                        delete(body[_settings.passThroughEndpoint.password]);
                         createUserPrivateCall(body, user, cbk);
                     });
                 }
@@ -159,7 +160,13 @@ function createUserByToken(token, cbk) {
         }
         var body = bodyData.data;
 
-        var profileSchema = _.isEmpty(config.validators.profile.path) ? require('./json_formats/' + config.validators.profile.filename) : config.validators.profile.path;
+        var profileSchema;
+
+        if (!config.validators) {
+            profileSchema = require('./json_formats/profile_create.json');
+        } else {
+            profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
+        }
 
         //Validate the current bodyData with the schema profile_create.json
         if( !jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
