@@ -40,6 +40,7 @@
       "properties": {
         "path": {"type": "string", "required": true},
         "username": {"type": "string", "required": true},
+        "email": {"type": "string", "required": false},
         "password": {"type": "string", "required": true}
       },
       "required": true

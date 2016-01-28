@@ -30,6 +30,7 @@
     "path": "/api/profile",
     "recoverPath": "/api/user/:email/password",
     "username":"email",
+    "email":"email",
     "password":"password"
   },
   "salesforce" : {
