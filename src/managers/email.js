@@ -4,6 +4,8 @@ var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
 var redisMng = require('./redis');
 
+var config = require(process.cwd() + '/config.json');
+
 var _settings = {};
 
 function sendEmailVerification(email, subject, emailBody, cbk){
@@ -48,7 +50,7 @@ function emailVerification(email, bodyData, cbk){
     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
     var redisKey = _settings.emailVerification.redis.key;
-    redisKey = redisKey.replace('{username}', bodyData.email);
+    redisKey = redisKey.replace('{username}', bodyData[config.passThroughEndpoint.email || 'email' ]);
     var redisExp = _settings.emailVerification.redis.expireInSec;
 
     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
@@ -64,7 +66,7 @@ function emailVerification(email, bodyData, cbk){
             tokenExpirationMinutes: redisExp
         };
 
-        ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+        ciphertoken.createToken(tokenSettings, bodyData[config.passThroughEndpoint.email || 'email' ], null, bodyData, function(err, token){
             if(err){
                 return cbk(err);
             }

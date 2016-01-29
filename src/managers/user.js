@@ -178,7 +178,7 @@ function createUserByToken(token, cbk) {
         }
         //Verify the transactionId
         var redisKey = _settings.emailVerification.redis.key;
-        redisKey = redisKey.replace('{username}', body.email);
+        redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email' ]);
 
         redisMng.getKeyValue(redisKey, function(err, transactionId) {
             if(err){
