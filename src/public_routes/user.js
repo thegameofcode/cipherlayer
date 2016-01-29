@@ -190,6 +190,11 @@ function createUserByToken(req, res, next) {
                 }
             }
 
+            if(req.method === 'POST') {
+                res.send(200, tokens);
+                return next();
+            }
+
             if (config.emailVerification.redirectUrl) {
                 res.setHeader('Location', config.emailVerification.redirectUrl);
                 res.send(301);
@@ -272,6 +277,7 @@ function addRoutes(service) {
 
     service.post(config.passThroughEndpoint.path, createUserEndpoint);
     service.get('/user/activate', createUserByToken);
+    service.post('/user/activate', createUserByToken);
 
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
 }
