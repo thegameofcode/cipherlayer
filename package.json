@@ -36,7 +36,7 @@
     "randexp": "^0.4.0",
     "redis": "^0.12.1",
     "request": "^2.47.0",
-    "restify": "^2.8.3",
+    "restify": "^2.8.5",
     "version-control": "^1.2.4"
   },
   "devDependencies": {
