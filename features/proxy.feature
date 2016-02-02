@@ -1,5 +1,6 @@
 Feature: reverse proxy protects an applicacion behind cipherlayer
 
+  @service
   Scenario Outline: A protected service needs an accessToken auth to be called
     Given a user with role user and a valid access token
     And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
