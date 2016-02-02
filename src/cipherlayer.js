@@ -94,6 +94,13 @@ function startListener(publicPort, internalPort, cbk){
                     credentials: true,
                     headers: config.accessControlAllow.headers
                 }));
+
+                publicServer.opts(/.*/, function (req,res,next) {
+                    res.header("Access-Control-Allow-Methods", req.header("Access-Control-Request-Methods") );
+                    res.header("Access-Control-Allow-Headers", req.header("Access-Control-Request-Headers") );
+                    res.send(200);
+                    return next();
+                });
             }
 
             publicServer.use(restify.queryParser());
