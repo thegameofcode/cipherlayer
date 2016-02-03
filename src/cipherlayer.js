@@ -102,7 +102,8 @@ function startListener(publicPort, internalPort, cbk){
                 "/auth/google",
                 "/auth/google/*",
                 "/user/activate*",
-                "/heartbeat"
+                "/heartbeat",
+                "/user/email/available"
             ];
             publicServer.use(versionControl(versionControlOptions));
 
