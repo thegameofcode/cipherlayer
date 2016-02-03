@@ -13,6 +13,8 @@ var checkAccessTokenParam = require('../middlewares/accessTokenParam.js');
 var checkAuthHeader = require('../middlewares/authHeader.js');
 var decodeToken = require('../middlewares/decodeToken.js');
 var findUser = require('../middlewares/findUser.js');
+var _ = require('lodash');
+var log = require('../logger/service.js');
 
 function sendNewPassword(req, res, next) {
     if (!req.params.email) {
@@ -272,13 +274,36 @@ function setPassword(req, res, next) {
     });
 }
 
+function checkEmailAvailable(req, res, next) {
+    var email = req.body.email;
+
+    if (_.isEmpty(email)) {
+        res.send(400, {
+            err: 'BadRequestError',
+            des: 'Missing email in request body'
+        });
+        return next();
+    }
+
+
+    daoMng.findByEmail(email, function(error, output) {
+        if (error) {
+            res.send(error.statusCode, error.body);
+            return next();
+        }
+
+        res.send(200, output);
+        return next();
+    });
+}
+
 function addRoutes(service) {
     service.get('/user/:email/password', sendNewPassword);
 
     service.post(config.passThroughEndpoint.path, createUserEndpoint);
     service.get('/user/activate', createUserByToken);
     service.post('/user/activate', createUserByToken);
-
+    service.post('/user/email/available', checkEmailAvailable);
     service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
 }
 

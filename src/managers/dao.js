@@ -6,6 +6,7 @@ var escapeRegexp = require('escape-regexp');
 var config = require(process.cwd() + '/config.json');
 var mongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
+var _ = require('lodash');
 
 var ERROR_USER_NOT_FOUND = 'user_not_found';
 var ERROR_USERNAME_ALREADY_EXISTS = 'username_already_exists';
@@ -114,6 +115,28 @@ function countUsers(cbk){
             return cbk(err, null);
         }
         cbk(null, count);
+    });
+}
+
+function findByEmail(email, callback) {
+
+    var targetEmail = new RegExp("^"+escapeRegexp(email.toLowerCase())+"$", "i");
+
+
+    usersCollection.find({username: targetEmail}, {password: 0}).toArray(function(error, foundUsers) {
+
+        if (error) {
+            return callback({statusCode: 500, body: {
+                err: 'InternalError',
+                des: 'User lookup failed'
+            }});
+        }
+
+        if (_.isEmpty(foundUsers)) {
+            return callback(null, {available: true});
+        }
+
+        return callback(null, {available: false});
     });
 }
 
@@ -346,6 +369,6 @@ module.exports = {
     getRealms: getRealms,
     resetRealmsVariables: resetRealmsVariables,
     deleteAllRealms: deleteAllRealms,
-
+    findByEmail:findByEmail,
     getStatus: getStatus
 };
