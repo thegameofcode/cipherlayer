@@ -51,12 +51,14 @@ describe('realms', function () {
                     daoMng.deleteAllRealms(finish);
                 },
                 function(finish){
-                    async.each(clone(baseRealms), function(realm, next){
+                    async.eachSeries(clone(baseRealms), function(realm, next){
                         daoMng.addRealm(realm, function(){
                             assert.equal(err,null);
                             next();
                         });
-                    }, finish);
+                    }, function(){
+                        finish();
+                    });
                 }
             ], done);
         });
