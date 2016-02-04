@@ -83,9 +83,9 @@ function postAuthRegisterFacebook(req, res, next) {
         }
 
         var fbUserProfile = mapFacebookData(fb_body, config.facebook.fieldsMap);
+        var fbUserProfileUsername = fbUserProfile[config.facebook.fieldsMap.email || 'email'];
 
-        daoMng.getFromUsername(fbUserProfile.username, function(err, foundUser) {
-
+        daoMng.getFromUsername(fbUserProfileUsername, function(err, foundUser) {
             // RETURNING FACEBOOK USER
 
             if (!err) {
@@ -161,7 +161,7 @@ function postAuthRegisterFacebook(req, res, next) {
                         }
 
                         tokenMng.createBothTokens(userId, tokenData, function (err, tokens) {
-                            tokens.expiresIn = _settings.accessToken.expiration * 60;
+                            tokens.expiresIn = config.accessToken.expiration * 60;
                             res.send(201, tokens);
                             return next();
                         });
