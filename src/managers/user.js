@@ -97,6 +97,15 @@ function createUser(body, pin, cbk) {
                     return cbk(err);
                 }
 
+                if (body.fb) {
+                    user.platforms = [{
+                        platform: 'fb',
+                        accessToken: body.fb.accessToken
+                    }];
+                    delete body.fb;
+                    createUserPrivateCall(body, user, cbk);
+                    return;
+                }
                 if (body.sf) {
                     delete(body[_settings.passThroughEndpoint.password]);
                     tokenMng.getAccessTokenInfo(body.sf, function (err, tokenInfo) {
