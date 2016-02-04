@@ -59,6 +59,14 @@
     "clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
     "callbackURL": "http://localhost:3000/auth/google/callback"
   },
+  "facebook": {
+    "registerByToken": true,
+    "requestFields": "name,email,picture",
+    "fieldsMap": {
+      "name": "fullname",
+      "email": "email"
+    }
+  },
   "aws":{
     "accessKeyId": "{{AWS_ACCESKEYID}}",
     "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
@@ -117,9 +125,9 @@
         "link" : "http://testLink",
         "1" : true
       },
-    "installPath" : "/install",
-    "db":"mongodb://localhost/versionControl?w=1"
-  }
+      "installPath" : "/install",
+      "db":"mongodb://localhost/versionControl?w=1"
+    }
   },
   "allowedDomains":[
     "*@a.com"
@@ -132,8 +140,8 @@
     "subject" :"Recover Example User Password",
     "body" : "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
   },
-    "endpoints" : [
-      {
+  "endpoints" : [
+    {
       "path" : "\/api\/profile",
       "methods" : ["POST", "PUT"],
       "roles" : ["admin"]
@@ -157,6 +165,6 @@
     "\/upload$"
   ],
   "allowedHeaders": [
-      "x-custom-header"
+    "x-custom-header"
   ]
 }
