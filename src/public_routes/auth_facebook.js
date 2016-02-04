@@ -13,7 +13,7 @@ var defaultOptions = {
     json: true,
     method: 'GET',
     qs: {
-        fields: config.facebook.requestFields,
+        fields: config.facebook ? config.facebook.requestFields : null,
         format: 'json',
         method: 'get',
         pretty: 0,
