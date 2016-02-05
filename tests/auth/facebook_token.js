@@ -28,7 +28,7 @@ var baseUser = {
 var FB_PROFILE = {
     name: "Test User",
     email: "test@a.com",
-    id: "FB1234"
+    id: "fb1234"
 };
 
 module.exports = {
@@ -107,7 +107,9 @@ module.exports = {
                 delete noEmailUser.email;
 
                 var madeUpEmailFbProfile = clone(FB_PROFILE);
-                madeUpEmailFbProfile.email = noEmailUser.id + '@facebook.com';
+                delete madeUpEmailFbProfile.email;
+
+                var userEmail = 'fb' + noEmailUser.id + '@facebook.com';
 
                 nockFBGraphCall(madeUpEmailFbProfile, OPTIONS.body.accessToken, config.facebook.requestFields);
                 nockPrivateCall(config, noEmailUser.id);
@@ -122,10 +124,10 @@ module.exports = {
                     assert.ok(body.refreshToken);
                     assert.ok(body.expiresIn);
 
-                    userDao.getFromUsername(madeUpEmailFbProfile.email, function (err, foundUser) {
+                    userDao.getFromUsername(userEmail, function (err, foundUser) {
                         assert.equal(err, null);
                         assert.ok(foundUser);
-                        assert.equal(foundUser.username, madeUpEmailFbProfile.email);
+                        assert.equal(foundUser.username, userEmail);
                         assert.ok(foundUser.platforms);
                         var fbPlatform = foundUser.platforms[0];
                         assert.equal(fbPlatform.platform, 'fb');
