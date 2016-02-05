@@ -130,7 +130,8 @@
     }
   },
   "allowedDomains":[
-    "*@a.com"
+    "*@a.com",
+    "*@facebook.com"
   ],
   "password":{
     "validateOldPassword": false,
