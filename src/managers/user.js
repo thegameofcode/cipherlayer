@@ -4,7 +4,6 @@ var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
-var config = require(process.cwd() + '/config.json');
 
 var daoMng = require('./dao');
 var tokenMng = require('./token');
@@ -127,7 +126,7 @@ function createUser(body, pin, cbk) {
 						createUserPrivateCall(body, user, cbk);
 					});
 				} else {
-					emailMng(_settings).emailVerification(body[config.passThroughEndpoint.email || 'email'], body, function (err, destinationEmail) {
+					emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
 						if (err) {
 							return cbk(err);
 						}
@@ -143,7 +142,6 @@ function createUser(body, pin, cbk) {
 			});
 		});
 	});
-
 }
 
 function createUserByToken(token, cbk) {
@@ -169,17 +167,9 @@ function createUserByToken(token, cbk) {
 		}
 		var body = bodyData.data;
 
-		var profileSchema;
-
-		if (!config.validators) {
-			profileSchema = require('./json_formats/profile_create.json');
-		} else {
-			profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
-		}
-
+		var profileSchema = require('./json_formats/profile_create.json');
 		//Validate the current bodyData with the schema profile_create.json
 		if (!jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
-
 			return cbk({
 				err: 'invalid_profile_data',
 				des: 'The data format provided is not valid.',
@@ -188,7 +178,7 @@ function createUserByToken(token, cbk) {
 		}
 		//Verify the transactionId
 		var redisKey = _settings.emailVerification.redis.key;
-		redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email']);
+		redisKey = redisKey.replace('{username}', body.email);
 
 		redisMng.getKeyValue(redisKey, function (err, transactionId) {
 			if (err) {
@@ -246,7 +236,8 @@ function createUserPrivateCall(body, user, cbk) {
 			'Content-Type': 'application/json; charset=utf-8'
 		},
 		method: 'POST',
-		body: JSON.stringify(clonedBody)
+		body: clonedBody,
+		json: true
 	};
 
 	log.info('=> POST ' + options.url);
@@ -261,7 +252,6 @@ function createUserPrivateCall(body, user, cbk) {
 		}
 
 		log.info('<= ' + private_res.statusCode);
-		body = JSON.parse(body);
 		user.id = body.id;
 
 		if (!user.password) {
