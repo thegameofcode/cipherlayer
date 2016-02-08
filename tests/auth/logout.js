@@ -36,7 +36,7 @@ module.exports = {
 			});
 
 			function doLogin() {
-				return new Promise(ok => {
+				return new Promise(function (ok) {
 					var user = clone(baseUser);
 					var options = {
 						url: 'http://localhost:' + config.public_port + '/auth/login',
@@ -58,7 +58,7 @@ module.exports = {
 			}
 
 			it('POST 204', function (done) {
-				doLogin().then(accessToken => {
+				doLogin().then(function (accessToken) {
 					var options = {
 						url: 'http://localhost:' + config.public_port + '/auth/logout',
 						method: 'POST',
