@@ -219,13 +219,15 @@ function createUserByToken(token, cbk) {
 }
 
 function createUserPrivateCall(body, user, cbk){
+    var clonedBody = _.clone(body);
+    delete clonedBody.password;
     var options = {
         url: 'http://' + _settings.private_host + ':' + _settings.private_port + _settings.passThroughEndpoint.path,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
         method: 'POST',
-        body: JSON.stringify(body)
+        body: JSON.stringify(clonedBody)
     };
 
     log.info('=> POST ' + options.url);
