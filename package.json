@@ -15,7 +15,7 @@
     "coverage-2": "cp coverage/lcov.info coverage/cucumber.lcov",
     "coverage-3": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
     "coverage-4": "node_modules/.bin/lcov-result-merger 'coverage/*.lcov' 'coverage/merged.lcov'",
-    "coverage-5": "cat ./coverage/merged.lcov | ./node_modules/coveralls/bin/coveralls.js"
+    "coverage-5": "cat ./coverage/merged.lcov | ./node_modules/coveralls/bin/coveralls.js --verbose"
   },
   "dependencies": {
     "async": "^0.9.0",
