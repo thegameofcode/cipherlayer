@@ -120,6 +120,44 @@ module.exports = {
 					done();
 				});
 			});
+
+			it('POST 401 no authorization header', function (done) {
+				var options = {
+					url: 'http://localhost:' + config.public_port + '/auth/logout',
+					method: 'POST',
+					headers: {},
+					json: true
+				};
+				options.headers[config.version.header] = "test/1";
+
+				request(options, function (err, res, body) {
+					should.not.exist(err);
+					res.statusCode.should.equal(401);
+					body.should.have.property('err').to.be.equal('invalid_access_token');
+					body.should.have.property('des').to.be.equal('unable to read token info');
+					done();
+				});
+			});
+
+			it('POST 401 invalid authorization header identifier', function (done) {
+				var options = {
+					url: 'http://localhost:' + config.public_port + '/auth/logout',
+					method: 'POST',
+					headers: {
+						'Authorization': 'wrong bearer TOKEN'
+					},
+					json: true
+				};
+				options.headers[config.version.header] = "test/1";
+
+				request(options, function (err, res, body) {
+					should.not.exist(err);
+					res.statusCode.should.equal(401);
+					body.should.have.property('err').to.be.equal('invalid_access_token');
+					body.should.have.property('des').to.be.equal('unable to read token info');
+					done();
+				});
+			});
 		});
 	}
 };
