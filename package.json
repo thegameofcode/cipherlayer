@@ -42,6 +42,7 @@
   "devDependencies": {
     "assert": "^1.1.2",
     "blanket": "^1.1.7",
+    "chai": "^3.5.0",
     "coveralls": "^2.11.4",
     "cucumber": "^0.5.2",
     "istanbul": "^0.3.17",
