@@ -64,7 +64,8 @@ module.exports = {
 						method: 'POST',
 						headers: {
 							'Authorization': 'bearer ' + accessToken
-						}
+						},
+						json: true
 					};
 					options.headers[config.version.header] = "test/1";
 
@@ -75,6 +76,48 @@ module.exports = {
 						res.statusCode.should.equal(204, body);
 						done();
 					});
+				});
+			});
+
+			it('POST 500 no sesion service', function (done) {
+				doLogin().then(function (accessToken) {
+					var options = {
+						url: 'http://localhost:' + config.public_port + '/auth/logout',
+						method: 'POST',
+						headers: {
+							'Authorization': 'bearer ' + accessToken
+						},
+						json: true
+					};
+					options.headers[config.version.header] = "test/1";
+
+					request(options, function (err, res, body) {
+						should.not.exist(err);
+						res.statusCode.should.equal(500);
+						body.should.have.property('err').to.be.equal('internal_session_error');
+						body.should.have.property('des').to.be.equal('unable to close session');
+						done();
+					});
+				});
+			});
+
+			it('POST 401 invalid access token', function (done) {
+				var options = {
+					url: 'http://localhost:' + config.public_port + '/auth/logout',
+					method: 'POST',
+					headers: {
+						'Authorization': 'bearer INVALID_TOKEN'
+					},
+					json: true
+				};
+				options.headers[config.version.header] = "test/1";
+
+				request(options, function (err, res, body) {
+					should.not.exist(err);
+					res.statusCode.should.equal(401);
+					body.should.have.property('err').to.be.equal('invalid_access_token');
+					body.should.have.property('des').to.be.equal('unable to read token info');
+					done();
 				});
 			});
 		});
