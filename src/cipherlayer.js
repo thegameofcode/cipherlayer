@@ -20,7 +20,6 @@ var platformsSetUp = require('./middlewares/platformsSetUp.js');
 var propagateRequest = require('./middlewares/propagateRequest.js');
 var permissions = require('./middlewares/permissions.js');
 var bodyParserWrapper = require('./middlewares/bodyParserWrapper.js');
-var headerCors = require('./middlewares/headerCors.js');
 
 var versionControl = require('version-control');
 
@@ -89,7 +88,21 @@ function startListener(publicPort, internalPort, cbk){
                 req.log.info(logInfo, "response");
             });
 
-            publicServer.use(headerCors);
+            if(config.accessControlAllow){
+                publicServer.use(restify.CORS({
+                    origins: config.accessControlAllow.origins,
+                    credentials: true,
+                    headers: config.accessControlAllow.headers
+                }));
+
+                publicServer.opts(/.*/, function (req,res,next) {
+                    res.header("Access-Control-Allow-Methods", req.header("Access-Control-Request-Methods") );
+                    res.header("Access-Control-Allow-Headers", req.header("Access-Control-Request-Headers") );
+                    res.send(200);
+                    return next();
+                });
+            }
+
             publicServer.use(restify.queryParser());
             publicServer.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
@@ -177,7 +190,6 @@ function startListener(publicPort, internalPort, cbk){
                 req.log.info(logInfo, "response");
             });
 
-            internalServer.use(headerCors);
             internalServer.use(restify.queryParser());
             internalServer.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 

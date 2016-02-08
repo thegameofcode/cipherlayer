@@ -1,4 +1,5 @@
-var request = require("request");
+'use strict';
+
 var async = require('async');
 
 var log = require('../logger/service.js');
@@ -7,6 +8,8 @@ var tokenMng = require('../managers/token');
 var config = require(process.cwd() + '/config.json');
 var ObjectID = require('mongodb').ObjectID;
 var cryptoMng = require('../managers/crypto')({password: 'password'});
+
+var sessionRequest = require('./auth/session');
 
 function postAuthLogin(req, res, next) {
     var userAgent = String(req.headers['user-agent']);
@@ -104,29 +107,6 @@ function postAuthLogin(req, res, next) {
             }
         });
     });
-}
-
-function sessionRequest(deviceId, userId, method, userAgent, cbk) {
-    if (deviceId) {
-        var options = {
-            url: 'http://' + config.private_host + ':' + config.private_port + "/api/me/session",
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'x-user-id': userId,
-                'user-agent': userAgent
-            },
-            method: method,
-            json: true,
-            body: {"deviceId": deviceId}
-        };
-
-        request(options, function (err, res, body) {
-            cbk(err, body);
-        });
-
-    } else {
-        cbk();
-    }
 }
 
 function postAuthUser(req, res, next) {
@@ -298,26 +278,12 @@ function renewToken(req, res, next) {
     });
 }
 
-function authLogout(req, res, next) {
-    var userAgent = String(req.headers['user-agent']);
-
-    var userId = req.body.userId;
-    //remove platform
-    userId = userId.substr(3);
-    var deviceId = req.body.deviceId;
-    sessionRequest(deviceId, userId, 'DELETE', userAgent, function (err, result) {
-        log.info({err: err, result: result}, 'RemoveDeviceResponse');
-        res.send(204);
-        return next();
-    });
-}
-
 function addRoutes(service) {
     service.post('/auth/login', postAuthLogin);
     service.post('/auth/user', checkAuthBasic, postAuthUser);
     service.del('/auth/user', checkAuthBasic, delAuthUser);
     service.post('/auth/renew', renewToken);
-    service.post('/auth/logout', authLogout);
+	require('./auth/logout')(service);
 }
 
 module.exports = addRoutes;
