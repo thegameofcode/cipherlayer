@@ -227,7 +227,8 @@ function createUserPrivateCall(body, user, cbk){
             'Content-Type': 'application/json; charset=utf-8'
         },
         method: 'POST',
-        body: JSON.stringify(clonedBody)
+        body: clonedBody,
+		json: true
     };
 
     log.info('=> POST ' + options.url);
@@ -242,7 +243,6 @@ function createUserPrivateCall(body, user, cbk){
         }
 
         log.info('<= ' + private_res.statusCode);
-        body = JSON.parse(body);
         user.id = body.id;
 
         if (!user.password) {
