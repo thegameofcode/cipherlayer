@@ -30,6 +30,7 @@
     "path": "/api/profile",
     "recoverPath": "/api/user/:email/password",
     "username": "email",
+    "email": "email",
     "password": "password"
   },
   "salesforce": {
@@ -84,7 +85,7 @@
       "email": "email"
     }
   },
-  "aws":{
+  "aws": {
     "accessKeyId": "{{AWS_ACCESKEYID}}",
     "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
     "region": "us-west-2",
@@ -131,7 +132,7 @@
       "key": "user.{username}.transaction",
       "expireInSec": 86400
     },
-    "scheme":"mycomms",
+    "scheme": "mycomms",
     "redirectUrl": "http://www.google.com"
   },
   "externalServices": {
@@ -155,7 +156,7 @@
     "*@a.com",
     "*@facebook.com"
   ],
-  "password":{
+  "password": {
     "validateOldPassword": false,
     "regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
     "message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",

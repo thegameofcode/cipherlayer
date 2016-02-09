@@ -4,6 +4,7 @@ var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
+var config = require(process.cwd() + '/config.json');
 
 var daoMng = require('./dao');
 var tokenMng = require('./token');
@@ -166,8 +167,14 @@ function createUserByToken(token, cbk) {
 			return cbk(err);
 		}
 		var body = bodyData.data;
+        var profileSchema;
 
-		var profileSchema = require('./json_formats/profile_create.json');
+        if (!config.validators) {
+            profileSchema = require('./json_formats/profile_create.json');
+        } else {
+            profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
+        }
+
 		//Validate the current bodyData with the schema profile_create.json
 		if (!jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
 			return cbk({
@@ -178,7 +185,7 @@ function createUserByToken(token, cbk) {
 		}
 		//Verify the transactionId
 		var redisKey = _settings.emailVerification.redis.key;
-		redisKey = redisKey.replace('{username}', body.email);
+        redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email' ]);
 
 		redisMng.getKeyValue(redisKey, function (err, transactionId) {
 			if (err) {
@@ -460,7 +467,6 @@ function validatePwd(pwd, regexp) {
 }
 
 module.exports = function (settings) {
-	var config = require(process.cwd() + '/config.json');
 	_settings = _.assign({}, config, settings);
 
 	return {

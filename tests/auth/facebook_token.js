@@ -20,7 +20,7 @@ var OPTIONS = {
 };
 
 var baseUser = {
-    id: '1234',
+    id: 'a1b2c3d4e5f6',
     email: 'test@a.com',
     password: 'pass1'
 };
@@ -28,7 +28,7 @@ var baseUser = {
 var FB_PROFILE = {
     name: "Test User",
     email: "test@a.com",
-    id: "fb1234"
+    id: "fba1b2c3d4e5f6"
 };
 
 module.exports = {
