@@ -169,6 +169,12 @@ function createUserByToken(req, res, next) {
             }
             return next(false);
         } else {
+
+            if(req.method === 'POST') {
+                res.send(200, tokens);
+                return next();
+            }
+
             var compatibleDevices = config.emailVerification.compatibleEmailDevices;
             var userAgent = String(req.headers['user-agent']);
 
@@ -191,13 +197,10 @@ function createUserByToken(req, res, next) {
                 }
             }
 
-            if(req.method === 'POST') {
-                res.send(200, tokens);
-                return next();
-            }
 
             if (config.emailVerification.redirectUrl) {
-                res.setHeader('Location', config.emailVerification.redirectUrl);
+                var refreshToken =  config.emailVerification.redirectRefreshToken ?  '?refreshToken=' + tokens.refreshToken : '';
+                res.setHeader('Location', config.emailVerification.redirectUrl + refreshToken);
                 res.send(301);
                 return next();
             }

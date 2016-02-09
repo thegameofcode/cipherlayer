@@ -133,7 +133,8 @@
       "expireInSec": 86400
     },
     "scheme": "mycomms",
-    "redirectUrl": "http://www.google.com"
+    "redirectUrl": "http://www.google.com",
+    "redirectRefreshToken": false
   },
   "externalServices": {
     "notifications": {
