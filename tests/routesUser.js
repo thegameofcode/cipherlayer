@@ -4,12 +4,14 @@ var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
 var fs = require('fs');
+var _ = require('lodash');
 var cipherlayer = require('../src/cipherlayer.js');
 
 var config = JSON.parse(fs.readFileSync('config.json','utf8'));
 var dao = require('../src/managers/dao.js');
 
-var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
+var crypto = require('../src/managers/crypto');
+var cryptoMng = crypto(config.password);
 
 var accessTokenSettings = {
     cipherKey: config.accessToken.cipherKey,
@@ -31,12 +33,13 @@ describe('user', function () {
         password: 'validpassword'
     };
 
-    function validatePwd(pwd, cbk){
-        cryptoMng.decrypt(pwd, function(decryptedPwd) {
-            var regex = new RegExp(config.password.regexValidation);
-            return cbk(regex.test(decryptedPwd));
-        });
-    }
+	function validatePwd(clear, crypted, cbk){
+		var cryptoMng = crypto(config.password);
+		cryptoMng.verify(clear, crypted, function(err) {
+				assert.equal(err, null);
+				return cbk();
+		});
+	}
 
     beforeEach(function (done) {
         cipherlayer.start(config.public_port, config.internal_port, function(err){
@@ -91,11 +94,9 @@ describe('user', function () {
                     dao.getAllUserFields(baseUser.username, function(err, foundUser){
                         assert.equal(err, null);
                         assert.notEqual(foundUser, null);
-
-                        validatePwd(foundUser.password[1], function(valid){
-                            assert.equal(valid, true);
-                            done();
-                        });
+                        assert.equal(result.password.length, 2);
+                        assert.notEqual(result.password[0], result.password[1]);
+                        done();
                     });
                 });
             });
@@ -153,6 +154,8 @@ describe('user', function () {
                 body : JSON.stringify(newPassword)
             };
             options.headers[config.version.header] = "test/1";
+            var clonedUser = _.clone(baseUser);
+            clonedUser.password = newPassword.password;
 
             request(options, function (err, res, body) {
                 assert.equal(err, null, body);
@@ -160,10 +163,7 @@ describe('user', function () {
                 dao.getAllUserFields(baseUser.username, function(err, foundUser){
                     assert.equal(err, null);
                     assert.notEqual(foundUser, null);
-                    validatePwd(foundUser.password, function(valid){
-                        assert.equal(valid, true);
-                        done();
-                    });
+                    validatePwd(clonedUser.password, foundUser.password,done);
                 });
             });
         });
