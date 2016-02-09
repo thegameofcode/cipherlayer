@@ -8,7 +8,7 @@ var dao = require('../../src/managers/dao.js');
 var clone = require("clone");
 var nock = require('nock');
 
-var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
+var cryptoMng = require('../../src/managers/crypto')(config.password);
 
 module.exports = function(){
     this.Given(/^a user with role (.*) and a valid access token$/, function (role, callback) {

@@ -6,7 +6,7 @@ var _ = require('lodash');
 var userDao = require('../src/managers/dao');
 var redisMng = require('../src/managers/redis');
 var userMng = require('../src/managers/user');
-var cryptoMng = require('../src/managers/crypto')({ password : 'password' });
+var crypto = require('../src/managers/crypto');
 
 var config = require('../config.json');
 
@@ -54,12 +54,13 @@ var configSettings = {
 
 describe('user Manager', function(){
 
-	function validatePwd(pwd, cbk){
-		cryptoMng.decrypt(pwd, function(decryptedPwd) {
-			var regex = new RegExp(config.password.regexValidation);
-			return cbk(regex.test(decryptedPwd));
-		});
-	}
+  function validatePwd(clear, crypted, cbk){
+    var cryptoMng = crypto(config.password);
+    cryptoMng.verify(clear, crypted, function(err) {
+      assert.equal(err, null);
+      return cbk();
+    });
+  }
 
 	beforeEach(function(done){
 		async.series([
@@ -682,15 +683,14 @@ describe('user Manager', function(){
 
 			userDao.addUser()(expectedUser, function(err, createdUser) {
 				userMng().setPassword(createdUser._id, newPassword, function(err, result){
+          var clonedUser = _.clone(expectedUser);
+          clonedUser.password = newPassword.password;
 					assert.equal(err, null);
 					assert.equal(result, 1);
 					userDao.getAllUserFields(createdUser.username, function(err, foundUser){
 						assert.equal(err, null);
 						assert.notEqual(foundUser, null);
-						validatePwd(foundUser.password, function(valid){
-							assert.equal(valid, true);
-							done();
-						});
+						validatePwd(clonedUser.password, foundUser.password, done);
 					});
 				});
 			});

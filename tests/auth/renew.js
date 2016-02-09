@@ -6,7 +6,8 @@ var ciphertoken = require('ciphertoken');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
-var cryptoMng = require('../../src/managers/crypto')({password: 'password'});
+var crypto = require('../../src/managers/crypto');
+var cryptoMng = crypto(config.password);
 
 module.exports = {
 	describe: function () {
