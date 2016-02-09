@@ -74,8 +74,7 @@ function propagateRequest(req, res, next) {
 					user: req.user
 				}, 'proxy call');
 
-
-                transferAllowedHeaders(config.allowedHeaders, private_res, res);
+				transferAllowedHeaders(config.allowedHeaders, private_res, res);
 
 				if (private_res.statusCode === 302) {
 					res.header('Location', private_res.headers.location);
@@ -92,15 +91,15 @@ function propagateRequest(req, res, next) {
 
 function transferAllowedHeaders(headers, srcRes, dstRes) {
 
-    if (!headers || !headers.length ) {
-        return;
-    }
+	if (!headers || !headers.length) {
+		return;
+	}
 
-    _.map(headers, function(header) {
-        if (srcRes.headers[header]) {
-            dstRes.header(header, srcRes.headers[header] );
-        }
-    });
+	_.map(headers, function (header) {
+		if (srcRes.headers[header]) {
+			dstRes.header(header, srcRes.headers[header]);
+		}
+	});
 }
 
 module.exports = propagateRequest;

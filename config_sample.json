@@ -1,210 +1,210 @@
 {
-  "public_port": 3000,
-  "private_port": 3001,
-  "internal_port": 3010,
-  "private_host": "localhost",
-  "public_url": "https://pro.example.com",
-  "authHeaderKey": "bearer ",
-  "accessToken": {
-    "cipherKey": "unsecureKey1",
-    "signKey": "unsecureKey2",
-    "expiration": 10
-  },
-  "refreshToken": {
-    "cipherKey": "unsecureKey3",
-    "signKey": "unsecureKey4",
-    "expiration": 60
-  },
-  "management": {
-    "clientId": "Cipher Layer User",
-    "clientSecret": "unsecureKey5"
-  },
-  "db": {
-    "conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
-  },
-  "redis": {
-    "host": "127.0.0.1",
-    "port": 6379
-  },
-  "passThroughEndpoint": {
-    "path": "/api/profile",
-    "recoverPath": "/api/user/:email/password",
-    "username": "email",
-    "email": "email",
-    "password": "password"
-  },
-  "salesforce": {
-    "scope": [
-      "profile",
-      "id",
-      "email",
-      "address",
-      "phone",
-      "refresh_token",
-      "offline_access",
-      "api"
-    ],
-    "clientId": "1a2b3c4d5e6f",
-    "clientSecret": "6f5e4d3c2b1a",
-    "callbackURL": "http://localhost:3000/auth/sf/callback",
-    "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
-    "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
-    "renewWhenLessThan": 1,
-    "expiration": 5,
-    "replaceDefaultAvatar": {
-      "defaultAvatar": "profilephoto/005/F",
-      "replacementAvatar": "https://_default_avatar.png"
-    }
-  },
-  "linkedin": {
-    "scope": [
-      "r_network",
-      "r_emailaddress",
-      "r_basicprofile",
-      "r_contactinfo",
-      "r_fullprofile"
-    ],
-    "consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
-    "consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
-    "callbackURL": "http://localhost:3000/auth/in/callback"
-  },
-  "google": {
-    "scope": [
-      "profile",
-      "https://www.googleapis.com/auth/plus.login"
-    ],
-    "clientId": "{{GOOGLE_CLIENT_ID}}",
-    "clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
-    "callbackURL": "http://localhost:3000/auth/google/callback"
-  },
-  "facebook": {
-    "registerByToken": true,
-    "requestFields": "name,email,picture",
-    "fieldsMap": {
-      "name": "fullname",
-      "email": "email"
-    }
-  },
-  "aws": {
-    "accessKeyId": "{{AWS_ACCESKEYID}}",
-    "secretAccessKey": "{{AWS_SECRETACCESKEY}}",
-    "region": "us-west-2",
-    "buckets": {
-      "avatars": "example-avatars"
-    }
-  },
-  "validators": {
-    "profile": {
-      "path": "",
-      "filename": "profile_create.json"
-    }
-  },
-  "phoneVerification": {
-    "pinSize": 4,
-    "attempts": 3,
-    "redis": {
-      "key": "user.{userId}.phone.{phone}",
-      "expireInSec": 300
-    },
-    "pinValidationEndpoints": [
-      {
-        "path": "/api/me/phones",
-        "method": "post",
-        "fields": {
-          "countryISO": "country",
-          "phoneNumber": "phone"
-        }
-      }
-    ]
-  },
-  "emailVerification": {
-    "subject": "Example email verification",
-    "from": "hello@example.com",
-    "body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
-    "compatibleEmailDevices": [
-      "*iPhone*",
-      "*iPad*",
-      "*iPod*",
-      "*Android*"
-    ],
-    "nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",
-    "redis": {
-      "key": "user.{username}.transaction",
-      "expireInSec": 86400
-    },
-    "scheme": "mycomms",
-    "redirectUrl": "http://www.google.com",
-    "redirectRefreshToken": false
-  },
-  "externalServices": {
-    "notifications": {
-      "base": "http://localhost:3002",
-      "pathEmail": "/api/notification/email"
-    }
-  },
-  "version": {
-    "header": "x-example-version",
-    "platforms": {
-      "test": {
-        "link": "http://testLink",
-        "1": true
-      }
-    },
-    "installPath": "/install",
-    "db": "mongodb://localhost/versionControl?w=1"
-  },
-  "allowedDomains": [
-    "*@a.com",
-    "*@facebook.com"
-  ],
-  "password": {
-    "algorithm": "aes-256-ctr",
-    "encryptPassword": "password",
-    "validateOldPassword": false,
-    "regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
-    "message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
-    "generatedRegex": "([a-z][\\d][A-Z]){3,4}",
-    "subject": "Recover Example User Password",
-    "body": "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
-  },
-  "endpoints": [
-    {
-      "path": "\/api\/profile",
-      "methods": [
-        "POST",
-        "PUT"
-      ],
-      "roles": [
-        "admin"
-      ]
-    },
-    {
-      "path": "\/.*",
-      "methods": [
-        "GET",
-        "POST",
-        "PUT"
-      ],
-      "roles": [
-        "user",
-        "admin"
-      ]
-    }
-  ],
-  "accessControlAllow": {
-    "headers": [
-      "x-mycomms-version",
-      "content-type",
-      "Authorization"
-    ],
-    "origins": [
-      "http://localhost:3000"
-    ]
-  },
-  "directProxyUrls": [
-    "\/upload$"
-  ],
-  "allowedHeaders": [
-    "x-custom-header"
-  ]
+	"public_port": 3000,
+	"private_port": 3001,
+	"internal_port": 3010,
+	"private_host": "localhost",
+	"public_url": "https://pro.example.com",
+	"authHeaderKey": "bearer ",
+	"accessToken": {
+		"cipherKey": "unsecureKey1",
+		"signKey": "unsecureKey2",
+		"expiration": 10
+	},
+	"refreshToken": {
+		"cipherKey": "unsecureKey3",
+		"signKey": "unsecureKey4",
+		"expiration": 60
+	},
+	"management": {
+		"clientId": "Cipher Layer User",
+		"clientSecret": "unsecureKey5"
+	},
+	"db": {
+		"conn": "mongodb://127.0.0.1:27017/cipherlayer?w=1"
+	},
+	"redis": {
+		"host": "127.0.0.1",
+		"port": 6379
+	},
+	"passThroughEndpoint": {
+		"path": "/api/profile",
+		"recoverPath": "/api/user/:email/password",
+		"username": "email",
+		"email": "email",
+		"password": "password"
+	},
+	"salesforce": {
+		"scope": [
+			"profile",
+			"id",
+			"email",
+			"address",
+			"phone",
+			"refresh_token",
+			"offline_access",
+			"api"
+		],
+		"clientId": "1a2b3c4d5e6f",
+		"clientSecret": "6f5e4d3c2b1a",
+		"callbackURL": "http://localhost:3000/auth/sf/callback",
+		"authUrl": "https://login.salesforce.com/services/oauth2/authorize",
+		"tokenUrl": "https://login.salesforce.com/services/oauth2/token",
+		"renewWhenLessThan": 1,
+		"expiration": 5,
+		"replaceDefaultAvatar": {
+			"defaultAvatar": "profilephoto/005/F",
+			"replacementAvatar": "https://_default_avatar.png"
+		}
+	},
+	"linkedin": {
+		"scope": [
+			"r_network",
+			"r_emailaddress",
+			"r_basicprofile",
+			"r_contactinfo",
+			"r_fullprofile"
+		],
+		"consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
+		"consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
+		"callbackURL": "http://localhost:3000/auth/in/callback"
+	},
+	"google": {
+		"scope": [
+			"profile",
+			"https://www.googleapis.com/auth/plus.login"
+		],
+		"clientId": "{{GOOGLE_CLIENT_ID}}",
+		"clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
+		"callbackURL": "http://localhost:3000/auth/google/callback"
+	},
+	"facebook": {
+		"registerByToken": true,
+		"requestFields": "name,email,picture",
+		"fieldsMap": {
+			"name": "fullname",
+			"email": "email"
+		}
+	},
+	"aws": {
+		"accessKeyId": "{{AWS_ACCESKEYID}}",
+		"secretAccessKey": "{{AWS_SECRETACCESKEY}}",
+		"region": "us-west-2",
+		"buckets": {
+			"avatars": "example-avatars"
+		}
+	},
+	"validators": {
+		"profile": {
+			"path": "",
+			"filename": "profile_create.json"
+		}
+	},
+	"phoneVerification": {
+		"pinSize": 4,
+		"attempts": 3,
+		"redis": {
+			"key": "user.{userId}.phone.{phone}",
+			"expireInSec": 300
+		},
+		"pinValidationEndpoints": [
+			{
+				"path": "/api/me/phones",
+				"method": "post",
+				"fields": {
+					"countryISO": "country",
+					"phoneNumber": "phone"
+				}
+			}
+		]
+	},
+	"emailVerification": {
+		"subject": "Example email verification",
+		"from": "hello@example.com",
+		"body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
+		"compatibleEmailDevices": [
+			"*iPhone*",
+			"*iPad*",
+			"*iPod*",
+			"*Android*"
+		],
+		"nonCompatibleEmailMsg": "Your user has been created correctly, try to access to Example app in your device.",
+		"redis": {
+			"key": "user.{username}.transaction",
+			"expireInSec": 86400
+		},
+		"scheme": "mycomms",
+		"redirectUrl": "http://www.google.com",
+		"redirectRefreshToken": false
+	},
+	"externalServices": {
+		"notifications": {
+			"base": "http://localhost:3002",
+			"pathEmail": "/api/notification/email"
+		}
+	},
+	"version": {
+		"header": "x-example-version",
+		"platforms": {
+			"test": {
+				"link": "http://testLink",
+				"1": true
+			}
+		},
+		"installPath": "/install",
+		"db": "mongodb://localhost/versionControl?w=1"
+	},
+	"allowedDomains": [
+		"*@a.com",
+		"*@facebook.com"
+	],
+	"password": {
+		"algorithm": "aes-256-ctr",
+		"encryptPassword": "password",
+		"validateOldPassword": false,
+		"regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
+		"message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
+		"generatedRegex": "([a-z][\\d][A-Z]){3,4}",
+		"subject": "Recover Example User Password",
+		"body": "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
+	},
+	"endpoints": [
+		{
+			"path": "\/api\/profile",
+			"methods": [
+				"POST",
+				"PUT"
+			],
+			"roles": [
+				"admin"
+			]
+		},
+		{
+			"path": "\/.*",
+			"methods": [
+				"GET",
+				"POST",
+				"PUT"
+			],
+			"roles": [
+				"user",
+				"admin"
+			]
+		}
+	],
+	"accessControlAllow": {
+		"headers": [
+			"x-mycomms-version",
+			"content-type",
+			"Authorization"
+		],
+		"origins": [
+			"http://localhost:3000"
+		]
+	},
+	"directProxyUrls": [
+		"\/upload$"
+	],
+	"allowedHeaders": [
+		"x-custom-header"
+	]
 }

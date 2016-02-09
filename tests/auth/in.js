@@ -4,51 +4,51 @@ var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 
 module.exports = {
-    describe: function(){
-        describe('/in', function(){
-            beforeEach(function(done){
-                dao.deleteAllUsers(function(err){
-                    assert.equal(err,null);
-                    done();
-                });
-            });
+	describe: function () {
+		describe('/in', function () {
+			beforeEach(function (done) {
+				dao.deleteAllUsers(function (err) {
+					assert.equal(err, null);
+					done();
+				});
+			});
 
-            it('GET 302', function(done){
-                var options = {
-                    url: 'http://localhost:'+config.public_port+'/auth/in',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    },
-                    method:'GET',
-                    followRedirect: false
-                };
+			it('GET 302', function (done) {
+				var options = {
+					url: 'http://localhost:' + config.public_port + '/auth/in',
+					headers: {
+						'Content-Type': 'application/json; charset=utf-8'
+					},
+					method: 'GET',
+					followRedirect: false
+				};
 
-                request(options, function(err,res,body){
-                    assert.equal(err,null);
-                    assert.equal(res.statusCode, 302, body);
-                    done();
-                });
-            });
+				request(options, function (err, res, body) {
+					assert.equal(err, null);
+					assert.equal(res.statusCode, 302, body);
+					done();
+				});
+			});
 
-            describe('/callback', function(){
-                it('302 invalid data', function(done){
+			describe('/callback', function () {
+				it('302 invalid data', function (done) {
 
-                    var options = {
-                        url: 'http://localhost:'+config.public_port+'/auth/in/callback',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        },
-                        method:'GET',
-                        followRedirect: false
-                    };
+					var options = {
+						url: 'http://localhost:' + config.public_port + '/auth/in/callback',
+						headers: {
+							'Content-Type': 'application/json; charset=utf-8'
+						},
+						method: 'GET',
+						followRedirect: false
+					};
 
-                    request(options, function(err,res,body){
-                        assert.equal(err,null);
-                        assert.equal(res.statusCode, 302, body);
-                        done();
-                    });
-                });
-            });
-        });
-    }
+					request(options, function (err, res, body) {
+						assert.equal(err, null);
+						assert.equal(res.statusCode, 302, body);
+						done();
+					});
+				});
+			});
+		});
+	}
 };

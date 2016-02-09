@@ -3,10 +3,10 @@
 var bunyan = require('bunyan');
 var fs = require('fs');
 
-module.exports = function(){
+module.exports = function () {
 
 	var dir = process.cwd() + '/logs';
-	if (!fs.existsSync(dir)){
+	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir);
 	}
 
