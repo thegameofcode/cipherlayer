@@ -256,7 +256,7 @@ describe('user', function () {
 				url: 'http://localhost:' + config.public_port + '/user/me/password',
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
-					'Authorization': 'bearer dsoiafobadjsbahof2345245boadsbkcbiilaSDGERTFGsdfn4302984252hds'
+					'Authorization': 'bearer INVALID TOKEN'
 				},
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
@@ -264,13 +264,13 @@ describe('user', function () {
 			options.headers[config.version.header] = "test/1";
 
 			var expectedResult = {
-				err: "invalid_token",
-				des: "invalid authorization header"
+				err: "invalid_access_token",
+				des: "unable to read token info"
 			};
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 403, body);
+				assert.equal(res.statusCode, 401, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
 				done();
