@@ -138,7 +138,7 @@ describe('redis', function () {
 								done();
 							});
 						});
-					}, 1000
+					}, 2000
 				);
 			},
 			// checkExpire
@@ -150,7 +150,7 @@ describe('redis', function () {
 							assert.equal(value, null);
 							done();
 						});
-					}, 1000
+					}, 1500
 				);
 			}
 		], done);
