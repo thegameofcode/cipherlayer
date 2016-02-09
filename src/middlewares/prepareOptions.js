@@ -36,7 +36,9 @@ function prepareOptions (req, res, next){
         options.formData = formData;
     } else {
         options.headers['Content-Type'] = req.header('Content-Type');
-        options.body = JSON.stringify(req.body);
+        if(req.body) {
+            options.body = JSON.stringify(req.body);
+        }
     }
     req.options = options;
     return next();

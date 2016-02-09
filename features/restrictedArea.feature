@@ -17,9 +17,9 @@ Feature: client application logs in with admin role
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
     And the response body must be <RESPONSE_PAYLOAD>
-  Examples:
-    | PATH          | METHOD  | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD       |
-    | /api/profile  | GET     | 200    |      {}         |       {"data":[]}      |
+    Examples:
+      | PATH         | METHOD | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD |
+      | /api/profile | GET    | 200    | {}              | {"data":[]}      |
 
 
   @service
@@ -28,9 +28,9 @@ Feature: client application logs in with admin role
     And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body ""
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
-  Examples:
-    | PATH          | METHOD  | STATUS | REQUEST_PAYLOAD |
-    | /api/profile  | PUT     | 204    |      {}         |
+    Examples:
+      | PATH         | METHOD | STATUS | REQUEST_PAYLOAD |
+      | /api/profile | PUT    | 204    | {}              |
 
 
   @service
@@ -40,7 +40,7 @@ Feature: client application logs in with admin role
     When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
     Then the response status code is <STATUS>
     And the response body must be <RESPONSE_PAYLOAD>
-  Examples:
-    | PATH          | METHOD  | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD        |
-    | /api/profile  | GET     | 401    |                 | {"err":"unauthorized"}  |
-    | /api/profile  | PUT     | 401    | {"key":"value"} | {"err":"unauthorized"}  |
+    Examples:
+      | PATH         | METHOD | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD       |
+      | /api/profile | GET    | 401    |                 | {"err":"unauthorized"} |
+      | /api/profile | PUT    | 401    | {"key":"value"} | {"err":"unauthorized"} |

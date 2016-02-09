@@ -34,6 +34,9 @@ function propagateRequest(req, res, next) {
 	// if url is a direct proxy request, use http-proxy
 	if (useDirectProxy) {
 
+		// add user id to proxy request headers
+		req.headers['x-user-id'] = req.options.headers['x-user-id'];
+
 		proxy.web(req, res, {
 			target: 'http://' + config.private_host + ':' + config.private_port
 		});
@@ -70,6 +73,10 @@ function propagateRequest(req, res, next) {
 					},
 					user: req.user
 				}, 'proxy call');
+
+
+                transferAllowedHeaders(config.allowedHeaders, private_res, res);
+
 				if (private_res.statusCode === 302) {
 					res.header('Location', private_res.headers.location);
 					res.send(302);
@@ -81,6 +88,19 @@ function propagateRequest(req, res, next) {
 			return next();
 		});
 	}
+}
+
+function transferAllowedHeaders(headers, srcRes, dstRes) {
+
+    if (!headers || !headers.length ) {
+        return;
+    }
+
+    _.map(headers, function(header) {
+        if (srcRes.headers[header]) {
+            dstRes.header(header, srcRes.headers[header] );
+        }
+    });
 }
 
 module.exports = propagateRequest;

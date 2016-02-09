@@ -36,8 +36,7 @@ describe('phone', function() {
         password : 'validpassword'
     };
 
-    var notifServiceURL = config.externalServices.notifications;
-
+    var notifServiceURL = config.externalServices.notifications.base;
     beforeEach(function(done){
         async.parallel([
             function(done){
@@ -68,7 +67,8 @@ describe('phone', function() {
     });
 
     it('create pin', function(done){
-        nock(notifServiceURL)
+
+      nock(notifServiceURL)
             .post('/notification/sms')
             .reply(204);
 

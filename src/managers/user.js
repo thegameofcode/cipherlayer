@@ -89,6 +89,16 @@ function createUser(body, pin, cbk) {
 				});
 			}
 
+			if (body.fb) {
+				user.platforms = [{
+					platform: 'fb',
+					accessToken: body.fb.accessToken
+				}];
+				delete body.fb;
+				createUserPrivateCall(body, user, cbk);
+				return;
+			}
+
 			var phone = body.phone;
 			var countryISO = body.country;
 			phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
@@ -132,7 +142,6 @@ function createUser(body, pin, cbk) {
 			});
 		});
 	});
-
 }
 
 function createUserByToken(token, cbk) {
@@ -163,7 +172,7 @@ function createUserByToken(token, cbk) {
 		if (!jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
 			return cbk({
 				err: 'invalid_profile_data',
-				des: 'The data format provided is nor valid.',
+				des: 'The data format provided is not valid.',
 				code: 400
 			});
 		}
@@ -362,6 +371,28 @@ function setPassword(id, body, cbk) {
 	}
 }
 
+function validateOldPassword(username, oldPassword, cbk) {
+
+	daoMng.getAllUserFields(username, function (err, user) {
+		if (err) {
+			res.send(401, err);
+			return next();
+		}
+
+		cryptoMng.encrypt(oldPassword, function (encrypted) {
+			if (user.password !== encrypted) {
+				return cbk({
+					err: 'invalid_old_password',
+					des: 'invalid password',
+					code: 401
+				});
+			}
+
+			return cbk();
+		});
+	});
+}
+
 //Aux functions
 function random(howMany, chars) {
 	chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
@@ -436,6 +467,7 @@ module.exports = function (settings) {
 		setPlatformData: setPlatformData,
 		createUser: createUser,
 		createUserByToken: createUserByToken,
-		setPassword: setPassword
+		setPassword: setPassword,
+		validateOldPassword: validateOldPassword
 	};
 };

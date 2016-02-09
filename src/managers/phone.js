@@ -34,7 +34,7 @@ function createPIN(redisKeyId, phone, cbk){
 }
 
 function sendPIN(phone, pin, cbk){
-    var notifServiceURL = _settings.externalServices.notifications;
+    var notifServiceURL = _settings.externalServices.notifications.base;
     var sms = {
         phone: phone,
         text: 'MyComms pin code: ' + pin

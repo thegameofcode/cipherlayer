@@ -4,18 +4,21 @@ var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
 var redisMng = require('./redis');
 
+var config = require(process.cwd() + '/config.json');
+
 var _settings = {};
 
 function sendEmailVerification(email, subject, emailBody, cbk){
-    var notifServiceURL = _settings.externalServices.notifications;
+    var notifServiceURL = _settings.externalServices.notifications.base;
     var emailOptions = {
         to: email,
         subject: subject,
-        html: emailBody
+        html: emailBody,
+        from: _settings.emailVerification.from
     };
 
     var options = {
-        url: notifServiceURL + '/notification/email',
+        url: notifServiceURL + _settings.externalServices.notifications.pathEmail,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },
@@ -47,7 +50,7 @@ function emailVerification(email, bodyData, cbk){
     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
     var redisKey = _settings.emailVerification.redis.key;
-    redisKey = redisKey.replace('{username}', bodyData.email);
+    redisKey = redisKey.replace('{username}', bodyData[config.passThroughEndpoint.email || 'email' ]);
     var redisExp = _settings.emailVerification.redis.expireInSec;
 
     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
@@ -63,7 +66,7 @@ function emailVerification(email, bodyData, cbk){
             tokenExpirationMinutes: redisExp
         };
 
-        ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
+        ciphertoken.createToken(tokenSettings, bodyData[config.passThroughEndpoint.email || 'email' ], null, bodyData, function(err, token){
             if(err){
                 return cbk(err);
             }
@@ -72,7 +75,6 @@ function emailVerification(email, bodyData, cbk){
             var emailText = (_settings.emailVerification.body).replace('{link}', link);
 
             var subject = _settings.emailVerification.subject;
-
             //Send verify email
             sendEmailVerification(email, subject, emailText, function(err){
                 if (err) {
@@ -96,7 +98,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk){
     };
 
     var options = {
-        url: _settings.externalServices.notifications + '/notification/email',
+        url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail ,
         headers: {
             'Content-Type': 'application/json; charset=utf-8'
         },

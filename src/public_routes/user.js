@@ -13,6 +13,8 @@ var checkAccessTokenParam = require('../middlewares/accessTokenParam.js');
 var checkAuthHeader = require('../middlewares/authHeader.js');
 var decodeToken = require('../middlewares/decodeToken.js');
 var findUser = require('../middlewares/findUser.js');
+var _ = require('lodash');
+var log = require('../logger/service.js');
 
 function sendNewPassword(req, res, next) {
     if (!req.params.email) {
@@ -189,12 +191,63 @@ function createUserByToken(req, res, next) {
                     return next(false);
                 }
             }
+
+            if(req.method === 'POST') {
+                res.send(200, tokens);
+                return next();
+            }
+
+            if (config.emailVerification.redirectUrl) {
+                res.setHeader('Location', config.emailVerification.redirectUrl);
+                res.send(301);
+                return next();
+            }
+
             res.send(200, {msg: config.emailVerification.nonCompatibleEmailMsg});
             return next();
         }
     });
 }
 
+function checkBody(req, res, next) {
+    var err;
+    if (!req.body){
+        err = {
+            err: 'invalid_body',
+            des: 'The call to this url must have body.'
+        };
+        res.send(400, err);
+        return next(false);
+    }
+
+    return next();
+}
+
+function validateOldPassword(req, res, next) {
+    var err;
+    if (!config.password.validateOldPassword) {
+        return next();
+    }
+
+    if (!req.body.oldPassword) {
+        err = {
+            err: 'missing_password',
+            des: 'Missing old password validation'
+        };
+        res.send(400, err);
+        return next(false);
+    }
+
+
+    userMng().validateOldPassword(req.user.username, req.body.oldPassword, function(err){
+        if (err) {
+            res.send(401, err);
+            return next(false);
+        }
+        return next();
+    });
+
+}
 function setPassword(req, res, next) {
     if (!req.body) {
         res.send(400, {
@@ -221,13 +274,37 @@ function setPassword(req, res, next) {
     });
 }
 
+function checkEmailAvailable(req, res, next) {
+    var email = req.body.email;
+
+    if (_.isEmpty(email)) {
+        res.send(400, {
+            err: 'BadRequestError',
+            des: 'Missing email in request body'
+        });
+        return next();
+    }
+
+
+    daoMng.findByEmail(email, function(error, output) {
+        if (error) {
+            res.send(error.statusCode, error.body);
+            return next();
+        }
+
+        res.send(200, output);
+        return next();
+    });
+}
+
 function addRoutes(service) {
     service.get('/user/:email/password', sendNewPassword);
 
     service.post(config.passThroughEndpoint.path, createUserEndpoint);
     service.get('/user/activate', createUserByToken);
-
-    service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, findUser, setPassword);
+    service.post('/user/activate', createUserByToken);
+    service.post('/user/email/available', checkEmailAvailable);
+    service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
 }
 
 module.exports = addRoutes;

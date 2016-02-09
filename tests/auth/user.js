@@ -4,6 +4,7 @@ var ciphertoken = require('ciphertoken');
 var async = require('async');
 var crypto = require('crypto');
 var nock = require('nock');
+var _ = require('lodash');
 
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
@@ -268,10 +269,12 @@ module.exports = {
                     });
                 });
 
-                it('Create OK (not an iOS or Android device) ', function(done) {
+                it('Create OK (not an iOS or Android device) without redirect option ', function(done) {
                     var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+                    var thisConfig = _.clone(config);
+                    thisConfig.emailVerification.redirectUrl = null;
 
-                    var bodyData = {
+                  var bodyData = {
                         firstName: 'Firstname',
                         lastName: 'Lastname',
                         password: password,
@@ -281,9 +284,9 @@ module.exports = {
                         transactionId: transactionId
                     };
 
-                    var redisKey = config.emailVerification.redis.key;
+                    var redisKey = thisConfig.emailVerification.redis.key;
                     redisKey = redisKey.replace('{username}', bodyData.email);
-                    var redisExp = config.emailVerification.redis.expireInSec;
+                    var redisExp = thisConfig.emailVerification.redis.expireInSec;
 
                     redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
                         assert.equal(err, null);
@@ -292,22 +295,22 @@ module.exports = {
                             assert.equal(err, null);
 
                             var options = {
-                                url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate?verifyToken=' + token ,
+                                url: 'http://' + thisConfig.private_host + ':' + thisConfig.public_port + '/user/activate?verifyToken=' + token ,
                                 method:'GET',
                                 headers: {},
                                 followRedirect: false
                             };
                             options.headers['user-agent'] = "Mozilla/5.0";
 
-                            nock('http://' + config.private_host + ':' + config.private_port)
-                                .post(config.passThroughEndpoint.path)
+                            nock('http://' + thisConfig.private_host + ':' + thisConfig.private_port)
+                                .post(thisConfig.passThroughEndpoint.path)
                                 .reply(201, {id: USER.id});
 
                             request(options, function(err, res, body){
                                 assert.equal(err, null);
                                 assert.equal(res.statusCode, 200, body);
                                 body = JSON.parse(body);
-                                assert.deepEqual(body, { msg : config.emailVerification.nonCompatibleEmailMsg } );
+                                assert.deepEqual(body, { msg : thisConfig.emailVerification.nonCompatibleEmailMsg } );
                                 done();
                             });
                         });
@@ -315,7 +318,55 @@ module.exports = {
                     });
                 });
 
-                it('No verify token param', function(done) {
+              it('Create OK (not an iOS or Android device) with redirect option', function(done) {
+                var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+                var thisConfig = _.clone(config);
+                thisConfig.emailVerification.redirectUrl = 'http://www.google.com';
+
+                var bodyData = {
+                  firstName: 'Firstname',
+                  lastName: 'Lastname',
+                  password: password,
+                  country: 'US',
+                  phone: phone,
+                  email: username,
+                  transactionId: transactionId
+                };
+
+                var redisKey = thisConfig.emailVerification.redis.key;
+                redisKey = redisKey.replace('{username}', bodyData.email);
+                var redisExp = thisConfig.emailVerification.redis.expireInSec;
+
+                redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err) {
+                  assert.equal(err, null);
+
+                  ciphertoken.createToken(tokenSettings, username, null, bodyData, function(err, token){
+                    assert.equal(err, null);
+
+                    var options = {
+                      url: 'http://' + thisConfig.private_host + ':' + thisConfig.public_port + '/user/activate?verifyToken=' + token ,
+                      method:'GET',
+                      headers: {},
+                      followRedirect: false
+                    };
+                    options.headers['user-agent'] = "Mozilla/5.0";
+
+                    nock('http://' + thisConfig.private_host + ':' + thisConfig.private_port)
+                      .post(thisConfig.passThroughEndpoint.path)
+                      .reply(201, {id: USER.id});
+
+                    request(options, function(err, res, body){
+                      assert.equal(err, null);
+                      assert.equal(res.statusCode, 301, body);
+                      assert.equal(res.headers.location, thisConfig.emailVerification.redirectUrl);
+                      done();
+                    });
+                  });
+
+                });
+              });
+
+              it('No verify token param', function(done) {
                     var expectedResponseBody = {
                         err: 'auth_proxy_error',
                         des: 'empty param verifyToken'

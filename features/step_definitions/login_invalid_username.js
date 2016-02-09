@@ -6,6 +6,7 @@ var config = require('../../config.json');
 module.exports = function(){
   this.When(/^the client app requests log in the protected application with username substring/, function (callback) {
     var username = world.getUser().username;
+    console.log('Email', username);
     world.getUser().username = username.slice(0, username.length / 2);
 
     var options = {
