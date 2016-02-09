@@ -32,6 +32,26 @@ describe('redis', function () {
 		});
 	});
 
+	it('set', function (done) {
+		redisMng.setKeyValue(baseKey, baseValue, function (err) {
+			assert.equal(err, null);
+			redisMng.getKeyValue(baseKey, function (err, value) {
+				assert.equal(err, null);
+				assert.equal(value, baseValue);
+				done();
+			});
+		});
+	});
+
+	it('set - disconnected', function (done) {
+		redisMng.disconnect(function () {
+			redisMng.setKeyValue(baseKey, 'value', function (err) {
+				assert.deepEqual(err, {err: 'redis_not_connected'});
+				done();
+			});
+		});
+	});
+
 	it('get', function (done) {
 		redisMng.getKeyValue(baseKey, function (err, value) {
 			assert.equal(err, null);
@@ -71,11 +91,11 @@ describe('redis', function () {
 	});
 
 	it('expire', function (done) {
-		this.timeout(4000);
+		this.timeout(3000);
 		async.series([
 			//createKey
 			function (done) {
-				redisMng.insertKeyValue(baseKey, baseValue, 2, function (err) {
+				redisMng.insertKeyValue(baseKey, baseValue, 1, function (err) {
 					assert.equal(err, null);
 					done();
 				});
@@ -89,7 +109,7 @@ describe('redis', function () {
 							assert.equal(value, null);
 							done();
 						});
-					}, 2500
+					}, 1500
 				);
 			}
 		], done);
@@ -101,7 +121,7 @@ describe('redis', function () {
 		async.series([
 			// createKey
 			function (done) {
-				redisMng.insertKeyValue(baseKey, baseValue, 3, function (err) {
+				redisMng.insertKeyValue(baseKey, baseValue, 2, function (err) {
 					assert.equal(err, null);
 					done();
 				});
@@ -118,7 +138,7 @@ describe('redis', function () {
 								done();
 							});
 						});
-					}, 2000
+					}, 1000
 				);
 			},
 			// checkExpire
@@ -130,7 +150,7 @@ describe('redis', function () {
 							assert.equal(value, null);
 							done();
 						});
-					}, 1500
+					}, 1000
 				);
 			}
 		], done);

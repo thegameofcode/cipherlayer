@@ -32,11 +32,11 @@ function insertKeyValue(key, value, expSeconds, cbk) {
 		return cbk({err: 'redis_not_connected'});
 	}
 
-	redisClient.set(key, value, function (err) {
+	setKeyValue(key, value, function (err) {
 		if (err) {
 			return cbk(err);
 		} else {
-			redisClient.get(key, function (err, value) {
+			getKeyValue(key, function (err, value) {
 				if (err) {
 					return cbk(err);
 				} else {
@@ -61,6 +61,15 @@ function updateKeyValue(key, value, cbk) {
 	});
 }
 
+function setKeyValue(key, value, cbk) {
+	if (!isConnected || !redisClient) {
+		return cbk({err: 'redis_not_connected'});
+	}
+
+	redisClient.set(key, value, function (err) {
+		return cbk(err);
+	});
+}
 function getKeyValue(key, cbk) {
 	if (!isConnected || !redisClient) {
 		return cbk({err: 'redis_not_connected'});
@@ -105,6 +114,7 @@ module.exports = {
 	insertKeyValue: insertKeyValue,
 	updateKeyValue: updateKeyValue,
 	getKeyValue: getKeyValue,
+	setKeyValue: setKeyValue,
 	deleteKeyValue: deleteKeyValue,
 	deleteAllKeys: deleteAllKeys,
 
