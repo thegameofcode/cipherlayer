@@ -127,7 +127,7 @@ function createUser(body, pin, cbk) {
 						createUserPrivateCall(body, user, cbk);
 					});
 				} else {
-					emailMng(_settings).emailVerification(body.email, body, function (err, destinationEmail) {
+					emailMng(_settings).emailVerification(body[_settings.passThroughEndpoint.email || 'email' ], body, function (err, destinationEmail) {
 						if (err) {
 							return cbk(err);
 						}
