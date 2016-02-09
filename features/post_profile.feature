@@ -2,7 +2,7 @@ Feature: client application POST a profile to create
 
   #TODO: update to validate the domain with the first item of the allowedDomains in the config (if it exists)
 
-  
+  @service
   Scenario Outline: Client post data for a new profile
     Given a protected service replies to a <METHOD> request with <PROTECTED_REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <PROTECTED_PAYLOAD>
     And config has no param emailverification
