@@ -1,12 +1,11 @@
-var RandExp = require('randexp');
 var async = require('async');
 
 var daoMng = require('../managers/dao');
 var config = require(process.cwd() + '/config.json');
-var cryptoMng = require('../managers/crypto')({password: 'password'});
+var crypto = require('../managers/crypto');
+var cryptoMng = crypto(config.password);
 var emailMng = require('../managers/email');
 var tokenMng = require('../managers/token');
-
 var userMng = require('../managers/user');
 
 var checkAccessTokenParam = require('../middlewares/accessTokenParam.js');
@@ -33,7 +32,7 @@ function sendNewPassword(req, res, next) {
             });
             return next(false);
         }
-        var passwd = new RandExp(new RegExp(config.password.generatedRegex)).gen();
+        var passwd = cryptoMng.randomPassword(config.password.regexValidation);
 
         cryptoMng.encrypt(passwd, function (encryptedPassword) {
             var fieldValue = [];

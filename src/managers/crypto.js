@@ -1,9 +1,10 @@
 var crypto = require('crypto');
 var _ = require('lodash');
+var RandExp = require('randexp');
 
 var defaultSettings = {
     algorithm : 'aes-256-ctr',
-    password : ''
+    encryptPassword: 'password'
 };
 
 var _settings = {};
@@ -12,20 +13,24 @@ function encrypt(text, cbk){
     if(!text){
         return cbk();
     }
-    var cipher = crypto.createCipher(_settings.algorithm, _settings.password);
+    var cipher = crypto.createCipher(_settings.algorithm, _settings.encryptPassword);
     var crypted = cipher.update(text,'utf8','hex');
     crypted += cipher.final('hex');
     cbk(crypted);
 }
 
-function decrypt(text, cbk){
-    if(!text){
-        return cbk();
-    }
-    var decipher = crypto.createDecipher(_settings.algorithm, _settings.password);
-    var dec = decipher.update(text,'hex','utf8');
-    dec += decipher.final('utf8');
-    cbk(dec);
+function verify(original, encrypted, cbk) {
+    encrypt(original, function(crypted) {
+        if(encrypted === crypted) {
+            return cbk(null);
+        }
+
+        return cbk(new Error('Invalid password'));
+    });
+}
+
+function randomPassword(passwordRegex) {
+    return new RandExp(passwordRegex).gen();
 }
 
 module.exports = function(settings) {
@@ -33,6 +38,7 @@ module.exports = function(settings) {
 
     return {
         encrypt: encrypt,
-        decrypt: decrypt
+        verify: verify,
+        randomPassword: randomPassword
     };
 };

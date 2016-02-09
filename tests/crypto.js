@@ -1,18 +1,19 @@
 var assert = require('assert');
 var crypto = require('crypto');
+var config = require('../config.json');
+
+var defaultSettings = {
+    algorithm : config.password.algorithm || 'aes-256-ctr',
+    encryptPassword: config.password.encryptPassword || 'password'
+};
 
 describe('crypto', function() {
 
-    var cryptoSettings = {
-        algorithm : 'aes-256-ctr',
-        password : 'mycomms'
-    };
-
-    var cipher = crypto.createCipher(cryptoSettings.algorithm, cryptoSettings.password);
-    var decipher = crypto.createDecipher(cryptoSettings.algorithm, cryptoSettings.password);
+    var cipher = crypto.createCipher(defaultSettings.algorithm, defaultSettings.encryptPassword);
 
     it('encrypt', function (done) {
-        var cryptoMng = require('../src/managers/crypto')(cryptoSettings);
+
+        var cryptoMng = require('../src/managers/crypto')(config.password);
         var value = 'Hello world';
         cryptoMng.encrypt(value, function(cryptedResult){
             var expectedValue = cipher.update(value,'utf8','hex');
@@ -22,38 +23,16 @@ describe('crypto', function() {
         });
     });
 
-    it('decrypt', function (done) {
-        var cryptoMng = require('../src/managers/crypto')(cryptoSettings);
-        var value = 'd43daa54527261b3ba7f';
-        cryptoMng.decrypt(value, function(decryptedResult){
-            var expectedValue = decipher.update(value,'hex','utf8');
-            expectedValue += decipher.final('utf8');
+    it('creates a valid random password', function() {
 
-            assert.equal(decryptedResult, expectedValue);
-            done();
-        });
+        var crypto = require('../src/managers/crypto');
+        var cryptoMng = crypto(config.password);
+
+      var newRandomPassword = cryptoMng.randomPassword(config.password.regexValidation);
+        var testRe = new RegExp(config.password.regexValidation);
+
+        assert.ok(newRandomPassword.match(testRe), 'Random password does not match with config regexp');
+
     });
 
-
-    it('encrypt & decript', function (done) {
-        var cryptoMng = require('../src/managers/crypto')(cryptoSettings);
-        var value = 'a1b2c3d4e5f6';
-        cryptoMng.encrypt(value, function(cryptedResult){
-            cryptoMng.decrypt(cryptedResult, function(decryptedResult){
-                assert.equal(decryptedResult, value);
-                done();
-            });
-        });
-    });
-
-    it('encrypt & decript (default settings)', function (done) {
-        var cryptoMng = require('../src/managers/crypto')(cryptoSettings);
-        var value = '1a2b3c4d5e6f';
-        cryptoMng.encrypt(value, function(cryptedResult){
-            cryptoMng.decrypt(cryptedResult, function(decryptedResult){
-                assert.equal(decryptedResult, value);
-                done();
-            });
-        });
-    });
 });

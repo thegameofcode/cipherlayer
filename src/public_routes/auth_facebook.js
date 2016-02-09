@@ -1,5 +1,4 @@
 var request = require('request');
-var crypto = require('crypto');
 var _ = require('lodash');
 
 var log = require('../logger/service.js');
@@ -7,6 +6,8 @@ var daoMng = require('../managers/dao');
 var userMng = require('../managers/user')();
 var tokenMng = require('../managers/token');
 var config = require(process.cwd() + '/config.json');
+var crypto= require('../managers/crypto');
+var cryptoMng = crypto(config.password);
 
 var defaultOptions = {
     url: 'https://graph.facebook.com/v2.5/me',
@@ -138,7 +139,7 @@ function postAuthRegisterFacebook(req, res, next) {
                     accessToken: req.body.accessToken
                 };
 
-                fbUserProfile.password = random(12);
+                fbUserProfile.password = cryptoMng.randomPassword(config.password.regexValidation);
 
                 userMng.createUser(fbUserProfile, null, function (err, tokens) {
                     if (err) {
@@ -180,19 +181,6 @@ function postAuthRegisterFacebook(req, res, next) {
         });
 
     });
-}
-
-// TODO: extract to common util file
-function random (howMany, chars) {
-    chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
-    var rnd = crypto.randomBytes(howMany),
-        value = new Array(howMany),
-        len = chars.length;
-
-    for (var i = 0; i < howMany; i++) {
-        value[i] = chars[rnd[i] % len];
-    }
-    return value.join('');
 }
 
 function addRoutes(service) {

@@ -7,7 +7,8 @@ var daoMng = require('../managers/dao');
 var tokenMng = require('../managers/token');
 var config = require(process.cwd() + '/config.json');
 var ObjectID = require('mongodb').ObjectID;
-var cryptoMng = require('../managers/crypto')({password: 'password'});
+var crypto = require('../managers/crypto');
+var cryptoMng = crypto(config.password);
 
 var sessionRequest = require('./auth/session');
 

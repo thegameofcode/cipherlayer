@@ -6,7 +6,8 @@ var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 var nock = require('nock');
 
-var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
+var crypto = require('../../src/managers/crypto');
+var cryptoMng = crypto(config.password);
 
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
