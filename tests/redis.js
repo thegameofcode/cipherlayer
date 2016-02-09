@@ -42,7 +42,7 @@ describe('redis', function () {
 
 	it('get - disconnected', function (done) {
 		redisMng.disconnect(function () {
-			redisMng.getKeyValue(baseKey, function (err, value) {
+			redisMng.getKeyValue(baseKey, function (err) {
 				assert.deepEqual(err, {err: 'redis_not_connected'});
 				done();
 			});
