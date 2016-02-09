@@ -1,4 +1,4 @@
-var clone = require('clone');
+var _ = require('lodash');
 var nock = require('nock');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
@@ -23,7 +23,7 @@ module.exports = {
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
-            var expectedPrivateResponse = clone(expectedPublicRequest);
+            var expectedPrivateResponse = _.clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
             nock('http://' + config.private_host + ':' + config.private_port)
@@ -104,7 +104,7 @@ module.exports = {
             }, function (err, sfToken) {
                 expectedPublicRequest.sf = sfToken;
 
-                var expectedPrivateResponse = clone(expectedPublicRequest);
+                var expectedPrivateResponse = _.clone(expectedPublicRequest);
                 delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
                 nock('http://' + config.private_host + ':' + config.private_port)
@@ -183,7 +183,7 @@ module.exports = {
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
-            var expectedPrivateResponse = clone(expectedPublicRequest);
+            var expectedPrivateResponse = _.clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
             nock('http://' + config.private_host + ':' + config.private_port)
@@ -275,7 +275,7 @@ module.exports = {
             expectedPublicRequest.phone = expectedUserPhone;
             expectedPublicRequest.country = expectedUserCountry;
 
-            var expectedPrivateResponse = clone(expectedPublicRequest);
+            var expectedPrivateResponse = _.clone(expectedPublicRequest);
             delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
             nock('http://' + config.private_host + ':' + config.private_port)

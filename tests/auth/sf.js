@@ -2,7 +2,7 @@ var assert = require('assert');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
-var clone = require('clone');
+var _ = require('lodash');
 
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
@@ -20,7 +20,7 @@ module.exports = {
             });
 
             it('GET 302', function(done){
-                var options = clone(OPTIONS);
+                var options = _.clone(OPTIONS);
 
                 request(options, function(err, res, body){
                     assert.equal(err, null);
@@ -31,7 +31,7 @@ module.exports = {
 
             describe('/callback', function(){
                 it('302 invalid data', function(done){
-                    var options = clone(OPTIONS);
+                    var options = _.clone(OPTIONS);
                     options.url ='http://localhost:' + config.public_port + '/auth/sf/callback';
 
                     request(options, function(err,res,body){
@@ -47,7 +47,7 @@ module.exports = {
                 nockSFGetProfileCall(SF_PROFILE);
                 nockSFGetOptInfo();
 
-                var options = clone(OPTIONS);
+                var options = _.clone(OPTIONS);
                 options.url ='http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
 
                 request(options, function(err,res,body){
@@ -109,7 +109,7 @@ module.exports = {
                 it.skip('203 not exists (valid avatar)', function(done){
                     if(!configAWSParam) return done();
 
-                    var sfProfile = clone(SF_PROFILE);
+                    var sfProfile = _.clone(SF_PROFILE);
                     sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
                     sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
 
@@ -117,7 +117,7 @@ module.exports = {
                     nockSFGetProfileCall(sfProfile);
                     nockSFGetOptInfo();
 
-                    var options = clone(OPTIONS);
+                    var options = _.clone(OPTIONS);
                     options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
 
                     request(options, function(err,res,body){
@@ -152,7 +152,7 @@ module.exports = {
                     nockSFLoginCall();
                     nockSFGetProfileCall(SF_PROFILE);
 
-                    var options = clone(OPTIONS);
+                    var options = _.clone(OPTIONS);
                     options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
                     options.followAllRedirects = true;
 
@@ -186,7 +186,7 @@ module.exports = {
             });
 
             it('401 deny permissions to SF', function(done){
-                var options = clone(OPTIONS);
+                var options = _.clone(OPTIONS);
                 options.url = 'http://localhost:'+config.public_port+'/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization';
 
                 request(options, function(err,res,body){

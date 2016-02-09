@@ -1,7 +1,7 @@
 var assert = require('assert');
 var request = require('request');
 var async = require('async');
-var clone = require('clone');
+var _ = require('lodash');
 
 var config = require('../config.json');
 var cipherlayer = require('../src/cipherlayer.js');
@@ -51,7 +51,7 @@ describe('realms', function () {
                     daoMng.deleteAllRealms(finish);
                 },
                 function(finish){
-                    async.eachSeries(clone(baseRealms), function(realm, next){
+                    async.eachSeries(_.cloneDeep(baseRealms), function(realm, next){
                         daoMng.addRealm(realm, function(){
                             assert.equal(err,null);
                             next();
@@ -80,13 +80,13 @@ describe('realms', function () {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
-            method: 'GET'
+            method: 'GET',
+			json: true
         };
 
         request(options, function (err, res, body) {
             assert.equal(err, null);
             assert.equal(res.statusCode, 200, body);
-            body = JSON.parse(body);
             assert.deepEqual(body.realms, baseRealms);
             done();
         });

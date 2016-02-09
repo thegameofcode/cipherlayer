@@ -1,7 +1,7 @@
 var request = require('request');
 var assert = require('assert');
 var ciphertoken = require('ciphertoken');
-var clone = require('clone');
+var _ = require('lodash');
 var nock = require('nock');
 
 var dao = require('../../src/managers/dao.js');
@@ -53,7 +53,7 @@ module.exports = {
                 ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
                     nockProtectedStandartCall(createdUser._id, SF_DATA, expectedBody);
 
-                    var options = clone(OPTIONS_STANDARD_CALL);
+                    var options = _.clone(OPTIONS_STANDARD_CALL);
                     options.headers.Authorization = 'bearer ' + loginToken;
                     options.headers[config.version.header] = "test/1";
 
@@ -70,7 +70,7 @@ module.exports = {
     },
     itRenewSFToken: function renewSFToken(accessTokenSettings){
         it('200 with salesforce when renewing access token', function(done){
-            var userWithSoonExpiry = clone(USER);
+            var userWithSoonExpiry = _.clone(USER);
             userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
 
             dao.addUser()(userWithSoonExpiry, function(err, createdUser){
@@ -94,11 +94,11 @@ module.exports = {
                     };
                     nockSFRenewToken(queryParams, sfRenewTokenReturnedBody);
 
-                    var newSFData = clone(SF_DATA);
+                    var newSFData = _.clone(SF_DATA);
                     newSFData.accessToken = sfRenewTokenReturnedBody.access_token;
                     nockProtectedStandartCall(createdUser._id, newSFData, expectedBody);
 
-                    var options = clone(OPTIONS_STANDARD_CALL);
+                    var options = _.clone(OPTIONS_STANDARD_CALL);
                     options.headers.Authorization = 'bearer ' + loginToken;
                     options.headers[config.version.header] = "test/1";
 

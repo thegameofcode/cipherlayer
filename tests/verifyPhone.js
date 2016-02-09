@@ -2,7 +2,7 @@ var assert = require('assert');
 var async = require('async');
 var request = require('request');
 var nock = require('nock');
-var clone = require('clone');
+var _ = require('lodash');
 var config = require('../config.json');
 
 var dao = require('../src/managers/dao');
@@ -47,7 +47,7 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it.skip('POST empty phone', function(done){
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
         user.phone = null;
 
         var options = {
@@ -72,7 +72,7 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it.skip('POST empty country', function(done){
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
         user.country = '';
 
         var options = {
@@ -97,11 +97,11 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it.skip('POST phone not verified', function(done){
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
             method:'POST',
             body : JSON.stringify(user)
         };
@@ -121,11 +121,11 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it.skip('POST incorrect PIN sent (1 attempt)', function(done){
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
             method:'POST',
             body : JSON.stringify(user)
         };
@@ -157,11 +157,11 @@ describe('/api/profile (verify phone)', function(){
     it.skip('POST correct PIN sent', function(done){
         this.timeout(10000);
 
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            headers: _clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
             method:'POST',
             body : JSON.stringify(user)
         };
@@ -211,11 +211,11 @@ describe('/api/profile (verify phone)', function(){
     });
 
     it.skip('POST incorrect PIN sent (3 attempts)', function(done){
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
             method:'POST',
             body : JSON.stringify(user)
         };
@@ -310,11 +310,11 @@ describe('/api/profile (verify phone)', function(){
     it.skip('POST user already exists', function(done){
         this.timeout(10000);
 
-        var user = clone(baseUser);
+        var user = _.clone(baseUser);
 
         var options = {
             url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-            headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+            headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
             method:'POST',
             body : JSON.stringify(user)
         };
