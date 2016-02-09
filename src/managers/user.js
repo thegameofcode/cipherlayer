@@ -8,7 +8,7 @@ var config = require(process.cwd() + '/config.json');
 var daoMng = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
-var crypto= require('./crypto');
+var crypto = require('./crypto');
 var cryptoMng = crypto(config.password);
 var phoneMng = require('./phone');
 var emailMng = require('./email');
@@ -127,7 +127,7 @@ function createUser(body, pin, cbk) {
 						createUserPrivateCall(body, user, cbk);
 					});
 				} else {
-					emailMng(_settings).emailVerification(body[_settings.passThroughEndpoint.email || 'email' ], body, function (err, destinationEmail) {
+					emailMng(_settings).emailVerification(body[_settings.passThroughEndpoint.email || 'email'], body, function (err, destinationEmail) {
 						if (err) {
 							return cbk(err);
 						}
@@ -167,13 +167,13 @@ function createUserByToken(token, cbk) {
 			return cbk(err);
 		}
 		var body = bodyData.data;
-        var profileSchema;
+		var profileSchema;
 
-        if (!config.validators) {
-            profileSchema = require('./json_formats/profile_create.json');
-        } else {
-            profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
-        }
+		if (!config.validators) {
+			profileSchema = require('./json_formats/profile_create.json');
+		} else {
+			profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
+		}
 
 		//Validate the current bodyData with the schema profile_create.json
 		if (!jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
@@ -185,7 +185,7 @@ function createUserByToken(token, cbk) {
 		}
 		//Verify the transactionId
 		var redisKey = _settings.emailVerification.redis.key;
-        redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email' ]);
+		redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email']);
 
 		redisMng.getKeyValue(redisKey, function (err, transactionId) {
 			if (err) {

@@ -1,17 +1,43 @@
 {
-  "id": "/Profile",
-  "type": "object",
-  "properties": {
-    "firstName": { "type": "string", "required": true },
-    "lastName": { "type": "string", "required": true },
-    "password": { "type": "string", "required": true },
-    "country": { "type": "string" },
-    "email": { "type": "string", "format": "email", "required": true },
-    "phone": { "type": "string" },
-    "avatar": { "type": "string", "format": "uri" },
-    "company": { "type": "string" },
-    "position": { "type": "string" },
-    "officeLocation": { "type": "string" }
-  },
-  "additionalProperties": true
+	"id": "/Profile",
+	"type": "object",
+	"properties": {
+		"firstName": {
+			"type": "string",
+			"required": true
+		},
+		"lastName": {
+			"type": "string",
+			"required": true
+		},
+		"password": {
+			"type": "string",
+			"required": true
+		},
+		"country": {
+			"type": "string"
+		},
+		"email": {
+			"type": "string",
+			"format": "email",
+			"required": true
+		},
+		"phone": {
+			"type": "string"
+		},
+		"avatar": {
+			"type": "string",
+			"format": "uri"
+		},
+		"company": {
+			"type": "string"
+		},
+		"position": {
+			"type": "string"
+		},
+		"officeLocation": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": true
 }

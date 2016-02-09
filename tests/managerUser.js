@@ -25,11 +25,11 @@ var configSettings = {
 	phoneVerification: {
 		pinSize: 4,
 		attempts: 3,
-		redis:{
-			key:"user.{userId}.phone.{phone}",
+		redis: {
+			key: "user.{userId}.phone.{phone}",
 			expireInSec: 300
 		},
-		pinValidationEndpoints : [
+		pinValidationEndpoints: [
 			{
 				path: "/api/me/phones",
 				method: "post",
@@ -40,65 +40,65 @@ var configSettings = {
 			}
 		]
 	},
-	emailVerification:{
+	emailVerification: {
 		subject: "MyContacts email verification",
 		body: "<p>Thanks for register into MyContacts, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@my-comms.com'>support@my-comms.com</a> and we will be pleased to help you.</p>",
-		compatibleEmailDevices: [ "*iPhone*", "*iPad*", "*iPod*" ],
+		compatibleEmailDevices: ["*iPhone*", "*iPad*", "*iPod*"],
 		nonCompatibleEmailMsg: "Your user has been created correctly, try to access to MyContacts app in your device.",
 		redis: {
-			key:"user.{username}.transaction",
+			key: "user.{username}.transaction",
 			expireInSec: 86400
 		}
 	}
 };
 
-describe('user Manager', function(){
+describe('user Manager', function () {
 
-  function validatePwd(clear, crypted, cbk){
-    var cryptoMng = crypto(config.password);
-    cryptoMng.verify(clear, crypted, function(err) {
-      assert.equal(err, null);
-      return cbk();
-    });
-  }
+	function validatePwd(clear, crypted, cbk) {
+		var cryptoMng = crypto(config.password);
+		cryptoMng.verify(clear, crypted, function (err) {
+			assert.equal(err, null);
+			return cbk();
+		});
+	}
 
-	beforeEach(function(done){
+	beforeEach(function (done) {
 		async.series([
-			function(done){
-				userDao.connect(function(err){
-					assert.equal(err,null);
+			function (done) {
+				userDao.connect(function (err) {
+					assert.equal(err, null);
 					userDao.deleteAllUsers(done);
 				});
 			},
-			function(done){
+			function (done) {
 				redisMng.connect(done);
 			},
-			function(done){
+			function (done) {
 				redisMng.deleteAllKeys(done);
 			}
 		], done);
 
 	});
 
-	afterEach(function(done){
+	afterEach(function (done) {
 		async.series([
-			function(done){
-				userDao.disconnect(function(err){
-					assert.equal(err,null);
+			function (done) {
+				userDao.disconnect(function (err) {
+					assert.equal(err, null);
 					done();
 				});
 			},
-			function(done){
+			function (done) {
 				redisMng.deleteAllKeys(done);
 			},
-			function(done){
+			function (done) {
 				redisMng.disconnect(done);
 			}
 		], done);
 
 	});
 
-	it('Update Platform Data', function(done){
+	it('Update Platform Data', function (done) {
 		var expectedPlatformData = {
 			platform: 'sf',
 			accessToken: 'a1b2c3...d4e5f6',
@@ -107,18 +107,18 @@ describe('user Manager', function(){
 		};
 
 		var expectedUser = {
-			id:'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+			id: 'a1b2c3d4e5f6',
+			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 			password: '12345678'
 		};
 
-		userDao.addUser()(expectedUser, function(err, createdUser){
+		userDao.addUser()(expectedUser, function (err, createdUser) {
 			assert.equal(err, null);
 			assert.notEqual(createdUser, null);
 
-			userMng().setPlatformData(expectedUser.id, 'sf', expectedPlatformData, function(err){
+			userMng().setPlatformData(expectedUser.id, 'sf', expectedPlatformData, function (err) {
 				assert.equal(err, null);
-				userDao.getFromId(expectedUser.id, function(err, foundUser){
+				userDao.getFromId(expectedUser.id, function (err, foundUser) {
 					assert.equal(err, null);
 					assert.notEqual(foundUser, null);
 					assert.notEqual(foundUser.platforms, null, 'must create an array of platforms');
@@ -130,34 +130,34 @@ describe('user Manager', function(){
 		});
 	});
 
-	describe('Create user', function(){
+	describe('Create user', function () {
 		var profileBody = {
-			email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+			email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 			password: 'n3wPas5W0rd',
 			phone: '111111111',
 			country: 'US'
 		};
 
-		it('usePinVerification = true & useEmailVerification = false', function(done){
+		it('usePinVerification = true & useEmailVerification = false', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = 'xxxx';
 
 			var redisKey = config.phoneVerification.redis.key;
-			redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
+			redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}', '+1' + profileBody.phone);
 			var expiration = config.phoneVerification.redis.expireInSec;
 
-			redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function(err){
+			redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function (err) {
 				assert.equal(err, null);
-				redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts , expiration, function(err){
+				redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts, expiration, function (err) {
 					assert.equal(err, null);
 
 					nock('http://' + config.private_host + ':' + config.private_port)
 						.post(config.passThroughEndpoint.path)
 						.reply(201, {id: expectedUserId});
 
-					userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+					userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 						assert.equal(err, null);
 						assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
 						assert.notEqual(tokens.accessToken, undefined);
@@ -166,13 +166,13 @@ describe('user Manager', function(){
 							assert.equal(accessTokenInfo.userId, expectedUserId);
 							done();
 						});
-					} );
+					});
 
 				});
 			});
 		});
 
-		it('usePinVerification = true & useEmailVerification = true', function(done){
+		it('usePinVerification = true & useEmailVerification = true', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 
 			var pin = 'xxxx';
@@ -183,12 +183,12 @@ describe('user Manager', function(){
 			};
 
 			var redisKey = config.phoneVerification.redis.key;
-			redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}','+1' + profileBody.phone);
+			redisKey = redisKey.replace('{userId}', profileBody.email).replace('{phone}', '+1' + profileBody.phone);
 			var expiration = config.phoneVerification.redis.expireInSec;
 
-			redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function(err){
+			redisMng.insertKeyValue(redisKey + '.pin', pin, expiration, function (err) {
 				assert.equal(err, null);
-				redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts , expiration, function(err){
+				redisMng.insertKeyValue(redisKey + '.attempts', configSettings.phoneVerification.attempts, expiration, function (err) {
 					assert.equal(err, null);
 
 					nock('http://' + config.private_host + ':' + config.private_port)
@@ -199,18 +199,18 @@ describe('user Manager', function(){
 						.post(notifServicePath)
 						.reply(204);
 
-					userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+					userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 						assert.notEqual(err, null);
 						assert.deepEqual(err, expectedError);
 						assert.equal(tokens, undefined);
 						done();
-					} );
+					});
 
 				});
 			});
 		});
 
-		it('usePinVerification = false & useEmailVerification = true', function(done){
+		it('usePinVerification = false & useEmailVerification = true', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
@@ -229,15 +229,15 @@ describe('user Manager', function(){
 				.post(notifServicePath)
 				.reply(204);
 
-			userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('usePinVerification = false & useEmailVerification = false', function(done){
+		it('usePinVerification = false & useEmailVerification = false', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -252,7 +252,7 @@ describe('user Manager', function(){
 				.post('/notification/email')
 				.reply(204);
 
-			userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 				assert.equal(err, null);
 				assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
 				assert.notEqual(tokens.accessToken, undefined);
@@ -261,10 +261,10 @@ describe('user Manager', function(){
 					assert.equal(accessTokenInfo.userId, expectedUserId);
 					done();
 				});
-			} );
+			});
 		});
 
-		it('No username', function(done){
+		it('No username', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -272,23 +272,23 @@ describe('user Manager', function(){
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.email  = null;
+			profile.email = null;
 
 			var expectedError = {
-				err:"auth_proxy_error",
-				des:"invalid userinfo",
-				code:400
+				err: "auth_proxy_error",
+				des: "invalid userinfo",
+				code: 400
 			};
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('No password', function(done){
+		it('No password', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -296,91 +296,91 @@ describe('user Manager', function(){
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.password  = null;
+			profile.password = null;
 
 			var expectedError = {
-				err:"invalid_security_token",
-				des:"you must provide a password or a salesforce token to create the user",
-				code:400
+				err: "invalid_security_token",
+				des: "you must provide a password or a salesforce token to create the user",
+				code: 400
 			};
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('No phone', function(done){
+		it('No phone', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.phone  = null;
+			profile.phone = null;
 
 			var expectedError = {
-				err:"auth_proxy_error",
-				des:"empty phone or country",
-				code:400
+				err: "auth_proxy_error",
+				des: "empty phone or country",
+				code: 400
 			};
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('No country', function(done){
+		it('No country', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.country  = null;
+			profile.country = null;
 
 			var expectedError = {
-				err:"auth_proxy_error",
-				des:"empty phone or country",
-				code:400
+				err: "auth_proxy_error",
+				des: "empty phone or country",
+				code: 400
 			};
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('Invalid country code', function(done){
+		it('Invalid country code', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.country  = '--';
+			profile.country = '--';
 
 			var expectedError = {
-				err:"country_not_found",
-				des:"given phone does not match any country dial code"
+				err: "country_not_found",
+				des: "given phone does not match any country dial code"
 			};
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 
-		it('no phone & no country & NO PIN verification', function(done){
+		it('no phone & no country & NO PIN verification', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -388,14 +388,14 @@ describe('user Manager', function(){
 			var pin = null;
 
 			var profile = _.clone(profileBody);
-			profile.country  = null;
-			profile.phone  = null;
+			profile.country = null;
+			profile.phone = null;
 
 			nock('http://' + config.private_host + ':' + config.private_port)
 				.post(config.passThroughEndpoint.path)
 				.reply(201, {id: expectedUserId});
 
-			userMng(testsConfigSettings).createUser( profile, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profile, pin, function (err, tokens) {
 				assert.equal(err, null);
 				assert.equal(tokens.expiresIn, accessTokenSettings.tokenExpirationMinutes);
 				assert.notEqual(tokens.accessToken, undefined);
@@ -404,10 +404,10 @@ describe('user Manager', function(){
 					assert.equal(accessTokenInfo.userId, expectedUserId);
 					done();
 				});
-			} );
+			});
 		});
 
-		it('user exists (same username with capital letters)', function(done){
+		it('user exists (same username with capital letters)', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -415,8 +415,8 @@ describe('user Manager', function(){
 			var pin = null;
 
 			var expectedError = {
-				err:"auth_proxy_user_error",
-				des:"user already exists",
+				err: "auth_proxy_user_error",
+				des: "user already exists",
 				code: 403
 			};
 
@@ -425,29 +425,29 @@ describe('user Manager', function(){
 				.reply(201, {id: expectedUserId});
 
 			//1st call create the user
-			userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 				assert.equal(err, null);
 				assert.notEqual(tokens, null);
 
 				//2nd call must fail
-				userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+				userMng(configSettings).createUser(profileBody, pin, function (err, tokens) {
 					assert.notEqual(err, null);
 					assert.deepEqual(err, expectedError);
 					assert.equal(tokens, undefined);
 
 					//3rd call must fail (same username with capital letters)
-					profileBody.email = 'VALID' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : '');
-					userMng(configSettings).createUser( profileBody, pin, function(err, tokens){
+					profileBody.email = 'VALID' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
+					userMng(configSettings).createUser(profileBody, pin, function (err, tokens) {
 						assert.notEqual(err, null);
 						assert.deepEqual(err, expectedError);
-						assert.equal(tokens,undefined);
+						assert.equal(tokens, undefined);
 						done();
 					});
 				});
 			});
 		});
 
-		it('Invalid domain', function(done){
+		it('Invalid domain', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
@@ -455,35 +455,35 @@ describe('user Manager', function(){
 
 			var pin = null;
 
-			profileBody.email  = "invalid@invaliddomain.com";
+			profileBody.email = "invalid@invaliddomain.com";
 
 			var expectedError = {
-				err:"user_domain_not_allowed",
+				err: "user_domain_not_allowed",
 				des: "Sorry your email domain is not authorised for this service",
-				code:400
+				code: 400
 			};
 
 			nock('http://' + config.private_host + ':' + config.private_port)
 				.post(config.passThroughEndpoint.path)
 				.reply(201, {id: expectedUserId});
 
-			userMng(testsConfigSettings).createUser( profileBody, pin, function(err, tokens){
+			userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
 				assert.notEqual(err, null);
 				assert.deepEqual(err, expectedError);
 				assert.equal(tokens, undefined);
 				done();
-			} );
+			});
 		});
 	});
 
-	describe('Create user DIRECT LOGIN', function() {
+	describe('Create user DIRECT LOGIN', function () {
 		var redisKey = config.emailVerification.redis.key;
 		var redisExp = config.emailVerification.redis.expireInSec;
 
 		var tokenSettings = _.clone(accessTokenSettings);
 		tokenSettings.tokenExpirationMinutes = redisExp;
 
-		it('OK', function(done){
+		it('OK', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
@@ -497,18 +497,18 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 				position: "",
 				transactionId: transactionId
 			};
 
 			redisKey = redisKey.replace('{username}', bodyData.email);
-			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function (err, value) {
 				assert.equal(err, null);
 				assert.equal(value, transactionId);
 
-				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
-					if(err){
+				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+					if (err) {
 						return cbk(err);
 					}
 
@@ -516,7 +516,7 @@ describe('user Manager', function(){
 						.post(config.passThroughEndpoint.path)
 						.reply(201, {id: expectedUserId});
 
-					userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
+					userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
 						assert.equal(err, null);
 						assert.notEqual(tokens.accessToken, undefined);
 						ciphertoken.getTokenSet(accessTokenSettings, tokens.accessToken, function (err, accessTokenInfo) {
@@ -529,7 +529,7 @@ describe('user Manager', function(){
 			});
 		});
 
-		it('Invalid data', function(done){
+		it('Invalid data', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
@@ -539,19 +539,19 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 				position: "",
 				transactionId: transactionId
 			};
 
 			var expectedError = {
-				err:"invalid_profile_data",
-				des:"The data format provided is not valid.",
-				code:400
+				err: "invalid_profile_data",
+				des: "The data format provided is not valid.",
+				code: 400
 			};
 
-			ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
-				if(err){
+			ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+				if (err) {
 					return cbk(err);
 				}
 
@@ -559,16 +559,16 @@ describe('user Manager', function(){
 					.post(config.passThroughEndpoint.path)
 					.reply(201, {id: expectedUserId});
 
-				userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
+				userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
 					assert.notEqual(err, null);
 					assert.deepEqual(err, expectedError);
-					assert.equal(tokens,undefined);
+					assert.equal(tokens, undefined);
 					done();
 				});
 			});
 		});
 
-		it('Incorrect transactionId', function(done){
+		it('Incorrect transactionId', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
@@ -581,23 +581,23 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 				transactionId: 'abcde'
 			};
 
 			var expectedError = {
-				err:'invalid_profile_data',
-				des:'Incorrect or expired transaction.',
+				err: 'invalid_profile_data',
+				des: 'Incorrect or expired transaction.',
 				code: 400
 			};
 
 			redisKey = redisKey.replace('{username}', bodyData.email);
-			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function (err, value) {
 				assert.equal(err, null);
 				assert.equal(value, transactionId);
 
-				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
-					if(err){
+				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+					if (err) {
 						return cbk(err);
 					}
 
@@ -605,17 +605,17 @@ describe('user Manager', function(){
 						.post(config.passThroughEndpoint.path)
 						.reply(201, {id: expectedUserId});
 
-					userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
+					userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
 						assert.notEqual(err, null);
 						assert.deepEqual(err, expectedError);
-						assert.equal(tokens,undefined);
+						assert.equal(tokens, undefined);
 						done();
 					});
 				});
 			});
 		});
 
-		it('Call sent 2 times', function(done){
+		it('Call sent 2 times', function (done) {
 			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
@@ -628,7 +628,7 @@ describe('user Manager', function(){
 				company: "",
 				password: "valid_password",
 				firstName: "firstName",
-				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+				email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 				transactionId: transactionId
 			};
 
@@ -639,12 +639,12 @@ describe('user Manager', function(){
 			};
 
 			redisKey = redisKey.replace('{username}', bodyData.email);
-			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function(err, value){
+			redisMng.insertKeyValue(redisKey, transactionId, redisExp, function (err, value) {
 				assert.equal(err, null);
 				assert.equal(value, transactionId);
 
-				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function(err, token){
-					if(err){
+				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+					if (err) {
 						return cbk(err);
 					}
 
@@ -652,14 +652,14 @@ describe('user Manager', function(){
 						.post(config.passThroughEndpoint.path)
 						.reply(201, {id: expectedUserId});
 
-					userMng(testsConfigSettings).createUserByToken( token, function(err, tokens){
+					userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
 						assert.equal(err, null);
 						assert.notEqual(tokens, null);
 
-						userMng(testsConfigSettings).createUserByToken( token, function(err, tokens) {
+						userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
 							assert.notEqual(err, null);
 							assert.deepEqual(err, expectedError);
-							assert.equal(tokens,undefined);
+							assert.equal(tokens, undefined);
 							done();
 						});
 					});
@@ -668,26 +668,26 @@ describe('user Manager', function(){
 		});
 	});
 
-	describe('Set user password', function() {
+	describe('Set user password', function () {
 
 		var expectedUser = {
-			id:'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*','') : ''),
+			id: 'a1b2c3d4e5f6',
+			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 			password: '12345678'
 		};
 
-		it('200 ok', function(done){
+		it('200 ok', function (done) {
 			var newPassword = {
 				password: 'n3wPas5W0rd'
 			};
 
-			userDao.addUser()(expectedUser, function(err, createdUser) {
-				userMng().setPassword(createdUser._id, newPassword, function(err, result){
-          var clonedUser = _.clone(expectedUser);
-          clonedUser.password = newPassword.password;
+			userDao.addUser()(expectedUser, function (err, createdUser) {
+				userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+					var clonedUser = _.clone(expectedUser);
+					clonedUser.password = newPassword.password;
 					assert.equal(err, null);
 					assert.equal(result, 1);
-					userDao.getAllUserFields(createdUser.username, function(err, foundUser){
+					userDao.getAllUserFields(createdUser.username, function (err, foundUser) {
 						assert.equal(err, null);
 						assert.notEqual(foundUser, null);
 						validatePwd(clonedUser.password, foundUser.password, done);
@@ -697,69 +697,69 @@ describe('user Manager', function(){
 
 		});
 
-		it('400 invalid passwords', function(done){
+		it('400 invalid passwords', function (done) {
 			var expectedError = {
 				err: 'invalid_password_format',
 				des: 'Your password must be at least 8 characters and must contain at least one capital, one lower and one number.',
 				code: 400
 			};
 
-			userDao.addUser()(expectedUser, function(err, createdUser) {
+			userDao.addUser()(expectedUser, function (err, createdUser) {
 				async.series([
-						function(done){
+						function (done) {
 							var newPassword = {
 								password: 'newpassword'
 							};
 
-							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
+							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 								assert.notEqual(err, null);
 								assert.deepEqual(err, expectedError);
 								assert.equal(result, undefined);
 								done();
 							});
 						},
-						function(done){
+						function (done) {
 							var newPassword = {
 								password: 'newPASSWORD'
 							};
 
-							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
+							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 								assert.notEqual(err, null);
 								assert.deepEqual(err, expectedError);
 								assert.equal(result, undefined);
 								done();
 							});
 						},
-						function(done){
+						function (done) {
 							var newPassword = {
 								password: 'new111111'
 							};
 
-							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
+							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 								assert.notEqual(err, null);
 								assert.deepEqual(err, expectedError);
 								assert.equal(result, undefined);
 								done();
 							});
 						},
-						function(done){
+						function (done) {
 							var newPassword = {
 								password: 'NEWPA55W0RD'
 							};
 
-							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
+							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 								assert.notEqual(err, null);
 								assert.deepEqual(err, expectedError);
 								assert.equal(result, undefined);
 								done();
 							});
 						},
-						function(done){
+						function (done) {
 							var newPassword = {
 								password: 'n3wPas5W0rd'
 							};
 
-							userMng().setPassword(createdUser._id, newPassword, function(err, result) {
+							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 								assert.equal(err, null);
 								assert.equal(result, 1);
 								done();

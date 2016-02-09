@@ -3,15 +3,15 @@ var fs = require('fs');
 var config = require(process.cwd() + '/config.json');
 
 console.log('starting cipherlayer proxy');
-cipherLayer.start(config.public_port, config.internal_port, function(err){
-    if(err){
-        console.error('error on launch: ' + err);
-    } else {
-        console.log('listening on port ' + config.public_port);
-    }
+cipherLayer.start(config.public_port, config.internal_port, function (err) {
+	if (err) {
+		console.error('error on launch: ' + err);
+	} else {
+		console.log('listening on port ' + config.public_port);
+	}
 
-    fs.watchFile('config.json', function(){
-        console.log('config file updated. exiting');
-        process.exit(1);
-    });
+	fs.watchFile('config.json', function () {
+		console.log('config file updated. exiting');
+		process.exit(1);
+	});
 });
