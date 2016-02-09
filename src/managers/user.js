@@ -1,6 +1,5 @@
 var log = require('../logger/service.js');
 var request = require('request');
-var crypto = require('crypto');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
@@ -9,7 +8,8 @@ var config = require(process.cwd() + '/config.json');
 var daoMng = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
-var cryptoMng = require('./crypto')({password: 'password'});
+var crypto= require('./crypto');
+var cryptoMng = crypto(config.password);
 var phoneMng = require('./phone');
 var emailMng = require('./email');
 
@@ -262,7 +262,7 @@ function createUserPrivateCall(body, user, cbk) {
 		user.id = body.id;
 
 		if (!user.password) {
-			user.password = random(12);
+			user.password = cryptoMng.randomPassword(config.password.regexValidation);
 		}
 
 		cryptoMng.encrypt(user.password, function (encrypted) {
@@ -398,19 +398,6 @@ function validateOldPassword(username, oldPassword, cbk) {
 			return cbk();
 		});
 	});
-}
-
-//Aux functions
-function random(howMany, chars) {
-	chars = chars || "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
-	var rnd = crypto.randomBytes(howMany),
-		value = new Array(howMany),
-		len = chars.length;
-
-	for (var i = 0; i < howMany; i++) {
-		value[i] = chars[rnd[i] % len];
-	}
-	return value.join('');
 }
 
 function isValidDomain(email, cbk) {

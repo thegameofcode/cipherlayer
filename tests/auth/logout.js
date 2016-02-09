@@ -8,7 +8,8 @@ var dao = require('../../src/managers/dao.js');
 var should = require('chai').should();
 var nock = require('nock');
 
-var cryptoMng = require('../../src/managers/crypto')({password: 'password'});
+var crypto = require('../../src/managers/crypto');
+var cryptoMng = crypto(config.password);
 
 module.exports = {
 	describe: function (accessTokenSettings) {
