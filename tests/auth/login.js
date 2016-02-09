@@ -1,10 +1,10 @@
 var assert = require('assert');
-var clone = require('clone');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
 var nock = require('nock');
+var _ = require('lodash');
 
 var cryptoMng = require('../../src/managers/crypto')({ password : 'password' });
 
@@ -21,7 +21,7 @@ module.exports = {
             beforeEach(function (done) {
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);
-                    var userToCreate = clone(baseUser);
+                    var userToCreate = _.clone(baseUser);
                     cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {
                         userToCreate.password = encryptedPwd;
                         dao.addUser()(userToCreate, function (err, createdUser) {
@@ -33,7 +33,7 @@ module.exports = {
                 });
             });
             it('POST 200', function (done) {
-                var user = clone(baseUser);
+                var user = _.clone(baseUser);
                 var options = {
                     url: 'http://localhost:' + config.public_port + '/auth/login',
                     headers: {
@@ -69,7 +69,7 @@ module.exports = {
                 });
             });
             it('POST 409 invalid credentials', function (done) {
-                var user = clone(baseUser);
+                var user = _.clone(baseUser);
                 user.password = 'invalidpassword';
                 var options = {
                     url: 'http://localhost:' + config.public_port + '/auth/login',
@@ -91,7 +91,7 @@ module.exports = {
             });
 
             it('POST 409 username substring', function (done) {
-                var user = clone(baseUser);
+                var user = _.clone(baseUser);
                 var username = user.username;
                 user.username = username.slice(0, username.length / 2);
                 var options = {
@@ -126,7 +126,7 @@ module.exports = {
             beforeEach(function (done) {
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);
-                    var userToCreate = clone(baseUser);
+                    var userToCreate = _.clone(baseUser);
                     cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {
                         userToCreate.password = encryptedPwd;
                         dao.addUser()(userToCreate, function (err, createdUser) {
@@ -138,7 +138,7 @@ module.exports = {
                 });
             });
             it('POST 200', function (done) {
-                var user = clone(baseUser);
+                var user = _.clone(baseUser);
                 var options = {
                     url: 'http://localhost:' + config.public_port + '/auth/login',
                     headers: {

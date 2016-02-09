@@ -1,5 +1,4 @@
 var log = require('../logger/service.js');
-var clone = require('clone');
 var _ = require('lodash');
 var phoneMng = require('../managers/phone');
 var jsonUtil = require('../managers/json_validator');
@@ -21,7 +20,7 @@ function pinValidation(req, res, next) {
     var endPoints = _settings.phoneVerification.pinValidationEndpoints;
 
     var path = String(req.url);
-    var body = clone(req.body);
+    var body = _.clone(req.body);
     var requiresPinValidation = false;
     var validBodySchema = false;
     var pinValidationConfig = {};

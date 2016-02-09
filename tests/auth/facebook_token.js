@@ -1,7 +1,7 @@
 var assert = require('assert');
 var request = require('request');
 var nock = require('nock');
-var clone = require('clone');
+var _ = require('lodash');
 
 var config = require('../../config.json');
 var userDao = require('../../src/managers/dao.js');
@@ -45,11 +45,11 @@ module.exports = {
             it('exchanges facebook token for an existing cipherlayer user', function(done) {
                 nockFBGraphCall(FB_PROFILE, OPTIONS.body.accessToken, config.facebook.requestFields);
 
-                var options = clone(OPTIONS);
+                var options = _.cloneDeep(OPTIONS);
                 options.url ='http://localhost:' + config.public_port + '/auth/login/facebook';
                 options.headers[config.version.header] = "test/1";
 
-                var existingUser = clone(baseUser);
+                var existingUser = _.cloneDeep(baseUser);
                 existingUser.username = existingUser.email;
                 delete existingUser.email;
 
@@ -78,7 +78,7 @@ module.exports = {
                 nockFBGraphCall(FB_PROFILE, OPTIONS.body.accessToken, config.facebook.requestFields);
                 nockPrivateCall(config, baseUser.id);
 
-                var options = clone(OPTIONS);
+                var options = _.cloneDeep(OPTIONS);
                 options.url ='http://localhost:' + config.public_port + '/auth/login/facebook';
                 options.headers[config.version.header] = "test/1";
 
@@ -103,10 +103,10 @@ module.exports = {
 
             it('creates a user with a facebook domain email when username field is missing', function(done) {
 
-                var noEmailUser = clone(baseUser);
+                var noEmailUser = _.cloneDeep(baseUser);
                 delete noEmailUser.email;
 
-                var madeUpEmailFbProfile = clone(FB_PROFILE);
+                var madeUpEmailFbProfile = _.cloneDeep(FB_PROFILE);
                 delete madeUpEmailFbProfile.email;
 
                 var userEmail = 'fb' + noEmailUser.id + '@facebook.com';
@@ -114,7 +114,7 @@ module.exports = {
                 nockFBGraphCall(madeUpEmailFbProfile, OPTIONS.body.accessToken, config.facebook.requestFields);
                 nockPrivateCall(config, noEmailUser.id);
 
-                var options = clone(OPTIONS);
+                var options = _.clone(OPTIONS);
                 options.url ='http://localhost:' + config.public_port + '/auth/login/facebook';
                 options.headers[config.version.header] = "test/1";
 

@@ -2,8 +2,7 @@ var assert = require('assert');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
 var nock = require('nock');
-var clone = require('clone');
-var ciphertoken = require('ciphertoken');
+var _ = require('lodash');
 var userDao = require('../src/managers/dao');
 var redisMng = require('../src/managers/redis');
 var userMng = require('../src/managers/user');
@@ -139,7 +138,7 @@ describe('user Manager', function(){
 		};
 
 		it('usePinVerification = true & useEmailVerification = false', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = 'xxxx';
@@ -173,7 +172,7 @@ describe('user Manager', function(){
 		});
 
 		it('usePinVerification = true & useEmailVerification = true', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 
 			var pin = 'xxxx';
 
@@ -211,7 +210,7 @@ describe('user Manager', function(){
 		});
 
 		it('usePinVerification = false & useEmailVerification = true', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
 			var pin = null;
@@ -238,7 +237,7 @@ describe('user Manager', function(){
 		});
 
 		it('usePinVerification = false & useEmailVerification = false', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 
@@ -265,13 +264,13 @@ describe('user Manager', function(){
 		});
 
 		it('No username', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.email  = null;
 
 			var expectedError = {
@@ -289,13 +288,13 @@ describe('user Manager', function(){
 		});
 
 		it('No password', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.password  = null;
 
 			var expectedError = {
@@ -313,12 +312,12 @@ describe('user Manager', function(){
 		});
 
 		it('No phone', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.phone  = null;
 
 			var expectedError = {
@@ -336,12 +335,12 @@ describe('user Manager', function(){
 		});
 
 		it('No country', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.country  = null;
 
 			var expectedError = {
@@ -359,12 +358,12 @@ describe('user Manager', function(){
 		});
 
 		it('Invalid country code', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.country  = '--';
 
 			var expectedError = {
@@ -381,13 +380,13 @@ describe('user Manager', function(){
 		});
 
 		it('no phone & no country & NO PIN verification', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 
 			var pin = null;
 
-			var profile = clone(profileBody);
+			var profile = _.clone(profileBody);
 			profile.country  = null;
 			profile.phone  = null;
 
@@ -408,7 +407,7 @@ describe('user Manager', function(){
 		});
 
 		it('user exists (same username with capital letters)', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 
@@ -448,7 +447,7 @@ describe('user Manager', function(){
 		});
 
 		it('Invalid domain', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 			testsConfigSettings.emailVerification = null;
 			testsConfigSettings.allowedDomains = ["*@valid.com"];
@@ -480,11 +479,11 @@ describe('user Manager', function(){
 		var redisKey = config.emailVerification.redis.key;
 		var redisExp = config.emailVerification.redis.expireInSec;
 
-		var tokenSettings = clone(accessTokenSettings);
+		var tokenSettings = _.clone(accessTokenSettings);
 		tokenSettings.tokenExpirationMinutes = redisExp;
 
 		it('OK', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
 			var transactionId = '1a2b3c4d5e6f';
@@ -530,7 +529,7 @@ describe('user Manager', function(){
 		});
 
 		it('Invalid data', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
 			var transactionId = '1a2b3c4d5e6f';
@@ -569,7 +568,7 @@ describe('user Manager', function(){
 		});
 
 		it('Incorrect transactionId', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
 			var transactionId = '1a2b3c4d5e6f';
@@ -616,7 +615,7 @@ describe('user Manager', function(){
 		});
 
 		it('Call sent 2 times', function(done){
-			var testsConfigSettings = clone(configSettings);
+			var testsConfigSettings = _.clone(configSettings);
 			testsConfigSettings.phoneVerification = null;
 
 			var transactionId = '1a2b3c4d5e6f';

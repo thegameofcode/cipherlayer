@@ -5,7 +5,6 @@ var fs = require('fs');
 var path = require('path');
 var config = require(process.cwd() + '/config.json');
 var passport = require('passport');
-var clone = require('clone');
 var _ = require('lodash');
 
 var userDao = require('./managers/dao');
@@ -106,7 +105,7 @@ function startListener(publicPort, internalPort, cbk){
             publicServer.use(restify.queryParser());
             publicServer.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-            var versionControlOptions = clone(config.version);
+            var versionControlOptions = _.clone(config.version);
             versionControlOptions.public = [
                 "/auth/sf",
                 "/auth/sf/*",

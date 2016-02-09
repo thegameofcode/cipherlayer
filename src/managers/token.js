@@ -55,10 +55,7 @@ function createBothTokens(userId, data, cbk){
             });
         }
     ], function(err){
-        if(err) {
-            return cbk(err,null);
-        }
-        cbk(null, tokens);
+        cbk(err, tokens);
     });
 }
 

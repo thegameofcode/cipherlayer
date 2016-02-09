@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var clone = require('clone');
+var _ = require('lodash');
 var request = require('request');
 var config = require('../../config.json');
 var dao = require('../../src/managers/dao.js');
@@ -23,7 +23,7 @@ module.exports = {
 			beforeEach(function (done) {
 				dao.deleteAllUsers(function (err) {
 					assert.equal(err, null);
-					var userToCreate = clone(baseUser);
+					var userToCreate = _.clone(baseUser);
 					cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 						userToCreate.password = encryptedPwd;
 						dao.addUser()(userToCreate, function (err, createdUser) {
@@ -37,7 +37,7 @@ module.exports = {
 
 			function doLogin() {
 				return new Promise(function (ok) {
-					var user = clone(baseUser);
+					var user = _.clone(baseUser);
 					var options = {
 						url: 'http://localhost:' + config.public_port + '/auth/login',
 						headers: {},

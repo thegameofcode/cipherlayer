@@ -1,5 +1,5 @@
 var assert = require('assert');
-var clone = require('clone');
+var _ = require('lodash');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
@@ -43,7 +43,7 @@ describe('user', function () {
 			assert.equal(err, null);
             dao.deleteAllUsers(function (err) {
                 assert.equal(err, null);
-                var userToCreate = clone(baseUser);
+                var userToCreate = _.clone(baseUser);
 
                 cryptoMng.encrypt(userToCreate.password, function(encryptedPwd) {
                     userToCreate.password = encryptedPwd;
