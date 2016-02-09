@@ -4,6 +4,7 @@ var nock = require('nock');
 var config = require('../config.json');
 var redisMng = require('../src/managers/redis');
 var countries = require('countries-info');
+var _ = require('lodash');
 
 var notifServiceURL = config.externalServices.notifications.base;
 
@@ -67,6 +68,20 @@ describe('middleware pinValidation', function(){
         redisMng.disconnect(done);
     });
 
+    it('no pin validation', function(done){
+        var req = {
+            url: "http://www.google.es"
+        };
+        var res = {};
+        var next = function(canContinue){
+            if(canContinue === undefined || canContinue === true) done();
+        };
+
+		var noPhone = _.cloneDeep(settings);
+		delete noPhone.phoneVerification;
+        pinValidation(noPhone)(req, res, next);
+    });
+
     it('continue if the url does not need pin validation', function(done){
         var req = {
             url: "http://www.google.es"
@@ -74,6 +89,37 @@ describe('middleware pinValidation', function(){
         var res = {};
         var next = function(canContinue){
             if(canContinue === undefined || canContinue === true) done();
+        };
+
+        pinValidation(settings)(req, res, next);
+    });
+
+    it('error if no user', function(done){
+        var expectedCode = 401;
+        var expectedError = {
+            err: 'invalid_headers',
+            des: 'no user in headers'
+        };
+        var validResponse = false;
+
+        var req = {
+            url: "/api/me/phones",
+            body: {
+                "country": "ES"
+            },
+            method: "POST"
+        };
+
+        var res = {
+            send : function(code, body){
+                assert.equal(code, expectedCode, 'invalid response code');
+                assert.deepEqual(body, expectedError, 'invalid response body');
+                validResponse = true;
+            }
+        };
+
+        var next = function(canContinue){
+            if(canContinue === false && validResponse) done();
         };
 
         pinValidation(settings)(req, res, next);
