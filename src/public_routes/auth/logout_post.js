@@ -5,8 +5,7 @@ var tokenMng = require('../../managers/token');
 var sessionRequest = require('./session');
 var log = require('../../logger/service.js');
 
-function authLogout(req, res, next) {
-
+module.exports = function (req, res, next) {
 	var authHeader = req.header('Authorization');
 	if (!authHeader) {
 		log.error({err: 'invalid_access_token', des: 'no authorization header'});
@@ -42,9 +41,4 @@ function authLogout(req, res, next) {
 			});
 		}
 	});
-
-}
-
-module.exports = function (service) {
-	service.post('/auth/logout', authLogout);
 };
