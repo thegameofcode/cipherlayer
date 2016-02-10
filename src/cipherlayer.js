@@ -233,6 +233,11 @@ function stopListener(cbk) {
 }
 
 function start(publicPort, internalPort, cbk) {
+	var dir = process.cwd() + '/logs';
+	if (!fs.existsSync(dir)) {
+		fs.mkdirSync(dir);
+	}
+
 	//Validate the current config.json with the schema
 	//if( !jsonValidator.isValidJSON(config, configSchema)) {
 	//    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
