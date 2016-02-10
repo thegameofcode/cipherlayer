@@ -82,6 +82,10 @@ function createUser(body, pin, cbk) {
 		};
 
 		daoMng.getFromUsername(user.username, function (err, foundUser) {
+			if(err && err.message !== daoMng.ERROR_USER_NOT_FOUND){
+				return cbk(err);
+			}
+
 			if (foundUser) {
 				return cbk({
 					err: 'auth_proxy_user_error',
@@ -189,7 +193,11 @@ function createUserByToken(token, cbk) {
 
 		redisMng.getKeyValue(redisKey, function (err, transactionId) {
 			if (err) {
-				return cbk(err);
+				return cbk({
+					err: 'auth_proxy_error',
+					des: 'error getting redis key',
+					code: 403
+				});
 			}
 
 			if (body.transactionId !== transactionId) {
@@ -218,6 +226,14 @@ function createUserByToken(token, cbk) {
 				}
 
 				daoMng.getFromUsername(user.username, function (err, foundUser) {
+					if(err && err.message !== daoMng.ERROR_USER_NOT_FOUND){
+						return cbk({
+							err: 'auth_proxy_error',
+							des: 'error checking user from db',
+							code: 403
+						});
+					}
+
 					if (foundUser) {
 						return cbk({
 							err: 'auth_proxy_error',

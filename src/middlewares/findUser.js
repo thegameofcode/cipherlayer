@@ -10,10 +10,9 @@ function findUser(req, res, next) {
 			});
 			res.send(401, {err: 'invalid_access_token', des: 'unknown user inside token'});
 			return next(false);
-		} else {
-			req.user = foundUser;
-			next();
 		}
+		req.user = foundUser;
+		next();
 	});
 }
 

@@ -5,7 +5,7 @@ function platformsSetUp(req, res, next) {
 		return next();
 	} else {
 		req.user.platforms.forEach(function (platform) {
-			if (platform.platform == 'sf') {
+			if (platform.platform === 'sf') {
 				SFPlatform.renewSFAccessTokenIfNecessary(req.user, platform, function (err, accessToken) {
 					if (err) {
 						res.send(401, {
@@ -22,7 +22,7 @@ function platformsSetUp(req, res, next) {
 					return next();
 				});
 			}
-			if (platform.platform == 'in') {
+			if (platform.platform === 'in') {
 				req.options.headers['x-in-data'] = JSON.stringify({
 					accessToken: platform.accessToken
 				});

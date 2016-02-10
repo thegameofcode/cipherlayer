@@ -9,6 +9,7 @@ var config = require(process.cwd() + '/config.json');
 var ObjectID = require('mongodb').ObjectID;
 var crypto = require('../managers/crypto');
 var cryptoMng = crypto(config.password);
+var checkAuthBasic = require('../middlewares/checkAuthBasic');
 
 var sessionRequest = require('./auth/session');
 
@@ -153,16 +154,6 @@ function delAuthUser(req, res, next) {
 		}
 		return next(false);
 	});
-}
-
-function checkAuthBasic(req, res, next) {
-	var expectedAuthorizationBasic = 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64');
-	if (req.headers.authorization != expectedAuthorizationBasic) {
-		res.send(401, "Missing basic authorization");
-		return next(false);
-	} else {
-		return next();
-	}
 }
 
 function renewToken(req, res, next) {

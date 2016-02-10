@@ -58,6 +58,7 @@ function propagateRequest(req, res, next) {
 				try {
 					body = JSON.parse(body);
 				} catch (ex) {
+					log.error({err: 'json_parse_error', des:'error parsing body from response'});
 				}
 				log.info({
 					request: {

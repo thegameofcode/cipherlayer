@@ -86,7 +86,7 @@ function deleteKeyValue(key, cbk) {
 	}
 
 	redisClient.del(key, function (err, deleted) {
-		return cbk(err, (deleted == 1));
+		return cbk(err, (deleted === 1));
 	});
 }
 

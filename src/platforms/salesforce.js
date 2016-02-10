@@ -100,7 +100,17 @@ function salesforceCallback(req, res, next) {
 				};
 
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
+					if (err) {
+						log.error({err: err}, 'error creating salesforce access token');
+						return next(false);
+					}
+
 					countries.countryFromPhone(profile._raw.mobile_phone, function (err, country) {
+						if (err) {
+							log.error({err: err}, 'error getting salesforce country from phone');
+							return next(false);
+						}
+
 						var returnProfile = {
 							name: profile._raw.first_name,
 							lastname: profile._raw.last_name,
@@ -113,12 +123,19 @@ function salesforceCallback(req, res, next) {
 							returnProfile.avatar = profile.avatar;
 						}
 
-						if (err === null && country) {
+						if (country) {
 							returnProfile.country = country['ISO3166-1-Alpha-2'];
 							returnProfile.phone = profile._raw.mobile_phone.replace('+' + country.Dial, '').trim();
+						} else {
+							log.info({profile_raw: profile._raw}, 'no country on salesforce phone');
 						}
 
 						getUserOptionalInfo(sfData, profile._raw.user_id, function (err, profileDetail) {
+							if (err) {
+								log.error({err: err}, 'error getting salesforce additional info');
+								return next(false);
+							}
+
 							if (profileDetail.title) {
 								returnProfile.position = profileDetail.title;
 							}
@@ -145,7 +162,6 @@ function salesforceCallback(req, res, next) {
 				expiry: new Date().getTime() + sfData.expiresIn * 1000
 			};
 
-			//TODO check if setPlatformData and createBothTokens call can be made in parallel
 			userMng.setPlatformData(foundUser._id, 'sf', platform, function (err) {
 				if (err) {
 					log.error({err: err}, 'error updating sf tokens into user ' + foundUser._id + '');

@@ -31,7 +31,7 @@ function pinValidation(req, res, next) {
 		var check = exp.replace(/\*/g, '.*');
 
 		var match = path.match(check);
-		requiresPinValidation = (match !== null && path == match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
+		requiresPinValidation = (match !== null && path === match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
 		if (requiresPinValidation) {
 			var fieldsSchema = {
 				"id": "/MePhones",

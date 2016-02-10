@@ -24,7 +24,6 @@ function prepareOptions(req, res, next) {
 		}
 	}
 
-	// TODO pass all file data correctly
 	if (req.header('Content-Type') && req.header('Content-Type').indexOf('multipart/form-data') > -1) {
 		var formData = {};
 		var files = req.files;
