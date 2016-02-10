@@ -31,7 +31,7 @@ function pinValidation(req, res, next) {
 		var check = exp.replace(/\*/g, '.*');
 
 		var match = path.match(check);
-		requiresPinValidation = (match !== null && path == match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
+		requiresPinValidation = (match !== null && path === match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
 		if (requiresPinValidation) {
 			var fieldsSchema = {
 				"id": "/MePhones",
@@ -74,16 +74,18 @@ function pinValidation(req, res, next) {
 		phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
 			if (err) {
 				if (!err.code) {
+					log.error({err: err}, 'Error validating phone');
 					res.send(500, err);
-				} else {
-					var errCode = err.code;
-					delete(err.code);
-					res.send(errCode, err);
+					return next(false);
 				}
+
+				var errCode = err.code;
+				delete(err.code);
+				res.send(errCode, err);
 				return next(false);
-			} else {
-				return next();
 			}
+
+			return next();
 		});
 	}
 }

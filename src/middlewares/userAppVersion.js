@@ -21,9 +21,8 @@ function storeUserAppVersion(req, res, next) {
 				log.error({err: err});
 				res.send(500, updatingUserError);
 				return next(false);
-			} else {
-				next();
 			}
+			next();
 		});
 	}
 }

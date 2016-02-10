@@ -30,12 +30,16 @@ function googleCallback(req, res, next) {
 
 	daoMng.getFromUsername(profile.email, function (err, foundUser) {
 		if (err) {
-			if (err.message == daoMng.ERROR_USER_NOT_FOUND) {
+			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
 				var tokenData = {
 					accessToken: googleData.accessToken,
 					refreshToken: googleData.refreshToken
 				};
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
+					if (err) {
+						log.error({err: err},'error creating google profile token');
+						return next(false);
+					}
 					var returnProfile = {
 						name: profile.name.givenName,
 						lastname: profile.name.familyName,

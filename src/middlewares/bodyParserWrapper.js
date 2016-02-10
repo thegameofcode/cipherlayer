@@ -10,7 +10,7 @@ module.exports = function (middleware) {
 
 		// if url is a proxy request, don't do anything and move to next middleware
 		if (useDirectProxy) {
-			next();
+			return next();
 		}
 		// else invoke middleware
 		else {

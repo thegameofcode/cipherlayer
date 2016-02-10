@@ -124,15 +124,20 @@ function createUserEndpoint(req, res, next) {
 		if (err) {
 			if (!err.code) {
 				res.send(500, err);
-			} else {
-				var errCode = err.code;
-				delete(err.code);
-				res.send(errCode, err);
+				return next(false);
 			}
+			var errCode = err.code;
+			delete(err.code);
+			res.send(errCode, err);
 			return next(false);
 		}
 
 		tokenMng.getRefreshTokenInfo(tokens.refreshToken, function (err, tokenSet) {
+			if (err) {
+				res.send(500, {err: 'internal_error', des: 'error creating user tokens'});
+				return next(false);
+			}
+
 			var userId = tokenSet.userId;
 			var tokenData = tokenSet.data;
 

@@ -84,7 +84,7 @@ function _addUser(userToAdd, cbk) {
 
 	getFromUsername(user.username, function (err) {
 		if (err) {
-			if (err.message == ERROR_USER_NOT_FOUND) {
+			if (err.message === ERROR_USER_NOT_FOUND) {
 				user._id = user.id;
 				delete(user.id);
 
@@ -222,7 +222,7 @@ function getFromId(id, cbk) {
 			if (user === null) {
 				return cbk(new Error(ERROR_USER_NOT_FOUND), null);
 			}
-			if (user._id == id) {
+			if (user._id === id) {
 				return cbk(null, user);
 			}
 		});
