@@ -74,16 +74,18 @@ function pinValidation(req, res, next) {
 		phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
 			if (err) {
 				if (!err.code) {
-					res.send(500, err);
-				} else {
-					var errCode = err.code;
-					delete(err.code);
-					res.send(errCode, err);
+					log.error({err:err},'Error validating phone');
+					res.send(500);
+					return next(false);
 				}
+
+				var errCode = err.code;
+				delete(err.code);
+				res.send(errCode, err);
 				return next(false);
-			} else {
-				return next();
 			}
+
+			return next();
 		});
 	}
 }
