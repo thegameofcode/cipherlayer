@@ -58,7 +58,7 @@ function propagateRequest(req, res, next) {
 				try {
 					body = JSON.parse(body);
 				} catch (ex) {
-					log.error({err: 'json_parse_error', des:'error parsing body from response'});
+					log.error({err: 'json_parse_error', des: 'error parsing body from response'});
 				}
 				log.info({
 					request: {
@@ -91,11 +91,6 @@ function propagateRequest(req, res, next) {
 }
 
 function transferAllowedHeaders(headers, srcRes, dstRes) {
-
-	if (!headers || !headers.length) {
-		return;
-	}
-
 	_.map(headers, function (header) {
 		if (srcRes.headers[header]) {
 			dstRes.header(header, srcRes.headers[header]);
