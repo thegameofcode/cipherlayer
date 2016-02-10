@@ -2,7 +2,9 @@ cipherlayer
 ===========
 
 [![Circle CI](https://circleci.com/gh/thegameofcode/cipherlayer/tree/master.svg?style=svg)](https://circleci.com/gh/thegameofcode/cipherlayer/tree/master)
+[![Code Climate](https://codeclimate.com/github/thegameofcode/cipherlayer/badges/gpa.svg)](https://codeclimate.com/github/thegameofcode/cipherlayer)
 [![Coverage Status](https://coveralls.io/repos/thegameofcode/cipherlayer/badge.svg?branch=master&service=github)](https://coveralls.io/github/thegameofcode/cipherlayer?branch=master)
+[![Issue Count](https://codeclimate.com/github/thegameofcode/cipherlayer/badges/issue_count.svg)](https://codeclimate.com/github/thegameofcode/cipherlayer)
 
 Security layer based on [OAuth 2.0](http://oauth.net/2/) protocol.
 Customers are given tokens to access protected client and these token have all the information about the session.
