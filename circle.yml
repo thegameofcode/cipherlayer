@@ -14,6 +14,7 @@ test:
     - npm run coverage-3
     - npm run coverage-4
     - npm run coverage-5
+    - npm run coverage-6
 deployment:
   npm:
     branch: master
