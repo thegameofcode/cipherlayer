@@ -75,7 +75,7 @@ function pinValidation(req, res, next) {
 			if (err) {
 				if (!err.code) {
 					log.error({err:err},'Error validating phone');
-					res.send(500);
+					res.send(500, err);
 					return next(false);
 				}
 
