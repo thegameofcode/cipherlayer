@@ -175,6 +175,8 @@ function salesforceCallback(req, res, next) {
 					data.deviceVersion = req.headers[config.version.header];
 				}
 
+				log.info({device_version: data.deviceVersion}, 'device version on SF login for profile ' + foundUser._id);
+
 				async.series([
 					function (done) {
 						//Add "realms" & "capabilities"
