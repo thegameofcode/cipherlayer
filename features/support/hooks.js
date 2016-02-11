@@ -1,4 +1,4 @@
-var clone = require('clone');
+var _= require('lodash');
 
 var world = require('./world');
 var config = require('../../config.json');
@@ -6,7 +6,7 @@ var config = require('../../config.json');
 module.exports = function () {
 	this.Before(function (done) {
 		world.resetUser();
-		world.config = clone(config);
+		world.config = _.clone(config);
 		done();
 	});
 
