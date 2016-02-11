@@ -5,7 +5,7 @@ var async = require('async');
 var config = require('../../config.json');
 
 var dao = require('../../src/managers/dao.js');
-var clone = require("clone");
+var _ = require("lodash");
 var nock = require('nock');
 
 var cryptoMng = require('../../src/managers/crypto')(config.password);
@@ -31,7 +31,7 @@ module.exports = function () {
 						break;
 				}
 
-				var userToCreate = clone(world.getUser());
+				var userToCreate = _.clone(world.getUser());
 				cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 					userToCreate.password = encryptedPwd;
 					dao.addUser()(userToCreate, function (err, createdUser) {
