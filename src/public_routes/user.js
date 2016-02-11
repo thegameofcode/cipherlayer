@@ -214,7 +214,7 @@ function createUserByToken(req, res, next) {
 	});
 }
 
-function checkBody(req, res, next) {
+function requireBody(req, res, next) {
 	var err;
 	if (!req.body) {
 		err = {
@@ -253,28 +253,21 @@ function validateOldPassword(req, res, next) {
 
 }
 function setPassword(req, res, next) {
-	if (!req.body) {
-		res.send(400, {
-			err: 'invalid_body',
-			des: 'The call to this url must have body.'
-		});
-		return next();
-	}
-
 	userMng().setPassword(req.user._id, req.body, function (err) {
 		if (err) {
 			if (!err.code) {
 				res.send(500, err);
-			} else {
-				var errCode = err.code;
-				delete(err.code);
-				res.send(errCode, err);
+				return next(false);
 			}
+
+			var errCode = err.code;
+			delete(err.code);
+			res.send(errCode, err);
 			return next(false);
-		} else {
-			res.send(204);
-			return next();
 		}
+
+		res.send(204);
+		return next();
 	});
 }
 
@@ -286,13 +279,13 @@ function checkEmailAvailable(req, res, next) {
 			err: 'BadRequestError',
 			des: 'Missing email in request body'
 		});
-		return next();
+		return next(false);
 	}
 
 	daoMng.findByEmail(email, function (error, output) {
 		if (error) {
 			res.send(error.statusCode, error.body);
-			return next();
+			return next(false);
 		}
 
 		res.send(200, output);
@@ -307,7 +300,7 @@ function addRoutes(service) {
 	service.get('/user/activate', createUserByToken);
 	service.post('/user/activate', createUserByToken);
 	service.post('/user/email/available', checkEmailAvailable);
-	service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, checkBody, findUser, validateOldPassword, setPassword);
+	service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, requireBody, findUser, validateOldPassword, setPassword);
 }
 
 module.exports = addRoutes;
