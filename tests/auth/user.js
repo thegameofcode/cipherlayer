@@ -11,6 +11,13 @@ var dao = require('../../src/managers/dao.js');
 
 var redisMng = require('../../src/managers/redis');
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
 	describe: function () {
 		describe('/user', function () {
@@ -29,7 +36,7 @@ module.exports = {
 					method: 'POST',
 					body: JSON.stringify({username: username, password: password, phone: phone})
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -48,7 +55,7 @@ module.exports = {
 					method: 'POST',
 					body: JSON.stringify({username: username, password: password})
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res) {
 					assert.equal(err, null);
@@ -68,7 +75,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify({username: USER.username, password: USER.password})
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);

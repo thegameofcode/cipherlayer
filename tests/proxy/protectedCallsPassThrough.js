@@ -10,6 +10,13 @@ var config = require('../../config.json');
 
 var notificationsServiceURL = config.externalServices.notifications.base;
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
 	itCreated: function created(accessTokenSettings, refreshTokenSettings) {
 		it.skip('201 Created', function (done) {
@@ -53,7 +60,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
@@ -130,7 +137,7 @@ module.exports = {
 							method: 'POST',
 							body: JSON.stringify(expectedPublicRequest)
 						};
-						options.headers[config.version.header] = "test/1";
+						options.headers[config.version.header] = versionHeader;
 
 						nock(notificationsServiceURL)
 							.post('/notification/email')
@@ -209,7 +216,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					nock(notificationsServiceURL)
 						.post('/notification/email')
@@ -251,7 +258,7 @@ module.exports = {
 				method: 'POST',
 				body: JSON.stringify(expectedPublicRequest)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
@@ -306,7 +313,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);

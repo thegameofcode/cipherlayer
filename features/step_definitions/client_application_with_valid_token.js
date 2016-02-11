@@ -54,7 +54,11 @@ module.exports = function () {
 					body: JSON.stringify(world.getUser())
 				};
 
-				options.headers[config.version.header] = "test/1";
+				if(config.version){
+					var platform = Object.keys(config.version.platforms)[0];
+					var version = Object.keys(platform)[1];
+					options.headers[config.version.header] = platform + '/' + version;
+				}
 
 				nock('http://localhost:' + config.private_port)
 					.post('/api/me/session')

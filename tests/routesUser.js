@@ -25,6 +25,13 @@ var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.path
 
 var createdUserId;
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 describe('user', function () {
 
 	var baseUser = {
@@ -78,8 +85,7 @@ describe('user', function () {
 				},
 				method: 'GET'
 			};
-
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -110,7 +116,7 @@ describe('user', function () {
 				},
 				method: 'GET'
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -153,7 +159,8 @@ describe('user', function () {
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
+
 			var clonedUser = _.clone(baseUser);
 			clonedUser.password = newPassword.password;
 
@@ -177,7 +184,7 @@ describe('user', function () {
 				},
 				method: 'PUT'
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "invalid_body",
@@ -205,7 +212,7 @@ describe('user', function () {
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "auth_proxy_error",
@@ -232,7 +239,7 @@ describe('user', function () {
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "unauthorized"
@@ -261,7 +268,7 @@ describe('user', function () {
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "invalid_access_token",

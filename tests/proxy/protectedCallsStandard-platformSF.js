@@ -42,6 +42,13 @@ var OPTIONS_STANDARD_CALL = {
 	body: JSON.stringify(expectedBody)
 };
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
 	itWithSalesforce: function withSalesForce(accessTokenSettings) {
 		it('200 with salesforce', function (done) {
@@ -53,7 +60,7 @@ module.exports = {
 
 					var options = _.clone(OPTIONS_STANDARD_CALL);
 					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
@@ -97,7 +104,7 @@ module.exports = {
 
 					var options = _.clone(OPTIONS_STANDARD_CALL);
 					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);

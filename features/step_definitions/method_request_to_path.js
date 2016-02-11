@@ -21,7 +21,12 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: METHOD
 		};
-		options.headers[config.version.header] = "test/1";
+
+		if(config.version){
+			var platform = Object.keys(config.version.platforms)[0];
+			var version = Object.keys(platform)[1];
+			options.headers[config.version.header] = platform + '/' + version;
+		}
 
 		nock(NOTIFICATION_SERVICE_URL)
 			.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -45,7 +50,12 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = "test/1";
+
+		if(config.version){
+			var platform = Object.keys(config.version.platforms)[0];
+			var version = Object.keys(platform)[1];
+			options.headers[config.version.header] = platform + '/' + version;
+		}
 
 		customHeaders.split(',').forEach(function (customHeader) {
 			options.headers[customHeader] = customHeader;
@@ -70,7 +80,12 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = "test/1";
+
+		if(config.version){
+			var platform = Object.keys(config.version.platforms)[0];
+			var version = Object.keys(platform)[1];
+			options.headers[config.version.header] = platform + '/' + version;
+		}
 
 		request(options, function (err, res) {
 			assert.equal(err, null);

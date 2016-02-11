@@ -31,6 +31,13 @@ var FB_PROFILE = {
 	id: "fba1b2c3d4e5f6"
 };
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
 	describe: function () {
 		describe('/facebook_token', function () {
@@ -47,7 +54,7 @@ module.exports = {
 
 				var options = _.cloneDeep(OPTIONS);
 				options.url = 'http://localhost:' + config.public_port + '/auth/login/facebook';
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				var existingUser = _.cloneDeep(baseUser);
 				existingUser.username = existingUser.email;
@@ -80,7 +87,7 @@ module.exports = {
 
 				var options = _.cloneDeep(OPTIONS);
 				options.url = 'http://localhost:' + config.public_port + '/auth/login/facebook';
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -116,7 +123,7 @@ module.exports = {
 
 				var options = _.clone(OPTIONS);
 				options.url = 'http://localhost:' + config.public_port + '/auth/login/facebook';
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);

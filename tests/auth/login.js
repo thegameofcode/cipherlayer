@@ -9,6 +9,13 @@ var _ = require('lodash');
 var crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
         describe('/login', function () {
@@ -43,7 +50,7 @@ module.exports = {
                     method: 'POST',
                     body: JSON.stringify(user)
                 };
-                options.headers[config.version.header] = "test/1";
+                options.headers[config.version.header] = versionHeader;
 
                 nock('http://localhost:'+ config.private_port)
                     .post('/api/me/session')
@@ -80,7 +87,7 @@ module.exports = {
                     method: 'POST',
                     body: JSON.stringify(user)
                 };
-                options.headers[config.version.header] = "test/1";
+                options.headers[config.version.header] = versionHeader;
 
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
@@ -103,7 +110,7 @@ module.exports = {
                     method: 'POST',
                     body: JSON.stringify(user)
                 };
-                options.headers[config.version.header] = "test/1";
+                options.headers[config.version.header] = versionHeader;
 
                 request(options, function (err, res, body) {
                     assert.equal(err, null);
@@ -148,7 +155,7 @@ module.exports = {
                     method: 'POST',
                     body: JSON.stringify(user)
                 };
-                options.headers[config.version.header] = "test/1";
+                options.headers[config.version.header] = versionHeader;
 
                 nock('http://localhost:'+ config.private_port)
                     .post('/api/me/session')

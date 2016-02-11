@@ -9,6 +9,13 @@ var config = require('../../config.json');
 var crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
+var versionHeader;
+if(config.version){
+	var platform = Object.keys(config.version.platforms)[0];
+	var version = Object.keys(platform)[1];
+	versionHeader = platform + '/' + version;
+}
+
 module.exports = {
 	describe: function () {
 		describe('/renew', function () {
@@ -36,7 +43,7 @@ module.exports = {
 					json: true,
 					body: _.cloneDeep(USER)
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -45,7 +52,7 @@ module.exports = {
 					var refreshToken = body.refreshToken;
 
 					var options = _.cloneDeep(OPTIONS_FOR_RENEW);
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 					options.body = {refreshToken: refreshToken};
 
 					request(options, function (err, res, body) {
@@ -60,7 +67,7 @@ module.exports = {
 			it('POST - 401 invalid token', function (done) {
 				var invalidToken = 'not a valid token :( sorry';
 				var options = _.cloneDeep(OPTIONS_FOR_RENEW);
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 				options.body = {refreshToken: invalidToken};
 
 				request(options, function (err, res, body) {
@@ -83,7 +90,7 @@ module.exports = {
 					assert.equal(err, null);
 
 					var options = _.cloneDeep(OPTIONS_FOR_RENEW);
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 					options.body = {refreshToken: token};
 
 					request(options, function (err, res, body) {
@@ -107,14 +114,14 @@ module.exports = {
 					body: {username: USER.username, password: USER.password, deviceId: USER.deviceId},
 					json: true
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
 					assert.equal(res.statusCode, 200, body);
 
 					var options = _.cloneDeep(OPTIONS_FOR_RENEW);
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 					options.body = {refreshToken: body.refreshToken};
 
 					request(options, function (err, res, body) {
