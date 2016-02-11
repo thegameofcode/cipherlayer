@@ -120,15 +120,14 @@ function sendNewPassword(req, res, next) {
 }
 
 function createUserEndpoint(req, res, next) {
-	userMng().createUser(req.body, req.headers['x-otp-pin'], function (err, tokens) {
-		if (err) {
-			if (!err.code) {
-				res.send(500, err);
+	userMng().createUser(req.body, req.headers['x-otp-pin'], function (error, tokens) {
+		if (error) {
+			if (!error.code) {
+				res.send(500, error);
 				return next(false);
 			}
-			var errCode = err.code;
-			delete(err.code);
-			res.send(errCode, err);
+			var errCode = error.code;
+			res.send(errCode, {err: error.err, des: error.des});
 			return next(false);
 		}
 
