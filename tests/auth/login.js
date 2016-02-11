@@ -10,11 +10,6 @@ var crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var versionHeader;
-if(config.version){
-	var platform = Object.keys(config.version.platforms)[0];
-	var version = Object.keys(platform)[1];
-	versionHeader = platform + '/' + version;
-}
 
 module.exports = {
     describe: function(accessTokenSettings, refreshTokenSettings){
@@ -27,6 +22,12 @@ module.exports = {
             };
 
             beforeEach(function (done) {
+				if(config.version){
+					var platform = Object.keys(config.version.platforms)[0];
+					var version = Object.keys(platform)[1];
+					versionHeader = platform + '/' + version;
+				}
+
                 dao.deleteAllUsers(function (err) {
                     assert.equal(err, null);
                     var userToCreate = _.clone(baseUser);

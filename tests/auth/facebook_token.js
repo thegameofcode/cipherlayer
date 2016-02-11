@@ -32,17 +32,18 @@ var FB_PROFILE = {
 };
 
 var versionHeader;
-if(config.version){
-	var platform = Object.keys(config.version.platforms)[0];
-	var version = Object.keys(platform)[1];
-	versionHeader = platform + '/' + version;
-}
 
 module.exports = {
 	describe: function () {
 		describe('/facebook_token', function () {
 
 			beforeEach(function (done) {
+				if(config.version){
+					var platform = Object.keys(config.version.platforms)[0];
+					var version = Object.keys(platform)[1];
+					versionHeader = platform + '/' + version;
+				}
+
 				userDao.deleteAllUsers(function (err) {
 					assert.equal(err, null);
 					done();
