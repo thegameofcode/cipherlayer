@@ -6,17 +6,11 @@ var nock = require('nock');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
-var versionHeader;
+var versionHeader = 'test/1';
 
 module.exports = {
 	itUnauthorized: function Unauthorized() {
 		it('401 Unauthorized', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedBody = {field1: 'value1', field2: 'value2'};
 
 			var options = {
@@ -39,12 +33,6 @@ module.exports = {
 	},
 	itWithoutPlatforms: function withoutPlatforms(accessTokenSettings) {
 		it('200 without platforms', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var user = {
 				id: 'a1b2c3d4e5f6',
 				username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
@@ -89,12 +77,6 @@ module.exports = {
 	},
 	itBodyResponseIsNotAJson: function bodyResponseIsNotAJson(accessTokenSettings) {
 		it('body response is not a json', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var user = {
 				id: 'a1b2c3d4e5f6',
 				username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),

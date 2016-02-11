@@ -13,7 +13,7 @@ var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 	'Content-Type': 'application/json; charset=utf-8'
 };
 
-var versionHeader;
+var versionHeader = 'test/1';
 
 describe('/api/profile (verify phone)', function () {
 
@@ -27,12 +27,6 @@ describe('/api/profile (verify phone)', function () {
 	};
 
 	beforeEach(function (done) {
-		if(config.version){
-			var platform = Object.keys(config.version.platforms)[0];
-			var version = Object.keys(platform)[1];
-			versionHeader = platform + '/' + version;
-		}
-
 		async.series([
 			function (done) {
 				cipherlayer.start(config.public_port, config.internal_port, done);

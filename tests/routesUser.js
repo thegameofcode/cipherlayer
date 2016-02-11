@@ -25,7 +25,7 @@ var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.path
 
 var createdUserId;
 
-var versionHeader;
+var versionHeader = 'test/1';
 
 describe('user', function () {
 
@@ -44,12 +44,6 @@ describe('user', function () {
 	}
 
 	beforeEach(function (done) {
-		if(config.version){
-			var platform = Object.keys(config.version.platforms)[0];
-			var version = Object.keys(platform)[1];
-			versionHeader = platform + '/' + version;
-		}
-
 		cipherlayer.start(config.public_port, config.internal_port, function (err) {
 			assert.equal(err, null);
 			dao.deleteAllUsers(function (err) {

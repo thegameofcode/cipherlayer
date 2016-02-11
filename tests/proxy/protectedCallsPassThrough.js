@@ -10,17 +10,11 @@ var config = require('../../config.json');
 
 var notificationsServiceURL = config.externalServices.notifications.base;
 
-var versionHeader;
+var versionHeader = 'test/1';
 
 module.exports = {
 	itCreated: function created(accessTokenSettings, refreshTokenSettings) {
 		it.skip('201 Created', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 			var expectedUserId = 'a1b2c3d4e5f6';
 			var expectedUserPhone = '111111111';
@@ -95,12 +89,6 @@ module.exports = {
 	},
 	itPlatformInfo: function platformInfo(accessTokenSettings, refreshTokenSettings) {
 		it.skip('203 Platform Info', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 			var expectedUserId = 'a1b2c3d4e5f6';
 			var expectedUserPhone = '222222222';
@@ -186,12 +174,6 @@ module.exports = {
 	},
 	itAlreadyExists: function alreadyExists(accessTokenSettings, refreshTokenSettings) {
 		it.skip('409 already exists', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 			var expectedUserId = 'a1b2c3d4e5f6';
 			var expectedPublicRequest = {};
@@ -259,12 +241,6 @@ module.exports = {
 	},
 	itNotSecurityToken: function notSecurityToken() {
 		it('400 not security token', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedPublicRequest = {};
 			expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 
@@ -290,12 +266,6 @@ module.exports = {
 	},
 	itCreatedVerifyMail: function createdVerifyMail() {
 		it.skip('201 Created (Verify email)', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 			var expectedUserId = 'a1b2c3d4e5f6';
 			var expectedUserPhone = '111111111';

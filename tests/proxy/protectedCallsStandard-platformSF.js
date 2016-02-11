@@ -42,17 +42,11 @@ var OPTIONS_STANDARD_CALL = {
 	body: JSON.stringify(expectedBody)
 };
 
-var versionHeader;
+var versionHeader = 'test/1';
 
 module.exports = {
 	itWithSalesforce: function withSalesForce(accessTokenSettings) {
 		it('200 with salesforce', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			dao.addUser()(USER, function (err, createdUser) {
 				assert.equal(err, null);
 
@@ -75,12 +69,6 @@ module.exports = {
 	},
 	itRenewSFToken: function renewSFToken(accessTokenSettings) {
 		it('200 with salesforce when renewing access token', function (done) {
-			if(config.version){
-				var platform = Object.keys(config.version.platforms)[0];
-				var version = Object.keys(platform)[1];
-				versionHeader = platform + '/' + version;
-			}
-
 			var userWithSoonExpiry = _.clone(USER);
 			userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
 
