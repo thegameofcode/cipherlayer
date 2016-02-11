@@ -5,6 +5,8 @@ var config = require('../../config.json');
 
 var user = {};
 
+var versionHeader = 'test/1';
+
 function getUser() {
 	return user;
 }
@@ -50,6 +52,8 @@ function getTokens() {
 }
 
 module.exports = {
+	versionHeader: versionHeader,
+
 	getUser: getUser,
 	resetUser: resetUser,
 	getResponse: getResponse,

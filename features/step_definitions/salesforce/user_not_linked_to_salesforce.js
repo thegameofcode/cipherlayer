@@ -18,12 +18,7 @@ module.exports = function () {
 			method: 'POST',
 			body: JSON.stringify(world.getUser())
 		};
-
-		if(config.version){
-			var platform = Object.keys(config.version.platforms)[0];
-			var version = Object.keys(platform)[1];
-			options.headers[config.version.header] = platform + '/' + version;
-		}
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
