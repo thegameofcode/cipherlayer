@@ -14,8 +14,7 @@ module.exports = function () {
 			method: 'POST',
 			body: JSON.stringify(world.getUser())
 		};
-
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);

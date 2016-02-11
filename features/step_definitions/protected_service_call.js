@@ -17,7 +17,7 @@ module.exports = function () {
 		if (METHOD == 'POST' || METHOD == 'PUT') {
 			options.body = PAYLOAD;
 		}
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);

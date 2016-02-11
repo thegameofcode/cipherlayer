@@ -13,6 +13,8 @@ var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 	'Content-Type': 'application/json; charset=utf-8'
 };
 
+var versionHeader = 'test/1';
+
 describe('/api/profile (verify phone)', function () {
 
 	var notifServiceURL = config.externalServices.notifications.base;
@@ -34,7 +36,7 @@ describe('/api/profile (verify phone)', function () {
 			},
 			function (done) {
 				dao.deleteAllUsers(done);
-			},
+			}
 		], done);
 	});
 
@@ -56,7 +58,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -81,7 +83,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -105,7 +107,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -129,7 +131,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -165,7 +167,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -219,7 +221,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -318,7 +320,7 @@ describe('/api/profile (verify phone)', function () {
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')

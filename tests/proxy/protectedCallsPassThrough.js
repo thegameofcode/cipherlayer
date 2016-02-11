@@ -10,6 +10,8 @@ var config = require('../../config.json');
 
 var notificationsServiceURL = config.externalServices.notifications.base;
 
+var versionHeader = 'test/1';
+
 module.exports = {
 	itCreated: function created(accessTokenSettings, refreshTokenSettings) {
 		it.skip('201 Created', function (done) {
@@ -53,7 +55,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
@@ -87,7 +89,6 @@ module.exports = {
 	},
 	itPlatformInfo: function platformInfo(accessTokenSettings, refreshTokenSettings) {
 		it.skip('203 Platform Info', function (done) {
-
 			var expectedUsername = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 			var expectedUserId = 'a1b2c3d4e5f6';
 			var expectedUserPhone = '222222222';
@@ -130,7 +131,7 @@ module.exports = {
 							method: 'POST',
 							body: JSON.stringify(expectedPublicRequest)
 						};
-						options.headers[config.version.header] = "test/1";
+						options.headers[config.version.header] = versionHeader;
 
 						nock(notificationsServiceURL)
 							.post('/notification/email')
@@ -209,7 +210,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					nock(notificationsServiceURL)
 						.post('/notification/email')
@@ -251,7 +252,7 @@ module.exports = {
 				method: 'POST',
 				body: JSON.stringify(expectedPublicRequest)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
@@ -306,7 +307,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);

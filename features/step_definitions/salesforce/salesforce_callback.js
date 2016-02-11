@@ -98,8 +98,7 @@ module.exports = function () {
 			method: 'GET',
 			followAllRedirects: followRedirects
 		};
-
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);

@@ -3,6 +3,8 @@ var assert = require('assert');
 
 var cipherlayer = require('../../src/cipherlayer');
 
+var world = require('./world');
+
 var config = require('../../config.json');
 
 module.exports = function () {
@@ -17,8 +19,8 @@ module.exports = function () {
 				},
 				method: 'DELETE'
 			};
+			options.headers[config.version.header] = world.versionHeader;
 
-			options.headers[config.version.header] = "test/1";
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 204, body);

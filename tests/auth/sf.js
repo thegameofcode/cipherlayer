@@ -9,10 +9,14 @@ var dao = require('../../src/managers/dao.js');
 
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
 
+var versionHeader = 'test/1';
+
 module.exports = {
 	describe: function (accessTokenSettings, refreshTokenSettings) {
 		describe('/sf', function () {
 			beforeEach(function (done) {
+				OPTIONS.headers[config.version.header] = versionHeader;
+
 				dao.deleteAllUsers(function (err) {
 					assert.equal(err, null);
 					done();

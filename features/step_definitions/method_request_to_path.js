@@ -21,7 +21,7 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: METHOD
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		nock(NOTIFICATION_SERVICE_URL)
 			.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -45,7 +45,7 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		customHeaders.split(',').forEach(function (customHeader) {
 			options.headers[customHeader] = customHeader;
@@ -70,7 +70,7 @@ var myStepDefinitionsWrapper = function () {
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = "test/1";
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res) {
 			assert.equal(err, null);

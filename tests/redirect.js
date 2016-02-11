@@ -12,6 +12,8 @@ var accessTokenSettings = {
 	tokenExpirationMinutes: config.accessToken.expiration * 60
 };
 
+var versionHeader = 'test/1';
+
 describe('redirect', function () {
 
 	beforeEach(function (done) {
@@ -52,7 +54,7 @@ describe('redirect', function () {
 						'Authorization': 'bearer ' + loginToken
 					}
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				nock('http://' + config.private_host + ':' + config.private_port)
 					.post('/whatever')

@@ -11,6 +11,8 @@ var nock = require('nock');
 var crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
+var versionHeader = 'test/1';
+
 module.exports = {
 	describe: function (accessTokenSettings) {
 		describe('/logout', function () {
@@ -46,7 +48,7 @@ module.exports = {
 						body: user,
 						json: true
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						should.not.exist(err);
@@ -68,7 +70,7 @@ module.exports = {
 						},
 						json: true
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					nock('http://' + config.private_host + ':' + config.private_port).delete('/api/me/session').reply(200);
 
@@ -90,7 +92,7 @@ module.exports = {
 						},
 						json: true
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						should.not.exist(err);
@@ -111,7 +113,7 @@ module.exports = {
 					},
 					json: true
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					should.not.exist(err);
@@ -129,7 +131,7 @@ module.exports = {
 					headers: {},
 					json: true
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					should.not.exist(err);
@@ -149,7 +151,7 @@ module.exports = {
 					},
 					json: true
 				};
-				options.headers[config.version.header] = "test/1";
+				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					should.not.exist(err);

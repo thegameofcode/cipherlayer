@@ -14,6 +14,7 @@ module.exports = function () {
 			method: 'GET',
 			followRedirect: false
 		};
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res) {
 			assert.equal(err, null);

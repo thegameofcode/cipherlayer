@@ -12,6 +12,7 @@ var myStepDefinitionsWrapper = function () {
 			method: 'GET',
 			followRedirect: false
 		};
+		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			world.getResponse().err = err;

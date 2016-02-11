@@ -19,7 +19,7 @@ var myStepDefinitionsWrapper = function () {
 				method: METHOD,
 				body: PUBLIC_PAYLOAD
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = world.versionHeader;
 
 			nock('http://' + config.private_host + ':' + config.private_port)
 				.post(config.passThroughEndpoint.path)

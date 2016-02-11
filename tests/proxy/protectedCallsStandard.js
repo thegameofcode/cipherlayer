@@ -6,6 +6,8 @@ var nock = require('nock');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
+var versionHeader = 'test/1';
+
 module.exports = {
 	itUnauthorized: function Unauthorized() {
 		it('401 Unauthorized', function (done) {
@@ -19,7 +21,7 @@ module.exports = {
 				method: 'POST',
 				body: JSON.stringify(expectedBody)
 			};
-			options.headers[config.version.header] = "test/1";
+			options.headers[config.version.header] = versionHeader;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
@@ -61,7 +63,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedBody)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
@@ -105,7 +107,7 @@ module.exports = {
 						method: 'POST',
 						body: JSON.stringify(expectedBody)
 					};
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);

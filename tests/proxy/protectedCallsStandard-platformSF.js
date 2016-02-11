@@ -42,6 +42,8 @@ var OPTIONS_STANDARD_CALL = {
 	body: JSON.stringify(expectedBody)
 };
 
+var versionHeader = 'test/1';
+
 module.exports = {
 	itWithSalesforce: function withSalesForce(accessTokenSettings) {
 		it('200 with salesforce', function (done) {
@@ -53,7 +55,7 @@ module.exports = {
 
 					var options = _.clone(OPTIONS_STANDARD_CALL);
 					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
@@ -97,7 +99,7 @@ module.exports = {
 
 					var options = _.clone(OPTIONS_STANDARD_CALL);
 					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = "test/1";
+					options.headers[config.version.header] = versionHeader;
 
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
