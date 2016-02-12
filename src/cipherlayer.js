@@ -107,6 +107,12 @@ function startListener(publicPort, internalPort, cbk) {
 
 			var versionControlOptions = _.clone(config.version);
 			versionControlOptions.public = [
+				"/auth/sf",
+				"/auth/sf/*",
+				"/auth/in",
+				"/auth/in/*",
+				"/auth/google",
+				"/auth/google/*",
 				"/user/activate*",
 				"/heartbeat",
 				"/user/email/available"
