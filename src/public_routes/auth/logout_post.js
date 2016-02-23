@@ -11,7 +11,7 @@ module.exports = function (req, res, next) {
 		return next(false);
 	}
 
-	const tokenInfo = req.tokenInfo;
+	var tokenInfo = req.tokenInfo;
 
 	var userAgent = String(req.headers['user-agent']);
 	var userId = tokenInfo.userId;
