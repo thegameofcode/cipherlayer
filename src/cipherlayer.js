@@ -10,20 +10,20 @@ var _ = require('lodash');
 var userDao = require('./managers/dao');
 var redisMng = require('./managers/redis');
 
-var checkAccessTokenParam = require('./middlewares/accessTokenParam.js');
-var checkAuthHeader = require('./middlewares/authHeader.js');
-var decodeToken = require('./middlewares/decodeToken.js');
-var findUser = require('./middlewares/findUser.js');
-var prepareOptions = require('./middlewares/prepareOptions.js');
-var platformsSetUp = require('./middlewares/platformsSetUp.js');
-var propagateRequest = require('./middlewares/propagateRequest.js');
-var permissions = require('./middlewares/permissions.js');
-var bodyParserWrapper = require('./middlewares/bodyParserWrapper.js');
+var checkAccessTokenParam = require('./middlewares/accessTokenParam');
+var checkAuthHeader = require('./middlewares/authHeaderRequired');
+var decodeToken = require('./middlewares/decodeToken');
+var findUser = require('./middlewares/findUser');
+var prepareOptions = require('./middlewares/prepareOptions');
+var platformsSetUp = require('./middlewares/platformsSetUp');
+var propagateRequest = require('./middlewares/propagateRequest');
+var permissions = require('./middlewares/permissions');
+var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
 
 var versionControl = require('version-control');
 
-var pinValidation = require('./middlewares/pinValidation.js')();
-var userAppVersion = require('./middlewares/userAppVersion.js')();
+var pinValidation = require('./middlewares/pinValidation')();
+var userAppVersion = require('./middlewares/userAppVersion')();
 
 var publicServer;
 var internalServer;

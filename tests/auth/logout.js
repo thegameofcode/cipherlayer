@@ -136,8 +136,8 @@ module.exports = {
 				request(options, function (err, res, body) {
 					should.not.exist(err);
 					res.statusCode.should.equal(401);
-					body.should.have.property('err').to.be.equal('invalid_access_token');
-					body.should.have.property('des').to.be.equal('unable to read token info');
+					body.should.have.property('err').to.be.equal('invalid_authorization');
+					body.should.have.property('des').to.be.equal('invalid authorization header');
 					done();
 				});
 			});
