@@ -238,7 +238,7 @@ describe('user', function () {
 
 			var expectedResult = {
 				err: 'invalid_authorization',
-				des: 'invalid authorization header'
+				des: 'required authorization header'
 			};
 
 			request(options, function (err, res, body) {
