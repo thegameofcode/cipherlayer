@@ -140,15 +140,6 @@ function startListener(publicPort, internalPort, cbk) {
 			publicServer.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
 			publicServer.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
 			publicServer.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-			publicServer.opts(/(.*)/, function (req, res, next) {
-				res.send(200);
-				next();
-			});
-
-			publicServer.use(function (req, res, next) {
-				log.info('< ' + res.statusCode);
-				next();
-			});
 
 			publicServer.listen(publicPort, function () {
 				log.info('PUBLIC SERVICE listening on PORT ' + publicPort);
@@ -199,11 +190,6 @@ function startListener(publicPort, internalPort, cbk) {
 			var routesPath = path.join(__dirname, './internal_routes/');
 			fs.readdirSync(routesPath).forEach(function (filename) {
 				require(routesPath + filename)(internalServer);
-			});
-
-			internalServer.use(function (req, res, next) {
-				log.info('< ' + res.statusCode);
-				next();
 			});
 
 			internalServer.listen(internalPort, function () {
