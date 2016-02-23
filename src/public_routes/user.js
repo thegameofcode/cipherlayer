@@ -37,8 +37,8 @@ function validateOldPassword(req, res, next) {
 		}
 		return next();
 	});
-
 }
+
 function setPassword(req, res, next) {
 	userMng().setPassword(req.user._id, req.body, function (err) {
 		if (err) {
