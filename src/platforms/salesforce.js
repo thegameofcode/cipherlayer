@@ -151,7 +151,7 @@ function salesforceCallback(req, res, next) {
 				});
 			} else {
 				res.send(500, {err: 'internal_error', des: 'There was an internal error matching salesforce profile'});
-				next(false);
+				return next(false);
 			}
 		} else {
 
