@@ -7,26 +7,13 @@ var checkAccessTokenParam = require('../middlewares/accessTokenParam');
 var checkAuthHeader = require('../middlewares/authHeaderRequired');
 var decodeToken = require('../middlewares/decodeToken');
 var findUser = require('../middlewares/findUser');
+var bodyRequired = require('../middlewares/bodyRequired');
 
 var forgotPassword_get = require('./user/forgotPassword_get');
 var activateUser_get = require('./user/activateUser_get');
 var activateUser_post = require('./user/activateUser_get');
 var checkEmailAvailability_post = require('./user/checkEmailAvailability_post');
 var createUser_post = require('./user/createUser_post');
-
-function requireBody(req, res, next) {
-	var err;
-	if (!req.body) {
-		err = {
-			err: 'invalid_body',
-			des: 'The call to this url must have body.'
-		};
-		res.send(400, err);
-		return next(false);
-	}
-
-	return next();
-}
 
 function validateOldPassword(req, res, next) {
 	var err;
@@ -77,7 +64,7 @@ function addRoutes(service) {
 	service.get('/user/activate', activateUser_get);
 	service.post('/user/activate', activateUser_post);
 	service.post('/user/email/available', checkEmailAvailability_post);
-	service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, requireBody, findUser, validateOldPassword, setPassword);
+	service.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, validateOldPassword, setPassword);
 }
 
 module.exports = addRoutes;
