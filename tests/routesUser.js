@@ -237,7 +237,8 @@ describe('user', function () {
 			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
-				err: "unauthorized"
+				err: 'invalid_authorization',
+				des: 'required authorization header'
 			};
 
 			request(options, function (err, res, body) {

@@ -8,10 +8,10 @@ var emailMng = require('../managers/email');
 var tokenMng = require('../managers/token');
 var userMng = require('../managers/user');
 
-var checkAccessTokenParam = require('../middlewares/accessTokenParam.js');
-var checkAuthHeader = require('../middlewares/authHeader.js');
-var decodeToken = require('../middlewares/decodeToken.js');
-var findUser = require('../middlewares/findUser.js');
+var checkAccessTokenParam = require('../middlewares/accessTokenParam');
+var checkAuthHeader = require('../middlewares/authHeaderRequired');
+var decodeToken = require('../middlewares/decodeToken');
+var findUser = require('../middlewares/findUser');
 var _ = require('lodash');
 var log = require('../logger/service.js');
 
