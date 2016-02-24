@@ -52,6 +52,7 @@
     "lcov-result-merger": "^1.0.2",
     "mocha": "^2.0.1",
     "mocha-lcov-reporter": "0.0.2",
+    "mockery": "^1.4.0",
     "nock": "^0.51.0",
     "pre-commit": "^1.0.7",
     "sinon": "^1.12.2",
