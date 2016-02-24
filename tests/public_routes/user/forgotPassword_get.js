@@ -20,7 +20,7 @@ describe('public routes', function () {
 				mockery.disable();
 			});
 
-			it('white box test of forgot password email creation', function (done) {
+			it.skip('white box test of forgot password email creation', function (done) {
 				var expectedEmail = 'valid@email.com';
 				var expectedUserId = 'USER_ID';
 				var expectedPassword = 'EXPECTED PASSWORD';
@@ -108,6 +108,7 @@ describe('public routes', function () {
 				var forgotPassword_get = require('../../../src/public_routes/user/forgotPassword_get');
 				forgotPassword_get(req, res, next);
 			});
+
 		});
 	});
 });
