@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var redisMng = require('./redis');
 
 var config = require(process.cwd() + '/config.json');
+var log = require('../logger/service');
 
 var _settings = {};
 
@@ -108,11 +109,13 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 	request(options, function (err, res, body) {
 		if (err) {
+			log.error(err);
 			cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
-			err = body;
-			return cbk(err);
+			var serviceError = body;
+			log.error(serviceError);
+			return cbk(serviceError);
 		}
 		cbk();
 	});

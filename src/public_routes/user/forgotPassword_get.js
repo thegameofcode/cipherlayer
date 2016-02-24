@@ -28,7 +28,7 @@ module.exports = function (req, res, next) {
 			});
 			return next(false);
 		}
-		var passwd = cryptoMng.randomPassword(config.password.regexValidation);
+		var passwd = cryptoMng.randomPassword(config.password.generatedRegex);
 
 		cryptoMng.encrypt(passwd, function (encryptedPassword) {
 			var fieldValue = [];
@@ -67,16 +67,16 @@ module.exports = function (req, res, next) {
 									log.info({des: 'there are no REALMS in DB'});
 									return done();
 								}
-								async.eachSeries(realms, function (realm, next) {
+								async.eachSeries(realms, function (realm, nextRealm) {
 									if (!realm.allowedDomains || !realm.allowedDomains.length) {
-										return next();
+										return nextRealm();
 									}
-									async.eachSeries(realm.allowedDomains, function (domain, more) {
+									async.eachSeries(realm.allowedDomains, function (domain, nextAllowedDomains) {
 										//wildcard
 										var check = domain.replace(/\*/g, '.*');
 										var match = foundUser.username.match(check);
 										if (!match || foundUser.username !== match[0]) {
-											return more();
+											return nextAllowedDomains();
 										}
 
 										if (!data.realms) {
@@ -91,8 +91,8 @@ module.exports = function (req, res, next) {
 
 											data.capabilities[capName] = realm.capabilities[capName];
 											added();
-										}, more);
-									}, next);
+										}, nextAllowedDomains);
+									}, nextRealm);
 								}, done);
 							});
 						}
@@ -102,10 +102,11 @@ module.exports = function (req, res, next) {
 							emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
 								if (err) {
 									res.send(500, {err: 'internalError', des: 'Internal server error'});
-								} else {
-									res.send(204);
+									return next(false);
 								}
-								return next(false);
+
+								res.send(204);
+								next();
 							});
 						});
 					});
