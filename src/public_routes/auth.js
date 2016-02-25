@@ -6,12 +6,15 @@ var user_post = require('./auth/user_post');
 var user_del = require('./auth/user_del');
 var renew_post = require('./auth/renew_post');
 var logout_post = require('./auth/logout_post');
+var loginEmail_post = require('./auth/loginEmail_post');
 
 var authHeaderRequired = require('../middlewares/authHeaderRequired');
 var decodeAccessToken = require('../middlewares/decodeToken');
 
 module.exports = function addRoutes(service) {
 	service.post('/auth/login', login_post);
+	service.post('/auth/login/email', loginEmail_post);
+
 	service.post('/auth/renew', renew_post);
 	service.post('/auth/logout', authHeaderRequired, decodeAccessToken, logout_post);
 
