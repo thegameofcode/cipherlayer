@@ -22,7 +22,7 @@ describe('public routes', function () {
 					mockery.disable();
 				});
 
-				it('302 - valid redirection', function (done) {
+				it.skip('302 - valid redirection', function (done) {
 					var expectedRefreshToken = 'VALID_REFRESH_TOKEN';
 					var tokenManagerStub = {
 						getRefreshTokenInfo: function (refreshToken, cbk) {
@@ -72,7 +72,7 @@ describe('public routes', function () {
 					loginRefreshToken_get(req, res, next.next);
 				});
 
-				it('400 - invalid refresh token', function (done) {
+				it.skip('400 - invalid refresh token', function (done) {
 					var expectedRefreshToken = 'INVALID_REFRESH_TOKEN';
 					var tokenManagerStub = {
 						getRefreshTokenInfo: function (refreshToken, cbk) {
