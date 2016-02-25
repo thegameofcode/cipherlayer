@@ -1,3 +1,5 @@
+'use strict';
+
 var request = require('request');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
@@ -110,7 +112,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 	request(options, function (err, res, body) {
 		if (err) {
 			log.error(err);
-			cbk({err: 'internalError', des: 'Internal server error'});
+			return cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
 			var serviceError = body;
@@ -122,12 +124,51 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 }
 
+function sendEmailMagicLink(email, link, cbk){
+
+	var html = _settings.magicLink.body.replace("__LINK__", link);
+
+	var body = {
+			to: email,
+			subject: _settings.magicLink.subject,
+			html: html
+	};
+
+	var options = {
+		url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail,
+		headers: {
+			'Content-Type': 'application/json; charset=utf-8'
+		},
+		method: 'POST',
+		body: JSON.stringify(body)
+	};
+
+	request(options, function (err, res, body){
+		if (err) {
+			log.error(err);
+			return cbk({err: 'internalError', des: 'Internal server error'});
+		}
+		if (res.statusCode === 500) {
+			var serviceError = body;
+			log.error(serviceError);
+			return cbk({
+				err: 'internal_error',
+				des: 'Error calling notifications service for Magic Link email'
+			});
+		}
+		cbk();
+	});
+}
+
 module.exports = function (settings) {
 	var config = require(process.cwd() + '/config.json');
 	_settings = _.assign({}, config, settings);
 
+	console.log('--call to real module--');
+
 	return {
 		emailVerification: emailVerification,
-		sendEmailForgotPassword: sendEmailForgotPassword
+		sendEmailForgotPassword: sendEmailForgotPassword,
+		sendEmailMagicLink: sendEmailMagicLink
 	};
 };
