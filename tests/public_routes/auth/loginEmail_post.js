@@ -25,7 +25,7 @@ describe('public routes', function () {
 				it.skip('204 - send valid email with a magic link', function (done) {
 					var expectedEmail = 'user@email.com';
 					var expectedRefreshToken = 'REFRESH_TOKEN';
-					var expectedLink = config.emailVerification.redirectProtocol + '://auth/login/refreshToken/' + expectedRefreshToken;
+					var expectedLink = config.emailVerification.redirectProtocol + '://auth/login/refreshToken?rt=' + expectedRefreshToken;
 					var expectedUserId = 'USER_ID';
 
 					var daoManagerStub = {

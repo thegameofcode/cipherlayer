@@ -22,7 +22,7 @@ Feature: client application logs in into a protected backend
 		When the client app requests log in the protected application with username substring
 		Then the response status code is 409
 		And the response body contains json attribute "err"
-		
+
 	@service
 	Scenario: client app requests a magic link
 		Given a user with valid credentials

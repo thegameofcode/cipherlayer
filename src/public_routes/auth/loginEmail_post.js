@@ -19,7 +19,7 @@ module.exports = function (req, res, next) {
 
 	daoManager.getFromUsername(email, function (err, user) {
 		tokenManager.createRefreshToken(user._id, {}, function (err, refreshToken) {
-			var link = config.emailVerification.redirectProtocol + '://auth/login/refreshToken/' + refreshToken;
+			var link = config.emailVerification.redirectProtocol + '://auth/login/refreshToken?rt=' + refreshToken;
 			emailManager.sendEmailMagicLink(email, link, function () {
 				res.send(204);
 				next();
