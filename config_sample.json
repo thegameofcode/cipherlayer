@@ -132,7 +132,7 @@
 			"key": "user.{username}.transaction",
 			"expireInSec": 86400
 		},
-		"scheme": "mycomms",
+		"scheme": "my-scheme",
 		"redirectProtocol": "https"
 	},
 	"externalServices": {
@@ -168,7 +168,8 @@
 	},
 	"magicLink": {
 		"subject": "Cipherlayer Magic Login",
-		"body": "Here is your magic link, please click <a href='__LINK__' >here</a>"
+		"body": "Here is your magic link, please click <a href='__LINK__' >here</a>",
+		"scheme": "my-scheme"
 	},
 	"endpoints": [
 		{

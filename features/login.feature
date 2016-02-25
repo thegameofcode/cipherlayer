@@ -22,9 +22,24 @@ Feature: client application logs in into a protected backend
 		When the client app requests log in the protected application with username substring
 		Then the response status code is 409
 		And the response body contains json attribute "err"
-		
+
 	@service
 	Scenario: client app requests a magic link
 		Given a user with valid credentials
-		When the app requests a magic link for a valid user
+		When the client app requests a magic link for a valid user
 		Then the response status code is 204
+
+	@service
+	Scenario: user receives the magic link
+		Given a user with valid credentials
+		When the client app requests a magic link for a valid user
+		Then the user receives a magic link email
+
+	@only
+	@service
+	Scenario: user clicks the magic link
+		Given a user with valid credentials
+		When the client app requests a magic link for a valid user
+		And the user clicks the received magic link
+		Then the response status code is 302
+		And the response headers contains the header "Location"
