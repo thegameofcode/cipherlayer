@@ -113,6 +113,7 @@ function startListener(publicPort, internalPort, cbk) {
 				"/auth/in/*",
 				"/auth/google",
 				"/auth/google/*",
+				"/auth/login/refreshToken*",
 				"/user/activate*",
 				"/heartbeat",
 				"/user/email/available"

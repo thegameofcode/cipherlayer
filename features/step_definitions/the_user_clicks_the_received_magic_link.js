@@ -26,7 +26,6 @@ module.exports = function () {
 			followAllRedirects: false,
 			json: true
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			should.not.exist(err);
