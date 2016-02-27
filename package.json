@@ -14,7 +14,7 @@
 		"coverage-unit": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/unit mocha -- tests --recursive --reporter mocha-lcov-reporter",
 		"coverage-acceptance": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/acceptance cucumber.js -- --tags ~@ignore --format json",
 		"coverage-merge": "istanbul-combine coverage/**/coverage.json",
-		"coverage": "npm run coverage-unit && npm run coverage-acceptance && coverage--merge",
+		"coverage": "npm run coverage-unit && npm run coverage-acceptance && coverage-merge",
 		"coveralls": "istanbul-coveralls",
 		"codeclimate": "codeclimate-test-reporter < ./coverage/lcov.info"
 	},
