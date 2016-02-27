@@ -9,7 +9,6 @@ describe('redis', function () {
 	this.timeout(4000);
 
 	beforeEach(redisMng.connect);
-	afterEach(redisMng.disconnect);
 
 	var baseKey = 'key';
 	var baseValue = 'value';
