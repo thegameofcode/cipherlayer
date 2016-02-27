@@ -12,7 +12,7 @@ module.exports = function () {
 		cipherlayer.start(config.public_port, config.internal_port, function (err) {
 			assert.equal(err, null);
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/auth/user',
+				url: 'http://localhost:' + config.internal_port + '/auth/user',
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
 					'Authorization': 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64')

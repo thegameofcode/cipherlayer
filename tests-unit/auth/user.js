@@ -26,7 +26,7 @@ module.exports = {
 
 			it('POST 201 created', function (done) {
 				var options = {
-					url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+					url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 					headers: HEADERS_WITH_AUTHORIZATION_BASIC,
 					method: 'POST',
 					body: JSON.stringify({username: username, password: password, phone: phone})
@@ -45,7 +45,7 @@ module.exports = {
 
 			it('401 Not authorized when trying to POST to /auth/user without basic authorization', function (done) {
 				var options = {
-					url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+					url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 					headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
 					method: 'POST',
 					body: JSON.stringify({username: username, password: password})
@@ -65,7 +65,7 @@ module.exports = {
 					assert.notEqual(createdUser, null);
 
 					var options = {
-						url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+						url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 						headers: HEADERS_WITH_AUTHORIZATION_BASIC,
 						method: 'POST',
 						body: JSON.stringify({username: USER.username, password: USER.password})
@@ -88,7 +88,7 @@ module.exports = {
 					assert.notEqual(createdUser, null);
 
 					var options = {
-						url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+						url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 						headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
 						method: 'POST',
 						body: JSON.stringify({username: USER.username, password: USER.password})
@@ -108,7 +108,7 @@ module.exports = {
 					assert.notEqual(createdUser, null);
 
 					var options = {
-						url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+						url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 						headers: HEADERS_WITH_AUTHORIZATION_BASIC,
 						method: 'DELETE'
 					};
@@ -133,7 +133,7 @@ module.exports = {
 					assert.notEqual(createdUser, null);
 
 					var options = {
-						url: 'http://' + config.private_host + ':' + config.public_port + '/auth/user',
+						url: 'http://' + config.private_host + ':' + config.internal_port + '/auth/user',
 						headers: HEADERS_WITHOUT_AUTHORIZATION_BASIC,
 						method: 'DELETE'
 					};

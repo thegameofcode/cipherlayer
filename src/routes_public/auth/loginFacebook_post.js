@@ -1,12 +1,14 @@
+'use strict';
+
 var request = require('request');
 var _ = require('lodash');
 
-var log = require('../logger/service.js');
-var daoMng = require('../managers/dao');
-var userMng = require('../managers/user')();
-var tokenMng = require('../managers/token');
+var log = require('../../logger/service.js');
+var daoMng = require('../../managers/dao');
+var userMng = require('../../managers/user')();
+var tokenMng = require('../../managers/token');
 var config = require(process.cwd() + '/config.json');
-var crypto = require('../managers/crypto');
+var crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var defaultOptions = {
@@ -48,7 +50,7 @@ function mapFacebookData(body, fieldsMap) {
 	return mappedData;
 }
 
-function postAuthRegisterFacebook(req, res, next) {
+module.exports = function postAuthRegisterFacebook(req, res, next) {
 
 	var options = _.clone(defaultOptions);
 	options.qs.access_token = req.body.accessToken;
@@ -179,10 +181,4 @@ function postAuthRegisterFacebook(req, res, next) {
 		});
 
 	});
-}
-
-function addRoutes(service) {
-	service.post('/auth/login/facebook', postAuthRegisterFacebook);
-}
-
-module.exports = addRoutes;
+};

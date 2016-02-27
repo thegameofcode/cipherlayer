@@ -105,7 +105,7 @@ describe('public routes', function () {
 					done();
 				};
 
-				var forgotPassword_get = require('../../../src/public_routes/user/forgotPassword_get');
+				var forgotPassword_get = require('../../../src/routes_public/user/forgotPassword_get');
 				forgotPassword_get(req, res, next);
 			});
 
