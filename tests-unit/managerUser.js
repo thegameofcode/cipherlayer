@@ -509,7 +509,7 @@ describe('user Manager', function () {
 
 				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
 					if (err) {
-						return cbk(err);
+						return done(err);
 					}
 
 					nock('http://' + config.private_host + ':' + config.private_port)
@@ -552,7 +552,7 @@ describe('user Manager', function () {
 
 			ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
 				if (err) {
-					return cbk(err);
+					return done(err);
 				}
 
 				nock('http://' + config.private_host + ':' + config.private_port)
@@ -598,7 +598,7 @@ describe('user Manager', function () {
 
 				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
 					if (err) {
-						return cbk(err);
+						return done(err);
 					}
 
 					nock('http://' + config.private_host + ':' + config.private_port)
@@ -645,7 +645,7 @@ describe('user Manager', function () {
 
 				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
 					if (err) {
-						return cbk(err);
+						return done(err);
 					}
 
 					nock('http://' + config.private_host + ':' + config.private_port)
@@ -660,7 +660,7 @@ describe('user Manager', function () {
 							assert.notEqual(err, null);
 							assert.deepEqual(err, expectedError);
 							assert.equal(tokens, undefined);
-							done();
+							return done();
 						});
 					});
 				});

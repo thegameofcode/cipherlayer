@@ -9,7 +9,4 @@ module.exports = function () {
 		world.config = _.clone(config);
 	});
 
-	this.After(function () {
-		config = world.config;
-	});
 };

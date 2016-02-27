@@ -74,7 +74,8 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 		if (res.statusCode !== 200) {
 			return cbk({err: 'avatar_inaccessible'});
 		}
-		var data = [], dataLen = 0;
+		var data = [];
+		var dataLen = 0;
 
 		res.on('data', function (chunk) {
 			data.push(chunk);

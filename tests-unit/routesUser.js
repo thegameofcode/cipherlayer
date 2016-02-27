@@ -21,7 +21,6 @@ var AUTHORIZATION;
 var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
 var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;
 
-var createdUserId;
 
 var versionHeader = 'test/1';
 
@@ -51,7 +50,6 @@ describe('user', function () {
 				dao.addUser()(userToCreate, function (err, createdUser) {
 					assert.equal(err, null);
 					assert.notEqual(createdUser, undefined);
-					createdUserId = createdUser._id;
 					ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
 						AUTHORIZATION = config.authHeaderKey + loginToken;
 						return done();

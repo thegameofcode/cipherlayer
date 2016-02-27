@@ -17,7 +17,7 @@ describe('user dao', function () {
 	var fakeCollection = {};
 	var fakeDb = {};
 	var fakeFind = {};
-	var noop = () => {};
+	var noop = () => {}; // eslint-disable-line no-empty-function
 
 	beforeEach(function (done) {
 		fakeCollection = {

@@ -44,7 +44,7 @@ describe.skip('/api/profile (verify phone)', function () {
 
 		var options = {
 			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
@@ -69,7 +69,7 @@ describe.skip('/api/profile (verify phone)', function () {
 
 		var options = {
 			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
@@ -152,7 +152,7 @@ describe.skip('/api/profile (verify phone)', function () {
 
 		var options = {
 			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
