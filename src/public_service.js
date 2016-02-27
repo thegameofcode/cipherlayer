@@ -107,10 +107,22 @@ module.exports = function () {
 			require(platformsPath + filename).addRoutes(server, passport);
 		});
 
-		server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+		const allMiddlewares = [
+			checkAccessTokenParam,
+			checkAuthHeader,
+			decodeToken,
+			permissions,
+			findUser,
+			pinValidation,
+			userAppVersion,
+			prepareOptions,
+			platformsSetUp,
+			propagateRequest
+		];
+		server.get(/(.*)/, allMiddlewares);
+		server.post(/(.*)/, allMiddlewares);
+		server.del(/(.*)/, allMiddlewares);
+		server.put(/(.*)/, allMiddlewares);
 
 		server.listen(publicPort, function () {
 			log.info(`PUBLIC SERVICE listening on PORT ${publicPort}`);
