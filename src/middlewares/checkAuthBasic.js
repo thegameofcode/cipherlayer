@@ -7,7 +7,7 @@ module.exports = function checkAuthBasic(req, res, next) {
 	if (req.headers.authorization !== expectedAuthorizationBasic) {
 		res.send(401, "Missing basic authorization");
 		return next(false);
-	} else {
-		return next();
 	}
+
+	return next();
 };

@@ -80,10 +80,9 @@ function salesforceDenyPermisionFilter(req, res, next) {
 	var errorDescription = req.query.error_description;
 	if (!errorCode || !errorDescription) {
 		return next();
-	} else {
-		res.send(401, {err: 'access_denied', des: 'end-user denied authorization'});
-		next(false);
 	}
+	res.send(401, {err: 'access_denied', des: 'end-user denied authorization'});
+	return next(false);
 }
 
 function salesforceCallback(req, res, next) {
@@ -93,7 +92,7 @@ function salesforceCallback(req, res, next) {
 	daoMng.getFromUsername(profile._raw.email, function (err, foundUser) {
 		if (err) {
 
-			if (err.message == daoMng.ERROR_USER_NOT_FOUND) {
+			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
 				var tokenData = {
 					accessToken: sfData.accessToken,
 					refreshToken: sfData.refreshToken
@@ -145,7 +144,7 @@ function salesforceCallback(req, res, next) {
 							}
 
 							res.send(203, returnProfile);
-							next(false);
+							return next(false);
 						});
 					});
 				});
@@ -251,9 +250,10 @@ function getUserOptionalInfo(sfData, userId, cbk) {
 	};
 	request(options, function (error, res_private, body) {
 		if (error) {
-			cbk(error, null);
+			return cbk(error, null);
 		}
-		cbk(null, JSON.parse(body));
+
+		return cbk(null, JSON.parse(body));
 	});
 }
 
@@ -275,10 +275,8 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk) {
 		return cbk(null, platform.accessToken.params.access_token);
 	}
 	var optionsForSFRenew = {
-		url: config.salesforce.tokenUrl + '?grant_type=refresh_token' + '&' +
-		'client_id=' + config.salesforce.clientId + '&' +
-		'client_secret=' + config.salesforce.clientSecret + '&' +
-		'refresh_token=' + platform.refreshToken,
+		url: `${config.salesforce.tokenUrl}?grant_type=refresh_token&client_id=${config.salesforce.clientId}` +
+		`&client_secret=${config.salesforce.clientSecret}&refresh_token=${platform.refreshToken}`,
 		method: 'POST'
 	};
 
@@ -304,9 +302,8 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk) {
 		daoMng.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function (err) {
 			if (err) {
 				return cbk(err);
-			} else {
-				return cbk(null, newAccessToken);
 			}
+			return cbk(null, newAccessToken);
 		});
 	});
 }

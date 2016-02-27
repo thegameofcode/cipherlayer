@@ -35,18 +35,17 @@ function insertKeyValue(key, value, expSeconds, cbk) {
 	setKeyValue(key, value, function (err) {
 		if (err) {
 			return cbk(err);
-		} else {
-			getKeyValue(key, function (err, value) {
-				if (err) {
-					return cbk(err);
-				} else {
-					if (expSeconds) {
-						redisClient.expire(key, expSeconds);
-					}
-					return cbk(null, value);
-				}
-			});
 		}
+
+		getKeyValue(key, function (err, value) {
+			if (err) {
+				return cbk(err);
+			}
+			if (expSeconds) {
+				redisClient.expire(key, expSeconds);
+			}
+			return cbk(null, value);
+		});
 	});
 }
 
@@ -56,7 +55,10 @@ function updateKeyValue(key, value, cbk) {
 	}
 
 	redisClient.ttl(key, function (err, expSeconds) {
-		if (err) return cbk(err);
+		if (err) {
+			return cbk(err);
+		}
+
 		insertKeyValue(key, value, expSeconds, cbk);
 	});
 }
@@ -99,13 +101,14 @@ function deleteAllKeys(cbk) {
 }
 
 function getStatus(cbk) {
-	var REDIS_ERR = {
-		err: 'component_error',
-		des: 'Redis component is not available'
-	};
+	if (!redisClient || !isConnected) {
+		return cbk({
+			err: 'component_error',
+			des: 'Redis component is not available'
+		});
+	}
 
-	if (!redisClient || !isConnected) return cbk(REDIS_ERR);
-	cbk();
+	return cbk();
 }
 
 module.exports = {

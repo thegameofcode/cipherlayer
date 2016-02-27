@@ -48,69 +48,69 @@ module.exports = function (req, res, next) {
 
 					return next(false);
 
-				} else {
-					var data = {};
-					if (foundUser.roles) {
-						data.roles = foundUser.roles;
-					}
+				}
+				var data = {};
+				if (foundUser.roles) {
+					data.roles = foundUser.roles;
+				}
 
-					async.series([
-						function (done) {
-							//Add "realms" & "capabilities"
-							daoMng.getRealms(function (err, realms) {
-								if (err) {
-									log.error({err: err, des: 'error obtaining user realms'});
-									return done();
-								}
+				async.series([
+					function (done) {
+						//Add "realms" & "capabilities"
+						daoMng.getRealms(function (err, realms) {
+							if (err) {
+								log.error({err: err, des: 'error obtaining user realms'});
+								return done();
+							}
 
-								if (!realms) {
-									log.info({des: 'there are no REALMS in DB'});
-									return done();
+							if (!realms) {
+								log.info({des: 'there are no REALMS in DB'});
+								return done();
+							}
+							async.eachSeries(realms, function (realm, nextRealm) {
+								if (!realm.allowedDomains || !realm.allowedDomains.length) {
+									return nextRealm();
 								}
-								async.eachSeries(realms, function (realm, nextRealm) {
-									if (!realm.allowedDomains || !realm.allowedDomains.length) {
-										return nextRealm();
+								async.eachSeries(realm.allowedDomains, function (domain, nextAllowedDomains) {
+									//wildcard
+									var check = domain.replace(/\*/g, '.*');
+									var match = foundUser.username.match(check);
+									if (!match || foundUser.username !== match[0]) {
+										return nextAllowedDomains();
 									}
-									async.eachSeries(realm.allowedDomains, function (domain, nextAllowedDomains) {
-										//wildcard
-										var check = domain.replace(/\*/g, '.*');
-										var match = foundUser.username.match(check);
-										if (!match || foundUser.username !== match[0]) {
-											return nextAllowedDomains();
+
+									if (!data.realms) {
+										data.realms = [];
+									}
+									data.realms.push(realm.name);
+
+									async.each(Object.keys(realm.capabilities), function (capName, added) {
+										if (!data.capabilities) {
+											data.capabilities = {};
 										}
 
-										if (!data.realms) {
-											data.realms = [];
-										}
-										data.realms.push(realm.name);
+										data.capabilities[capName] = realm.capabilities[capName];
+										added();
+									}, nextAllowedDomains);
+								}, nextRealm);
+							}, done);
+						});
+					}
+				], function () {
+					tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
+						var link = config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken;
+						emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
+							if (err) {
+								res.send(500, {err: 'internalError', des: 'Internal server error'});
+								return next(false);
+							}
 
-										async.each(Object.keys(realm.capabilities), function (capName, added) {
-											if (!data.capabilities) {
-												data.capabilities = {};
-											}
-
-											data.capabilities[capName] = realm.capabilities[capName];
-											added();
-										}, nextAllowedDomains);
-									}, nextRealm);
-								}, done);
-							});
-						}
-					], function () {
-						tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
-							var link = config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken;
-							emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
-								if (err) {
-									res.send(500, {err: 'internalError', des: 'Internal server error'});
-									return next(false);
-								}
-
-								res.send(204);
-								next();
-							});
+							res.send(204);
+							next();
 						});
 					});
-				}
+				});
+
 			});
 		});
 	});

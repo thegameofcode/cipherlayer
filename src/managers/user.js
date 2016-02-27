@@ -385,21 +385,19 @@ function setPassword(id, body, cbk) {
 		ERR_INVALID_PWD.des = _settings.password.message;
 		var err = ERR_INVALID_PWD;
 		return cbk(err);
-	} else {
-		cryptoMng.encrypt(body.password, function (encryptedPwd) {
-			daoMng.updateField(id, 'password', encryptedPwd, function (err, result) {
-				return cbk(err, result);
-			});
-		});
 	}
+	cryptoMng.encrypt(body.password, function (encryptedPwd) {
+		daoMng.updateField(id, 'password', encryptedPwd, function (err, result) {
+			return cbk(err, result);
+		});
+	});
 }
 
 function validateOldPassword(username, oldPassword, cbk) {
 
 	daoMng.getAllUserFields(username, function (err, user) {
 		if (err) {
-			res.send(401, err);
-			return next();
+			return cbk(err);
 		}
 
 		cryptoMng.encrypt(oldPassword, function (encrypted) {

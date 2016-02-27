@@ -15,16 +15,15 @@ var _settings = {};
 function storeUserAppVersion(req, res, next) {
 	if (!req.headers[_settings.version.header] || req.user.appVersion === req.headers[_settings.version.header]) {
 		return next();
-	} else {
-		userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
-			if (err) {
-				log.error({err: err});
-				res.send(500, updatingUserError);
-				return next(false);
-			}
-			next();
-		});
 	}
+	userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
+		if (err) {
+			log.error({err: err});
+			res.send(500, updatingUserError);
+			return next(false);
+		}
+		return next();
+	});
 }
 
 module.exports = function (settings) {

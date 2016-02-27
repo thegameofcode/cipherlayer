@@ -164,8 +164,6 @@ module.exports = function (settings) {
 	var config = require(process.cwd() + '/config.json');
 	_settings = _.assign({}, config, settings);
 
-	console.log('--call to real module--');
-
 	return {
 		emailVerification: emailVerification,
 		sendEmailForgotPassword: sendEmailForgotPassword,

@@ -22,24 +22,22 @@ function uploadFile(bucket, fileName, binaryFile, cbk) {
 	initAWS(function (started) {
 		if (!started) {
 			return cbk({err: 'cannot_initialize_AWS_service'});
-		} else {
-			if (!bucket || bucket === '') {
-				return cbk({err: 'invalid_bucket'});
-			} else if (!fileName || fileName === '') {
-				return cbk({err: 'invalid_file_name'});
-			} else if (!binaryFile || binaryFile.length === 0) {
-				return cbk({err: 'invalid_file_data'});
-			} else {
-				var data = {Key: fileName, Body: binaryFile, Bucket: bucket, ACL: 'public-read'};
-				s3.putObject(data, function (err, data) {
-					if (err) {
-						return cbk(err);
-					} else {
-						cbk(null, data);
-					}
-				});
-			}
 		}
+		if (!bucket || bucket === '') {
+			return cbk({err: 'invalid_bucket'});
+		} else if (!fileName || fileName === '') {
+			return cbk({err: 'invalid_file_name'});
+		} else if (!binaryFile || binaryFile.length === 0) {
+			return cbk({err: 'invalid_file_data'});
+		}
+
+		var data = {Key: fileName, Body: binaryFile, Bucket: bucket, ACL: 'public-read'};
+		s3.putObject(data, function (err, data) {
+			if (err) {
+				return cbk(err);
+			}
+			return cbk(null, data);
+		});
 	});
 }
 
@@ -47,26 +45,24 @@ function getFileURL(bucket, fileName, cbk) {
 	initAWS(function (started) {
 		if (!started) {
 			return cbk({err: 'cannot_initialize_AWS_service'});
-		} else {
-
-			if (!bucket || bucket === '') {
-				return cbk({err: 'invalid_bucket'});
-			} else if (!fileName || fileName === '') {
-				return cbk({err: 'invalid_file_name'});
-			} else {
-				var urlParams = {Bucket: bucket, Key: fileName};
-				s3.getSignedUrl('getObject', urlParams, function (err, url) {
-					if (err) {
-						return cbk(err);
-					} else {
-						if (url.indexOf('?') > -1) {
-							url = url.substr(0, url.indexOf('?'));
-						}
-						cbk(null, url);
-					}
-				});
-			}
 		}
+
+		if (!bucket || bucket === '') {
+			return cbk({err: 'invalid_bucket'});
+		} else if (!fileName || fileName === '') {
+			return cbk({err: 'invalid_file_name'});
+		}
+
+		var urlParams = {Bucket: bucket, Key: fileName};
+		s3.getSignedUrl('getObject', urlParams, function (err, url) {
+			if (err) {
+				return cbk(err);
+			}
+			if (url.indexOf('?') > -1) {
+				url = url.substr(0, url.indexOf('?'));
+			}
+			return cbk(null, url);
+		});
 	});
 }
 
@@ -96,15 +92,14 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 			uploadFile(validBucket, avatarName, buf, function (err) {
 				if (err) {
 					return cbk({err: 'avatar_not_uploaded'});
-				} else {
-					getFileURL(validBucket, avatarName, function (err, fileURL) {
-						if (err) {
-							return cbk({err: 'avatar_address_inaccessible'});
-						} else {
-							return cbk(null, fileURL);
-						}
-					});
 				}
+
+				getFileURL(validBucket, avatarName, function (err, fileURL) {
+					if (err) {
+						return cbk({err: 'avatar_address_inaccessible'});
+					}
+					return cbk(null, fileURL);
+				});
 			});
 		});
 	});

@@ -42,52 +42,53 @@ function propagateRequest(req, res, next) {
 		});
 		return;
 
-	} else {
-
-		// This are the normal requests
-		req.options.headers['user-agent'] = req.headers['user-agent'];
-		request(req.options, function (err, private_res, body) {
-			var end = Date.now();
-			if (err) {
-				log.error({err: err, res: private_res, body: body});
-				res.send(500, {
-					err: ' auth_proxy_error',
-					des: 'there was an internal error when redirecting the call to protected service'
-				});
-			} else {
-				try {
-					body = JSON.parse(body);
-				} catch (ex) {
-					log.error({err: 'json_parse_error', des: 'error parsing body from response'});
-				}
-				log.info({
-					request: {
-						url: req.options.url,
-						method: req.options.method,
-						headers: req.options.headers,
-						time: start
-					},
-					response: {
-						statusCode: private_res.statusCode,
-						hasBody: (_.size(private_res.body) > 0),
-						time: end
-					},
-					user: req.user
-				}, 'proxy call');
-
-				transferAllowedHeaders(config.allowedHeaders, private_res, res);
-
-				if (private_res.statusCode === 302) {
-					res.header('Location', private_res.headers.location);
-					res.send(302);
-				} else {
-					res.send(Number(private_res.statusCode), body);
-				}
-			}
-
-			return next();
-		});
 	}
+
+	// This are the normal requests
+	req.options.headers['user-agent'] = req.headers['user-agent'];
+	request(req.options, function (err, private_res, body) {
+		var end = Date.now();
+		if (err) {
+			log.error({err: err, res: private_res, body: body});
+			res.send(500, {
+				err: ' auth_proxy_error',
+				des: 'there was an internal error when redirecting the call to protected service'
+			});
+			return next();
+		}
+
+		try {
+			body = JSON.parse(body);
+		} catch (ex) {
+			log.error({err: 'json_parse_error', des: 'error parsing body from response'});
+		}
+
+		log.info({
+			request: {
+				url: req.options.url,
+				method: req.options.method,
+				headers: req.options.headers,
+				time: start
+			},
+			response: {
+				statusCode: private_res.statusCode,
+				hasBody: (_.size(private_res.body) > 0),
+				time: end
+			},
+			user: req.user
+		}, 'proxy call');
+
+		transferAllowedHeaders(config.allowedHeaders, private_res, res);
+
+		if (private_res.statusCode === 302) {
+			res.header('Location', private_res.headers.location);
+			res.send(302);
+		} else {
+			res.send(Number(private_res.statusCode), body);
+		}
+
+		return next();
+	});
 }
 
 function transferAllowedHeaders(headers, srcRes, dstRes) {

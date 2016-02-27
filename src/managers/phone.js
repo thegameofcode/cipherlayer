@@ -87,13 +87,12 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 				if (err) {
 					err.code = 500;
 					return cbk(err);
-				} else {
-					return cbk({
-						err: 'auth_proxy_verified_error',
-						des: 'User phone not verified',
-						code: 403
-					});
 				}
+				return cbk({
+					err: 'auth_proxy_verified_error',
+					des: 'User phone not verified',
+					code: 403
+				});
 			});
 		} else {
 			var redisKey = _settings.phoneVerification.redis.key;
@@ -130,29 +129,28 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 						} else {
 							if (pin === redisPhonePin) {
 								return cbk(null, true);
+							}
+							//Last attempt
+							if (redisPinAttempts === '1') {
+								createPIN(redisKeyId, phone, function (err) {
+									if (err) {
+										return cbk(err);
+									}
+									return cbk({
+										err: 'verify_phone_error',
+										des: 'PIN used has expired.',
+										code: 401
+									}, false);
+								});
 							} else {
-								//Last attempt
-								if (redisPinAttempts === '1') {
-									createPIN(redisKeyId, phone, function (err) {
-										if (err) {
-											return cbk(err);
-										}
-										return cbk({
-											err: 'verify_phone_error',
-											des: 'PIN used has expired.',
-											code: 401
-										}, false);
-									});
-								} else {
-									redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts - 1, function (err) {
-										if (err) return cbk(err);
-										return cbk({
-											err: 'verify_phone_error',
-											des: 'PIN used is not valid.',
-											code: 401
-										}, false);
-									});
-								}
+								redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts - 1, function (err) {
+									if (err) return cbk(err);
+									return cbk({
+										err: 'verify_phone_error',
+										des: 'PIN used is not valid.',
+										code: 401
+									}, false);
+								});
 							}
 						}
 					});
