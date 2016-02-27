@@ -20,7 +20,7 @@ describe('public routes', function () {
 				mockery.disable();
 			});
 
-			it.skip('white box test of forgot password email creation', function (done) {
+			it('white box test of forgot password email creation', function (done) {
 				var expectedEmail = 'valid@email.com';
 				var expectedUserId = 'USER_ID';
 				var expectedPassword = 'EXPECTED PASSWORD';
