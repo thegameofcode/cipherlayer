@@ -6,8 +6,6 @@
 	"scripts": {
 		"test": "npm run-script jshint && npm run-script mocha && npm run-script features",
 		"mocha": "mocha tests --recursive",
-		"mocha-report-1": "node_modules/.bin/mocha tests --recursive --require blanket -R mocha-lcov-reporter > coverage/mocha.lcov",
-		"mocha-report-2": "cat coverage/mocha.lcov | node_modules/coveralls/bin/coveralls.js",
 		"features": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags ~@ignore",
 		"features-only": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @only",
 		"jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js",
