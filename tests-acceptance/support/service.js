@@ -8,7 +8,7 @@ var world = require('./world');
 var config = require('../../config.json');
 
 module.exports = function () {
-	this.Before("@service", function (done) {
+	this.Before("@service", function (scenario, done) {
 		cipherlayer.start(config.public_port, config.internal_port, function (err) {
 			assert.equal(err, null);
 			var options = {
@@ -30,7 +30,7 @@ module.exports = function () {
 		});
 	});
 
-	this.After("@service", function (done) {
+	this.After("@service", function (scenario, done) {
 		cipherlayer.stop(done);
 	});
 };
