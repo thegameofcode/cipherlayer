@@ -7,6 +7,8 @@ var nock = require('nock');
 var dao = require('../../src/managers/dao.js');
 var config = require('../../config.json');
 
+var accessTokenSettings = require('../token_settings').accessTokenSettings;
+
 var expectedBody = {field1: 'value1', field2: 'value2'};
 var SF_DATA = {
 	userId: 'f6e5d4c3b2a1',
@@ -44,89 +46,95 @@ var OPTIONS_STANDARD_CALL = {
 
 var versionHeader = 'test/1';
 
-module.exports = {
-	itWithSalesforce: function withSalesForce(accessTokenSettings) {
-		it('200 with salesforce', function (done) {
-			dao.addUser()(USER, function (err, createdUser) {
+describe('Protected calls standard with SF', () => {
+
+	beforeEach(function (done) {
+		dao.deleteAllUsers(function (err) {
+			assert.equal(err, null);
+			done();
+		});
+	});
+
+	it('200 with salesforce', function (done) {
+		dao.addUser()(USER, function (err, createdUser) {
+			assert.equal(err, null);
+
+			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+				nockProtectedStandartCall(createdUser._id, SF_DATA, expectedBody);
+
+				var options = _.clone(OPTIONS_STANDARD_CALL);
+				options.headers.Authorization = 'bearer ' + loginToken;
+				options.headers[config.version.header] = versionHeader;
+
+				request(options, function (err, res, body) {
+					assert.equal(err, null);
+					assert.equal(res.statusCode, 200, body);
+					assert.notEqual(body, undefined);
+					done();
+				});
+			});
+		});
+	});
+
+	it('200 with salesforce when renewing access token', function (done) {
+		var userWithSoonExpiry = _.clone(USER);
+		userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
+
+		dao.addUser()(userWithSoonExpiry, function (err, createdUser) {
+			assert.equal(err, null);
+
+			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
 				assert.equal(err, null);
+				var oldAccessToken = USER.platforms[0].accessToken.params.access_token;
 
-				ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-					nockProtectedStandartCall(createdUser._id, SF_DATA, expectedBody);
+				var queryParams = 'grant_type=refresh_token&' +
+					'client_id=' + config.salesforce.clientId + '&' +
+					'client_secret=' + config.salesforce.clientSecret + '&' +
+					'refresh_token=' + USER.platforms[0].refreshToken;
 
-					var options = _.clone(OPTIONS_STANDARD_CALL);
-					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = versionHeader;
+				var sfRenewTokenReturnedBody = {
+					"id": "https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",
+					"issued_at": "1278448384422",
+					"instance_url": "https://na1.salesforce.com",
+					"signature": "SSSbLO/gBhmmyNUvN18ODBDFYHzakxOMgqYtu+hDPsc=",
+					"access_token": "00Dx0000000BV7z!AR8AQP0jITN80ESEsj5EbaZTFG0RNBaT1cyWk7TrqoDjoNIWQ2ME_sTZzBjfmOE6zMHq6y8PIW4eWze9JksNEkWUl.Cju7m4"
+				};
+				nockSFRenewToken(queryParams, sfRenewTokenReturnedBody);
 
-					request(options, function (err, res, body) {
+				var newSFData = _.clone(SF_DATA);
+				newSFData.accessToken = sfRenewTokenReturnedBody.access_token;
+				nockProtectedStandartCall(createdUser._id, newSFData, expectedBody);
+
+				var options = _.clone(OPTIONS_STANDARD_CALL);
+				options.headers.Authorization = 'bearer ' + loginToken;
+				options.headers[config.version.header] = versionHeader;
+
+				request(options, function (err, res, body) {
+					assert.equal(err, null);
+					assert.equal(res.statusCode, 200, body);
+					assert.notEqual(body, undefined);
+
+					dao.getFromId(createdUser._id, function (err, foundUser) {
 						assert.equal(err, null);
-						assert.equal(res.statusCode, 200, body);
-						assert.notEqual(body, undefined);
+
+						var updatedExpiry = foundUser.platforms[0].expiry;
+						var roundedUpdatedExpiry = (updatedExpiry / 10000).toFixed();
+
+						var expectedExpiry = (new Date().getTime()) + config.salesforce.expiration * 60 * 1000;
+						var roundedExpectedExpiry = (expectedExpiry / 10000).toFixed();
+
+						assert.equal(roundedUpdatedExpiry, roundedExpectedExpiry);
+						assert.notEqual(oldAccessToken, foundUser.platforms[0].accessToken.params.access_token);
 						done();
 					});
 				});
 			});
 		});
-	},
-	itRenewSFToken: function renewSFToken(accessTokenSettings) {
-		it('200 with salesforce when renewing access token', function (done) {
-			var userWithSoonExpiry = _.clone(USER);
-			userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
+	});
 
-			dao.addUser()(userWithSoonExpiry, function (err, createdUser) {
-				assert.equal(err, null);
+});
 
-				ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-					assert.equal(err, null);
-					var oldAccessToken = USER.platforms[0].accessToken.params.access_token;
-
-					var queryParams = 'grant_type=refresh_token&' +
-						'client_id=' + config.salesforce.clientId + '&' +
-						'client_secret=' + config.salesforce.clientSecret + '&' +
-						'refresh_token=' + USER.platforms[0].refreshToken;
-
-					var sfRenewTokenReturnedBody = {
-						"id": "https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",
-						"issued_at": "1278448384422",
-						"instance_url": "https://na1.salesforce.com",
-						"signature": "SSSbLO/gBhmmyNUvN18ODBDFYHzakxOMgqYtu+hDPsc=",
-						"access_token": "00Dx0000000BV7z!AR8AQP0jITN80ESEsj5EbaZTFG0RNBaT1cyWk7TrqoDjoNIWQ2ME_sTZzBjfmOE6zMHq6y8PIW4eWze9JksNEkWUl.Cju7m4"
-					};
-					nockSFRenewToken(queryParams, sfRenewTokenReturnedBody);
-
-					var newSFData = _.clone(SF_DATA);
-					newSFData.accessToken = sfRenewTokenReturnedBody.access_token;
-					nockProtectedStandartCall(createdUser._id, newSFData, expectedBody);
-
-					var options = _.clone(OPTIONS_STANDARD_CALL);
-					options.headers.Authorization = 'bearer ' + loginToken;
-					options.headers[config.version.header] = versionHeader;
-
-					request(options, function (err, res, body) {
-						assert.equal(err, null);
-						assert.equal(res.statusCode, 200, body);
-						assert.notEqual(body, undefined);
-
-						dao.getFromId(createdUser._id, function (err, foundUser) {
-							assert.equal(err, null);
-
-							var updatedExpiry = foundUser.platforms[0].expiry;
-							var roundedUpdatedExpiry = (updatedExpiry / 10000).toFixed();
-
-							var expectedExpiry = (new Date().getTime()) + config.salesforce.expiration * 60 * 1000;
-							var roundedExpectedExpiry = (expectedExpiry / 10000).toFixed();
-
-							assert.equal(roundedUpdatedExpiry, roundedExpectedExpiry);
-							assert.notEqual(oldAccessToken, foundUser.platforms[0].accessToken.params.access_token);
-							done();
-						});
-					});
-				});
-			});
-		});
-	}
-};
-
-function nockProtectedStandartCall(id, expectedSfData, expectedBody) {
+function nockProtectedStandartCall (id, expectedSfData, expectedBody) {
 	nock('http://' + config.private_host + ':' + config.private_port, {
 		reqheaders: {
 			'x-user-id': id,
@@ -138,7 +146,7 @@ function nockProtectedStandartCall(id, expectedSfData, expectedBody) {
 		.reply(200, {field3: 'value3'});
 }
 
-function nockSFRenewToken(queryParams, bodyToReturn) {
+function nockSFRenewToken (queryParams, bodyToReturn) {
 	nock('https://login.salesforce.com', {})
 		.post('/services/oauth2/token' + '?' + queryParams)
 		.reply(200, bodyToReturn);

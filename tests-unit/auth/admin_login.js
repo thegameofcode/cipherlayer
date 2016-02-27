@@ -13,12 +13,14 @@ var versionHeader = 'test/1';
 var accessTokenSettings = require('../token_settings').accessTokenSettings;
 var refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 
-describe('/login', function () {
+
+describe('Admin /login', function () {
 	var baseUser = {
 		id: 'a1b2c3d4e5f6',
 		username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 		password: 'validpassword',
-		deviceId: '1234567890'
+		roles: ["admin"],
+		deviceId: "0987654321"
 	};
 
 	beforeEach(function (done) {
@@ -60,6 +62,7 @@ describe('/login', function () {
 			ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function (err, accessTokenInfo) {
 				assert.equal(err, null);
 				assert.equal(accessTokenInfo.userId, user.id);
+				assert.deepEqual(accessTokenInfo.data.roles, user.roles);
 				assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
 				assert.notEqual(body.refreshToken, undefined);
 				ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, refreshTokenInfo) {
@@ -71,50 +74,4 @@ describe('/login', function () {
 			});
 		});
 	});
-	it('POST 409 invalid credentials', function (done) {
-		var user = _.clone(baseUser);
-		user.password = 'invalidpassword';
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
-			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
-			},
-			method: 'POST',
-			body: JSON.stringify(user)
-		};
-		options.headers[config.version.header] = versionHeader;
-
-		request(options, function (err, res, body) {
-			assert.equal(err, null);
-			assert.equal(res.statusCode, 409);
-			body = JSON.parse(body);
-			assert.notEqual(body.err, 'invalid_credentials');
-			done();
-		});
-	});
-
-	it('POST 409 username substring', function (done) {
-		var user = _.clone(baseUser);
-		var username = user.username;
-		user.username = username.slice(0, username.length / 2);
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
-			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
-			},
-			method: 'POST',
-			body: JSON.stringify(user)
-		};
-		options.headers[config.version.header] = versionHeader;
-
-		request(options, function (err, res, body) {
-			assert.equal(err, null);
-			assert.equal(res.statusCode, 409);
-			body = JSON.parse(body);
-			assert.notEqual(body.err, 'invalid_credentials');
-			done();
-		});
-	});
 });
-
-

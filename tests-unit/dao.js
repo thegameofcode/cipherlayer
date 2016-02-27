@@ -17,36 +17,26 @@ describe('user dao', function () {
 	var fakeCollection = {};
 	var fakeDb = {};
 	var fakeFind = {};
+	var noop = () => {};
 
 	beforeEach(function (done) {
 		fakeCollection = {
-			remove: function () {
-			},
-			count: function () {
-			},
-			find: function () {
-			},
-			insert: function () {
-			},
-			update: function () {
-			},
-			ensureIndex: function () {
-			},
-			toArray: function () {
-
-			}
+			remove: noop,
+			count: noop,
+			find: noop,
+			insert: noop,
+			update: noop,
+			ensureIndex: noop,
+			toArray: noop
 		};
 
 		fakeDb = {
-			collection: function () {
-			},
-			close: function () {
-			}
+			collection: noop,
+			close: noop
 		};
 
 		fakeFind = {
-			nextObject: function () {
-			}
+			nextObject: noop
 		};
 
 		sinon.stub(fakeCollection, 'remove').yields();

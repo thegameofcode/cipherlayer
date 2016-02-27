@@ -1,7 +1,6 @@
 var assert = require('assert');
 var request = require('request');
 
-var cipherlayer = require('../src/cipherlayer');
 var config = require('../config.json');
 var userDao = require('../src/managers/dao');
 
@@ -14,17 +13,10 @@ var baseUser = {
 describe('Check Email Available endpoint', function () {
 
 	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, function (error) {
+		userDao.deleteAllUsers(function (error) {
 			assert.equal(error, null);
-			userDao.deleteAllUsers(function (error) {
-				assert.equal(error, null);
-				return done();
-			});
+			return done();
 		});
-	});
-
-	afterEach(function (done) {
-		cipherlayer.stop(done);
 	});
 
 	it('should indicate that requested email is available', function (done) {

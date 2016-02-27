@@ -13,7 +13,7 @@ var accessTokenSettings = {
 
 describe('middleware', function () {
 	describe('decodeToken', function () {
-		it('OK - lowercase authorization header', function(done){
+		it('OK - lowercase authorization header', function (done) {
 			var userId = 'A1B2C3D4';
 			var data = {data: 'some data'};
 			ciphertoken.createToken(accessTokenSettings, userId, null, data, function (err, accessToken) {
@@ -39,7 +39,7 @@ describe('middleware', function () {
 			});
 		});
 
-		it('OK - uppercase authorization header', function(done){
+		it('OK - uppercase authorization header', function (done) {
 			var userId = 'A1B2C3D4';
 			var data = {data: 'some data'};
 			ciphertoken.createToken(accessTokenSettings, userId, null, data, function (err, accessToken) {
