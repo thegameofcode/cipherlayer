@@ -10,8 +10,8 @@ test:
   override:
     - npm run test
     - npm run coverage
-    - npm run coveralls
-    - npm run codeclimate
+    - if [[ -z $CIRCLE_PR_REPONAME ]] ; then npm run coveralls ; fi
+    - if [[ -z $CIRCLE_PR_REPONAME ]] ; then npm run codeclimate ; fi
 deployment:
   npm:
     branch: master
