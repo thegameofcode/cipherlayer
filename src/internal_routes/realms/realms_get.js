@@ -1,6 +1,8 @@
-var daoMng = require('../managers/dao');
+'use strict';
 
-function getRealms(req, res, next) {
+var daoMng = require('../../managers/dao');
+
+module.exports = function getRealms(req, res, next) {
 	daoMng.getRealms(function (err, realms) {
 		if (err) {
 			res.send(500, {err: 'internalError', des: 'Internal server error'});
@@ -12,10 +14,4 @@ function getRealms(req, res, next) {
 		});
 		return next();
 	});
-}
-
-function addRoutes(service) {
-	service.get('/realms', getRealms);
-}
-
-module.exports = addRoutes;
+};

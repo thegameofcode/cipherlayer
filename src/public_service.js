@@ -23,6 +23,8 @@ var versionControl = require('version-control');
 var pinValidation = require('./middlewares/pinValidation')();
 var userAppVersion = require('./middlewares/userAppVersion')();
 
+var routes = require('./public_routes/routes');
+
 module.exports = function () {
 	var service = {};
 
@@ -101,10 +103,7 @@ module.exports = function () {
 			}
 		});
 
-		var routesPath = path.join(__dirname, './public_routes/');
-		fs.readdirSync(routesPath).forEach(function (filename) {
-			require(routesPath + filename)(server);
-		});
+		routes(server);
 
 		var platformsPath = path.join(__dirname, '/platforms/');
 		fs.readdirSync(platformsPath).forEach(function (filename) {

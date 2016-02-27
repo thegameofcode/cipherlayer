@@ -1,12 +1,12 @@
 'use strict';
 
 var restify = require('restify');
-var fs = require('fs');
-var path = require('path');
 var _ = require('lodash');
 
 var log = require('./logger/service.js');
 var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+
+var routes = require('./internal_routes/routes');
 
 module.exports = function () {
 	var service = {};
@@ -53,10 +53,7 @@ module.exports = function () {
 		server.use(restify.queryParser());
 		server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-		var routesPath = path.join(__dirname, './internal_routes/');
-		fs.readdirSync(routesPath).forEach(function (filename) {
-			require(routesPath + filename)(server);
-		});
+		routes(server);
 
 		server.listen(internalPort, function () {
 			log.info('INTERNAL SERVICE listening on PORT ' + internalPort);
