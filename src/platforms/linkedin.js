@@ -4,7 +4,7 @@ var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var log = require('../logger/service.js');
 var tokenMng = require('../managers/token');
 var daoMng = require('../managers/dao');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 function createLinkedInStrategy() {
 
@@ -15,12 +15,11 @@ function createLinkedInStrategy() {
 		scope: config.linkedin.scope,
 		passReqToCallback: true
 	}, function (req, accessToken, refreshToken, profile, done) {
-		var data = {
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			profile: profile
-		};
-		done(null, data);
+		return done(null, {
+			accessToken,
+			refreshToken,
+			profile
+		});
 	});
 }
 
@@ -36,7 +35,7 @@ function linkedInCallback(req, res, next) {
 				};
 				tokenMng.createAccessToken(profile.id, inData, function (err, token) {
 					if (err) {
-						log.error({err: err}, 'error creating linkedin profile token');
+						log.error({ err }, 'error creating linkedin profile token');
 						return next(false);
 					}
 					var returnProfile = {
@@ -56,7 +55,7 @@ function linkedInCallback(req, res, next) {
 
 		var tokenData = {};
 		if (foundUser.roles) {
-			tokenData = {"roles": foundUser.roles};
+			tokenData = { roles: foundUser.roles };
 		}
 
 		async.series([
@@ -64,7 +63,7 @@ function linkedInCallback(req, res, next) {
 				//Add "realms" & "capabilities"
 				daoMng.getRealms(function (err, realms) {
 					if (err) {
-						log.error({err: err, des: 'error obtaining user realms'});
+						log.error({err, des: 'error obtaining user realms'});
 						return done();
 					}
 
@@ -189,5 +188,5 @@ function addRoutes(server, passport) {
 }
 
 module.exports = {
-	addRoutes: addRoutes
+	addRoutes
 };

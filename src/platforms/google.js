@@ -5,7 +5,7 @@ var log = require('../logger/service');
 var tokenMng = require('../managers/token');
 var daoMng = require('../managers/dao');
 var userManager = require('../managers/user')();
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 function createGoogleStrategy() {
 
@@ -15,12 +15,11 @@ function createGoogleStrategy() {
 		callbackURL: config.google.callbackURL,
 		passReqToCallback: true
 	}, function (req, accessToken, refreshToken, profile, done) {
-		var data = {
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			profile: profile
-		};
-		done(null, data);
+		return done(null, {
+			accessToken,
+			refreshToken,
+			profile
+		});
 	});
 }
 
@@ -37,7 +36,7 @@ function googleCallback(req, res, next) {
 				};
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
 					if (err) {
-						log.error({err: err},'error creating google profile token');
+						log.error({ err },'error creating google profile token');
 						return next(false);
 					}
 					var returnProfile = {
@@ -69,11 +68,11 @@ function googleCallback(req, res, next) {
 
 		userManager.setPlatformData(foundUser._id, 'google', platform, function (err) {
 			if (err) {
-				log.error({err: err}, 'error updating google tokens into user ' + foundUser._id + '');
+				log.error({ err }, `error updating google tokens into user ${foundUser._id}`);
 			}
 			var data = {};
 			if (foundUser.roles) {
-				data = {"roles": foundUser.roles};
+				data = { roles: foundUser.roles };
 			}
 
 			async.series([
@@ -81,12 +80,12 @@ function googleCallback(req, res, next) {
 					//Add "realms" & "capabilities"
 					daoMng.getRealms(function (err, realms) {
 						if (err) {
-							log.error({err: err, des: 'error obtaining user realms'});
+							log.error({ err }, 'error obtaining user realms');
 							return done();
 						}
 
 						if (!realms || !realms.length) {
-							log.info({des: 'there are no REALMS in DB'});
+							log.info('there are no REALMS in DB');
 							return done();
 						}
 						async.eachSeries(realms, function (realm, next) {
@@ -153,5 +152,5 @@ function addRoutes(server, passport) {
 }
 
 module.exports = {
-	addRoutes: addRoutes
+	addRoutes
 };

@@ -37,8 +37,8 @@ module.exports = function (settings) {
 	_.extend(_settings, defaultSettings, settings);
 
 	return {
-		encrypt: encrypt,
-		verify: verify,
-		randomPassword: randomPassword
+		encrypt,
+		verify,
+		randomPassword
 	};
 };

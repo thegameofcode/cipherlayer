@@ -17,11 +17,11 @@ function createPIN(redisKeyId, phone, cbk) {
 		pin += randomNum.toString();
 	}
 
-	redisMng.insertKeyValue(redisKey + '.pin', pin, expires, function (err, pin) {
+	redisMng.insertKeyValue(`${redisKey}.pin`, pin, expires, function (err, pin) {
 		if (err) {
 			return cbk(err);
 		}
-		redisMng.insertKeyValue(redisKey + '.attempts', pinAttempts, expires, function (err) {
+		redisMng.insertKeyValue(`${redisKey}.attempts`, pinAttempts, expires, function (err) {
 			if (err) {
 				return cbk(err);
 			}
@@ -33,27 +33,19 @@ function createPIN(redisKeyId, phone, cbk) {
 }
 
 function sendPIN(phone, pin, cbk) {
-	var notifServiceURL = _settings.externalServices.notifications.base;
-	var sms = {
-		phone: phone,
-		text: 'MyComms pin code: ' + pin
+	const sms = {
+		phone,
+		text: `MyComms pin code: ${pin}`
 	};
 
-	var options = {
-		url: notifServiceURL + '/notification/sms',
+	request({
+		url: `${_settings.externalServices.notifications.base}/notification/sms`,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
 		},
 		method: 'POST',
 		body: JSON.stringify(sms)
-	};
-
-	request(options, function (err) {
-		if (err) {
-			return cbk(err);
-		}
-		cbk();
-	});
+	}, cbk);
 }
 
 function verifyPhone(redisKeyId, phone, country, pin, cbk) {
@@ -72,9 +64,9 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 		if (err) {
 			return cbk(err);
 		}
-		phone = '+' + returnedCountry.Dial + phone;
+		const formattedPhone = `+${returnedCountry.Dial}${phone}`;
 
-		if (!phone) {
+		if (!formattedPhone) {
 			return cbk({
 				err: 'auth_proxy_error',
 				des: 'empty phone',
@@ -83,7 +75,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 		}
 
 		if (!pin) {
-			createPIN(redisKeyId, phone, function (err) {
+			createPIN(redisKeyId, formattedPhone, function (err) {
 				if (err) {
 					err.code = 500;
 					return cbk(err);
@@ -96,13 +88,13 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 			});
 		} else {
 			var redisKey = _settings.phoneVerification.redis.key;
-			redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', phone);
+			redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', formattedPhone);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				if (err) return cbk(err);
 
 				if (!redisPhonePin) {
-					createPIN(redisKeyId, phone, function (err) {
+					createPIN(redisKeyId, formattedPhone, function (err) {
 						if (err) {
 							return cbk(err);
 						}
@@ -113,10 +105,10 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 						}, false);
 					});
 				} else {
-					redisMng.getKeyValue(redisKey + '.attempts', function (err, redisPinAttempts) {
+					redisMng.getKeyValue(`${redisKey}.attempts`, function (err, redisPinAttempts) {
 						if (err) return cbk(err);
 						if (!redisPinAttempts || redisPinAttempts === '0') {
-							createPIN(redisKeyId, phone, function (err) {
+							createPIN(redisKeyId, formattedPhone, function (err) {
 								if (err) {
 									return cbk(err);
 								}
@@ -132,7 +124,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 							}
 							//Last attempt
 							if (redisPinAttempts === '1') {
-								createPIN(redisKeyId, phone, function (err) {
+								createPIN(redisKeyId, formattedPhone, function (err) {
 									if (err) {
 										return cbk(err);
 									}
@@ -143,7 +135,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 									}, false);
 								});
 							} else {
-								redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts - 1, function (err) {
+								redisMng.updateKeyValue(`${redisKey}.attempts`, redisPinAttempts - 1, function (err) {
 									if (err) return cbk(err);
 									return cbk({
 										err: 'verify_phone_error',
@@ -161,11 +153,11 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 }
 
 module.exports = function (settings) {
-	var config = require(process.cwd() + '/config.json');
+	var config = require('../../config.json');
 	_settings = _.assign({}, config, settings);
 
 	return {
-		createPIN: createPIN,
-		verifyPhone: verifyPhone
+		createPIN,
+		verifyPhone
 	};
 };

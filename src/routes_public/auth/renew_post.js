@@ -4,7 +4,7 @@ var async = require('async');
 var log = require('../../logger/service.js');
 var daoMng = require('../../managers/dao');
 var tokenMng = require('../../managers/token');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var sessionRequest = require('./../auth/session');
 
 module.exports = function (req, res, next) {
@@ -24,16 +24,16 @@ module.exports = function (req, res, next) {
 
 		if (err) {
 			var errInvalidToken = {
-				"err": "invalid_token",
-				"des": "Invalid token"
+				err: 'invalid_token',
+				des: 'Invalid token'
 			};
 			res.send(401, errInvalidToken);
 			return next();
 		}
 		if (new Date().getTime() > tokenSet.expiresAtTimestamp) {
 			var errExpiredToken = {
-				"err": "expired_token",
-				"des": "Expired token"
+				err: 'expired_token',
+				des: 'Expired token'
 			};
 			res.send(401, errExpiredToken);
 			return next();
@@ -42,8 +42,8 @@ module.exports = function (req, res, next) {
 		daoMng.getFromId(tokenSet.userId, function (err, foundUser) {
 			if (err) {
 				var errInvalidToken = {
-					"err": "invalid_token",
-					"des": "Invalid token"
+					err: 'invalid_token',
+					des: 'Invalid token'
 				};
 				res.send(401, errInvalidToken);
 				return next();
@@ -52,7 +52,7 @@ module.exports = function (req, res, next) {
 			if (!foundUser) {
 				log.error({
 					err: 'invalid_refresh_token',
-					des: "invalid_refresh_token '" + refreshToken + "' contains unknown user '" + tokenSet.userId + "'"
+					des: `invalid_refresh_token '${refreshToken}' contains unknown user '${tokenSet.userId}'`
 				});
 				res.send(401, {err: 'invalid_refresh_token', des: 'unknown user inside token'});
 				return next(false);
@@ -60,10 +60,10 @@ module.exports = function (req, res, next) {
 
 			async.series([
 				function (done) {
-					//Add "realms" & "capabilities"
+					//Add 'realms' & 'capabilities'
 					daoMng.getRealms(function (err, realms) {
 						if (err) {
-							log.error({err: err, des: 'error obtaining user realms'});
+							log.error({ err, des: 'error obtaining user realms' });
 							return done();
 						}
 
@@ -103,11 +103,11 @@ module.exports = function (req, res, next) {
 			], function () {
 				sessionRequest(data.deviceId, tokenSet.userId, 'POST', userAgent, function (err) {
 					if (err) {
-						log.error({err: err});
+						log.error({ err });
 					}
 					tokenMng.createAccessToken(tokenSet.userId, data, function (err, newToken) {
 						if (err) {
-							log.error({err: err});
+							log.error({ err });
 						}
 						var body = {
 							accessToken: newToken,

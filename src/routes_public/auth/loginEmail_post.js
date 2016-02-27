@@ -1,7 +1,7 @@
 'use strict';
 
 var emailManager = require('../../managers/email')();
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var tokenManager = require('../../managers/token');
 var daoManager = require('../../managers/dao');
 
@@ -19,10 +19,10 @@ module.exports = function (req, res, next) {
 
 	daoManager.getFromUsername(email, function (err, user) {
 		tokenManager.createRefreshToken(user._id, {}, function (err, refreshToken) {
-			var link = config.public_url + '/auth/login/refreshToken?rt=' + refreshToken;
+			var link = `${config.public_url}/auth/login/refreshToken?rt=${refreshToken}`;
 			emailManager.sendEmailMagicLink(email, link, function () {
 				res.send(204);
-				next();
+				return next();
 			});
 		});
 	});

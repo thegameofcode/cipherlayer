@@ -1,7 +1,7 @@
 'use strict';
 
 var tokenManager = require('../../managers/token');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 
 module.exports = function (req, res, next) {
 
@@ -23,9 +23,9 @@ module.exports = function (req, res, next) {
 			});
 			return next(false);
 		}
-		res.header('Location', config.magicLink.scheme + '://user/refreshToken/' + refreshToken);
+		res.header('Location', `${config.magicLink.scheme}://user/refreshToken/${refreshToken}`);
 		res.send(302);
 
-		next();
+		return next();
 	});
 };

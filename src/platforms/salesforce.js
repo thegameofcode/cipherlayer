@@ -7,7 +7,7 @@ var daoMng = require('../managers/dao');
 var userMng = require('../managers/user')();
 var tokenMng = require('../managers/token');
 var fileStoreMng = require('../managers/file_store');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
 
@@ -30,9 +30,8 @@ function createSalesforceStrategy() {
 }
 
 function prepareSession(accessToken, refreshToken, profile, done) {
-	log.info('user ' + profile.id + ' logged in using salesforce');
-	async.series(
-		[
+	log.info(`user ${profile.id} logged in using salesforce`);
+	async.series([
 			function uploadAvatar(done) {
 				if (!profile._raw || !profile._raw.photos || !profile._raw.photos.picture || !config.aws || !config.aws.buckets || !config.aws.buckets.avatars) {
 					return done();
@@ -40,32 +39,29 @@ function prepareSession(accessToken, refreshToken, profile, done) {
 
 				if (config.salesforce.replaceDefaultAvatar && profile._raw.photos.picture.indexOf(config.salesforce.replaceDefaultAvatar.defaultAvatar) > -1) {
 					profile.avatar = config.salesforce.replaceDefaultAvatar.replacementAvatar;
-					done();
-				} else {
-					var oauthToken = "?oauth_token=" + accessToken.params.access_token;
-
-					var avatarPath = profile._raw.photos.picture + oauthToken;
-					var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
-					var name = profile.id.substring(idPos) + '.jpg';
-
-					fileStoreMng.uploadAvatarToAWS(avatarPath, name, function (err, avatarUrl) {
-						if (err) {
-							log.error({err: err}, 'Error uploading a profile picture to AWS');
-						} else {
-							profile.avatar = avatarUrl;
-						}
-						done();
-					});
+					return done();
 				}
+				var avatarPath = `${profile._raw.photos.picture}?oauth_token=${accessToken.params.access_token}`;
+				var idPos = profile.id.lastIndexOf('/') ? profile.id.lastIndexOf('/') + 1 : 0;
+				var name = `${profile.id.substring(idPos)}.jpg`;
+
+				fileStoreMng.uploadAvatarToAWS(avatarPath, name, function (err, avatarUrl) {
+					if (err) {
+						log.error({ err }, 'Error uploading a profile picture to AWS');
+					} else {
+						profile.avatar = avatarUrl;
+					}
+					return done();
+				});
 			},
 			function returnSessionData(done) {
 				var data = {
-					accessToken: accessToken,
-					refreshToken: refreshToken,
-					profile: profile,
+					accessToken,
+					refreshToken,
+					profile,
 					expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
 				};
-				done(data);
+				return done(data);
 			}
 		], function (data) {
 			done(null, data);
@@ -100,22 +96,23 @@ function salesforceCallback(req, res, next) {
 
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
 					if (err) {
-						log.error({err: err}, 'error creating salesforce access token');
+						log.error({ err }, 'error creating salesforce access token');
 						return next(false);
 					}
 
 					countries.countryFromPhone(profile._raw.mobile_phone, function (err, country) {
 						if (err) {
-							log.error({err: err}, 'error getting salesforce country from phone');
+							log.error({ err }, 'error getting salesforce country from phone');
 							return next(false);
 						}
 
+						var officeLocation = `${profile._raw.addr_street || ''} ${profile._raw.addr_city || ''} ${profile._raw.addr_country || ''}`.trim();
 						var returnProfile = {
 							name: profile._raw.first_name,
 							lastname: profile._raw.last_name,
 							email: profile._raw.email,
 							sf: token,
-							officeLocation: ((profile._raw.addr_street || '') + ' ' + (profile._raw.addr_city || '') + ' ' + (profile._raw.addr_country || '')).trim()
+							officeLocation
 						};
 
 						if (profile.avatar) {
@@ -124,14 +121,14 @@ function salesforceCallback(req, res, next) {
 
 						if (country) {
 							returnProfile.country = country['ISO3166-1-Alpha-2'];
-							returnProfile.phone = profile._raw.mobile_phone.replace('+' + country.Dial, '').trim();
+							returnProfile.phone = profile._raw.mobile_phone.replace(`+${country.Dial}`, '').trim();
 						} else {
 							log.info({profile_raw: profile._raw}, 'no country on salesforce phone');
 						}
 
 						getUserOptionalInfo(sfData, profile._raw.user_id, function (err, profileDetail) {
 							if (err) {
-								log.error({err: err}, 'error getting salesforce additional info');
+								log.error({ err }, 'error getting salesforce additional info');
 								return next(false);
 							}
 
@@ -163,7 +160,7 @@ function salesforceCallback(req, res, next) {
 
 			userMng.setPlatformData(foundUser._id, 'sf', platform, function (err) {
 				if (err) {
-					log.error({err: err}, 'error updating sf tokens into user ' + foundUser._id + '');
+					log.error({ err }, `error updating sf tokens into user ${foundUser._id}`);
 				}
 				var data = {};
 				if (foundUser.roles) {
@@ -174,14 +171,14 @@ function salesforceCallback(req, res, next) {
 					data.deviceVersion = req.headers[config.version.header];
 				}
 
-				log.info({device_version: data.deviceVersion}, 'device version on SF login for profile ' + foundUser._id);
+				log.info({device_version: data.deviceVersion}, `device version on SF login for profile ${foundUser._id}`);
 
 				async.series([
 					function (done) {
 						//Add "realms" & "capabilities"
 						daoMng.getRealms(function (err, realms) {
 							if (err) {
-								log.error({err: err, des: 'error obtaining user realms'});
+								log.error({ err , des: 'error obtaining user realms' });
 								return done();
 							}
 
@@ -238,13 +235,12 @@ function salesforceCallback(req, res, next) {
 }
 
 function getUserOptionalInfo(sfData, userId, cbk) {
-	var SERVICE_CHATTER_URL = "/services/data/v26.0/chatter/users/" + userId;
 
 	var options = {
-		url: sfData.accessToken.params.instance_url + SERVICE_CHATTER_URL,
+		url: `${sfData.accessToken.params.instance_url}/services/data/v26.0/chatter/users/${userId}`,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8',
-			'Authorization': 'Bearer ' + sfData.accessToken.params.access_token
+			Authorization: `Bearer ${sfData.accessToken.params.access_token}`
 		},
 		method: 'GET'
 	};
@@ -262,7 +258,7 @@ function authSfBridge(passport) {
 		var end = res.end;
 		res.end = function () {
 			end.call(this);
-			next();
+			return next();
 		};
 
 		passport.authenticate('forcedotcom')(req, res);
@@ -288,16 +284,16 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk) {
 		var newAccessToken = body.access_token;
 
 		var newSFplatformItem = {
-			"platform": "sf",
-			"accessToken": {
-				"params": {
-					"id": user.userId,
-					"instance_url": platform.accessToken.params.instance_url,
-					"access_token": body.access_token
+			platform: 'sf',
+			accessToken: {
+				params: {
+					id: user.userId,
+					instance_url: platform.accessToken.params.instance_url,
+					access_token: body.access_token
 				}
 			},
-			"refreshToken": platform.refreshToken,
-			"expiry": new Date().getTime() + config.salesforce.expiration * 60 * 1000
+			refreshToken: platform.refreshToken,
+			expiry: new Date().getTime() + config.salesforce.expiration * 60 * 1000
 		};
 		daoMng.updateArrayItem(user._id, 'platforms', 'platform', newSFplatformItem, function (err) {
 			if (err) {
@@ -324,7 +320,7 @@ function addRoutes(server, passport) {
 }
 
 module.exports = {
-	addRoutes: addRoutes,
-	prepareSession: prepareSession,
-	renewSFAccessTokenIfNecessary: renewSFAccessTokenIfNecessary
+	addRoutes,
+	prepareSession,
+	renewSFAccessTokenIfNecessary
 };

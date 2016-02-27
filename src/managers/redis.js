@@ -1,12 +1,12 @@
 var redis = require('redis');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 var redisClient;
 
 var isConnected;
 
 function connect(cbk) {
-	var host = config.redis.host || "localhost";
+	var host = config.redis.host || 'localhost';
 	var port = config.redis.port || 6379;
 
 	redisClient = redis.createClient(port, host, {});
@@ -112,14 +112,13 @@ function getStatus(cbk) {
 }
 
 module.exports = {
-	connect: connect,
-	disconnect: disconnect,
-	insertKeyValue: insertKeyValue,
-	updateKeyValue: updateKeyValue,
-	getKeyValue: getKeyValue,
-	setKeyValue: setKeyValue,
-	deleteKeyValue: deleteKeyValue,
-	deleteAllKeys: deleteAllKeys,
-
-	getStatus: getStatus
+	connect,
+	disconnect,
+	insertKeyValue,
+	updateKeyValue,
+	getKeyValue,
+	setKeyValue,
+	deleteKeyValue,
+	deleteAllKeys,
+	getStatus
 };

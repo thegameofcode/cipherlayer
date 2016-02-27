@@ -2,8 +2,8 @@ var assert = require('assert');
 var async = require('async');
 var extend = require('util')._extend;
 var escapeRegexp = require('escape-regexp');
-var config = require(process.cwd() + '/config.json');
-var mongoClient = require('mongodb').MongoClient;
+var config = require('../../config.json');
+var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 var _ = require('lodash');
 
@@ -20,8 +20,10 @@ var localStoredRealms;
 var lastTimeRefresedRealms;
 var TIME_TO_REFRESH = 1000 * 60 * 60;
 
+const makeRegEx = str => new RegExp(`^${escapeRegexp(str.toLowerCase())}$`, 'i');
+
 function connect(cbk) {
-	mongoClient.connect(url, function (err, connectedDb) {
+	MongoClient.connect(url, function (err, connectedDb) {
 		assert.equal(err, null, err);
 		db = connectedDb;
 
@@ -119,7 +121,7 @@ function countUsers(cbk) {
 
 function findByEmail(email, callback) {
 
-	var targetEmail = new RegExp("^" + escapeRegexp(email.toLowerCase()) + "$", "i");
+	var targetEmail = makeRegEx(email);
 
 	usersCollection.find({username: targetEmail}, {password: 0}).toArray(function (error, foundUsers) {
 
@@ -144,8 +146,8 @@ function getFromUsername(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'}, null);
 	}
-	username = new RegExp("^" + escapeRegexp(username.toLowerCase()) + "$", "i");
-	usersCollection.find({username: username}, {password: 0}, function (err, users) {
+	const usernameRe = makeRegEx(username);
+	usersCollection.find({ username: usernameRe }, {password: 0}, function (err, users) {
 		if (err) {
 			return cbk(err, null);
 		}
@@ -163,8 +165,8 @@ function getFromUsername(username, cbk) {
 }
 
 function getFromUsernamePassword(username, password, cbk) {
-	username = new RegExp("^" + escapeRegexp(username.toLowerCase()) + "$", "i");
-	usersCollection.find({username: username, password: password}, {password: 0}, function (err, users) {
+	username = makeRegEx(username);
+	usersCollection.find({ username, password }, {password: 0}, function (err, users) {
 		if (err) {
 			return cbk(err, null);
 		}
@@ -185,8 +187,8 @@ function getAllUserFields(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'}, null);
 	}
-	username = new RegExp("^" + escapeRegexp(username.toLowerCase()) + "$", "i");
-	usersCollection.find({username: username}, function (err, users) {
+	const usernameRE = makeRegEx(username);
+	usersCollection.find({ username: usernameRE }, function (err, users) {
 		if (err) {
 			return cbk(err, null);
 		}
@@ -237,11 +239,11 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 	};
 
 	var data = {$push: updatedField};
-	usersCollection.update({_id: _id}, data, function (err, updatedProfiles) {
+	usersCollection.update({ _id }, data, function (err, updatedProfiles) {
 		if (err) {
 			return cbk(err, null);
 		}
-		cbk(null, updatedProfiles);
+		return cbk(null, updatedProfiles);
 	});
 }
 
@@ -252,16 +254,16 @@ function updateField(userId, fieldName, fieldValue, cbk) {
 		if (err) {
 			return cbk(err, null);
 		}
-		cbk(null, updatedUsers);
+		return cbk(null, updatedUsers);
 	});
 }
 
 function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
 	var query = {_id: userId};
-	query[arrayName + '.' + itemKey] = itemValue[itemKey];
+	query[`${arrayName}.${itemKey}`] = itemValue[itemKey];
 
 	var data = {};
-	data[arrayName + '.$'] = itemValue;
+	data[`${arrayName}.$`] = itemValue;
 	var update = {$set: data};
 
 	//first tries to update array item if already exists
@@ -344,32 +346,34 @@ function getStatus(cbk) {
 
 var _settings = {};
 
+function addUser (settings) {
+	_settings = _.clone(config);
+	_settings = extend(_settings, settings);
+	return _addUser;
+}
+
 module.exports = {
-	connect: connect,
-	disconnect: disconnect,
-	addUser: function (settings) {
-		_settings = _.clone(config);
-		_settings = extend(_settings, settings);
-		return _addUser;
-	},
-	countUsers: countUsers,
-	getFromUsername: getFromUsername,
-	getFromUsernamePassword: getFromUsernamePassword,
-	deleteAllUsers: deleteAllUsers,
-	getFromId: getFromId,
+	connect,
+	disconnect,
+	addUser,
+	countUsers,
+	getFromUsername,
+	getFromUsernamePassword,
+	deleteAllUsers,
+	getFromId,
 
-	updateField: updateField,
-	updateArrayItem: updateArrayItem,
-	addToArrayFieldById: addToArrayFieldById,
-	getAllUserFields: getAllUserFields,
+	updateField,
+	updateArrayItem,
+	addToArrayFieldById,
+	getAllUserFields,
 
-	ERROR_USER_NOT_FOUND: ERROR_USER_NOT_FOUND,
-	ERROR_USERNAME_ALREADY_EXISTS: ERROR_USERNAME_ALREADY_EXISTS,
+	ERROR_USER_NOT_FOUND,
+	ERROR_USERNAME_ALREADY_EXISTS,
 
-	addRealm: addRealm,
-	getRealms: getRealms,
-	resetRealmsVariables: resetRealmsVariables,
-	deleteAllRealms: deleteAllRealms,
-	findByEmail: findByEmail,
-	getStatus: getStatus
+	addRealm,
+	getRealms,
+	resetRealmsVariables,
+	deleteAllRealms,
+	findByEmail,
+	getStatus
 };

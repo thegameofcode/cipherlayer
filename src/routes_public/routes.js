@@ -1,6 +1,6 @@
 'use strict';
 
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 var authHeaderRequired = require('../middlewares/authHeaderRequired');
 var decodeAccessToken = require('../middlewares/decodeToken');

@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 function checkAuthHeader(req, res, next) {
 	var authHeader = req.header('Authorization');
@@ -20,8 +20,8 @@ function checkAuthHeader(req, res, next) {
 		return next(false);
 	}
 
-	req.auth = authType + ' ' + authValue;
-	next();
+	req.auth = `${authType} ${authValue}`;
+	return next();
 }
 
 module.exports = checkAuthHeader;

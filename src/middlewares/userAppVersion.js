@@ -1,8 +1,8 @@
-var log = require('../logger/service.js');
-var userDao = require('../managers/dao');
 var _ = require('lodash');
 
-var config = require(process.cwd() + '/config.json');
+var log = require('../logger/service.js');
+var userDao = require('../managers/dao');
+var config = require('../../config.json');
 
 var updatingUserError = {
 	err: 'proxy_error',
@@ -18,7 +18,7 @@ function storeUserAppVersion(req, res, next) {
 	}
 	userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
 		if (err) {
-			log.error({err: err});
+			log.error({ err });
 			res.send(500, updatingUserError);
 			return next(false);
 		}

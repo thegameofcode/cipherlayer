@@ -1,13 +1,13 @@
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 function checkAccessTokenParam(req, res, next) {
 	var paramAT = req.params.at;
 
 	if (paramAT) {
-		req.headers.authorization = config.authHeaderKey.trim() + ' ' + paramAT;
+		req.headers.authorization = `${config.authHeaderKey.trim()} ${paramAT}`;
 	}
 
-	next();
+	return next();
 }
 
 module.exports = checkAccessTokenParam;

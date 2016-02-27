@@ -10,13 +10,13 @@ function platformsSetUp(req, res, next) {
 				if (err) {
 					res.send(401, {
 						err: 'Could not renew SF token',
-						des: 'Unable to renew sales force access token, got error: ' + err
+						des: `Unable to renew sales force access token, got error: ${err}`
 					});
 					return next(false);
 				}
 				req.options.headers['x-sf-data'] = JSON.stringify({
 					userId: platform.accessToken.params.id,
-					accessToken: accessToken,
+					accessToken,
 					instanceUrl: platform.accessToken.params.instance_url
 				});
 				return next();

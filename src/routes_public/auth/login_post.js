@@ -4,7 +4,7 @@ var async = require('async');
 var log = require('../../logger/service.js');
 var daoMng = require('../../managers/dao');
 var crypto = require('../../managers/crypto');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var cryptoMng = crypto(config.password);
 var sessionRequest = require('./session');
 var tokenMng = require('../../managers/token');
@@ -21,8 +21,8 @@ module.exports = function (req, res, next) {
 
 			daoMng.getAllUserFields(foundUser.username, function (err, result) {
 				if (Array.isArray(result.password)) {
-					daoMng.updateField(foundUser._id, "password", encryptedPwd, function (err, result) {
-						log.info({err: err, result: result}, 'UpdatePasswordField');
+					daoMng.updateField(foundUser._id, 'password', encryptedPwd, function (err, result) {
+						log.info({ err , result }, 'UpdatePasswordField');
 					});
 				}
 			});
@@ -49,7 +49,7 @@ module.exports = function (req, res, next) {
 					//Add "realms" & "capabilities"
 					daoMng.getRealms(function (err, realms) {
 						if (err) {
-							log.error({err: err, des: 'error obtaining user realms'});
+							log.error({ err , des: 'error obtaining user realms' });
 							return done();
 						}
 
@@ -89,7 +89,7 @@ module.exports = function (req, res, next) {
 			], function () {
 				sessionRequest(data.deviceId, foundUser._id, 'POST', userAgent, function (err) {
 					if (err) {
-						log.error({err: err});
+						log.error({ err });
 					}
 					tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
 						if (err) {

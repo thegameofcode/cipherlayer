@@ -1,13 +1,13 @@
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 var fs = require('fs');
 
 function prepareOptions(req, res, next) {
 	var options = {
-		url: 'http://' + config.private_host + ':' + config.private_port + req.url,
+		url: `http://${config.private_host}:${config.private_port}${req.url}`,
 		headers: {
 			'Content-Type': req.header('Content-Type'),
 			'x-user-id': req.tokenInfo.userId,
-			'Host': req.headers.host,
+			Host: req.headers.host,
 			'X-Real-IP': req.connection.remoteAddress,
 			'X-Forwarded-For': req.header('X-Forwarded-For') || req.connection.remoteAddress
 		},

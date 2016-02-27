@@ -9,9 +9,7 @@ module.exports = function getRealms(req, res, next) {
 			return next(false);
 		}
 
-		res.send(200, {
-			realms: realms
-		});
+		res.send(200, { realms });
 		return next();
 	});
 };

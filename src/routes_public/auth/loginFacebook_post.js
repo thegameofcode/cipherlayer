@@ -7,7 +7,7 @@ var log = require('../../logger/service.js');
 var daoMng = require('../../managers/dao');
 var userMng = require('../../managers/user')();
 var tokenMng = require('../../managers/token');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
 
@@ -27,7 +27,9 @@ var defaultOptions = {
 function mapFacebookData(body, fieldsMap) {
 	var mappedData = {};
 
-	if (!fieldsMap) return mappedData;
+	if (!fieldsMap) {
+		return mappedData;
+	}
 
 	_.each(_.keys(fieldsMap), function (fb_key) {
 		var profile_key = fieldsMap[fb_key];
@@ -37,7 +39,7 @@ function mapFacebookData(body, fieldsMap) {
 		}
 
 		if (fb_key === 'email' && !body[fb_key]) {
-			body[fb_key] = body.id + '@facebook.com';
+			body[fb_key] = `${body.id}@facebook.com`;
 		}
 
 		if (!body[fb_key]) {
@@ -97,7 +99,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 
 				userMng.setPlatformData(foundUser._id, 'fb', platform, function (err) {
 					if (err) {
-						log.error({err: err}, 'error updating sf tokens into user ' + foundUser._id + '');
+						log.error({ err }, `error updating sf tokens into user ${foundUser._id}`);
 					}
 
 					var data = {};

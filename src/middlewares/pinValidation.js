@@ -1,8 +1,8 @@
 var log = require('../logger/service.js');
 var _ = require('lodash');
 var phoneMng = require('../managers/phone');
-var jsonUtil = require('../managers/json_validator');
-var config = require(process.cwd() + '/config.json');
+var isValidJSON = require('../managers/json_validator');
+var config = require('../../config.json');
 
 var errInvalidFields = {
 	err: 'auth_proxy_error',
@@ -34,16 +34,16 @@ function pinValidation(req, res, next) {
 		requiresPinValidation = (match !== null && path === match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
 		if (requiresPinValidation) {
 			var fieldsSchema = {
-				"id": "/MePhones",
-				"type": "object",
-				"properties": {},
-				"additionalProperties": true
+				id: '/MePhones',
+				type: 'object',
+				properties: {},
+				additionalProperties: true
 			};
 
-			fieldsSchema.properties[endPoints[i].fields.countryISO] = {"type": "string", "required": true};
-			fieldsSchema.properties[endPoints[i].fields.phoneNumber] = {"type": "string", "required": true};
+			fieldsSchema.properties[endPoints[i].fields.countryISO] = { type: 'string', required: true };
+			fieldsSchema.properties[endPoints[i].fields.phoneNumber] = { type: 'string', required: true };
 
-			if (jsonUtil.isValidJSON(body, fieldsSchema)) {
+			if (isValidJSON(body, fieldsSchema)) {
 				validBodySchema = true;
 				pinValidationConfig = endPoints[i];
 				break;
@@ -70,11 +70,12 @@ function pinValidation(req, res, next) {
 	var countryISO = body[pinValidationConfig.fields.countryISO];
 
 	var pin = req.headers ? req.headers['x-otp-pin'] : null;
-	log.info({pinValidation: {user: user.id, pin: pin}});
+	log.info({pinValidation: { user: user.id, pin }});
 	phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
 		if (err) {
+			log.error({ err }, 'Error validating phone');
+
 			if (!err.code) {
-				log.error({err: err}, 'Error validating phone');
 				res.send(500, err);
 				return next(false);
 			}

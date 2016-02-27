@@ -3,7 +3,7 @@
 var async = require('async');
 
 var daoMng = require('../../managers/dao');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
 var emailMng = require('../../managers/email');
@@ -59,7 +59,7 @@ module.exports = function (req, res, next) {
 						//Add "realms" & "capabilities"
 						daoMng.getRealms(function (err, realms) {
 							if (err) {
-								log.error({err: err, des: 'error obtaining user realms'});
+								log.error({ err , des: 'error obtaining user realms' });
 								return done();
 							}
 
@@ -98,7 +98,7 @@ module.exports = function (req, res, next) {
 					}
 				], function () {
 					tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
-						var link = config.emailVerification.redirectProtocol + '://user/refreshToken/' + tokens.refreshToken;
+						var link = `${config.emailVerification.redirectProtocol}://user/refreshToken/${tokens.refreshToken}`;
 						emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
 							if (err) {
 								res.send(500, {err: 'internalError', des: 'Internal server error'});
@@ -106,7 +106,7 @@ module.exports = function (req, res, next) {
 							}
 
 							res.send(204);
-							next();
+							return next();
 						});
 					});
 				});

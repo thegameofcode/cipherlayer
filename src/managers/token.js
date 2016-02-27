@@ -1,6 +1,6 @@
 var async = require('async');
 var ciphertoken = require('ciphertoken');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 var accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,
@@ -60,9 +60,9 @@ function createBothTokens(userId, data, cbk) {
 }
 
 module.exports = {
-	createAccessToken: createAccessToken,
-	getAccessTokenInfo: getAccessTokenInfo,
-	createRefreshToken: createRefreshToken,
-	createBothTokens: createBothTokens,
-	getRefreshTokenInfo: getRefreshTokenInfo
+	createAccessToken,
+	getAccessTokenInfo,
+	createRefreshToken,
+	createBothTokens,
+	getRefreshTokenInfo
 };

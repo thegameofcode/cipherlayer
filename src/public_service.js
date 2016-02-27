@@ -1,13 +1,14 @@
 'use strict';
 
-var log = require('./logger/service.js');
+var passport = require('passport');
+var _ = require('lodash');
 var restify = require('restify');
 var fs = require('fs');
 var path = require('path');
-var config = require(process.cwd() + '/config.json');
-var passport = require('passport');
-var _ = require('lodash');
+var versionControl = require('version-control');
 
+var config = require('../config.json');
+var log = require('./logger/service.js');
 var checkAccessTokenParam = require('./middlewares/accessTokenParam');
 var checkAuthHeader = require('./middlewares/authHeaderRequired');
 var decodeToken = require('./middlewares/decodeToken');
@@ -17,9 +18,6 @@ var platformsSetUp = require('./middlewares/platformsSetUp');
 var propagateRequest = require('./middlewares/propagateRequest');
 var permissions = require('./middlewares/permissions');
 var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
-
-var versionControl = require('version-control');
-
 var pinValidation = require('./middlewares/pinValidation')();
 var userAppVersion = require('./middlewares/userAppVersion')();
 
@@ -27,16 +25,15 @@ var routes = require('./routes_public/routes');
 
 module.exports = function () {
 	var service = {};
-
 	var server;
 
 	service.start = function (publicPort, done) {
 		server = restify.createServer({
 			name: 'cipherlayer-server',
-			log: log
+			log
 		});
 
-		log.info('PUBLIC SERVICE starting on PORT ' + publicPort);
+		log.info(`PUBLIC SERVICE starting on PORT ${publicPort}`);
 
 		server.on('after', function (req, res) {
 			var logInfo = {
@@ -60,7 +57,7 @@ module.exports = function () {
 			};
 			delete(logInfo.request.params.password);
 
-			req.log.info(logInfo, "response");
+			req.log.info(logInfo, 'response');
 		});
 
 		if (config.accessControlAllow) {
@@ -71,8 +68,8 @@ module.exports = function () {
 			}));
 
 			server.opts(/.*/, function (req, res, next) {
-				res.header("Access-Control-Allow-Methods", req.header("Access-Control-Request-Methods"));
-				res.header("Access-Control-Allow-Headers", req.header("Access-Control-Request-Headers"));
+				res.header('Access-Control-Allow-Methods', req.header('Access-Control-Request-Methods'));
+				res.header('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers'));
 				res.send(200);
 				return next();
 			});
@@ -83,21 +80,21 @@ module.exports = function () {
 
 		var versionControlOptions = _.clone(config.version);
 		versionControlOptions.public = [
-			"/auth/sf",
-			"/auth/sf/*",
-			"/auth/in",
-			"/auth/in/*",
-			"/auth/google",
-			"/auth/google/*",
-			"/auth/login/refreshToken*",
-			"/user/activate*",
-			"/heartbeat",
-			"/user/email/available"
+			'/auth/sf',
+			'/auth/sf/*',
+			'/auth/in',
+			'/auth/in/*',
+			'/auth/google',
+			'/auth/google/*',
+			'/auth/login/refreshToken*',
+			'/user/activate*',
+			'/heartbeat',
+			'/user/email/available'
 		];
 		server.use(versionControl(versionControlOptions));
 
 		server.on('uncaughtException', function (req, res, route, error) {
-			log.error({exception: {req: req, res: res, route: route, err: error}});
+			log.error({exception: { req, res, route, err: error }});
 			if (!res.statusCode) {
 				res.send(500, {err: 'internal_error', des: 'uncaught exception'});
 			}
@@ -116,14 +113,14 @@ module.exports = function () {
 		server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
 
 		server.listen(publicPort, function () {
-			log.info('PUBLIC SERVICE listening on PORT ' + publicPort);
-			done();
+			log.info(`PUBLIC SERVICE listening on PORT ${publicPort}`);
+			return done();
 		});
 	};
 
 	service.stop = function (done) {
 		server.close(function () {
-			done();
+			return done();
 		});
 	};
 

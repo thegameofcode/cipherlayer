@@ -18,11 +18,11 @@ module.exports = function () {
 			return done();
 		}
 
-		log.info('INTERNAL SERVICE starting on PORT ' + internalPort);
+		log.info(`INTERNAL SERVICE starting on PORT ${internalPort}`);
 
 		server = restify.createServer({
 			name: 'cipherlayer-internal-server',
-			log: log
+			log
 		});
 
 		server.on('after', function (req, res) {
@@ -47,7 +47,7 @@ module.exports = function () {
 			};
 			delete(logInfo.request.params.password);
 
-			req.log.info(logInfo, "response");
+			req.log.info(logInfo, 'response');
 		});
 
 		server.use(restify.queryParser());
@@ -56,8 +56,8 @@ module.exports = function () {
 		routes(server);
 
 		server.listen(internalPort, function () {
-			log.info('INTERNAL SERVICE listening on PORT ' + internalPort);
-			done();
+			log.info(`INTERNAL SERVICE listening on PORT ${internalPort}`);
+			return done();
 		});
 	};
 
@@ -66,7 +66,7 @@ module.exports = function () {
 			return done();
 		}
 		server.close(function () {
-			done();
+			return done();
 		});
 	};
 

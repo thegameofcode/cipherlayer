@@ -1,6 +1,6 @@
 'use strict';
 
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var tokenMng = require('../../managers/token');
 var userMng = require('../../managers/user');
 

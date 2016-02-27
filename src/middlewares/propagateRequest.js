@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
 var log = require('../logger/service.js');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 var request = require('request');
 var httpProxy = require('http-proxy');
 var _ = require('lodash');
@@ -17,7 +17,7 @@ proxy.on('proxyRes', function () {
 });
 
 proxy.on('error', function (err, req, res) {
-	log.error({err: err, des: 'there was an internal error when redirecting the call to protected service'});
+	log.error({ err }, 'there was an internal error when redirecting the call to protected service');
 	res.send(500, {
 		err: ' auth_proxy_error',
 		des: 'there was an internal error when redirecting the call to protected service'
@@ -38,7 +38,7 @@ function propagateRequest(req, res, next) {
 		req.headers['x-user-id'] = req.options.headers['x-user-id'];
 
 		proxy.web(req, res, {
-			target: 'http://' + config.private_host + ':' + config.private_port
+			target: `http://${config.private_host}:${config.private_port}`
 		});
 		return;
 
@@ -49,7 +49,7 @@ function propagateRequest(req, res, next) {
 	request(req.options, function (err, private_res, body) {
 		var end = Date.now();
 		if (err) {
-			log.error({err: err, res: private_res, body: body});
+			log.error({ err, res: private_res, body });
 			res.send(500, {
 				err: ' auth_proxy_error',
 				des: 'there was an internal error when redirecting the call to protected service'

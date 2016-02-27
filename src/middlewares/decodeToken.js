@@ -1,11 +1,12 @@
+var config = require('../../config.json');
 var log = require('../logger/service.js');
-var config = require(process.cwd() + '/config.json');
 var tokenMng = require('../managers/token');
 
 function decodeToken(req, res, next) {
 	if (!req.auth) {
-		log.error({err: 'invalid_access_token', des: 'access token required'});
-		res.send(401, {err: 'invalid_access_token', des: 'access token required'});
+		const err = { err: 'invalid_access_token', des: 'access token required' };
+		log.error({ err });
+		res.send(401, err);
 		return next(false);
 	}
 

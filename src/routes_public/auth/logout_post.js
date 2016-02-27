@@ -11,7 +11,7 @@ module.exports = function (req, res, next) {
 
 	sessionRequest(deviceId, userId, 'DELETE', userAgent, function (err, result) {
 		if (err) {
-			log.error({err: err, result: result}, 'RemoveDeviceResponse');
+			log.error({ err, result }, 'RemoveDeviceResponse');
 			res.send(500, {err: 'internal_session_error', des: 'unable to close session'});
 			return next(false);
 		}

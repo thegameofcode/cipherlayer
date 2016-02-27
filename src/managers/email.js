@@ -1,22 +1,21 @@
 'use strict';
 
 var request = require('request');
-var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var crypto = require('crypto');
 var redisMng = require('./redis');
 
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 var log = require('../logger/service');
 
 var _settings = {};
 
-function sendEmailVerification(email, subject, emailBody, cbk) {
+function sendEmailVerification(email, subject, html, cbk) {
 	var notifServiceURL = _settings.externalServices.notifications.base;
 	var emailOptions = {
 		to: email,
-		subject: subject,
-		html: emailBody,
+		subject,
+		html,
 		from: _settings.emailVerification.from
 	};
 
@@ -34,7 +33,7 @@ function sendEmailVerification(email, subject, emailBody, cbk) {
 			err = body;
 			return cbk(err);
 		}
-		cbk();
+		return cbk();
 	});
 }
 
@@ -74,7 +73,7 @@ function emailVerification(email, bodyData, cbk) {
 				return cbk(err);
 			}
 
-			var link = _settings.public_url + '/user/activate?verifyToken=' + token;
+			var link = `${_settings.public_url}/user/activate?verifyToken=${token}`;
 			var emailText = (_settings.emailVerification.body).replace('{link}', link);
 
 			var subject = _settings.emailVerification.subject;
@@ -92,12 +91,12 @@ function emailVerification(email, bodyData, cbk) {
 
 function sendEmailForgotPassword(email, passwd, link, cbk) {
 
-	var html = _settings.password.body.replace("__PASSWD__", passwd).replace("__LINK__", link);
+	var html = _settings.password.body.replace('__PASSWD__', passwd).replace('__LINK__', link);
 
 	var body = {
 		to: email,
 		subject: _settings.password.subject,
-		html: html
+		html
 	};
 
 	var options = {
@@ -111,7 +110,7 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 	request(options, function (err, res, body) {
 		if (err) {
-			log.error(err);
+			log.error({ err });
 			return cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
@@ -126,12 +125,12 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 function sendEmailMagicLink(email, link, cbk){
 
-	var html = _settings.magicLink.body.replace("__LINK__", link);
+	var html = _settings.magicLink.body.replace('__LINK__', link);
 
 	var body = {
 			to: email,
 			subject: _settings.magicLink.subject,
-			html: html
+			html
 	};
 
 	var options = {
@@ -145,7 +144,7 @@ function sendEmailMagicLink(email, link, cbk){
 
 	request(options, function (err, res, body){
 		if (err) {
-			log.error(err);
+			log.error({ err });
 			return cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
@@ -161,12 +160,12 @@ function sendEmailMagicLink(email, link, cbk){
 }
 
 module.exports = function (settings) {
-	var config = require(process.cwd() + '/config.json');
-	_settings = _.assign({}, config, settings);
+	var config = require('../../config.json');
+	_settings = Object.assign({}, config, settings);
 
 	return {
-		emailVerification: emailVerification,
-		sendEmailForgotPassword: sendEmailForgotPassword,
-		sendEmailMagicLink: sendEmailMagicLink
+		emailVerification,
+		sendEmailForgotPassword,
+		sendEmailMagicLink
 	};
 };

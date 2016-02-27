@@ -1,10 +1,10 @@
-var log = require('../logger/service.js');
 var request = require('request');
 var _ = require('lodash');
 var ciphertoken = require('ciphertoken');
 var async = require('async');
-var config = require(process.cwd() + '/config.json');
 
+var config = require('../../config.json');
+var log = require('../logger/service.js');
 var daoMng = require('./dao');
 var tokenMng = require('./token');
 var redisMng = require('./redis');
@@ -13,7 +13,7 @@ var cryptoMng = crypto(config.password);
 var phoneMng = require('./phone');
 var emailMng = require('./email');
 
-var jsonValidator = require('./json_validator');
+var isValidJSON = require('./json_validator');
 
 var ERR_INVALID_PWD = {
 	err: 'invalid_password_format',
@@ -56,7 +56,7 @@ function createUser(body, pin, cbk) {
 				des: ERR_INVALID_USER_DOMAIN,
 				code: 400
 			};
-			log.warn({err: err});
+			log.warn(err);
 			return cbk(err, null);
 		}
 
@@ -180,7 +180,7 @@ function createUserByToken(token, cbk) {
 		}
 
 		//Validate the current bodyData with the schema profile_create.json
-		if (!jsonValidator.isValidJSON(body, profileSchema) || !body.transactionId) {
+		if (!isValidJSON(body, profileSchema) || !body.transactionId) {
 			return cbk({
 				err: 'invalid_profile_data',
 				des: 'The data format provided is not valid.',
@@ -254,7 +254,7 @@ function createUserPrivateCall(body, user, cbk) {
 	var clonedBody = _.clone(body);
 	delete clonedBody.password;
 	var options = {
-		url: 'http://' + _settings.private_host + ':' + _settings.private_port + _settings.passThroughEndpoint.path,
+		url: `http://${_settings.private_host}:${_settings.private_port}${_settings.passThroughEndpoint.path}`,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
 		},
@@ -263,10 +263,10 @@ function createUserPrivateCall(body, user, cbk) {
 		json: true
 	};
 
-	log.info('=> POST ' + options.url);
+	log.info(`=> POST ${options.url}`);
 	request(options, function (err, private_res, body) {
 		if (err) {
-			log.error('<= error: ' + err);
+			log.error(`<= error: ${err}`);
 			return cbk({
 				err: 'auth_proxy_error',
 				des: 'there was an internal error when redirecting the call to protected service',
@@ -274,7 +274,7 @@ function createUserPrivateCall(body, user, cbk) {
 			});
 		}
 
-		log.info('<= ' + private_res.statusCode);
+		log.info(`<= ${private_res.statusCode}`);
 		user.id = body.id;
 
 		if (!user.password) {
@@ -286,7 +286,7 @@ function createUserPrivateCall(body, user, cbk) {
 
 			daoMng.addUser()(user, function (err, createdUser) {
 				if (err) {
-					log.error({err: err, des: 'error adding user to DB'});
+					log.error({ err }, 'error adding user to DB');
 					return cbk({
 						err: err.err,
 						des: 'error adding user to DB',
@@ -296,7 +296,7 @@ function createUserPrivateCall(body, user, cbk) {
 
 				daoMng.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
 					if (err) {
-						log.error({err: err, des: 'error obtaining user'});
+						log.error({ err }, 'error obtaining user');
 						return cbk({
 							err: err.message,
 							code: 409
@@ -313,7 +313,7 @@ function createUserPrivateCall(body, user, cbk) {
 							//Add "realms" & "capabilities"
 							daoMng.getRealms(function (err, realms) {
 								if (err) {
-									log.error({err: err, des: 'error obtaining user realms'});
+									log.error({ err }, 'error obtaining user realms');
 									return done();
 								}
 
@@ -354,7 +354,7 @@ function createUserPrivateCall(body, user, cbk) {
 					], function () {
 						tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
 							if (err) {
-								log.error({err: err, des: 'error creating tokens'});
+								log.error({ err }, 'error creating tokens');
 								return cbk({
 									err: err.message,
 									code: 409
@@ -471,10 +471,10 @@ module.exports = function (settings) {
 	_settings = _.assign({}, config, settings);
 
 	return {
-		setPlatformData: setPlatformData,
-		createUser: createUser,
-		createUserByToken: createUserByToken,
-		setPassword: setPassword,
-		validateOldPassword: validateOldPassword
+		setPlatformData,
+		createUser,
+		createUserByToken,
+		setPassword,
+		validateOldPassword
 	};
 };

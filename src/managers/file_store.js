@@ -1,6 +1,6 @@
 var AWS = require('aws-sdk');
 var https = require('https');
-var config = require(process.cwd() + '/config.json');
+var config = require('../../config.json');
 
 var s3;
 
@@ -76,12 +76,12 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 		}
 		var data = [], dataLen = 0;
 
-		res.on("data", function (chunk) {
+		res.on('data', function (chunk) {
 			data.push(chunk);
 			dataLen += chunk.length;
 		});
 
-		res.on("end", function () {
+		res.on('end', function () {
 			var buf = new Buffer(dataLen);
 			for (var i = 0, len = data.length, pos = 0; i < len; i++) {
 				data[i].copy(buf, pos);
@@ -106,7 +106,7 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 }
 
 module.exports = {
-	uploadFile: uploadFile,
-	getFileURL: getFileURL,
-	uploadAvatarToAWS: uploadAvatarToAWS
+	uploadFile,
+	getFileURL,
+	uploadAvatarToAWS
 };

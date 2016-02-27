@@ -12,10 +12,6 @@ module.exports = function () {
 	var cipherlayer = {};
 
 	cipherlayer.start = function (publicPort, internalPort, cbk) {
-		//Validate the current config.json with the schema
-		//if( !jsonValidator.isValidJSON(config, configSchema)) {
-		//    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
-		//}
 
 		async.series([
 			userDao.connect,

@@ -1,6 +1,6 @@
 'use strict';
 
-var config = require(process.cwd() + '/config.json');
+var config = require('../../../config.json');
 var userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
@@ -40,10 +40,10 @@ module.exports = function (req, res, next) {
 			if (isCompatible) {
 				match = userAgent.match(/.*Android.*/i);
 				var isAndroid = (match !== null && userAgent === match[0]);
-				var location = config.emailVerification.scheme + '://user/refreshToken/' + tokens.refreshToken;
+				var location = `${config.emailVerification.scheme}://user/refreshToken/${tokens.refreshToken}`;
 
 				if (isAndroid) {
-					location = 'intent://user/refreshToken/' + tokens.refreshToken + '/#Intent;scheme=' + config.emailVerification.scheme + ';end';
+					location = `intent://user/refreshToken/${tokens.refreshToken}/#Intent;scheme=${config.emailVerification.scheme};end`;
 				}
 				res.header('Location', location);
 				res.send(302);
@@ -52,7 +52,7 @@ module.exports = function (req, res, next) {
 		}
 
 		if (config.emailVerification.redirectUrl) {
-			var refreshToken = config.emailVerification.redirectRefreshToken ? '?refreshToken=' + tokens.refreshToken : '';
+			var refreshToken = config.emailVerification.redirectRefreshToken ? `?refreshToken=${tokens.refreshToken}`: '';
 			res.setHeader('Location', config.emailVerification.redirectUrl + refreshToken);
 			res.send(301);
 			return next();
