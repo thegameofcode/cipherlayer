@@ -42,21 +42,5 @@ module.exports = function () {
 		});
 	};
 
-	cipherlayer.getStatus = function (cbk) {
-		async.series([
-			function (done) {
-				userDao.getStatus(done);
-			},
-			function (done) {
-				redisMng.getStatus(done);
-			}
-		], function (err) {
-			if (err) {
-				return cbk(err);
-			}
-			cbk();
-		});
-	};
-
 	return cipherlayer;
 }();
