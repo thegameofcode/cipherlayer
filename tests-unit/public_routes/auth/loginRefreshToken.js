@@ -68,7 +68,7 @@ describe('public routes', function () {
 					};
 					var nextSpy = sinon.spy(next, 'next');
 
-					var loginRefreshToken_get = require('../../../src/public_routes/auth/loginRefreshToken_get.js');
+					var loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get.js');
 					loginRefreshToken_get(req, res, next.next);
 				});
 
@@ -114,7 +114,7 @@ describe('public routes', function () {
 					};
 					var nextSpy = sinon.spy(next, 'next');
 
-					var loginRefreshToken_get = require('../../../src/public_routes/auth/loginRefreshToken_get.js');
+					var loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get.js');
 					loginRefreshToken_get(req, res, next.next);
 				});
 
@@ -148,7 +148,7 @@ describe('public routes', function () {
 					};
 					var nextSpy = sinon.spy(next, 'next');
 
-					var loginRefreshToken_get = require('../../../src/public_routes/auth/loginRefreshToken_get.js');
+					var loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get.js');
 					loginRefreshToken_get(req, res, next.next);
 				});
 			});

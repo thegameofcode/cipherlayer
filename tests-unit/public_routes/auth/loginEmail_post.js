@@ -83,7 +83,7 @@ describe('public routes', function () {
 						done();
 					};
 
-					var loginEmail_post = require('../../../src/public_routes/auth/loginEmail_post.js');
+					var loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post.js');
 					loginEmail_post(req, res, next);
 				});
 
@@ -120,7 +120,7 @@ describe('public routes', function () {
 					};
 					var nextSpy = sinon.spy(next, 'next');
 
-					var loginEmail_post = require('../../../src/public_routes/auth/loginEmail_post.js');
+					var loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post.js');
 					loginEmail_post(req, res, next.next);
 				});
 			});

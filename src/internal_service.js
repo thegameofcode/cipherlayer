@@ -6,7 +6,7 @@ var _ = require('lodash');
 var log = require('./logger/service.js');
 var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
 
-var routes = require('./internal_routes/routes');
+var routes = require('./routes_internal/routes');
 
 module.exports = function () {
 	var service = {};

@@ -23,7 +23,7 @@ var versionControl = require('version-control');
 var pinValidation = require('./middlewares/pinValidation')();
 var userAppVersion = require('./middlewares/userAppVersion')();
 
-var routes = require('./public_routes/routes');
+var routes = require('./routes_public/routes');
 
 module.exports = function () {
 	var service = {};
