@@ -22,7 +22,7 @@ describe('public routes', function () {
 					mockery.disable();
 				});
 
-				it.skip('204 - send valid email with a magic link', function (done) {
+				it('204 - send valid email with a magic link', function (done) {
 					var expectedEmail = 'user@email.com';
 					var expectedRefreshToken = 'REFRESH_TOKEN';
 					var expectedLink = config.public_url + '/auth/login/refreshToken?rt=' + expectedRefreshToken;
