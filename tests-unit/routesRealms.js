@@ -4,7 +4,6 @@ var async = require('async');
 var _ = require('lodash');
 
 var config = require('../config.json');
-var cipherlayer = require('../src/cipherlayer.js');
 var daoMng = require('../src/managers/dao.js');
 
 describe('realms', function () {
@@ -43,32 +42,20 @@ describe('realms', function () {
 	];
 
 	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, function (err) {
-			assert.equal(err, null);
-			async.parallel([
-				function (finish) {
-					daoMng.resetRealmsVariables();
-					daoMng.deleteAllRealms(finish);
-				},
-				function (finish) {
-					async.eachSeries(_.cloneDeep(baseRealms), function (realm, next) {
-						daoMng.addRealm(realm, function () {
-							assert.equal(err, null);
-							next();
-						});
-					}, function () {
-						finish();
-					});
-				}
-			], done);
-		});
+		async.parallel([
+			function (finish) {
+				daoMng.resetRealmsVariables();
+				daoMng.deleteAllRealms(finish);
+			},
+			function (finish) {
+				async.eachSeries(_.cloneDeep(baseRealms), function (realm, next) {
+					daoMng.addRealm(realm, next);
+				}, finish);
+			}
+		], done);
 	});
 
-	afterEach(function (done) {
-		daoMng.deleteAllRealms(function () {
-			cipherlayer.stop(done);
-		});
-	});
+	afterEach(daoMng.deleteAllRealms);
 
 	it('Get all realms', function (done) {
 		if (!config.internal_port) {

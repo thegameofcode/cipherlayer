@@ -5,13 +5,11 @@ var assert = require('assert');
 var async = require('async');
 
 describe('redis', function () {
-	beforeEach(function (done) {
-		redisMng.connect(done);
-	});
 
-	afterEach(function (done) {
-		redisMng.disconnect(done);
-	});
+	this.timeout(4000);
+
+	beforeEach(redisMng.connect);
+	afterEach(redisMng.disconnect);
 
 	var baseKey = 'key';
 	var baseValue = 'value';
@@ -91,7 +89,6 @@ describe('redis', function () {
 	});
 
 	it('expire', function (done) {
-		this.timeout(3000);
 		async.series([
 			//createKey
 			function (done) {
@@ -102,21 +99,18 @@ describe('redis', function () {
 			},
 			// checkExpire
 			function (done) {
-				setTimeout(
-					function () {
-						redisMng.getKeyValue(baseKey, function (err, value) {
-							assert.equal(err, null);
-							assert.equal(value, null);
-							done();
-						});
-					}, 1500
-				);
+				setTimeout(function () {
+					redisMng.getKeyValue(baseKey, function (err, value) {
+						assert.equal(err, null);
+						assert.equal(value, null);
+						done();
+					});
+				}, 1500);
 			}
 		], done);
 	});
 
 	it('update', function (done) {
-		this.timeout(4000);
 		var val = 'new value';
 		async.series([
 			// createKey
@@ -128,36 +122,31 @@ describe('redis', function () {
 			},
 			// updateKey
 			function (done) {
-				setTimeout(
-					function () {
-						redisMng.updateKeyValue(baseKey, val, function (err) {
+				setTimeout(function () {
+					redisMng.updateKeyValue(baseKey, val, function (err) {
+						assert.equal(err, null);
+						redisMng.getKeyValue(baseKey, function (err, value) {
 							assert.equal(err, null);
-							redisMng.getKeyValue(baseKey, function (err, value) {
-								assert.equal(err, null);
-								assert.equal(value, val);
-								done();
-							});
+							assert.equal(value, val);
+							done();
 						});
-					}, 1000
-				);
+					});
+				}, 1000);
 			},
 			// checkExpire
 			function (done) {
-				setTimeout(
-					function () {
-						redisMng.getKeyValue(baseKey, function (err, value) {
-							assert.equal(err, null);
-							assert.equal(value, null);
-							done();
-						});
-					}, 1500
-				);
+				setTimeout(function () {
+					redisMng.getKeyValue(baseKey, function (err, value) {
+						assert.equal(err, null);
+						assert.equal(value, null);
+						done();
+					});
+				}, 1500);
 			}
 		], done);
 	});
 
 	it('update - disconnected', function (done) {
-		this.timeout(4000);
 		var val = 'new value';
 		async.series([
 			// createKey

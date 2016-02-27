@@ -4,11 +4,11 @@
 	"description": "cipherlayer",
 	"main": "src/cipherlayer.js",
 	"scripts": {
-		"test": "npm run-script jshint && npm run-script mocha && npm run-script features",
-		"mocha": "mocha tests-unit --recursive",
-		"features": "cucumber.js tests-acceptance -f pretty --tags ~@ignore",
-		"features-only": "cucumber.js tests-acceptance -f pretty --tags @only",
-		"jshint": "jshint ./src ./tests-unit ./tests-acceptance main.js",
+		"test": "npm run lint && npm run test-unit && npm run test-acceptance",
+		"test-unit": "mocha tests-unit --recursive",
+		"test-acceptance": "cucumber.js tests-acceptance -f pretty --tags ~@ignore",
+		"test-acceptance-only": "cucumber.js tests-acceptance -f pretty --tags @only",
+		"lint": "jshint ./src ./tests-unit ./tests-acceptance main.js",
 		"coverage-unit": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/unit _mocha -- tests-unit --recursive --reporter mocha-lcov-reporter",
 		"coverage-acceptance": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/acceptance cucumber.js -- tests-acceptance --tags ~@ignore --format json",
 		"coverage-merge": "istanbul-combine coverage/**/coverage.json",
@@ -26,7 +26,7 @@
 		"http-proxy": "^1.8.1",
 		"jsonschema": "^1.0.0",
 		"lodash": "^4.3.0",
-		"mongodb": "^1.4.22",
+		"mongodb": "^1.4.40",
 		"passport": "^0.2.1",
 		"passport-forcedotcom": "^0.1.1",
 		"passport-google-oauth2": "^0.1.6",
@@ -39,7 +39,6 @@
 	},
 	"devDependencies": {
 		"assert": "^1.1.2",
-		"blanket": "^1.1.7",
 		"chai": "^3.5.0",
 		"codeclimate-test-reporter": "^0.3.1",
 		"coveralls": "^2.11.4",
@@ -48,11 +47,10 @@
 		"istanbul-combine": "^0.3.0",
 		"istanbul-coveralls": "^1.0.3",
 		"jshint": "^2.8.0",
-		"lcov-result-merger": "^1.0.2",
 		"mocha": "^2.0.1",
-		"mocha-lcov-reporter": "0.0.2",
+		"mocha-lcov-reporter": "^1.2.0",
 		"mockery": "^1.4.0",
-		"nock": "^0.51.0",
+		"nock": "^7.3.0",
 		"pre-commit": "^1.0.7",
 		"sinon": "^1.12.2",
 		"which": "^1.0.8"
@@ -68,24 +66,12 @@
 	},
 	"homepage": "https://github.com/thegameofcode/cipherlayer",
 	"pre-commit": [
-		"jshint"
+		"lint"
 	],
 	"jshintConfig": {
 		"esnext": true,
 		"node": true,
 		"unused": true,
 		"mocha": true
-	},
-	"config": {
-		"blanket": {
-			"pattern": [
-				"src",
-				"tests"
-			],
-			"data-cover-never": [
-				"node_modules",
-				"tests"
-			]
-		}
 	}
 }

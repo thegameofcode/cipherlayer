@@ -4,13 +4,8 @@ var fs = require('fs');
 var config = require('../config.json');
 
 describe('AWS', function () {
-	beforeEach(function (done) {
-		done();
-	});
 
-	afterEach(function (done) {
-		done();
-	});
+	this.timeout(10000);
 
 	var configAWSParam = false;
 	var validBucket;
@@ -61,8 +56,6 @@ describe('AWS', function () {
 	it('upload invalid bucket', function (done) {
 		if (!configAWSParam) return done();
 
-		this.timeout(5000);
-
 		fs.readFile(uploadImage.path, function (err, data) {
 			assert.equal(err, null);
 			var file = new Buffer(data, 'binary');
@@ -102,8 +95,6 @@ describe('AWS', function () {
 	it.skip('upload valid image', function (done) {
 		if (!configAWSParam) return done();
 
-		this.timeout(10000);
-
 		fs.readFile(uploadImage.path, function (err, data) {
 			assert.equal(err, null);
 			var file = new Buffer(data, 'binary');
@@ -117,8 +108,6 @@ describe('AWS', function () {
 
 	it.skip('upload valid zip', function (done) {
 		if (!configAWSParam) return done();
-
-		this.timeout(10000);
 
 		fs.readFile(uploadZip.path, function (err, data) {
 			assert.equal(err, null);

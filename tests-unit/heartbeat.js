@@ -1,20 +1,11 @@
 var assert = require('assert');
 var request = require('request');
 var config = require('../config.json');
-var cipherlayer = require('../src/cipherlayer');
 
 var userDao = require('../src/managers/dao');
 var redisMng = require('../src/managers/redis');
 
 describe('Heartbeat (Server status)', function () {
-
-	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, done);
-	});
-
-	afterEach(function (done) {
-		cipherlayer.stop(done);
-	});
 
 	it('OK', function (done) {
 		var options = {

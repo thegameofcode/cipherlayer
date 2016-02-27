@@ -1,10 +1,9 @@
 var assert = require('assert');
 var async = require('async');
+var nock = require('nock');
+
 var phoneMng = require('../src/managers/phone');
 var redisMng = require('../src/managers/redis');
-var cipherlayer = require('../src/cipherlayer');
-
-var nock = require('nock');
 
 var config = require('../config.json');
 
@@ -38,33 +37,13 @@ describe('phone', function () {
 
 	var notifServiceURL = config.externalServices.notifications.base;
 	beforeEach(function (done) {
-		async.parallel([
-			function (done) {
-				cipherlayer.start(config.public_port, config.internal_port, done);
-			},
-			function (done) {
-				async.series([
-					function (done) {
-						redisMng.connect(done);
-					},
-					function (done) {
-						redisMng.deleteAllKeys(done);
-					}
-				], done);
-			}
+		async.series([
+				redisMng.connect,
+				redisMng.deleteAllKeys
 		], done);
 	});
 
-	afterEach(function (done) {
-		async.parallel([
-			function (done) {
-				cipherlayer.stop(done);
-			},
-			function (done) {
-				redisMng.disconnect(done);
-			}
-		], done);
-	});
+	afterEach(redisMng.disconnect);
 
 	it('create pin', function (done) {
 

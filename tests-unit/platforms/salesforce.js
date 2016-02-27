@@ -1,6 +1,5 @@
 var assert = require('assert');
 
-var cipherlayer = require('../../src/cipherlayer.js');
 var sfPlatform = require('../../src/platforms/salesforce.js');
 var config = require('../../config.json');
 var SF_PROFILE = require('../resources/sfProfileTemplate.js');
@@ -15,13 +14,6 @@ var sfAccessToken = {
 
 describe('inject expiresAtTimestamp whit refresh token', function () {
 
-	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, done);
-	});
-
-	afterEach(function (done) {
-		cipherlayer.stop(done);
-	});
 	it('expiresAtTimestamp must be provided along with sf refresh token', function (done) {
 
 		sfPlatform.prepareSession(sfAccessToken, 'refreshToken123456', SF_PROFILE, function (err, data) {

@@ -47,7 +47,7 @@ describe('public routes', function () {
 
 							should.not.exist(body);
 						},
-						header: function(headerName, headerValue){
+						header: function (headerName, headerValue) {
 							should.exist(headerName);
 							headerName.toLowerCase().should.equal('location');
 							should.exist(headerValue);

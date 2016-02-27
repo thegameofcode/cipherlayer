@@ -3,7 +3,7 @@ var assert = require('assert');
 var net = require('net');
 var config = require('../config.json');
 
-describe('server control ', function () {
+describe.skip('server control ', function () {
 	it('start', function (done) {
 		cipherlayer.start(config.public_port, config.internal_port, function (err) {
 			assert.equal(err, null);
