@@ -9,7 +9,7 @@
 		"features": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags ~@ignore",
 		"features-only": "./node_modules/cucumber/bin/cucumber.js features -f pretty --tags @only",
 		"jshint": "node_modules/.bin/jshint ./src ./tests ./features main.js",
-		"coverage-unit": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/unit mocha -- tests --recursive --reporter mocha-lcov-reporter",
+		"coverage-unit": "istanbul cover --include-all-sources --lcovonly --dir ./coverage/unit _mocha -- tests --recursive --reporter mocha-lcov-reporter",
 		"coverage-acceptance": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/acceptance cucumber.js -- --tags ~@ignore --format json",
 		"coverage-merge": "istanbul-combine coverage/**/coverage.json",
 		"coverage": "npm run coverage-unit && npm run coverage-acceptance && npm run coverage-merge",
