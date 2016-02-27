@@ -2,7 +2,6 @@ var request = require('request');
 var _ = require('lodash');
 var countries = require('countries-info');
 var redisMng = require('./redis');
-var todo = require('../logger/todo.js');
 
 var _settings = {};
 
@@ -50,7 +49,6 @@ function sendPIN(phone, pin, cbk) {
 	};
 
 	request(options, function (err) {
-		todo.warn('pin sms notification request must verify response code');
 		if (err) {
 			return cbk(err);
 		}
