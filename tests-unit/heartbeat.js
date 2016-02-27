@@ -1,9 +1,9 @@
-var assert = require('assert');
-var request = require('request');
-var config = require('../config.json');
+const assert = require('assert');
+const request = require('request');
+const config = require('../config.json');
 
-var userDao = require('../src/managers/dao');
-var redisMng = require('../src/managers/redis');
+const userDao = require('../src/managers/dao');
+const redisMng = require('../src/managers/redis');
 
 describe('Heartbeat (Server status)', function () {
 

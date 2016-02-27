@@ -1,11 +1,11 @@
-var request = require('request');
-var assert = require('assert');
+const request = require('request');
+const assert = require('assert');
 
-var cipherlayer = require('../../src/cipherlayer');
+const cipherlayer = require('../../src/cipherlayer');
 
-var world = require('./world');
+const world = require('./world');
 
-var config = require('../../config.json');
+const config = require('../../config.json');
 
 module.exports = function () {
 	this.Before("@serviceValidCors", function (scenario, done) {

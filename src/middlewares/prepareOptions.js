@@ -1,5 +1,5 @@
-var config = require('../../config.json');
-var fs = require('fs');
+const config = require('../../config.json');
+const fs = require('fs');
 
 function prepareOptions(req, res, next) {
 	var options = {

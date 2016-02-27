@@ -1,5 +1,5 @@
-var world = require('../support/world');
-var assert = require('assert');
+const world = require('../support/world');
+const assert = require('assert');
 
 var myStepDefinitionsWrapper = function () {
 	this.Then(/^the response has no error$/, function (callback) {

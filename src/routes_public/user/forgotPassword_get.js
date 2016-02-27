@@ -1,15 +1,15 @@
 'use strict';
 
-var async = require('async');
+const async = require('async');
 
-var daoMng = require('../../managers/dao');
-var config = require('../../../config.json');
-var crypto = require('../../managers/crypto');
+const daoMng = require('../../managers/dao');
+const config = require('../../../config.json');
+const crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
-var emailMng = require('../../managers/email');
-var tokenMng = require('../../managers/token');
+const emailMng = require('../../managers/email');
+const tokenMng = require('../../managers/token');
 
-var log = require('../../logger/service.js');
+const log = require('../../logger/service');
 
 module.exports = function (req, res, next) {
 	if (!req.params.email) {

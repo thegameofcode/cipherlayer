@@ -1,16 +1,16 @@
-var assert = require('assert');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var nock = require('nock');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const nock = require('nock');
+const _ = require('lodash');
 
-var config = require('../../config.json');
-var dao = require('../../src/managers/dao.js');
+const config = require('../../config.json');
+const dao = require('../../src/managers/dao');
 
-var SF_PROFILE = require('../resources/sfProfileTemplate.js');
+const SF_PROFILE = require('../resources/sfProfileTemplate');
 
-var accessTokenSettings = require('../token_settings').accessTokenSettings;
-var refreshTokenSettings = require('../token_settings').refreshTokenSettings;
+const accessTokenSettings = require('../token_settings').accessTokenSettings;
+const refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 
 var versionHeader = 'test/1';
 

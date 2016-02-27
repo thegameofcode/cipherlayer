@@ -1,9 +1,9 @@
 'use strict';
-var world = require('../support/world');
-var request = require('request');
-var assert = require('assert');
-var config = require('../../config.json');
-var nock = require('nock');
+const world = require('../support/world');
+const request = require('request');
+const assert = require('assert');
+const config = require('../../config.json');
+const nock = require('nock');
 
 module.exports = function () {
 	this.When(/^the client app requests a magic link for a valid user$/, function (callback) {

@@ -1,19 +1,19 @@
-var _ = require('lodash');
-var nock = require('nock');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var assert = require('assert');
-var redisMng = require('../../src/managers/redis');
+const _ = require('lodash');
+const nock = require('nock');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const assert = require('assert');
+const redisMng = require('../../src/managers/redis');
 
-var dao = require('../../src/managers/dao.js');
-var config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const config = require('../../config.json');
 
 var notificationsServiceURL = config.externalServices.notifications.base;
 
 var versionHeader = 'test/1';
 
-var accessTokenSettings = require('../token_settings').accessTokenSettings;
-var refreshTokenSettings = require('../token_settings').refreshTokenSettings;
+const accessTokenSettings = require('../token_settings').accessTokenSettings;
+const refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 
 
 describe('Protected calls passThrough', () => {

@@ -1,10 +1,10 @@
 'use strict';
 
-var log = require('../logger/service.js');
-var config = require('../../config.json');
-var request = require('request');
-var httpProxy = require('http-proxy');
-var _ = require('lodash');
+const log = require('../logger/service');
+const config = require('../../config.json');
+const request = require('request');
+const httpProxy = require('http-proxy');
+const _ = require('lodash');
 
 var proxy = httpProxy.createProxyServer({});
 

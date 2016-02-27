@@ -1,9 +1,9 @@
 'use strict';
 
-var _ = require('lodash');
-var should = require('chai').should();
-var config = require('../../config.json');
-var authHeaderRequired = require('../../src/middlewares/authHeaderRequired');
+const _ = require('lodash');
+const should = require('chai').should();
+const config = require('../../config.json');
+const authHeaderRequired = require('../../src/middlewares/authHeaderRequired');
 
 describe('middleware', function () {
 	describe('authHeaderRequired', function () {

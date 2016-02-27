@@ -1,12 +1,12 @@
 'use strict';
 
-var restify = require('restify');
-var _ = require('lodash');
+const restify = require('restify');
+const _ = require('lodash');
 
-var log = require('./logger/service.js');
-var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+const log = require('./logger/service');
+const bodyParserWrapper = require('./middlewares/bodyParserWrapper');
 
-var routes = require('./routes_internal/routes');
+const routes = require('./routes_internal/routes');
 
 module.exports = function () {
 	var service = {};

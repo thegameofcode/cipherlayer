@@ -1,12 +1,12 @@
-var assert = require('assert');
-var async = require('async');
-var request = require('request');
-var nock = require('nock');
-var _ = require('lodash');
-var config = require('../config.json');
+const assert = require('assert');
+const async = require('async');
+const request = require('request');
+const nock = require('nock');
+const _ = require('lodash');
+const config = require('../config.json');
 
-var dao = require('../src/managers/dao');
-var redisMng = require('../src/managers/redis');
+const dao = require('../src/managers/dao');
+const redisMng = require('../src/managers/redis');
 
 var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 	'Content-Type': 'application/json; charset=utf-8'

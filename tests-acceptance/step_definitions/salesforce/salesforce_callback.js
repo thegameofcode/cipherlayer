@@ -1,9 +1,9 @@
-var world = require('../../support/world');
-var request = require('request');
-var assert = require('assert');
-var config = require('../../../config.json');
-var nock = require('nock');
-var url = require('url');
+const world = require('../../support/world');
+const request = require('request');
+const assert = require('assert');
+const config = require('../../../config.json');
+const nock = require('nock');
+const url = require('url');
 
 module.exports = function () {
 	this.When(/^the client app receives the SalesForce callback response$/, function (callback) {

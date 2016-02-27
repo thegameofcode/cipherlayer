@@ -1,8 +1,8 @@
-var assert = require('assert');
-var request = require('request');
-var config = require('../../config.json');
-var dao = require('../../src/managers/dao.js');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const _ = require('lodash');
 
 var versionHeader = 'test/1';
 

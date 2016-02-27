@@ -1,5 +1,5 @@
-var config = require('../../config.json');
-var _ = require('lodash');
+const config = require('../../config.json');
+const _ = require('lodash');
 
 module.exports = function (middleware) {
 	return function (req, res, next) {

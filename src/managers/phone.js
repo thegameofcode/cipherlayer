@@ -1,7 +1,7 @@
-var request = require('request');
-var _ = require('lodash');
-var countries = require('countries-info');
-var redisMng = require('./redis');
+const request = require('request');
+const _ = require('lodash');
+const countries = require('countries-info');
+const redisMng = require('./redis');
 
 var _settings = {};
 
@@ -153,7 +153,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 }
 
 module.exports = function (settings) {
-	var config = require('../../config.json');
+	const config = require('../../config.json');
 	_settings = _.assign({}, config, settings);
 
 	return {

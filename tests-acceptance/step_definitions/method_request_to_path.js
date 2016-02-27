@@ -1,9 +1,9 @@
-var world = require('../support/world');
-var fs = require('fs');
+const world = require('../support/world');
+const fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-var nock = require('nock');
-var request = require('request');
-var assert = require('assert');
+const nock = require('nock');
+const request = require('request');
+const assert = require('assert');
 
 var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
 var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;

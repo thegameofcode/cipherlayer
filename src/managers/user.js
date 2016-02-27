@@ -1,19 +1,19 @@
-var request = require('request');
-var _ = require('lodash');
-var ciphertoken = require('ciphertoken');
-var async = require('async');
+const request = require('request');
+const _ = require('lodash');
+const ciphertoken = require('ciphertoken');
+const async = require('async');
 
-var config = require('../../config.json');
-var log = require('../logger/service.js');
-var daoMng = require('./dao');
-var tokenMng = require('./token');
-var redisMng = require('./redis');
-var crypto = require('./crypto');
+const config = require('../../config.json');
+const log = require('../logger/service');
+const daoMng = require('./dao');
+const tokenMng = require('./token');
+const redisMng = require('./redis');
+const crypto = require('./crypto');
 var cryptoMng = crypto(config.password);
-var phoneMng = require('./phone');
-var emailMng = require('./email');
+const phoneMng = require('./phone');
+const emailMng = require('./email');
 
-var isValidJSON = require('./json_validator');
+const isValidJSON = require('./json_validator');
 
 var ERR_INVALID_PWD = {
 	err: 'invalid_password_format',

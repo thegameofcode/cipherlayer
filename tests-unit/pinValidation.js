@@ -1,10 +1,10 @@
-var assert = require('assert');
-var pinValidation = require('../src/middlewares/pinValidation.js');
-var nock = require('nock');
-var config = require('../config.json');
-var redisMng = require('../src/managers/redis');
-var countries = require('countries-info');
-var _ = require('lodash');
+const assert = require('assert');
+const pinValidation = require('../src/middlewares/pinValidation');
+const nock = require('nock');
+const config = require('../config.json');
+const redisMng = require('../src/managers/redis');
+const countries = require('countries-info');
+const _ = require('lodash');
 
 var notifServiceURL = config.externalServices.notifications.base;
 

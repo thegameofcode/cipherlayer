@@ -1,13 +1,13 @@
 'use strict';
 
-var async = require('async');
-var log = require('../../logger/service.js');
-var daoMng = require('../../managers/dao');
-var crypto = require('../../managers/crypto');
-var config = require('../../../config.json');
+const async = require('async');
+const log = require('../../logger/service');
+const daoMng = require('../../managers/dao');
+const crypto = require('../../managers/crypto');
+const config = require('../../../config.json');
 var cryptoMng = crypto(config.password);
-var sessionRequest = require('./session');
-var tokenMng = require('../../managers/token');
+const sessionRequest = require('./session');
+const tokenMng = require('../../managers/token');
 
 module.exports = function (req, res, next) {
 	var userAgent = String(req.headers['user-agent']);

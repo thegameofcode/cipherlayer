@@ -1,9 +1,9 @@
 'use strict';
 
-var nock = require('nock');
-var should = require('chai').should();
-var emailMng = require('../../src/managers/email')();
-var config = require(process.cwd() + '/config.json');
+const nock = require('nock');
+const should = require('chai').should();
+const emailMng = require('../../src/managers/email')();
+const config = require(process.cwd() + '/config.json');
 
 describe('managers', function () {
 	describe('email', function () {

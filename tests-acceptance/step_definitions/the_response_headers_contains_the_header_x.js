@@ -1,7 +1,7 @@
 'use strict';
 
-var world = require('../support/world');
-var should = require('chai').should();
+const world = require('../support/world');
+const should = require('chai').should();
 
 module.exports = function (){
 	this.Then(/^the response headers contains the header "([^"]*)"$/, function (headerName, callback) {

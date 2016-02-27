@@ -1,13 +1,13 @@
-var request = require('request');
-var assert = require('assert');
-var ciphertoken = require('ciphertoken');
-var _ = require('lodash');
-var nock = require('nock');
+const request = require('request');
+const assert = require('assert');
+const ciphertoken = require('ciphertoken');
+const _ = require('lodash');
+const nock = require('nock');
 
-var dao = require('../../src/managers/dao.js');
-var config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const config = require('../../config.json');
 
-var accessTokenSettings = require('../token_settings').accessTokenSettings;
+const accessTokenSettings = require('../token_settings').accessTokenSettings;
 
 var expectedBody = {field1: 'value1', field2: 'value2'};
 var SF_DATA = {

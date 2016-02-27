@@ -1,6 +1,6 @@
-var world = require('../support/world');
-var request = require('request');
-var config = require('../../config.json');
+const world = require('../support/world');
+const request = require('request');
+const config = require('../../config.json');
 
 var myStepDefinitionsWrapper = function () {
 	this.When(/^the client app receives the Linked in callback response$/, function (callback) {

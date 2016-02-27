@@ -1,7 +1,7 @@
-var assert = require('assert');
-var ciphertoken = require('ciphertoken');
-var tokenManager = require('../src/managers/token');
-var config = require('../config.json');
+const assert = require('assert');
+const ciphertoken = require('ciphertoken');
+const tokenManager = require('../src/managers/token');
+const config = require('../config.json');
 
 describe('token manager', function () {
 	describe('createAccessToken', function () {

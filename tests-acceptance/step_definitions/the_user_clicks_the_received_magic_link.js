@@ -1,8 +1,8 @@
 'use strict';
-var world = require('../support/world');
-var should = require('chai').should();
-var config = require('../../config.json');
-var request = require('request');
+const world = require('../support/world');
+const should = require('chai').should();
+const config = require('../../config.json');
+const request = require('request');
 
 module.exports = function () {
 	this.When(/^the user clicks the received magic link$/, function (callback) {

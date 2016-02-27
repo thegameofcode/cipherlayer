@@ -1,8 +1,8 @@
 'use strict';
 
-var redisMng = require('../src/managers/redis');
-var assert = require('assert');
-var async = require('async');
+const redisMng = require('../src/managers/redis');
+const assert = require('assert');
+const async = require('async');
 
 describe('redis', function () {
 

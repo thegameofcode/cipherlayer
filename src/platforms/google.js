@@ -1,11 +1,11 @@
-var async = require('async');
-var GoogleStrategy = require('passport-google-oauth2').Strategy;
+const async = require('async');
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
-var log = require('../logger/service');
-var tokenMng = require('../managers/token');
-var daoMng = require('../managers/dao');
-var userManager = require('../managers/user')();
-var config = require('../../config.json');
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
+const daoMng = require('../managers/dao');
+const userManager = require('../managers/user')();
+const config = require('../../config.json');
 
 function createGoogleStrategy() {
 

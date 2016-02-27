@@ -1,7 +1,7 @@
 'use strict';
 
-var assert = require('assert');
-var isValidJSON = require('../src/managers/json_validator');
+const assert = require('assert');
+const isValidJSON = require('../src/managers/json_validator');
 
 describe('jsonValidator', function () {
 	it('no json', function (done) {

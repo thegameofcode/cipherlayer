@@ -1,4 +1,4 @@
-var Validator = require('jsonschema').Validator;
+const Validator = require('jsonschema').Validator;
 
 module.exports = function (json, schema) {
 	if (!json || Object.keys(json).length === 0) {

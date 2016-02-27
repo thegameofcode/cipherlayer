@@ -1,4 +1,4 @@
-var world = require('../support/world');
+const world = require('../support/world');
 
 module.exports = function () {
 	this.Then(/^the response body contains json attribute "(.*)"$/, function (attribute, callback) {

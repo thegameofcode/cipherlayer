@@ -1,7 +1,7 @@
-var phoneMng = require("../../src/managers/phone");
-var redisMng = require("../../src/managers/redis");
-var nock = require("nock");
-var config = require('../../config.json');
+const phoneMng = require("../../src/managers/phone");
+const redisMng = require("../../src/managers/redis");
+const nock = require("nock");
+const config = require('../../config.json');
 
 var user = {};
 

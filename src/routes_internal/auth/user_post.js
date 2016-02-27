@@ -1,9 +1,9 @@
 'use strict';
 
-var daoMng = require('../../managers/dao');
-var config = require('../../../config.json');
-var ObjectID = require('mongodb').ObjectID;
-var crypto = require('../../managers/crypto');
+const daoMng = require('../../managers/dao');
+const config = require('../../../config.json');
+const ObjectID = require('mongodb').ObjectID;
+const crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
 
 module.exports = function postAuthUser(req, res, next) {

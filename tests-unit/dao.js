@@ -1,10 +1,10 @@
-var assert = require('assert');
-var _ = require('lodash');
-var config = require('../config.json');
-var dao = require('../src/managers/dao.js');
-var sinon = require('sinon');
+const assert = require('assert');
+const _ = require('lodash');
+const config = require('../config.json');
+const dao = require('../src/managers/dao');
+const sinon = require('sinon');
 
-var mongoClient = require('mongodb').MongoClient;
+const mongoClient = require('mongodb').MongoClient;
 
 describe('user dao', function () {
 

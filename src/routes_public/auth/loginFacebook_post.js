@@ -1,14 +1,14 @@
 'use strict';
 
-var request = require('request');
-var _ = require('lodash');
+const request = require('request');
+const _ = require('lodash');
 
-var log = require('../../logger/service.js');
-var daoMng = require('../../managers/dao');
-var userMng = require('../../managers/user')();
-var tokenMng = require('../../managers/token');
-var config = require('../../../config.json');
-var crypto = require('../../managers/crypto');
+const log = require('../../logger/service');
+const daoMng = require('../../managers/dao');
+const userMng = require('../../managers/user')();
+const tokenMng = require('../../managers/token');
+const config = require('../../../config.json');
+const crypto = require('../../managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var defaultOptions = {

@@ -1,6 +1,6 @@
-var crypto = require('crypto');
-var _ = require('lodash');
-var RandExp = require('randexp');
+const crypto = require('crypto');
+const _ = require('lodash');
+const RandExp = require('randexp');
 
 var defaultSettings = {
 	algorithm: 'aes-256-ctr',

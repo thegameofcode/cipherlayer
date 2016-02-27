@@ -1,7 +1,7 @@
 'use strict';
 
-var config = require('../../../config.json');
-var userMng = require('../../managers/user');
+const config = require('../../../config.json');
+const userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
 	if (!req.params) {

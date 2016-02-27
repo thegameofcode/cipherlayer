@@ -1,4 +1,4 @@
-var SFPlatform = require('../platforms/salesforce.js');
+const SFPlatform = require('../platforms/salesforce');
 
 function platformsSetUp(req, res, next) {
 	if (!req.user.platforms) {

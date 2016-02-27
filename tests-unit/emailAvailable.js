@@ -1,8 +1,8 @@
-var assert = require('assert');
-var request = require('request');
+const assert = require('assert');
+const request = require('request');
 
-var config = require('../config.json');
-var userDao = require('../src/managers/dao');
+const config = require('../config.json');
+const userDao = require('../src/managers/dao');
 
 var baseUser = {
 	id: 'a1b2c3d4e5f6',

@@ -1,10 +1,10 @@
-var assert = require('assert');
-var async = require('async');
-var nock = require('nock');
+const assert = require('assert');
+const async = require('async');
+const nock = require('nock');
 
-var redisMng = require('../src/managers/redis');
+const redisMng = require('../src/managers/redis');
 
-var config = require('../config.json');
+const config = require('../config.json');
 var notifServiceURL = config.externalServices.notifications.base;
 var notifServicePath = config.externalServices.notifications.pathEmail;
 
@@ -22,7 +22,7 @@ describe('email', function () {
 	});
 
 	it('verifyEmail', function (done) {
-		var emailMng = require('../src/managers/email')({
+		const emailMng = require('../src/managers/email')({
 			"useEmailVerification": true
 		});
 
@@ -43,7 +43,7 @@ describe('email', function () {
 	});
 
 	it('verifyEmail (not email)', function (done) {
-		var emailMng = require('../src/managers/email')({
+		const emailMng = require('../src/managers/email')({
 			"useEmailVerification": true
 		});
 
@@ -66,7 +66,7 @@ describe('email', function () {
 	});
 
 	it('verifyEmail (useEmailVerification = false)', function (done) {
-		var emailMng = require('../src/managers/email')({
+		const emailMng = require('../src/managers/email')({
 			"emailVerification": false
 		});
 

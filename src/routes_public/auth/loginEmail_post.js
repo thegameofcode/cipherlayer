@@ -1,9 +1,9 @@
 'use strict';
 
-var emailManager = require('../../managers/email')();
-var config = require('../../../config.json');
-var tokenManager = require('../../managers/token');
-var daoManager = require('../../managers/dao');
+const emailManager = require('../../managers/email')();
+const config = require('../../../config.json');
+const tokenManager = require('../../managers/token');
+const daoManager = require('../../managers/dao');
 
 module.exports = function (req, res, next) {
 

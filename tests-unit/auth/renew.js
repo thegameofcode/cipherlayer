@@ -1,12 +1,12 @@
-var assert = require('assert');
-var request = require('request');
-var _ = require('lodash');
-var ciphertoken = require('ciphertoken');
+const assert = require('assert');
+const request = require('request');
+const _ = require('lodash');
+const ciphertoken = require('ciphertoken');
 
-var dao = require('../../src/managers/dao.js');
-var config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const config = require('../../config.json');
 
-var crypto = require('../../src/managers/crypto');
+const crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var versionHeader = 'test/1';

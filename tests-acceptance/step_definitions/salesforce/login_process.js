@@ -1,7 +1,7 @@
-var world = require('../../support/world');
-var request = require('request');
-var assert = require('assert');
-var config = require('../../../config.json');
+const world = require('../../support/world');
+const request = require('request');
+const assert = require('assert');
+const config = require('../../../config.json');
 
 module.exports = function () {
 	this.When(/^the client app request to start SalesForce login process$/, function (callback) {

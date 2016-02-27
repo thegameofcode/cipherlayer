@@ -1,5 +1,5 @@
-var world = require('../support/world');
-var assert = require('assert');
+const world = require('../support/world');
+const assert = require('assert');
 
 module.exports = function () {
 	this.Then(/^the response status code is (\d+)$/, function (statusCode, callback) {

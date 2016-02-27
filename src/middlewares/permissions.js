@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var config = require('../../config.json');
+const _ = require('lodash');
+const config = require('../../config.json');
 
 function checkPermissions(req, res, next) {
 	if (!config.endpoints) {

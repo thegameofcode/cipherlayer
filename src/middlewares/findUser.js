@@ -1,5 +1,5 @@
-var log = require('../logger/service.js');
-var userDao = require('../managers/dao');
+const log = require('../logger/service');
+const userDao = require('../managers/dao');
 
 function findUser(req, res, next) {
 	userDao.getFromId(req.tokenInfo.userId, function (err, foundUser) {

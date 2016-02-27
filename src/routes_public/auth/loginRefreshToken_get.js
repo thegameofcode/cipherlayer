@@ -1,7 +1,7 @@
 'use strict';
 
-var tokenManager = require('../../managers/token');
-var config = require('../../../config.json');
+const tokenManager = require('../../managers/token');
+const config = require('../../../config.json');
 
 module.exports = function (req, res, next) {
 

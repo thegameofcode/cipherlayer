@@ -1,6 +1,6 @@
-var world = require('../support/world');
-var nock = require('nock');
-var config = require('../../config.json');
+const world = require('../support/world');
+const nock = require('nock');
+const config = require('../../config.json');
 
 module.exports = function(){
     this.Given(/^a protected service replies to a GET request with (.*) to (.*) with status (.*) and a responseBody (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){

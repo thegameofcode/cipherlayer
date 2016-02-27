@@ -1,14 +1,14 @@
-var assert = require('assert');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var nock = require('nock');
-var fs = require('fs');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const nock = require('nock');
+const fs = require('fs');
+const _ = require('lodash');
 
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-var dao = require('../src/managers/dao.js');
+const dao = require('../src/managers/dao');
 
-var crypto = require('../src/managers/crypto');
+const crypto = require('../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var accessTokenSettings = {

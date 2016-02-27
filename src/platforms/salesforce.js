@@ -1,15 +1,15 @@
-var log = require('../logger/service.js');
-var request = require('request');
-var async = require('async');
-var countries = require('countries-info');
+const log = require('../logger/service');
+const request = require('request');
+const async = require('async');
+const countries = require('countries-info');
 
-var daoMng = require('../managers/dao');
-var userMng = require('../managers/user')();
-var tokenMng = require('../managers/token');
-var fileStoreMng = require('../managers/file_store');
-var config = require('../../config.json');
+const daoMng = require('../managers/dao');
+const userMng = require('../managers/user')();
+const tokenMng = require('../managers/token');
+const fileStoreMng = require('../managers/file_store');
+const config = require('../../config.json');
 
-var forcedotcomStrategy = require('passport-forcedotcom').Strategy;
+const forcedotcomStrategy = require('passport-forcedotcom').Strategy;
 
 function createSalesforceStrategy() {
 

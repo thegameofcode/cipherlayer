@@ -1,10 +1,10 @@
-var assert = require('assert');
-var request = require('request');
-var async = require('async');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const async = require('async');
+const _ = require('lodash');
 
-var config = require('../config.json');
-var daoMng = require('../src/managers/dao.js');
+const config = require('../config.json');
+const daoMng = require('../src/managers/dao');
 
 describe('realms', function () {
 

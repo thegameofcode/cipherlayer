@@ -1,15 +1,15 @@
-var async = require('async'),
-	fs = require('fs'),
-	nock = require('nock'),
-	userMng = require('../src/managers/user'),
-	config = require('../config.json'),
-	userDao = require('../src/managers/dao.js');
+const async = require('async');
+const fs = require('fs');
+const nock = require('nock');
+const userMng = require('../src/managers/user');
+const config = require('../config.json');
+const userDao = require('../src/managers/dao');
 /*
  * Objects for `async.eachSeries`
  */
 
 // Function to apply to each fixture
-var addFixture = function (fixture, callback) {
+const addFixture = function (fixture, callback) {
 
 	var data = fixture;
 

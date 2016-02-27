@@ -1,17 +1,17 @@
-var assert = require('assert');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var config = require('../../config.json');
-var dao = require('../../src/managers/dao.js');
-var nock = require('nock');
-var _ = require('lodash');
-var crypto = require('../../src/managers/crypto');
+const assert = require('assert');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const nock = require('nock');
+const _ = require('lodash');
+const crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var versionHeader = 'test/1';
 
-var accessTokenSettings = require('../token_settings').accessTokenSettings;
-var refreshTokenSettings = require('../token_settings').refreshTokenSettings;
+const accessTokenSettings = require('../token_settings').accessTokenSettings;
+const refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 
 
 describe('Admin /login', function () {

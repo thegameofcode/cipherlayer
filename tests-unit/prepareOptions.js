@@ -1,8 +1,8 @@
-var assert = require('assert');
-var sinon = require('sinon');
-var prepareOptions = require('./../src/middlewares/prepareOptions');
-var _ = require('lodash');
-var fs = require('fs');
+const assert = require('assert');
+const sinon = require('sinon');
+const prepareOptions = require('./../src/middlewares/prepareOptions');
+const _ = require('lodash');
+const fs = require('fs');
 var request;
 var response;
 

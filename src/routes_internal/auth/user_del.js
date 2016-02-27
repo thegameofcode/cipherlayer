@@ -1,6 +1,6 @@
 'use strict';
 
-var daoMng = require('../../managers/dao');
+const daoMng = require('../../managers/dao');
 
 module.exports = function (req, res, next) {
 	daoMng.deleteAllUsers(function (err) {

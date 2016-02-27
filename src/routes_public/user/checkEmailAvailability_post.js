@@ -1,8 +1,8 @@
 'use strict';
 
-var daoMng = require('../../managers/dao');
+const daoMng = require('../../managers/dao');
 
-var _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function (req, res, next) {
 	var email = req.body.email;

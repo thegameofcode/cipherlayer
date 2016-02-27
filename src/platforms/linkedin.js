@@ -1,10 +1,10 @@
-var async = require('async');
-var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+const async = require('async');
+const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 
-var log = require('../logger/service.js');
-var tokenMng = require('../managers/token');
-var daoMng = require('../managers/dao');
-var config = require('../../config.json');
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
+const daoMng = require('../managers/dao');
+const config = require('../../config.json');
 
 function createLinkedInStrategy() {
 

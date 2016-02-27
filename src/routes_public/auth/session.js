@@ -1,7 +1,7 @@
 'use strict';
 
-var request = require('request');
-var config = require('../../../config.json');
+const request = require('request');
+const config = require('../../../config.json');
 
 module.exports = function sessionRequest(deviceId, userId, method, userAgent, cbk) {
 	if (deviceId) {

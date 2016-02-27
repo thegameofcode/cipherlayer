@@ -1,11 +1,11 @@
-var assert = require('assert');
-var async = require('async');
-var nock = require('nock');
+const assert = require('assert');
+const async = require('async');
+const nock = require('nock');
 
-var phoneMng = require('../src/managers/phone');
-var redisMng = require('../src/managers/redis');
+const phoneMng = require('../src/managers/phone');
+const redisMng = require('../src/managers/redis');
 
-var config = require('../config.json');
+const config = require('../config.json');
 
 var phoneSettings = {
 	phoneVerification: {

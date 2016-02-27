@@ -1,6 +1,6 @@
-var assert = require('assert');
-var crypto = require('crypto');
-var config = require('../config.json');
+const assert = require('assert');
+const crypto = require('crypto');
+const config = require('../config.json');
 
 var defaultSettings = {
 	algorithm: config.password.algorithm || 'aes-256-ctr',
@@ -13,7 +13,7 @@ describe('crypto', function () {
 
 	it('encrypt', function (done) {
 
-		var cryptoMng = require('../src/managers/crypto')(config.password);
+		const cryptoMng = require('../src/managers/crypto')(config.password);
 		var value = 'Hello world';
 		cryptoMng.encrypt(value, function (cryptedResult) {
 			var expectedValue = cipher.update(value, 'utf8', 'hex');
@@ -25,7 +25,7 @@ describe('crypto', function () {
 
 	it('creates a valid random password', function () {
 
-		var crypto = require('../src/managers/crypto');
+		const crypto = require('../src/managers/crypto');
 		var cryptoMng = crypto(config.password);
 
 		var newRandomPassword = cryptoMng.randomPassword(config.password.regexValidation);

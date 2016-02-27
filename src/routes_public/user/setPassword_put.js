@@ -1,6 +1,6 @@
 'use strict';
 
-var userMng = require('../../managers/user');
+const userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
 	userMng().setPassword(req.user._id, req.body, function (err) {

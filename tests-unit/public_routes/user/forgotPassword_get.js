@@ -1,8 +1,8 @@
 'use strict';
 
-var config = require('../../../config.json');
-var should = require('chai').should();
-var mockery = require('mockery');
+const config = require('../../../config.json');
+const should = require('chai').should();
+const mockery = require('mockery');
 
 describe('public routes', function () {
 	describe('/user', function () {
@@ -105,7 +105,7 @@ describe('public routes', function () {
 					done();
 				};
 
-				var forgotPassword_get = require('../../../src/routes_public/user/forgotPassword_get');
+				const forgotPassword_get = require('../../../src/routes_public/user/forgotPassword_get');
 				forgotPassword_get(req, res, next);
 			});
 

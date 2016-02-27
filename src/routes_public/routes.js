@@ -1,34 +1,34 @@
 'use strict';
 
-var config = require('../../config.json');
+const config = require('../../config.json');
 
-var authHeaderRequired = require('../middlewares/authHeaderRequired');
-var decodeAccessToken = require('../middlewares/decodeToken');
+const authHeaderRequired = require('../middlewares/authHeaderRequired');
+const decodeAccessToken = require('../middlewares/decodeToken');
 
-var login_post = require('./auth/login_post');
-var renew_post = require('./auth/renew_post');
-var logout_post = require('./auth/logout_post');
-var loginEmail_post = require('./auth/loginEmail_post');
-var loginRefreshToken_get = require('./auth/loginRefreshToken_get');
+const login_post = require('./auth/login_post');
+const renew_post = require('./auth/renew_post');
+const logout_post = require('./auth/logout_post');
+const loginEmail_post = require('./auth/loginEmail_post');
+const loginRefreshToken_get = require('./auth/loginRefreshToken_get');
 
-var heartbeat_get = require('./heartbeat/heartbeat_get');
+const heartbeat_get = require('./heartbeat/heartbeat_get');
 
-var authloginFacebook_post = require('./auth/loginFacebook_post');
+const authloginFacebook_post = require('./auth/loginFacebook_post');
 
-var checkAccessTokenParam = require('../middlewares/accessTokenParam');
-var checkAuthHeader = require('../middlewares/authHeaderRequired');
-var decodeToken = require('../middlewares/decodeToken');
-var findUser = require('../middlewares/findUser');
-var bodyRequired = require('../middlewares/bodyRequired');
+const checkAccessTokenParam = require('../middlewares/accessTokenParam');
+const checkAuthHeader = require('../middlewares/authHeaderRequired');
+const decodeToken = require('../middlewares/decodeToken');
+const findUser = require('../middlewares/findUser');
+const bodyRequired = require('../middlewares/bodyRequired');
 
-var forgotPassword_get = require('./user/forgotPassword_get');
-var activateUser_get = require('./user/activateUser_get');
-var activateUser_post = require('./user/activateUser_get');
-var checkEmailAvailability_post = require('./user/checkEmailAvailability_post');
-var createUser_post = require('./user/createUser_post');
+const forgotPassword_get = require('./user/forgotPassword_get');
+const activateUser_get = require('./user/activateUser_get');
+const activateUser_post = require('./user/activateUser_get');
+const checkEmailAvailability_post = require('./user/checkEmailAvailability_post');
+const createUser_post = require('./user/createUser_post');
 
-var validateOldPassword = require('./user/validateOldPassword_put');
-var setPassword = require('./user/setPassword_put');
+const validateOldPassword = require('./user/validateOldPassword_put');
+const setPassword = require('./user/setPassword_put');
 
 module.exports = function(server){
 	server.post('/auth/login', login_post);

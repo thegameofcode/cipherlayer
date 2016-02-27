@@ -1,8 +1,8 @@
 'use strict';
 
-var should = require('chai').should();
-var config = require(process.cwd() + '/config.json');
-var cryptoManager = require('../../src/managers/crypto')();
+const should = require('chai').should();
+const config = require(process.cwd() + '/config.json');
+const cryptoManager = require('../../src/managers/crypto')();
 
 describe('managers', function () {
 	describe('crypto', function () {

@@ -1,19 +1,19 @@
 'use strict';
 
-var assert = require('assert');
-var _ = require('lodash');
-var request = require('request');
-var config = require('../../config.json');
-var dao = require('../../src/managers/dao.js');
-var should = require('chai').should();
-var nock = require('nock');
+const assert = require('assert');
+const _ = require('lodash');
+const request = require('request');
+const config = require('../../config.json');
+const dao = require('../../src/managers/dao');
+const should = require('chai').should();
+const nock = require('nock');
 
-var crypto = require('../../src/managers/crypto');
+const crypto = require('../../src/managers/crypto');
 var cryptoMng = crypto(config.password);
 
 var versionHeader = 'test/1';
 
-var accessTokenSettings = require('../token_settings').accessTokenSettings;
+const accessTokenSettings = require('../token_settings').accessTokenSettings;
 
 describe('/logout', function () {
 	var baseUser = {

@@ -1,6 +1,6 @@
-var cipherLayer = require('./src/cipherlayer');
-var fs = require('fs');
-var config = require(process.cwd() + '/config.json');
+const cipherLayer = require('./src/cipherlayer');
+const fs = require('fs');
+const config = require(process.cwd() + '/config.json');
 
 var PUBLIC_PORT = process.env.PORT || config.public_port;
 var INTERNAL_PORT = process.env.INTERNAL_PORT || config.internal_port;

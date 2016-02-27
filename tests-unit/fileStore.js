@@ -1,7 +1,7 @@
-var fileStoreMng = require('../src/managers/file_store');
-var assert = require('assert');
-var fs = require('fs');
-var config = require('../config.json');
+const fileStoreMng = require('../src/managers/file_store');
+const assert = require('assert');
+const fs = require('fs');
+const config = require('../config.json');
 
 describe('AWS', function () {
 

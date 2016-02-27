@@ -1,8 +1,8 @@
-var request = require('request');
-var assert = require('assert');
-var world = require('../support/world');
-var nock = require('nock');
-var config = require('../../config.json');
+const request = require('request');
+const assert = require('assert');
+const world = require('../support/world');
+const nock = require('nock');
+const config = require('../../config.json');
 
 module.exports = function () {
 	this.When(/^the client makes a pass through (.*) with the following (.*) in the body$/, function (METHOD, PUBLIC_PAYLOAD, callback) {

@@ -1,9 +1,9 @@
 'use strict';
 
-var should = require('chai').should();
-var ciphertoken = require('ciphertoken');
-var config = require('../../config.json');
-var decodeToken = require('../../src/middlewares/decodeToken');
+const should = require('chai').should();
+const ciphertoken = require('ciphertoken');
+const config = require('../../config.json');
+const decodeToken = require('../../src/middlewares/decodeToken');
 
 var accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,

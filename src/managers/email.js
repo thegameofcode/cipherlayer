@@ -1,12 +1,12 @@
 'use strict';
 
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var crypto = require('crypto');
-var redisMng = require('./redis');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const crypto = require('crypto');
+const redisMng = require('./redis');
 
-var config = require('../../config.json');
-var log = require('../logger/service');
+const config = require('../../config.json');
+const log = require('../logger/service');
 
 var _settings = {};
 
@@ -160,7 +160,7 @@ function sendEmailMagicLink(email, link, cbk){
 }
 
 module.exports = function (settings) {
-	var config = require('../../config.json');
+	const config = require('../../config.json');
 	_settings = Object.assign({}, config, settings);
 
 	return {

@@ -1,15 +1,15 @@
-var assert = require('assert');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var async = require('async');
-var crypto = require('crypto');
-var nock = require('nock');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const async = require('async');
+const crypto = require('crypto');
+const nock = require('nock');
+const _ = require('lodash');
 
-var config = require('../../config.json');
-var dao = require('../../src/managers/dao.js');
+const config = require('../../config.json');
+const dao = require('../../src/managers/dao');
 
-var redisMng = require('../../src/managers/redis');
+const redisMng = require('../../src/managers/redis');
 
 var versionHeader = 'test/1';
 

@@ -1,8 +1,8 @@
-var assert = require('assert');
+const assert = require('assert');
 
-var sfPlatform = require('../../src/platforms/salesforce.js');
-var config = require('../../config.json');
-var SF_PROFILE = require('../resources/sfProfileTemplate.js');
+const sfPlatform = require('../../src/platforms/salesforce');
+const config = require('../../config.json');
+const SF_PROFILE = require('../resources/sfProfileTemplate');
 
 var sfAccessToken = {
 	id: "https://login.salesforce.com/id/00Dx0000000BV7z/005x00000012Q9P",

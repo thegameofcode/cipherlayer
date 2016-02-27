@@ -1,9 +1,9 @@
 'use strict';
 
-var should = require('chai').should();
-var mockery = require('mockery');
-var sinon = require('sinon');
-var config = require(process.cwd() + '/config.json');
+const should = require('chai').should();
+const mockery = require('mockery');
+const sinon = require('sinon');
+const config = require(process.cwd() + '/config.json');
 
 describe('public routes', function () {
 	describe('/auth', function () {
@@ -83,7 +83,7 @@ describe('public routes', function () {
 						done();
 					};
 
-					var loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post.js');
+					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
 					loginEmail_post(req, res, next);
 				});
 
@@ -120,7 +120,7 @@ describe('public routes', function () {
 					};
 					var nextSpy = sinon.spy(next, 'next');
 
-					var loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post.js');
+					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
 					loginEmail_post(req, res, next.next);
 				});
 			});

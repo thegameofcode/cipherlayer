@@ -1,10 +1,10 @@
-var assert = require('assert');
-var request = require('request');
-var nock = require('nock');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const nock = require('nock');
+const _ = require('lodash');
 
-var config = require('../../config.json');
-var userDao = require('../../src/managers/dao.js');
+const config = require('../../config.json');
+const userDao = require('../../src/managers/dao');
 
 var OPTIONS = {
 	url: 'http://localhost:' + config.public_port + '/auth/login/facebook',

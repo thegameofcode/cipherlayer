@@ -1,27 +1,27 @@
 'use strict';
 
-var passport = require('passport');
-var _ = require('lodash');
-var restify = require('restify');
-var fs = require('fs');
-var path = require('path');
-var versionControl = require('version-control');
+const passport = require('passport');
+const _ = require('lodash');
+const restify = require('restify');
+const fs = require('fs');
+const path = require('path');
+const versionControl = require('version-control');
 
-var config = require('../config.json');
-var log = require('./logger/service.js');
-var checkAccessTokenParam = require('./middlewares/accessTokenParam');
-var checkAuthHeader = require('./middlewares/authHeaderRequired');
-var decodeToken = require('./middlewares/decodeToken');
-var findUser = require('./middlewares/findUser');
-var prepareOptions = require('./middlewares/prepareOptions');
-var platformsSetUp = require('./middlewares/platformsSetUp');
-var propagateRequest = require('./middlewares/propagateRequest');
-var permissions = require('./middlewares/permissions');
-var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
-var pinValidation = require('./middlewares/pinValidation')();
-var userAppVersion = require('./middlewares/userAppVersion')();
+const config = require('../config.json');
+const log = require('./logger/service');
+const checkAccessTokenParam = require('./middlewares/accessTokenParam');
+const checkAuthHeader = require('./middlewares/authHeaderRequired');
+const decodeToken = require('./middlewares/decodeToken');
+const findUser = require('./middlewares/findUser');
+const prepareOptions = require('./middlewares/prepareOptions');
+const platformsSetUp = require('./middlewares/platformsSetUp');
+const propagateRequest = require('./middlewares/propagateRequest');
+const permissions = require('./middlewares/permissions');
+const bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+const pinValidation = require('./middlewares/pinValidation')();
+const userAppVersion = require('./middlewares/userAppVersion')();
 
-var routes = require('./routes_public/routes');
+const routes = require('./routes_public/routes');
 
 module.exports = function () {
 	var service = {};

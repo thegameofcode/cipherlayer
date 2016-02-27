@@ -1,8 +1,8 @@
 'use strict';
 
-var config = require('../../../config.json');
-var tokenMng = require('../../managers/token');
-var userMng = require('../../managers/user');
+const config = require('../../../config.json');
+const tokenMng = require('../../managers/token');
+const userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
 	userMng().createUser(req.body, req.headers['x-otp-pin'], function (error, tokens) {

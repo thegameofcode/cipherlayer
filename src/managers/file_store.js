@@ -1,6 +1,6 @@
-var AWS = require('aws-sdk');
-var https = require('https');
-var config = require('../../config.json');
+const AWS = require('aws-sdk');
+const https = require('https');
+const config = require('../../config.json');
 
 var s3;
 

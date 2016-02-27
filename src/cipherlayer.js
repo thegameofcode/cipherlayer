@@ -1,12 +1,12 @@
 'use strict';
 
-var async = require('async');
+const async = require('async');
 
-var userDao = require('./managers/dao');
-var redisMng = require('./managers/redis');
+const userDao = require('./managers/dao');
+const redisMng = require('./managers/redis');
 
-var publicService = require('./public_service');
-var privateService = require('./internal_service');
+const publicService = require('./public_service');
+const privateService = require('./internal_service');
 
 module.exports = function () {
 	var cipherlayer = {};

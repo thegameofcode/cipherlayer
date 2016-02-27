@@ -1,6 +1,6 @@
-var config = require('../../config.json');
-var log = require('../logger/service.js');
-var tokenMng = require('../managers/token');
+const config = require('../../config.json');
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
 
 function decodeToken(req, res, next) {
 	if (!req.auth) {

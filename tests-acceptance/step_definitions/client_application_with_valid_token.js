@@ -1,14 +1,14 @@
-var world = require('../support/world');
-var request = require('request');
-var assert = require('assert');
-var async = require('async');
-var config = require('../../config.json');
+const world = require('../support/world');
+const request = require('request');
+const assert = require('assert');
+const async = require('async');
+const config = require('../../config.json');
 
-var dao = require('../../src/managers/dao.js');
-var _ = require("lodash");
-var nock = require('nock');
+const dao = require('../../src/managers/dao');
+const _ = require("lodash");
+const nock = require('nock');
 
-var cryptoMng = require('../../src/managers/crypto')(config.password);
+const cryptoMng = require('../../src/managers/crypto')(config.password);
 
 module.exports = function () {
 	this.Given(/^a user with role (.*) and a valid access token$/, function (role, callback) {

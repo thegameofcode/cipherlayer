@@ -1,8 +1,8 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-var log = require('../logger/service.js');
-var userDao = require('../managers/dao');
-var config = require('../../config.json');
+const log = require('../logger/service');
+const userDao = require('../managers/dao');
+const config = require('../../config.json');
 
 var updatingUserError = {
 	err: 'proxy_error',

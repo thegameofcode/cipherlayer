@@ -1,14 +1,14 @@
-var assert = require('assert');
-var ciphertoken = require('ciphertoken');
-var async = require('async');
-var nock = require('nock');
-var _ = require('lodash');
-var userDao = require('../src/managers/dao');
-var redisMng = require('../src/managers/redis');
-var userMng = require('../src/managers/user');
-var crypto = require('../src/managers/crypto');
+const assert = require('assert');
+const ciphertoken = require('ciphertoken');
+const async = require('async');
+const nock = require('nock');
+const _ = require('lodash');
+const userDao = require('../src/managers/dao');
+const redisMng = require('../src/managers/redis');
+const userMng = require('../src/managers/user');
+const crypto = require('../src/managers/crypto');
 
-var config = require('../config.json');
+const config = require('../config.json');
 
 var notifServiceURL = config.externalServices.notifications.base;
 var notifServicePath = config.externalServices.notifications.pathEmail;

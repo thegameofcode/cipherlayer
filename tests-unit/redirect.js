@@ -1,9 +1,9 @@
-var assert = require('assert');
-var nock = require('nock');
-var request = require('request');
-var ciphertoken = require('ciphertoken');
-var dao = require('../src/managers/dao.js');
-var config = require('../config.json');
+const assert = require('assert');
+const nock = require('nock');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const dao = require('../src/managers/dao');
+const config = require('../config.json');
 
 var accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,

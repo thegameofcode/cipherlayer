@@ -1,10 +1,10 @@
-var assert = require('assert');
-var async = require('async');
+const assert = require('assert');
+const async = require('async');
 
-var userAppVersion = require('../src/middlewares/userAppVersion.js');
-var userDao = require('../src/managers/dao');
+const userAppVersion = require('../src/middlewares/userAppVersion');
+const userDao = require('../src/managers/dao');
 
-var config = require('../config.json');
+const config = require('../config.json');
 
 describe('middleware userAppVersion', function () {
 	var settings = {

@@ -1,7 +1,7 @@
 'use strict';
 
-var sessionRequest = require('./session');
-var log = require('../../logger/service.js');
+const sessionRequest = require('./session');
+const log = require('../../logger/service');
 
 module.exports = function (req, res, next) {
 	var tokenInfo = req.tokenInfo;

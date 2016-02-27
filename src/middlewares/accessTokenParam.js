@@ -1,4 +1,4 @@
-var config = require('../../config.json');
+const config = require('../../config.json');
 
 function checkAccessTokenParam(req, res, next) {
 	var paramAT = req.params.at;

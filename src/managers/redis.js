@@ -1,5 +1,5 @@
-var redis = require('redis');
-var config = require('../../config.json');
+const redis = require('redis');
+const config = require('../../config.json');
 
 var redisClient;
 
