@@ -8,7 +8,7 @@
     "test-unit": "mocha tests-unit --recursive",
     "test-acceptance": "cucumber.js tests-acceptance -f pretty --tags ~@ignore",
     "test-acceptance-only": "cucumber.js tests-acceptance -f pretty --tags @only",
-    "lint": "jshint src tests-unit tests-acceptance main.js",
+    "lint": "eslint src tests-unit tests-acceptance main.js",
     "coverage-unit": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/unit _mocha -- tests-unit --recursive --reporter mocha-lcov-reporter",
     "coverage-acceptance": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/acceptance cucumber.js -- tests-acceptance --tags ~@ignore --format json",
     "coverage-merge": "istanbul-combine coverage/**/coverage.json",
@@ -46,10 +46,11 @@
     "codeclimate-test-reporter": "^0.3.1",
     "coveralls": "^2.11.4",
     "cucumber": "^0.9.5",
+    "eslint": "^2.2.0",
+    "eslint-plugin-extra-rules": "^0.6.1",
     "istanbul": "^0.4.2",
     "istanbul-combine": "^0.3.0",
     "istanbul-coveralls": "^1.0.3",
-    "jshint": "^2.8.0",
     "mocha": "^2.0.1",
     "mocha-junit-reporter": "^1.9.1",
     "mocha-lcov-reporter": "^1.2.0",
@@ -71,11 +72,5 @@
   "homepage": "https://github.com/thegameofcode/cipherlayer",
   "pre-commit": [
     "lint"
-  ],
-  "jshintConfig": {
-    "esnext": true,
-    "node": true,
-    "unused": true,
-    "mocha": true
-  }
+  ]
 }
