@@ -1,32 +1,32 @@
 'use strict';
 
-var assert = require('assert');
-var jsonValidator = require('../src/managers/json_validator');
+const assert = require('assert');
+const isValidJSON = require('../src/managers/json_validator');
 
 describe('jsonValidator', function () {
 	it('no json', function (done) {
-		var result = jsonValidator.isValidJSON(null, null);
+		const result = isValidJSON(null, null);
 		assert.equal(result, false);
-		done();
+		return done();
 	});
 
 	it('no schema', function (done) {
-		var result = jsonValidator.isValidJSON({isJson: true}, null);
+		const result = isValidJSON({isJson: true}, null);
 		assert.equal(result, true);
-		done();
+		return done();
 	});
 
 	it('valid json', function (done) {
-		var result = jsonValidator.isValidJSON({isNumber: 1, isString: 'string'}, {
-			"id": "/Profile",
-			"type": "object",
-			"properties": {
-				"isNumber": {"type": "number", "required": true},
-				"isString": {"type": "string", "required": true}
+		const result = isValidJSON({isNumber: 1, isString: 'string'}, {
+			id: '/Profile',
+			type: 'object',
+			properties: {
+				isNumber: {type: 'number', required: true},
+				isString: {type: 'string', required: true}
 			},
-			"additionalProperties": true
+			additionalProperties: true
 		});
 		assert.equal(result, true);
-		done();
+		return done();
 	});
 });

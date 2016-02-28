@@ -1,18 +1,18 @@
 'use strict';
 
-var tokenManager = require('../../managers/token');
-var config = require(process.cwd() + '/config.json');
+const tokenManager = require('../../managers/token');
+const config = require('../../../config.json');
 
 module.exports = function (req, res, next) {
 
-	var refreshToken = req.params.rt;
+	const refreshToken = req.params.rt;
 
 	if (!refreshToken) {
 		res.send(400, {
 			err: 'invalid_request',
 			des: 'refresh token required'
 		});
-		return next(false);
+		return next();
 	}
 
 	tokenManager.getRefreshTokenInfo(refreshToken, function (err) {
@@ -21,11 +21,11 @@ module.exports = function (req, res, next) {
 				err: 'invalid_request',
 				des: 'invalid refresh token'
 			});
-			return next(false);
+			return next();
 		}
-		res.header('Location', config.magicLink.scheme + '://user/refreshToken/' + refreshToken);
+		res.header('Location', `${config.magicLink.scheme}://user/refreshToken/${refreshToken}`);
 		res.send(302);
 
-		next();
+		return next();
 	});
 };

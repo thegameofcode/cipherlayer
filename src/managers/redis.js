@@ -1,19 +1,22 @@
-var redis = require('redis');
-var config = require(process.cwd() + '/config.json');
+'use strict';
 
-var redisClient;
+const redis = require('redis');
+const config = require('../../config.json');
 
-var isConnected;
+const REDIS_HOST = config.redis.host || 'localhost';
+const REDIS_PORT = config.redis.port || 6379;
+
+let redisClient;
+let isConnected;
 
 function connect(cbk) {
-	var host = config.redis.host || "localhost";
-	var port = config.redis.port || 6379;
-
-	redisClient = redis.createClient(port, host, {});
+	redisClient = redis.createClient(REDIS_PORT, REDIS_HOST, {});
 	redisClient.on('connect', function (err) {
-		if (err) return cbk(err);
+		if (err) {
+			return cbk(err);
+		}
 		isConnected = true;
-		cbk(null, true);
+		return cbk(null, true);
 	});
 }
 
@@ -24,7 +27,7 @@ function disconnect(cbk) {
 
 	redisClient.end();
 	isConnected = false;
-	cbk(null, false);
+	return cbk(null, false);
 }
 
 function insertKeyValue(key, value, expSeconds, cbk) {
@@ -35,18 +38,17 @@ function insertKeyValue(key, value, expSeconds, cbk) {
 	setKeyValue(key, value, function (err) {
 		if (err) {
 			return cbk(err);
-		} else {
-			getKeyValue(key, function (err, value) {
-				if (err) {
-					return cbk(err);
-				} else {
-					if (expSeconds) {
-						redisClient.expire(key, expSeconds);
-					}
-					return cbk(null, value);
-				}
-			});
 		}
+
+		getKeyValue(key, function (getErr, resValue) {
+			if (getErr) {
+				return cbk(getErr);
+			}
+			if (expSeconds) {
+				redisClient.expire(key, expSeconds);
+			}
+			return cbk(null, resValue);
+		});
 	});
 }
 
@@ -56,7 +58,10 @@ function updateKeyValue(key, value, cbk) {
 	}
 
 	redisClient.ttl(key, function (err, expSeconds) {
-		if (err) return cbk(err);
+		if (err) {
+			return cbk(err);
+		}
+
 		insertKeyValue(key, value, expSeconds, cbk);
 	});
 }
@@ -99,24 +104,24 @@ function deleteAllKeys(cbk) {
 }
 
 function getStatus(cbk) {
-	var REDIS_ERR = {
-		err: 'component_error',
-		des: 'Redis component is not available'
-	};
+	if (!redisClient || !isConnected) {
+		return cbk({
+			err: 'component_error',
+			des: 'Redis component is not available'
+		});
+	}
 
-	if (!redisClient || !isConnected) return cbk(REDIS_ERR);
-	cbk();
+	return cbk();
 }
 
 module.exports = {
-	connect: connect,
-	disconnect: disconnect,
-	insertKeyValue: insertKeyValue,
-	updateKeyValue: updateKeyValue,
-	getKeyValue: getKeyValue,
-	setKeyValue: setKeyValue,
-	deleteKeyValue: deleteKeyValue,
-	deleteAllKeys: deleteAllKeys,
-
-	getStatus: getStatus
+	connect,
+	disconnect,
+	insertKeyValue,
+	updateKeyValue,
+	getKeyValue,
+	setKeyValue,
+	deleteKeyValue,
+	deleteAllKeys,
+	getStatus
 };

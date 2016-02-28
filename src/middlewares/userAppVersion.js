@@ -1,34 +1,34 @@
-var log = require('../logger/service.js');
-var userDao = require('../managers/dao');
-var _ = require('lodash');
+'use strict';
 
-var config = require(process.cwd() + '/config.json');
+const _ = require('lodash');
 
-var updatingUserError = {
+const log = require('../logger/service');
+const userDao = require('../managers/dao');
+const config = require('../../config.json');
+
+const updatingUserError = {
 	err: 'proxy_error',
 	des: 'error updating user appVersion'
 };
 
-var defaultSettings = config;
-var _settings = {};
+let _settings = {};
 
 function storeUserAppVersion(req, res, next) {
 	if (!req.headers[_settings.version.header] || req.user.appVersion === req.headers[_settings.version.header]) {
 		return next();
-	} else {
-		userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
-			if (err) {
-				log.error({err: err});
-				res.send(500, updatingUserError);
-				return next(false);
-			}
-			next();
-		});
 	}
+	userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
+		if (err) {
+			log.error({ err });
+			res.send(500, updatingUserError);
+			return next(err);
+		}
+		return next();
+	});
 }
 
 module.exports = function (settings) {
-	_.extend(_settings, defaultSettings, settings);
+	_settings = _.extend({}, config, settings);
 
 	return storeUserAppVersion;
 };

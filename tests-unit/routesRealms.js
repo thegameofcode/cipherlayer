@@ -1,56 +1,52 @@
-var assert = require('assert');
-var request = require('request');
-var async = require('async');
-var _ = require('lodash');
+const assert = require('assert');
+const request = require('request');
+const async = require('async');
+const _ = require('lodash');
 
-var config = require('../config.json');
-var daoMng = require('../src/managers/dao.js');
+const config = require('../config.json');
+const daoMng = require('../src/managers/dao');
 
 describe('realms', function () {
 
-	var baseRealms = [
+	const baseRealms = [
 		{
-			"name": "default",
-			"allowedDomains": [
-				"*@a.com",
-				"*@b.com"
+			name: 'default',
+			allowedDomains: [
+				'*@a.com',
+				'*@b.com'
 			],
-			"capabilities": {
-				"news": true,
-				"chat": true,
-				"call": true
+			capabilities: {
+				news: true,
+				chat: true,
+				call: true
 			}
 		},
 		{
-			"name": "test",
-			"allowedDomains": [
-				"*@a.com"
+			name: 'test',
+			allowedDomains: [
+				'*@a.com'
 			],
-			"capabilities": {
-				"test": true
+			capabilities: {
+				test: true
 			}
 		},
 		{
-			"name": "valid",
-			"allowedDomains": [
-				"valid@a.com"
+			name: 'valid',
+			allowedDomains: [
+				'valid@a.com'
 			],
-			"capabilities": {
-				"valid": true
+			capabilities: {
+				valid: true
 			}
 		}
 	];
 
 	beforeEach(function (done) {
+		daoMng.resetRealmsVariables();
 		async.parallel([
+			daoMng.deleteAllRealms,
 			function (finish) {
-				daoMng.resetRealmsVariables();
-				daoMng.deleteAllRealms(finish);
-			},
-			function (finish) {
-				async.eachSeries(_.cloneDeep(baseRealms), function (realm, next) {
-					daoMng.addRealm(realm, next);
-				}, finish);
+				async.eachSeries(_.cloneDeep(baseRealms), daoMng.addRealm, finish);
 			}
 		], done);
 	});
@@ -62,8 +58,8 @@ describe('realms', function () {
 			return done();
 		}
 
-		var options = {
-			url: 'http://localhost:' + config.internal_port + '/realms',
+		const options = {
+			url: `http://localhost:${config.internal_port}/realms`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -75,7 +71,7 @@ describe('realms', function () {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 200, body);
 			assert.deepEqual(body.realms, baseRealms);
-			done();
+			return done();
 		});
 	});
 
@@ -87,20 +83,20 @@ describe('realms', function () {
 		daoMng.deleteAllRealms(function (err) {
 			assert.equal(err, null);
 
-			var options = {
-				url: 'http://localhost:' + config.internal_port + '/realms',
+			const options = {
+				url: `http://localhost:${config.internal_port}/realms`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
 				method: 'GET'
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
-				assert.equal(res.statusCode, 200, body);
-				body = JSON.parse(body);
+				assert.equal(res.statusCode, 200, rawBody);
+				const body = JSON.parse(rawBody);
 				assert.deepEqual(body.realms, []);
-				done();
+				return done();
 			});
 		});
 	});

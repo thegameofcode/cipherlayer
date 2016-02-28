@@ -1,0 +1,76 @@
+extends: 'eslint:recommended'
+env:
+  node: true
+  mocha: true
+  es6: true
+parserOptions:
+  ecmaVersion: 6
+  sourceType: 'module'
+  ecmaFeatures:
+    implidedStrict: true
+    blockBindings: true
+    arrowFunctions: true
+    objectLiteralShorthandMethods: true
+    objectLiteralShorthandProperties: true
+plugins:
+  - "extra-rules"
+rules:
+  array-callback-return: 2
+  arrow-parens: [2, 'as-needed']
+  arrow-spacing: 2
+  callback-return: [2, ['callback', 'cbk', 'next', 'done']]
+  complexity: [0, 11]
+
+  # this should be set to 2, warning until 100% test coverage
+  consistent-return: 1
+  eqeqeq: 2
+
+  # this should be enable after prefer-arrow-callback
+  func-names: 0
+  max-depth: [0, 4]
+  max-params: [0, 3]
+  max-statements: [0, 10]
+  no-else-return: 2
+  no-empty-function: 1
+  no-eq-null: 2
+  no-eval: 2
+  no-extend-native: 2
+  no-lone-blocks: 2
+  no-loop-func: 2
+  no-multi-spaces: 2
+  no-new-func: 2
+  no-new-wrappers: 2
+  no-new: 2
+  no-octal-escape: 2
+  no-octal: 2
+  no-param-reassign: 1
+  no-process-env: 2
+  no-proto: 2
+  no-return-assign: 2
+  no-sequences: 2
+  no-self-compare: 2
+  no-shadow: 1
+  no-throw-literal: 2
+  no-unused-expressions: 2
+  no-useless-call: 2
+  no-useless-concat: 2
+  no-var: 2
+  no-void: 2
+  no-with: 2
+  object-shorthand: 2
+  one-var: [2, 'never']
+  padded-blocks: 0
+
+  # this should enable at some point
+  #prefer-arrow-callback: 1
+  prefer-const: 1
+  prefer-template: 2
+  quote-props: [2, 'as-needed']
+  quotes: [2, 'single']
+  radix: 2
+  semi: 2
+  template-curly-spacing: [2, 'never']
+  yoda: 2
+#  extra-rules/no-commented-out-code: 2
+  extra-rules/no-for-loops: 1
+  extra-rules/potential-point-free: 2

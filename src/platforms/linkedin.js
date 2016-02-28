@@ -1,10 +1,12 @@
-var async = require('async');
-var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+'use strict';
 
-var log = require('../logger/service.js');
-var tokenMng = require('../managers/token');
-var daoMng = require('../managers/dao');
-var config = require(process.cwd() + '/config.json');
+const async = require('async');
+const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
+const daoMng = require('../managers/dao');
+const config = require('../../config.json');
 
 function createLinkedInStrategy() {
 
@@ -15,48 +17,47 @@ function createLinkedInStrategy() {
 		scope: config.linkedin.scope,
 		passReqToCallback: true
 	}, function (req, accessToken, refreshToken, profile, done) {
-		var data = {
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			profile: profile
-		};
-		done(null, data);
+		return done(null, {
+			accessToken,
+			refreshToken,
+			profile
+		});
 	});
 }
 
 function linkedInCallback(req, res, next) {
-	var data = req.user;
-	var profile = data.profile;
+	const data = req.user;
+	const profile = data.profile;
 	daoMng.getFromUsername(profile._json.emailAddress, function (err, foundUser) {
 		if (err) {
 			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
-				var inData = {
+				const inData = {
 					accessToken: data.accessToken,
 					refreshToken: data.refreshToken
 				};
 				tokenMng.createAccessToken(profile.id, inData, function (err, token) {
 					if (err) {
-						log.error({err: err}, 'error creating linkedin profile token');
-						return next(false);
+						log.error({ err }, 'error creating linkedin profile token');
+						return next(err);
 					}
-					var returnProfile = {
+					const returnProfile = {
 						name: profile._json.formattedName,
 						email: profile._json.emailAddress,
 						in: token
 					};
 
 					res.send(203, returnProfile);
-					return next(false);
+					return next();
 				});
 			} else {
 				res.send(500, {err: 'internal_error', des: 'There was an internal error matching linkedin profile'});
-				return next(false);
+				return next(err);
 			}
 		}
 
-		var tokenData = {};
+		let tokenData = {};
 		if (foundUser.roles) {
-			tokenData = {"roles": foundUser.roles};
+			tokenData = { roles: foundUser.roles };
 		}
 
 		async.series([
@@ -64,7 +65,7 @@ function linkedInCallback(req, res, next) {
 				//Add "realms" & "capabilities"
 				daoMng.getRealms(function (err, realms) {
 					if (err) {
-						log.error({err: err, des: 'error obtaining user realms'});
+						log.error({err, des: 'error obtaining user realms'});
 						return done();
 					}
 
@@ -78,8 +79,8 @@ function linkedInCallback(req, res, next) {
 						}
 						async.eachSeries(realm.allowedDomains, function (domain, more) {
 							//wildcard
-							var check = domain.replace(/\*/g, '.*');
-							var match = foundUser.username.match(check);
+							const check = domain.replace(/\*/g, '.*');
+							const match = foundUser.username.match(check);
 							if (!match || foundUser.username !== match[0]) {
 								return more();
 							}
@@ -105,33 +106,34 @@ function linkedInCallback(req, res, next) {
 			tokenMng.createBothTokens(foundUser.username, tokenData, function (err, tokens) {
 				if (err) {
 					res.send(409, {err: err.message});
-				} else {
-					tokens.expiresIn = config.accessToken.expiration * 60;
-					res.send(200, tokens);
+					return next(err);
+
 				}
-				return next(false);
+				tokens.expiresIn = config.accessToken.expiration * 60;
+				res.send(200, tokens);
+				return next();
 			});
 		});
 	});
 }
 
 function addUserPlatform(req, res, next) {
-	var data = req.user;
-	var profile = data.profile;
+	const data = req.user;
+	const profile = data.profile;
 
 	daoMng.getFromUsername(profile._json.emailAddress, function (err, foundUser) {
 		if (err) {
 			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
 				res.send(500, {err: 'internal_error', des: 'User not found'});
-				return next(false);
+				return next(err);
 			}
 			res.send(500, {err: 'internal_error', des: 'There was an internal error matching linkedin profile'});
-			return next(false);
+			return next(true); // TODO: return error
 		}
 
-		var updatedPlatforms = [];
-		var platforms = profile.platforms;
-		var platformExists = false;
+		const updatedPlatforms = [];
+		const platforms = profile.platforms;
+		let platformExists = false;
 
 		if (foundUser.platforms && foundUser.platforms.length > 0) {
 			platforms.forEach(function (platform) {
@@ -146,7 +148,7 @@ function addUserPlatform(req, res, next) {
 		}
 
 		if (!platformExists) {
-			var linkedInPlatform = {
+			const linkedInPlatform = {
 				platform: 'in',
 				accessToken: data.accessToken,
 				refreshToken: data.refreshToken,
@@ -158,16 +160,16 @@ function addUserPlatform(req, res, next) {
 		daoMng.updateFieldById(foundUser.id.toString(), {platforms: updatedPlatforms}, function (err, updatedUsers) {
 			if (err) {
 				res.send(500, {err: 'internal_error', des: 'Error updating the user'});
-				return next(false);
+				return next(err);
 			}
 
 			if (updatedUsers !== 1) {
 				res.send(500, {err: 'internal_error', des: 'Error updating the user'});
-				return next(false);
+				return next(true); // TODO: return error
 			}
 
 			res.send(204);
-			return next(false);
+			return next();
 		});
 	});
 }
@@ -178,7 +180,7 @@ function addRoutes(server, passport) {
 	}
 
 	log.info('Adding LinkedIn routes');
-	var linkedInStrategy = createLinkedInStrategy();
+	const linkedInStrategy = createLinkedInStrategy();
 	passport.use(linkedInStrategy);
 	server.get('/auth/in', passport.authenticate('linkedin', {state: new Date().getTime()}));
 	server.post('/auth/in', addUserPlatform);
@@ -189,5 +191,5 @@ function addRoutes(server, passport) {
 }
 
 module.exports = {
-	addRoutes: addRoutes
+	addRoutes
 };

@@ -1,127 +1,127 @@
-var assert = require('assert');
-var async = require('async');
-var request = require('request');
-var nock = require('nock');
-var _ = require('lodash');
-var config = require('../config.json');
+const assert = require('assert');
+const async = require('async');
+const request = require('request');
+const nock = require('nock');
+const _ = require('lodash');
+const config = require('../config.json');
 
-var dao = require('../src/managers/dao');
-var redisMng = require('../src/managers/redis');
+const dao = require('../src/managers/dao');
+const redisMng = require('../src/managers/redis');
 
-var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
-	'Content-Type': 'application/json; charset=utf-8'
-};
-
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 
 describe.skip('/api/profile (verify phone)', function () {
 
 	this.timeout(10000);
 
-	var notifServiceURL = config.externalServices.notifications.base;
+	const notifServiceURL = config.externalServices.notifications.base;
 
-	var baseUser = {
-		email: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
-		password: "n3wPas5W0rd",
-		phone: "444444444",
-		country: "US"
+	const baseUser = {
+		email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+		password: 'n3wPas5W0rd',
+		phone: '444444444',
+		country: 'US'
 	};
 
 	beforeEach(function (done) {
 		async.series([
-			function (done) {
-				redisMng.deleteAllKeys(done);
-			},
-			function (done) {
-				dao.deleteAllUsers(done);
-			}
+			redisMng.deleteAllKeys,
+			dao.deleteAllUsers
 		], done);
 	});
 
 	it('POST empty phone', function (done) {
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 		user.phone = null;
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
 			.reply(204);
 
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 400, body);
-			body = JSON.parse(body);
-			assert.deepEqual(body, {"err": "auth_proxy_error", "des": "empty phone or country"});
-			done();
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 400, rawBody);
+			const body = JSON.parse(rawBody);
+			assert.deepEqual(body, {err: 'auth_proxy_error', des: 'empty phone or country'});
+			return done();
 		});
 	});
 
 	it('POST empty country', function (done) {
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 		user.country = '';
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
 			.reply(204);
 
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 400, body);
-			body = JSON.parse(body);
-			assert.deepEqual(body, {"err": "auth_proxy_error", "des": "empty phone or country"});
-			done();
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 400, rawBody);
+			const body = JSON.parse(rawBody);
+			assert.deepEqual(body, {err: 'auth_proxy_error', des: 'empty phone or country'});
+			return done();
 		});
 	});
 
 	it('POST phone not verified', function (done) {
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
 			.reply(204);
 
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 403, body);
-			body = JSON.parse(body);
-			assert.deepEqual(body, {"err": "auth_proxy_verified_error", "des": "User phone not verified"});
-			done();
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 403, rawBody);
+			const body = JSON.parse(rawBody);
+			assert.deepEqual(body, { err: 'auth_proxy_verified_error', des: 'User phone not verified' });
+			return done();
 		});
 	});
 
 	it('POST incorrect PIN sent (1 attempt)', function (done) {
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -129,55 +129,56 @@ describe.skip('/api/profile (verify phone)', function () {
 			.reply(204);
 
 		//1st call must create the pin
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 403, body);
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 403, rawBody);
 
 			options.headers['x-otp-pin'] = 'zzzz';
 
 			//2nd call incorrect pin
-			request(options, function (err, res, body) {
-				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 401, body);
-				body = JSON.parse(body);
-				assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
-				done();
+			request(options, function (err, res, rawBody) {
+				assert.equal(err, null, rawBody);
+				assert.equal(res.statusCode, 401, rawBody);
+				const body = JSON.parse(rawBody);
+				assert.deepEqual(body, { err: 'verify_phone_error', des: 'PIN used is not valid.'});
+				return done();
 			});
 		});
 	});
 
 	it('POST correct PIN sent', function (done) {
 
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
 			.reply(204);
 
 		//1st call must create the pin
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 403, body);
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 403, rawBody);
 
-			var redisKey = config.redisKeys.user_phone_verify.key;
-			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
+			const redisKey = config.redisKeys.user_phone_verify.key.replace('{userId}', user.email).replace('{phone}', `+1${user.phone}`);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = redisPhonePin;
 
-				var expectedUserId = 'a1b2c3d4e5f6';
+				const expectedUserId = 'a1b2c3d4e5f6';
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post(config.passThroughEndpoint.path)
 					.reply(201, {id: expectedUserId});
 
@@ -186,14 +187,14 @@ describe.skip('/api/profile (verify phone)', function () {
 					.reply(204);
 
 				//2nd call correct pin
-				request(options, function (err, res, body) {
-					assert.equal(err, null, body);
-					assert.equal(res.statusCode, 201, body);
-					body = JSON.parse(body);
-					assert.notEqual(body.accessToken, null, body);
-					assert.notEqual(body.refreshToken, null, body);
-					assert.notEqual(body.expiresIn, null, body);
-					done();
+				request(options, function (err, res, rawBody) {
+					assert.equal(err, null, rawBody);
+					assert.equal(res.statusCode, 201, rawBody);
+					const body = JSON.parse(body);
+					assert.notEqual(body.accessToken, null, rawBody);
+					assert.notEqual(body.refreshToken, null, rawBody);
+					assert.notEqual(body.expiresIn, null, rawBody);
+					return done();
 				});
 
 			});
@@ -202,15 +203,17 @@ describe.skip('/api/profile (verify phone)', function () {
 	});
 
 	it('POST incorrect PIN sent (3 attempts)', function (done) {
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -218,51 +221,50 @@ describe.skip('/api/profile (verify phone)', function () {
 			.reply(204);
 
 		//1st call must create the pin
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 403, body);
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 403, rawBody);
 
-			var redisKey = config.redisKeys.user_phone_verify.key;
-			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
+			const redisKey = config.redisKeys.user_phone_verify.key.replace('{userId}', user.email).replace('{phone}', `+1${user.phone}`);
 
 			//Get the correct PIN
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = 'zzzz';
 
 				//1st call incorrect pin
-				request(options, function (err, res, body) {
-					assert.equal(err, null, body);
-					assert.equal(res.statusCode, 401, body);
-					body = JSON.parse(body);
-					assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
+				request(options, function (err, res, rawBody) {
+					assert.equal(err, null, rawBody);
+					assert.equal(res.statusCode, 401, rawBody);
+					const body = JSON.parse(rawBody);
+					assert.deepEqual(body, {err: 'verify_phone_error', des: 'PIN used is not valid.'});
 
 					//2nd call incorrect pin
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 401, body);
-						body = JSON.parse(body);
-						assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
+					request(options, function (err, res, rawBody) {
+						assert.equal(err, null, rawBody);
+						assert.equal(res.statusCode, 401, rawBody);
+						const body = JSON.parse(rawBody);
+						assert.deepEqual(body, {err: 'verify_phone_error', des: 'PIN used is not valid.'});
 
 						//3rd call incorrect pin
-						request(options, function (err, res, body) {
-							assert.equal(err, null, body);
-							assert.equal(res.statusCode, 401, body);
-							body = JSON.parse(body);
-							assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used has expired."});
+						request(options, function (err, res, rawBody) {
+							assert.equal(err, null, rawBody);
+							assert.equal(res.statusCode, 401, rawBody);
+							const body = JSON.parse(rawBody);
+							assert.deepEqual(body, {err: 'verify_phone_error', des: 'PIN used has expired.'});
 
 							options.headers['x-otp-pin'] = redisPhonePin;
 
 							//4th call incorrect (expired pin)
-							request(options, function (err, res, body) {
-								assert.equal(err, null, body);
-								assert.equal(res.statusCode, 401, body);
-								body = JSON.parse(body);
-								assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
+							request(options, function (err, res, rawBody) {
+								assert.equal(err, null, rawBody);
+								assert.equal(res.statusCode, 401, rawBody);
+								const body = JSON.parse(body);
+								assert.deepEqual(body, {err: 'verify_phone_error', des: 'PIN used is not valid.'});
 
 								//Get the correct PIN
-								redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+								redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 									assert.equal(err, null);
 
 									options.headers['x-otp-pin'] = redisPhonePin;
@@ -271,21 +273,21 @@ describe.skip('/api/profile (verify phone)', function () {
 										.post('/notification/email')
 										.reply(204);
 
-									var expectedUserId = 'a1b2c3d4e5f6';
+									const expectedUserId = 'a1b2c3d4e5f6';
 
-									nock('http://' + config.private_host + ':' + config.private_port)
+									nock(`http://${config.private_host}:${config.private_port}`)
 										.post(config.passThroughEndpoint.path)
 										.reply(201, {id: expectedUserId});
 
 									//5th call actualized correct pin
-									request(options, function (err, res, body) {
-										assert.equal(err, null, body);
-										assert.equal(res.statusCode, 201, body);
-										body = JSON.parse(body);
-										assert.notEqual(body.accessToken, null, body);
-										assert.notEqual(body.refreshToken, null, body);
-										assert.notEqual(body.expiresIn, null, body);
-										done();
+									request(options, function (err, res, rawBody) {
+										assert.equal(err, null, rawBody);
+										assert.equal(res.statusCode, 201, rawBody);
+										const body = JSON.parse(rawBody);
+										assert.notEqual(body.accessToken, null, rawBody);
+										assert.notEqual(body.refreshToken, null, rawBody);
+										assert.notEqual(body.expiresIn, null, rawBody);
+										return done();
 									});
 
 								});
@@ -300,29 +302,30 @@ describe.skip('/api/profile (verify phone)', function () {
 
 	it('POST user already exists', function (done) {
 
-		var user = _.clone(baseUser);
+		const user = _.clone(baseUser);
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+		const options = {
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
 			.reply(204);
 
 		//1st call must create the pin
-		request(options, function (err, res, body) {
-			assert.equal(err, null, body);
-			assert.equal(res.statusCode, 403, body);
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, 403, rawBody);
 
-			var redisKey = config.redisKeys.user_phone_verify.key;
-			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
+			const redisKey = config.redisKeys.user_phone_verify.key.replace('{userId}', user.email).replace('{phone}', `+1${user.phone}`);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = redisPhonePin;
@@ -331,9 +334,9 @@ describe.skip('/api/profile (verify phone)', function () {
 					.post('/notification/sms')
 					.reply(204);
 
-				var expectedUserId = 'a1b2c3d4e5f6';
+				const expectedUserId = 'a1b2c3d4e5f6';
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post(config.passThroughEndpoint.path)
 					.reply(201, {id: expectedUserId});
 
@@ -342,20 +345,20 @@ describe.skip('/api/profile (verify phone)', function () {
 					.reply(204);
 
 				//2nd call correct pin
-				request(options, function (err, res, body) {
-					assert.equal(err, null, body);
-					assert.equal(res.statusCode, 201, body);
-					body = JSON.parse(body);
-					assert.notEqual(body.accessToken, null, body);
-					assert.notEqual(body.refreshToken, null, body);
-					assert.notEqual(body.expiresIn, null, body);
+				request(options, function (err, res, rawBody) {
+					assert.equal(err, null, rawBody);
+					assert.equal(res.statusCode, 201, rawBody);
+					const body = JSON.parse(rawBody);
+					assert.notEqual(body.accessToken, null, rawBody);
+					assert.notEqual(body.refreshToken, null, rawBody);
+					assert.notEqual(body.expiresIn, null, rawBody);
 
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 403, body);
-						body = JSON.parse(body);
-						assert.deepEqual(body, {"err": "auth_proxy_error", "des": "user already exists"});
-						done();
+					request(options, function (err, res, rawBody) {
+						assert.equal(err, null, rawBody);
+						assert.equal(res.statusCode, 403, rawBody);
+						const body = JSON.parse(rawBody);
+						assert.deepEqual(body, { err: 'auth_proxy_error', des: 'user already exists' });
+						return done();
 					});
 				});
 

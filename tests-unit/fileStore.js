@@ -1,32 +1,34 @@
-var fileStoreMng = require('../src/managers/file_store');
-var assert = require('assert');
-var fs = require('fs');
-var config = require('../config.json');
+'use strict';
+
+const fileStoreMng = require('../src/managers/file_store');
+const assert = require('assert');
+const fs = require('fs');
+const config = require('../config.json');
 
 describe('AWS', function () {
 
 	this.timeout(10000);
 
-	var configAWSParam = false;
-	var validBucket;
+	let configAWSParam = false;
+	let validBucket;
 
-	var uploadImage = {
+	const uploadImage = {
 		name: 'test.jpg',
-		path: __dirname + '/test_files/1234.jpg'
+		path: `${__dirname}/test_files/1234.jpg`
 	};
 
-	var emptyImage = {
+	const emptyImage = {
 		name: 'test.jpg',
-		path: __dirname + '/test_files/empty.jpg'
+		path: `${__dirname}/test_files/empty.jpg`
 	};
 
-	var uploadZip = {
+	const uploadZip = {
 		name: 'test.zip',
-		path: __dirname + '/test_files/empty proj.zip'
+		path: `${__dirname}/test_files/empty proj.zip`
 	};
 
 	it('Get AWS configuration', function (done) {
-		var msg = 'You must configure your AWS service in the config file, ' +
+		const msg = 'You must configure your AWS service in the config file, ' +
 			'\r\notherwise you must skip this group of tests';
 
 		assert.notEqual(config.aws, null, msg);
@@ -50,7 +52,7 @@ describe('AWS', function () {
 		validBucket = config.aws.buckets.avatars;
 
 		configAWSParam = true;
-		done();
+		return done();
 	});
 
 	it('upload invalid bucket', function (done) {
@@ -58,10 +60,10 @@ describe('AWS', function () {
 
 		fs.readFile(uploadImage.path, function (err, data) {
 			assert.equal(err, null);
-			var file = new Buffer(data, 'binary');
+			const file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile('hola', uploadImage.name, file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -71,62 +73,70 @@ describe('AWS', function () {
 
 		fs.readFile(uploadImage.path, function (err, data) {
 			assert.equal(err, null);
-			var file = new Buffer(data, 'binary');
+			const file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, '', file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
 
 	it('upload invalid file (0 bytes)', function (done) {
-		if (!configAWSParam) return done();
+		if (!configAWSParam) {
+			return done();
+		}
 
 		fs.readFile(emptyImage.path, function (err, data) {
 			assert.equal(err, null);
-			var file = new Buffer(data, 'binary');
+			const file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, emptyImage.name, file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
 
 	it.skip('upload valid image', function (done) {
-		if (!configAWSParam) return done();
+		if (!configAWSParam) {
+			return done();
+		}
 
 		fs.readFile(uploadImage.path, function (err, data) {
 			assert.equal(err, null);
-			var file = new Buffer(data, 'binary');
+			const file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, uploadImage.name, file, function (err, file) {
 				assert.equal(err, null);
 				assert.notEqual(file, null);
-				done();
+				return done();
 			});
 		});
 	});
 
 	it.skip('upload valid zip', function (done) {
-		if (!configAWSParam) return done();
+		if (!configAWSParam) {
+			return done();
+		}
 
 		fs.readFile(uploadZip.path, function (err, data) {
 			assert.equal(err, null);
-			var file = new Buffer(data, 'binary');
+			const file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, uploadZip.name, file, function (err, file) {
 				assert.equal(err, null);
 				assert.notEqual(file, null);
-				done();
+				return done();
 			});
 		});
 	});
 
 	it('get URL', function (done) {
-		if (!configAWSParam) return done();
+		if (!configAWSParam) {
+			return done();
+		}
 
 		fileStoreMng.getFileURL(validBucket, uploadImage.name, function (err, fileURL) {
 			assert.equal(err, null);
 			assert.notEqual(fileURL, null);
-			done();
+			return done();
 		});
 	});
 });

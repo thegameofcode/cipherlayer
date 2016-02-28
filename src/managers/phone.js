@@ -1,59 +1,53 @@
-var request = require('request');
-var _ = require('lodash');
-var countries = require('countries-info');
-var redisMng = require('./redis');
+'use strict';
 
-var _settings = {};
+const request = require('request');
+const _ = require('lodash');
+const countries = require('countries-info');
+const redisMng = require('./redis');
+
+let _settings = {};
 
 function createPIN(redisKeyId, phone, cbk) {
-	var redisKey = _settings.phoneVerification.redis.key;
-	redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', phone);
-	var expires = _settings.phoneVerification.redis.expireInSec;
-	var pinAttempts = _settings.phoneVerification.attempts;
+	const redisKey = _settings.phoneVerification.redis.key.replace('{userId}', redisKeyId).replace('{phone}', phone);
+	const expires = _settings.phoneVerification.redis.expireInSec;
+	const pinAttempts = _settings.phoneVerification.attempts;
 
-	var pin = '';
-	for (var i = 0; i < _settings.phoneVerification.pinSize; i++) {
-		var randomNum = Math.floor(Math.random() * 9);
-		pin += randomNum.toString();
+	let pin = '';
+
+	// TODO: replace with map()
+	for (let i = 0; i < _settings.phoneVerification.pinSize; i++) {
+		pin += Math.floor(Math.random() * 9).toString();
 	}
 
-	redisMng.insertKeyValue(redisKey + '.pin', pin, expires, function (err, pin) {
+	redisMng.insertKeyValue(`${redisKey}.pin`, pin, expires, function (err, pin) {
 		if (err) {
 			return cbk(err);
 		}
-		redisMng.insertKeyValue(redisKey + '.attempts', pinAttempts, expires, function (err) {
+		redisMng.insertKeyValue(`${redisKey}.attempts`, pinAttempts, expires, function (err) {
 			if (err) {
 				return cbk(err);
 			}
-			sendPIN(phone, pin, function (err) {
-				cbk(err, pin);
+			sendPIN(phone, pin, function (pinErr) {
+				cbk(pinErr, pin);
 			});
 		});
 	});
 }
 
 function sendPIN(phone, pin, cbk) {
-	var notifServiceURL = _settings.externalServices.notifications.base;
-	var sms = {
-		phone: phone,
-		text: 'MyComms pin code: ' + pin
+	const sms = {
+		phone,
+		text: `MyComms pin code: ${pin}`
 	};
 
-	var options = {
-		url: notifServiceURL + '/notification/sms',
+	request({
+		url: `${_settings.externalServices.notifications.base}/notification/sms`,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
 		},
 		method: 'POST',
 		body: JSON.stringify(sms)
-	};
-
-	request(options, function (err) {
-		if (err) {
-			return cbk(err);
-		}
-		cbk();
-	});
+	}, cbk);
 }
 
 function verifyPhone(redisKeyId, phone, country, pin, cbk) {
@@ -72,9 +66,9 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 		if (err) {
 			return cbk(err);
 		}
-		phone = '+' + returnedCountry.Dial + phone;
+		const formattedPhone = `+${returnedCountry.Dial}${phone}`;
 
-		if (!phone) {
+		if (!formattedPhone) {
 			return cbk({
 				err: 'auth_proxy_error',
 				des: 'empty phone',
@@ -83,27 +77,25 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 		}
 
 		if (!pin) {
-			createPIN(redisKeyId, phone, function (err) {
+			createPIN(redisKeyId, formattedPhone, function (err) {
 				if (err) {
 					err.code = 500;
 					return cbk(err);
-				} else {
-					return cbk({
-						err: 'auth_proxy_verified_error',
-						des: 'User phone not verified',
-						code: 403
-					});
 				}
+				return cbk({
+					err: 'auth_proxy_verified_error',
+					des: 'User phone not verified',
+					code: 403
+				});
 			});
 		} else {
-			var redisKey = _settings.phoneVerification.redis.key;
-			redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', phone);
+			const redisKey = _settings.phoneVerification.redis.key.replace('{userId}', redisKeyId).replace('{phone}', formattedPhone);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				if (err) return cbk(err);
 
 				if (!redisPhonePin) {
-					createPIN(redisKeyId, phone, function (err) {
+					createPIN(redisKeyId, formattedPhone, function (err) {
 						if (err) {
 							return cbk(err);
 						}
@@ -114,10 +106,10 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 						}, false);
 					});
 				} else {
-					redisMng.getKeyValue(redisKey + '.attempts', function (err, redisPinAttempts) {
+					redisMng.getKeyValue(`${redisKey}.attempts`, function (err, redisPinAttempts) {
 						if (err) return cbk(err);
 						if (!redisPinAttempts || redisPinAttempts === '0') {
-							createPIN(redisKeyId, phone, function (err) {
+							createPIN(redisKeyId, formattedPhone, function (err) {
 								if (err) {
 									return cbk(err);
 								}
@@ -130,29 +122,28 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 						} else {
 							if (pin === redisPhonePin) {
 								return cbk(null, true);
+							}
+							// Last attempt
+							if (redisPinAttempts === '1') {
+								createPIN(redisKeyId, formattedPhone, function (err) {
+									if (err) {
+										return cbk(err);
+									}
+									return cbk({
+										err: 'verify_phone_error',
+										des: 'PIN used has expired.',
+										code: 401
+									}, false);
+								});
 							} else {
-								//Last attempt
-								if (redisPinAttempts === '1') {
-									createPIN(redisKeyId, phone, function (err) {
-										if (err) {
-											return cbk(err);
-										}
-										return cbk({
-											err: 'verify_phone_error',
-											des: 'PIN used has expired.',
-											code: 401
-										}, false);
-									});
-								} else {
-									redisMng.updateKeyValue(redisKey + '.attempts', redisPinAttempts - 1, function (err) {
-										if (err) return cbk(err);
-										return cbk({
-											err: 'verify_phone_error',
-											des: 'PIN used is not valid.',
-											code: 401
-										}, false);
-									});
-								}
+								redisMng.updateKeyValue(`${redisKey}.attempts`, redisPinAttempts - 1, function (err) {
+									if (err) return cbk(err);
+									return cbk({
+										err: 'verify_phone_error',
+										des: 'PIN used is not valid.',
+										code: 401
+									}, false);
+								});
 							}
 						}
 					});
@@ -163,11 +154,11 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 }
 
 module.exports = function (settings) {
-	var config = require(process.cwd() + '/config.json');
+	const config = require('../../config.json');
 	_settings = _.assign({}, config, settings);
 
 	return {
-		createPIN: createPIN,
-		verifyPhone: verifyPhone
+		createPIN,
+		verifyPhone
 	};
 };

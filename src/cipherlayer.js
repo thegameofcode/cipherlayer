@@ -1,21 +1,17 @@
 'use strict';
 
-var async = require('async');
+const async = require('async');
 
-var userDao = require('./managers/dao');
-var redisMng = require('./managers/redis');
+const userDao = require('./managers/dao');
+const redisMng = require('./managers/redis');
 
-var publicService = require('./public_service');
-var privateService = require('./internal_service');
+const publicService = require('./public_service');
+const privateService = require('./internal_service');
 
 module.exports = function () {
-	var cipherlayer = {};
+	const cipherlayer = {};
 
 	cipherlayer.start = function (publicPort, internalPort, cbk) {
-		//Validate the current config.json with the schema
-		//if( !jsonValidator.isValidJSON(config, configSchema)) {
-		//    return cbk({err:'invalid_config_json', des:'The config.json is not updated, check for the last version.'});
-		//}
 
 		async.series([
 			userDao.connect,
@@ -26,9 +22,7 @@ module.exports = function () {
 			function (done) {
 				privateService.start(internalPort, done);
 			}
-		], function (err) {
-			cbk(err);
-		});
+		], cbk);
 	};
 
 	cipherlayer.stop = function stop(cbk) {
@@ -37,9 +31,7 @@ module.exports = function () {
 			redisMng.disconnect,
 			publicService.stop,
 			privateService.stop
-		], function (err) {
-			cbk(err);
-		});
+		], cbk);
 	};
 
 	return cipherlayer;

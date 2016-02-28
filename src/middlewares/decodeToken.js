@@ -1,27 +1,27 @@
-var log = require('../logger/service.js');
-var config = require(process.cwd() + '/config.json');
-var tokenMng = require('../managers/token');
+'use strict';
 
-function decodeToken(req, res, next) {
+const config = require('../../config.json');
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
+
+module.exports = function decodeToken(req, res, next) {
 	if (!req.auth) {
-		log.error({err: 'invalid_access_token', des: 'access token required'});
-		res.send(401, {err: 'invalid_access_token', des: 'access token required'});
-		return next(false);
+		const err = { err: 'invalid_access_token', des: 'access token required' };
+		log.error({ err });
+		res.send(401, err);
+		return next(err);
 	}
 
-	var accessToken = req.auth.substring(config.authHeaderKey.length);
+	const accessToken = req.auth.substring(config.authHeaderKey.length);
 	req.accessToken = accessToken;
 
 	tokenMng.getAccessTokenInfo(accessToken, function (err, tokenInfo) {
 		if (err) {
 			log.error({err: 'invalid_access_token', des: accessToken});
 			res.send(401, {err: 'invalid_access_token', des: 'unable to read token info'});
-			return next(false);
-		} else {
-			req.tokenInfo = tokenInfo;
-			return next();
+			return next(err);
 		}
+		req.tokenInfo = tokenInfo;
+		return next();
 	});
-}
-
-module.exports = decodeToken;
+};

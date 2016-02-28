@@ -1,27 +1,27 @@
-var world = require('../support/world');
-var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-var nock = require('nock');
-var request = require('request');
-var assert = require('assert');
+const world = require('../support/world');
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+const nock = require('nock');
+const request = require('request');
+const assert = require('assert');
 
-var NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
-var NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;
+const NOTIFICATION_SERVICE_URL = config.externalServices.notifications.base;
+const NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pathEmail;
 
-var myStepDefinitionsWrapper = function () {
+module.exports = function () {
 	this.When(/^the client makes a (.*) request to (.*)$/, function (METHOD, PATH, callback) {
 
-		var path = PATH.replace(":email", world.getUser().username.toUpperCase()); //Upper to check the lower email validation
-		var options = {
-			url: 'http://localhost:' + config.public_port + path,
+		const path = PATH.replace(':email', world.getUser().username.toUpperCase()); //Upper to check the lower email validation
+		const options = {
+			url: `http://localhost:${config.public_port}${path}`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',
-				'Origin': 'http://localhost:' + config.public_port,
-				'Referer': 'http://localhost:' + config.public_port
+				Origin: `http://localhost:${config.public_port}`,
+				Referer: `http://localhost:${config.public_port}`,
+				[config.version.header]: world.versionHeader
 			},
 			method: METHOD
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		nock(NOTIFICATION_SERVICE_URL)
 			.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -31,21 +31,21 @@ var myStepDefinitionsWrapper = function () {
 			assert.equal(err, null);
 			world.getResponse().statusCode = res.statusCode;
 			world.getResponse().headers = res.headers;
-			callback();
+			return callback();
 		});
 	});
 
 	this.When(/^the client makes a request with valid origin and headers "(.*)"$/, function (customHeaders, callback) {
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/testCors',
+		const options = {
+			url: `http://localhost:${config.public_port}/testCors`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',
-				'Origin': this.accessControlAllow.origins[0],
-				'Referer': this.accessControlAllow.origins[0]
+				Origin: this.accessControlAllow.origins[0],
+				Referer: this.accessControlAllow.origins[0],
+				[config.version.header]: world.versionHeader
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		customHeaders.split(',').forEach(function (customHeader) {
 			options.headers[customHeader] = customHeader;
@@ -56,28 +56,27 @@ var myStepDefinitionsWrapper = function () {
 			world.getResponse().statusCode = res.statusCode;
 			world.getResponse().headers = res.headers;
 
-			callback();
+			return callback();
 		});
 	});
 
 	this.When(/^the client makes a request with invalid origin$/, function (callback) {
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/testCors',
+		const options = {
+			url: `http://localhost:${config.public_port}/testCors`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',
-				'Origin': 'http://invalid.origin.com',
-				'Referer': 'http://invalid.origin.com'
+				Origin: 'http://invalid.origin.com',
+				Referer: 'http://invalid.origin.com',
+				[config.version.header]: world.versionHeader
 			},
 			method: 'OPTIONS'
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res) {
 			assert.equal(err, null);
 			world.getResponse().statusCode = res.statusCode;
 			world.getResponse().headers = res.headers;
-			callback();
+			return callback();
 		});
 	});
 };
-module.exports = myStepDefinitionsWrapper;

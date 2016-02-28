@@ -1,32 +1,32 @@
 'use strict';
 
-var restify = require('restify');
-var _ = require('lodash');
+const restify = require('restify');
+const _ = require('lodash');
 
-var log = require('./logger/service.js');
-var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+const log = require('./logger/service');
+const bodyParserWrapper = require('./middlewares/bodyParserWrapper');
 
-var routes = require('./routes_internal/routes');
+const routes = require('./routes_internal/routes');
 
 module.exports = function () {
-	var service = {};
+	const service = {};
 
-	var server;
+	let server;
 	service.start = function (internalPort, done) {
 		if (!internalPort) {
 			log.info('INTERNAL SERVICE not started because there is no internal_port in config');
 			return done();
 		}
 
-		log.info('INTERNAL SERVICE starting on PORT ' + internalPort);
+		log.info(`INTERNAL SERVICE starting on PORT ${internalPort}`);
 
 		server = restify.createServer({
 			name: 'cipherlayer-internal-server',
-			log: log
+			log
 		});
 
 		server.on('after', function (req, res) {
-			var logInfo = {
+			const logInfo = {
 				request: {
 					method: req.method,
 					headers: req.headers,
@@ -47,7 +47,7 @@ module.exports = function () {
 			};
 			delete(logInfo.request.params.password);
 
-			req.log.info(logInfo, "response");
+			req.log.info(logInfo, 'response');
 		});
 
 		server.use(restify.queryParser());
@@ -56,8 +56,8 @@ module.exports = function () {
 		routes(server);
 
 		server.listen(internalPort, function () {
-			log.info('INTERNAL SERVICE listening on PORT ' + internalPort);
-			done();
+			log.info(`INTERNAL SERVICE listening on PORT ${internalPort}`);
+			return done();
 		});
 	};
 
@@ -66,7 +66,7 @@ module.exports = function () {
 			return done();
 		}
 		server.close(function () {
-			done();
+			return done();
 		});
 	};
 

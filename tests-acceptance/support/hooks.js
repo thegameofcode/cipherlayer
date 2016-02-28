@@ -1,7 +1,7 @@
-var _= require('lodash');
+const _= require('lodash');
 
-var world = require('./world');
-var config = require('../../config.json');
+const world = require('./world');
+const config = require('../../config.json');
 
 module.exports = function () {
 	this.Before(function () {
@@ -9,7 +9,4 @@ module.exports = function () {
 		world.config = _.clone(config);
 	});
 
-	this.After(function () {
-		config = world.config;
-	});
 };

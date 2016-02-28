@@ -1,11 +1,13 @@
-var async = require('async');
-var GoogleStrategy = require('passport-google-oauth2').Strategy;
+'use strict';
 
-var log = require('../logger/service');
-var tokenMng = require('../managers/token');
-var daoMng = require('../managers/dao');
-var userManager = require('../managers/user')();
-var config = require(process.cwd() + '/config.json');
+const async = require('async');
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
+
+const log = require('../logger/service');
+const tokenMng = require('../managers/token');
+const daoMng = require('../managers/dao');
+const userManager = require('../managers/user')();
+const config = require('../../config.json');
 
 function createGoogleStrategy() {
 
@@ -15,47 +17,46 @@ function createGoogleStrategy() {
 		callbackURL: config.google.callbackURL,
 		passReqToCallback: true
 	}, function (req, accessToken, refreshToken, profile, done) {
-		var data = {
-			accessToken: accessToken,
-			refreshToken: refreshToken,
-			profile: profile
-		};
-		done(null, data);
+		return done(null, {
+			accessToken,
+			refreshToken,
+			profile
+		});
 	});
 }
 
 function googleCallback(req, res, next) {
-	var googleData = req.user;
-	var profile = googleData.profile;
+	const googleData = req.user;
+	const profile = googleData.profile;
 
 	daoMng.getFromUsername(profile.email, function (err, foundUser) {
 		if (err) {
 			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
-				var tokenData = {
+				const tokenData = {
 					accessToken: googleData.accessToken,
 					refreshToken: googleData.refreshToken
 				};
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
 					if (err) {
-						log.error({err: err},'error creating google profile token');
-						return next(false);
+						log.error({ err },'error creating google profile token');
+						return next(err);
 					}
-					var returnProfile = {
+					const returnProfile = {
 						name: profile.name.givenName,
 						lastname: profile.name.familyName,
 						email: profile.email,
 						google: token
 					};
 					res.send(203, returnProfile);
-					return next(false);
+					return next();
 				});
 			}
 
 			res.send(500, {err: 'internal_error', des: 'There was an internal error matching google profile'});
-			return next(false);
+			return next(err);
 		}
 
-		var platform = {
+		const platform = {
 			platform: 'google',
 			accessToken: googleData.accessToken
 		};
@@ -69,11 +70,11 @@ function googleCallback(req, res, next) {
 
 		userManager.setPlatformData(foundUser._id, 'google', platform, function (err) {
 			if (err) {
-				log.error({err: err}, 'error updating google tokens into user ' + foundUser._id + '');
+				log.error({ err }, `error updating google tokens into user ${foundUser._id}`);
 			}
-			var data = {};
+			let data = {};
 			if (foundUser.roles) {
-				data = {"roles": foundUser.roles};
+				data = { roles: foundUser.roles };
 			}
 
 			async.series([
@@ -81,12 +82,12 @@ function googleCallback(req, res, next) {
 					//Add "realms" & "capabilities"
 					daoMng.getRealms(function (err, realms) {
 						if (err) {
-							log.error({err: err, des: 'error obtaining user realms'});
+							log.error({ err }, 'error obtaining user realms');
 							return done();
 						}
 
 						if (!realms || !realms.length) {
-							log.info({des: 'there are no REALMS in DB'});
+							log.info('there are no REALMS in DB');
 							return done();
 						}
 						async.eachSeries(realms, function (realm, next) {
@@ -95,8 +96,8 @@ function googleCallback(req, res, next) {
 							}
 							async.eachSeries(realm.allowedDomains, function (domain, more) {
 								//wildcard
-								var check = domain.replace(/\*/g, '.*');
-								var match = foundUser.username.match(check);
+								const check = domain.replace(/\*/g, '.*');
+								const match = foundUser.username.match(check);
 								if (!match || foundUser.username !== match[0]) {
 									return more();
 								}
@@ -139,7 +140,7 @@ function addRoutes(server, passport) {
 	}
 
 	log.info('Adding Google routes');
-	var googleStrategy = createGoogleStrategy();
+	const googleStrategy = createGoogleStrategy();
 	passport.use(googleStrategy);
 	server.get('/auth/google', passport.authenticate('google', {
 		scope: config.google.scope,
@@ -153,5 +154,5 @@ function addRoutes(server, passport) {
 }
 
 module.exports = {
-	addRoutes: addRoutes
+	addRoutes
 };

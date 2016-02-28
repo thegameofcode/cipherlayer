@@ -1,84 +1,80 @@
-var assert = require('assert');
-var async = require('async');
-var nock = require('nock');
+const assert = require('assert');
+const async = require('async');
+const nock = require('nock');
 
-var redisMng = require('../src/managers/redis');
+const redisMng = require('../src/managers/redis');
 
-var config = require('../config.json');
-var notifServiceURL = config.externalServices.notifications.base;
-var notifServicePath = config.externalServices.notifications.pathEmail;
+const config = require('../config.json');
+const notifServiceURL = config.externalServices.notifications.base;
+const notifServicePath = config.externalServices.notifications.pathEmail;
 
 describe('email', function () {
 
 	beforeEach(function (done) {
 		async.series([
-			function (done) {
-				redisMng.connect(done);
-			},
-			function (done) {
-				redisMng.deleteAllKeys(done);
-			}
+			redisMng.connect,
+			redisMng.deleteAllKeys
 		], done);
 	});
 
 	it('verifyEmail', function (done) {
-		var emailMng = require('../src/managers/email')({
-			"useEmailVerification": true
+		const emailMng = require('../src/managers/email')({
+			useEmailVerification: true
 		});
 
 		nock(notifServiceURL)
 			.post(notifServicePath)
 			.reply(204);
 
-		var email = "test@test.com";
-		var bodyData = {
-			key: "value",
-			key2: "value2"
+		const email = 'test@test.com';
+		const bodyData = {
+			key: 'value',
+			key2: 'value2'
 		};
 		emailMng.emailVerification(email, bodyData, function (err, returnedEmail) {
 			assert.equal(err, null);
 			assert.equal(returnedEmail, email);
-			done();
+			return done();
 		});
 	});
 
 	it('verifyEmail (not email)', function (done) {
-		var emailMng = require('../src/managers/email')({
-			"useEmailVerification": true
+		const emailMng = require('../src/managers/email')({
+			useEmailVerification: true
 		});
 
-		var expected_error = {"err": "auth_proxy_error", "des": "empty email"};
+		const expected_error = { err: 'auth_proxy_error', des: 'empty email' };
 
 		nock(notifServiceURL)
 			.post('/notification/email')
 			.reply(204);
 
-		var email = null;
-		var bodyData = {
-			key: "value",
-			key2: "value2"
+		const email = null;
+		const bodyData = {
+			key: 'value',
+			key2: 'value2'
 		};
 		emailMng.emailVerification(email, bodyData, function (err, returnedEmail) {
 			assert.deepEqual(err, expected_error);
 			assert.equal(returnedEmail, null);
-			done();
+			return done();
 		});
 	});
 
 	it('verifyEmail (useEmailVerification = false)', function (done) {
-		var emailMng = require('../src/managers/email')({
-			"emailVerification": false
+		const emailMng = require('../src/managers/email')({
+			emailVerification: false
 		});
 
-		var email = "test@test.com";
-		var bodyData = {
-			key: "value",
-			key2: "value2"
+		const email = 'test@test.com';
+		const bodyData = {
+			key: 'value',
+			key2: 'value2'
 		};
 		emailMng.emailVerification(email, bodyData, function (err, returnedEmail) {
 			assert.equal(err, null);
 			assert.equal(returnedEmail, null);
-			done();
+			return done();
 		});
 	});
 });

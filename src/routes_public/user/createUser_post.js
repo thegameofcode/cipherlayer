@@ -1,29 +1,29 @@
 'use strict';
 
-var config = require(process.cwd() + '/config.json');
-var tokenMng = require('../../managers/token');
-var userMng = require('../../managers/user');
+const config = require('../../../config.json');
+const tokenMng = require('../../managers/token');
+const userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
 	userMng().createUser(req.body, req.headers['x-otp-pin'], function (error, tokens) {
 		if (error) {
 			if (!error.code) {
 				res.send(500, error);
-				return next(false);
+				return next();
 			}
-			var errCode = error.code;
+			const errCode = error.code;
 			res.send(errCode, {err: error.err, des: error.des});
-			return next(false);
+			return next();
 		}
 
 		tokenMng.getRefreshTokenInfo(tokens.refreshToken, function (err, tokenSet) {
 			if (err) {
 				res.send(500, {err: 'internal_error', des: 'error creating user tokens'});
-				return next(false);
+				return next();
 			}
 
-			var userId = tokenSet.userId;
-			var tokenData = tokenSet.data;
+			const userId = tokenSet.userId;
+			const tokenData = tokenSet.data;
 
 			if (config.version) {
 				tokenData.deviceVersion = req.headers[config.version.header];

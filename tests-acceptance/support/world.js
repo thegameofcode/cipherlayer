@@ -1,11 +1,16 @@
-var phoneMng = require("../../src/managers/phone");
-var redisMng = require("../../src/managers/redis");
-var nock = require("nock");
-var config = require('../../config.json');
+'use strict';
 
-var user = {};
+const nock = require('nock');
 
-var versionHeader = 'test/1';
+const phoneMng = require('../../src/managers/phone');
+const redisMng = require('../../src/managers/redis');
+const config = require('../../config.json');
+
+const versionHeader = 'test/1';
+
+let response = {}; // eslint-disable-line prefer-const
+let user = {}; // eslint-disable-line prefer-const
+let tokens = {}; // eslint-disable-line prefer-const
 
 function getUser() {
 	return user;
@@ -15,49 +20,37 @@ function resetUser() {
 	user = {};
 }
 
-function createPin(userId, phone, cbk) {
-
-	var notifServiceURL = config.externalServices.notifications;
-
-	nock(notifServiceURL)
-		.post('/notification/sms')
-		.reply(204);
-
-	phoneMng.createPIN(userId, phone, function (err, pin) {
-		cbk(err, pin);
-	});
-}
-
-function getPinNumber(userId, phone, cbk) {
-	var redisKey = config.phoneVerification.redis.key;
-	redisKey = redisKey.replace('{userId}', userId).replace('{phone}', phone);
-
-	redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
-		cbk(err, redisPhonePin);
-	});
-}
-
 // RESPONSE
-var response = {};
-
 function getResponse() {
 	return response;
 }
 
 // TOKENS
-var tokens = {};
-
 function getTokens() {
 	return tokens;
 }
 
-module.exports = {
-	versionHeader: versionHeader,
+function createPin(userId, phone, cbk) {
 
-	getUser: getUser,
-	resetUser: resetUser,
-	getResponse: getResponse,
-	getTokens: getTokens,
-	createPin: createPin,
-	getPinNumber: getPinNumber
+	nock(config.externalServices.notifications)
+		.post('/notification/sms')
+		.reply(204);
+
+	phoneMng.createPIN(userId, phone, cbk);
+}
+
+function getPinNumber(userId, phone, cbk) {
+	const redisKey = config.phoneVerification.redis.key.replace('{userId}', userId).replace('{phone}', phone);
+
+	redisMng.getKeyValue(`${redisKey}.pin`, cbk);
+}
+
+module.exports = {
+	versionHeader,
+	getUser,
+	resetUser,
+	getResponse,
+	getTokens,
+	createPin,
+	getPinNumber
 };

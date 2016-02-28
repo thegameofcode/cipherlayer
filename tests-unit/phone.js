@@ -1,27 +1,29 @@
-var assert = require('assert');
-var async = require('async');
-var nock = require('nock');
+'use strict';
 
-var phoneMng = require('../src/managers/phone');
-var redisMng = require('../src/managers/redis');
+const assert = require('assert');
+const async = require('async');
+const nock = require('nock');
 
-var config = require('../config.json');
+const phoneMng = require('../src/managers/phone');
+const redisMng = require('../src/managers/redis');
 
-var phoneSettings = {
+const config = require('../config.json');
+
+const phoneSettings = {
 	phoneVerification: {
 		pinSize: 4,
 		attempts: 3,
 		redis: {
-			key: "user.{userId}.phone.{phone}",
+			key: 'user.{userId}.phone.{phone}',
 			expireInSec: 300
 		},
 		pinValidationEndpoints: [
 			{
-				path: "/api/me/phones",
-				method: "post",
+				path: '/api/me/phones',
+				method: 'post',
 				fields: {
-					countryISO: "country",
-					phoneNumber: "phone"
+					countryISO: 'country',
+					phoneNumber: 'phone'
 				}
 			}
 		]
@@ -29,13 +31,13 @@ var phoneSettings = {
 };
 
 describe('phone', function () {
-	var baseUser = {
+	const baseUser = {
 		id: 'a1b2c3d4e5f6',
 		username: 'validuser',
 		password: 'validpassword'
 	};
 
-	var notifServiceURL = config.externalServices.notifications.base;
+	const notifServiceURL = config.externalServices.notifications.base;
 	beforeEach(function (done) {
 		async.series([
 				redisMng.connect,
@@ -51,12 +53,12 @@ describe('phone', function () {
 			.post('/notification/sms')
 			.reply(204);
 
-		var basePhone = '111111111';
+		const basePhone = '111111111';
 
 		phoneMng(phoneSettings).createPIN(baseUser.username, basePhone, function (err, createdPin) {
 			assert.equal(err, null);
 			assert.notEqual(createdPin, null);
-			done();
+			return done();
 		});
 	});
 
@@ -66,17 +68,17 @@ describe('phone', function () {
 				.post('/notification/sms')
 				.reply(204);
 
-			var basePhone = '222222222';
-			var baseCountry = 'US';
+			const basePhone = '222222222';
+			const baseCountry = 'US';
 
-			phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+			phoneMng(phoneSettings).createPIN(baseUser.username, `+1${basePhone}`, function (err, createdPIN) {
 				assert.equal(err, null);
 				assert.notEqual(createdPIN, null);
 
 				phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
 					assert.equal(err, null);
 					assert.equal(verified, true);
-					done();
+					return done();
 				});
 			});
 		});
@@ -86,10 +88,10 @@ describe('phone', function () {
 				.post('/notification/sms')
 				.reply(204);
 
-			var basePhone = '333333333';
-			var baseCountry = 'US';
+			const basePhone = '333333333';
+			const baseCountry = 'US';
 
-			phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+			phoneMng(phoneSettings).createPIN(baseUser.username, `+1${basePhone}`, function (err, createdPIN) {
 				assert.equal(err, null);
 				assert.notEqual(createdPIN, null);
 
@@ -97,7 +99,7 @@ describe('phone', function () {
 					assert.notEqual(err, null);
 					assert.equal(err.err, 'verify_phone_error');
 					assert.equal(verified, false);
-					done();
+					return done();
 				});
 			});
 		});
@@ -107,10 +109,10 @@ describe('phone', function () {
 				.post('/notification/sms')
 				.reply(204);
 
-			var basePhone = '444444444';
-			var baseCountry = 'US';
+			const basePhone = '444444444';
+			const baseCountry = 'US';
 
-			phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+			phoneMng(phoneSettings).createPIN(baseUser.username, `+1${basePhone}`, function (err, createdPIN) {
 				assert.equal(err, null);
 
 				nock(notifServiceURL)
@@ -121,7 +123,7 @@ describe('phone', function () {
 					assert.notEqual(err, null);
 					assert.equal(err.err, 'verify_phone_error');
 					assert.equal(verified, false);
-					done();
+					return done();
 				});
 			});
 		});
@@ -131,10 +133,10 @@ describe('phone', function () {
 				.post('/notification/sms')
 				.reply(204);
 
-			var basePhone = '555555555';
-			var baseCountry = 'US';
+			const basePhone = '555555555';
+			const baseCountry = 'US';
 
-			phoneMng(phoneSettings).createPIN(baseUser.username, '+1' + basePhone, function (err, createdPIN) {
+			phoneMng(phoneSettings).createPIN(baseUser.username, `+1${basePhone}`, function (err, createdPIN) {
 				assert.equal(err, null);
 
 				//1st attempt
@@ -165,18 +167,17 @@ describe('phone', function () {
 								assert.equal(err.err, 'verify_phone_error');
 								assert.equal(verified, false);
 
-								var redisKey = config.phoneVerification.redis.key;
-								redisKey = redisKey.replace('{userId}', baseUser.username).replace('{phone}', '+1' + basePhone);
+								const redisKey = config.phoneVerification.redis.key.replace('{userId}', baseUser.username).replace('{phone}', `+1${basePhone}`);
 
 								//5th attempt, new correct PIN
-								redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+								redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 									assert.equal(err, null);
 									assert.notEqual(createdPIN, redisPhonePin);
 
 									phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, redisPhonePin, function (err, verified) {
 										assert.equal(err, null);
 										assert.equal(verified, true);
-										done();
+										return done();
 									});
 								});
 							});

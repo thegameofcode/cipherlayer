@@ -1,45 +1,43 @@
 'use strict';
 
-var log = require('./logger/service.js');
-var restify = require('restify');
-var fs = require('fs');
-var path = require('path');
-var config = require(process.cwd() + '/config.json');
-var passport = require('passport');
-var _ = require('lodash');
+const passport = require('passport');
+const _ = require('lodash');
+const restify = require('restify');
+const fs = require('fs');
+const path = require('path');
+const versionControl = require('version-control');
 
-var checkAccessTokenParam = require('./middlewares/accessTokenParam');
-var checkAuthHeader = require('./middlewares/authHeaderRequired');
-var decodeToken = require('./middlewares/decodeToken');
-var findUser = require('./middlewares/findUser');
-var prepareOptions = require('./middlewares/prepareOptions');
-var platformsSetUp = require('./middlewares/platformsSetUp');
-var propagateRequest = require('./middlewares/propagateRequest');
-var permissions = require('./middlewares/permissions');
-var bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+const config = require('../config.json');
+const log = require('./logger/service');
+const checkAccessTokenParam = require('./middlewares/accessTokenParam');
+const checkAuthHeader = require('./middlewares/authHeaderRequired');
+const decodeToken = require('./middlewares/decodeToken');
+const findUser = require('./middlewares/findUser');
+const prepareOptions = require('./middlewares/prepareOptions');
+const platformsSetUp = require('./middlewares/platformsSetUp');
+const propagateRequest = require('./middlewares/propagateRequest');
+const permissions = require('./middlewares/permissions');
+const bodyParserWrapper = require('./middlewares/bodyParserWrapper');
+const pinValidation = require('./middlewares/pinValidation')();
+const userAppVersion = require('./middlewares/userAppVersion')();
 
-var versionControl = require('version-control');
+const routes = require('./routes_public/routes');
 
-var pinValidation = require('./middlewares/pinValidation')();
-var userAppVersion = require('./middlewares/userAppVersion')();
-
-var routes = require('./routes_public/routes');
+const service = {};
+let server;
 
 module.exports = function () {
-	var service = {};
-
-	var server;
 
 	service.start = function (publicPort, done) {
 		server = restify.createServer({
 			name: 'cipherlayer-server',
-			log: log
+			log
 		});
 
-		log.info('PUBLIC SERVICE starting on PORT ' + publicPort);
+		log.info(`PUBLIC SERVICE starting on PORT ${publicPort}`);
 
 		server.on('after', function (req, res) {
-			var logInfo = {
+			const logInfo = {
 				request: {
 					method: req.method,
 					headers: req.headers,
@@ -60,7 +58,7 @@ module.exports = function () {
 			};
 			delete(logInfo.request.params.password);
 
-			req.log.info(logInfo, "response");
+			req.log.info(logInfo, 'response');
 		});
 
 		if (config.accessControlAllow) {
@@ -71,8 +69,8 @@ module.exports = function () {
 			}));
 
 			server.opts(/.*/, function (req, res, next) {
-				res.header("Access-Control-Allow-Methods", req.header("Access-Control-Request-Methods"));
-				res.header("Access-Control-Allow-Headers", req.header("Access-Control-Request-Headers"));
+				res.header('Access-Control-Allow-Methods', req.header('Access-Control-Request-Methods'));
+				res.header('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers'));
 				res.send(200);
 				return next();
 			});
@@ -81,23 +79,23 @@ module.exports = function () {
 		server.use(restify.queryParser());
 		server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-		var versionControlOptions = _.clone(config.version);
+		const versionControlOptions = _.clone(config.version);
 		versionControlOptions.public = [
-			"/auth/sf",
-			"/auth/sf/*",
-			"/auth/in",
-			"/auth/in/*",
-			"/auth/google",
-			"/auth/google/*",
-			"/auth/login/refreshToken*",
-			"/user/activate*",
-			"/heartbeat",
-			"/user/email/available"
+			'/auth/sf',
+			'/auth/sf/*',
+			'/auth/in',
+			'/auth/in/*',
+			'/auth/google',
+			'/auth/google/*',
+			'/auth/login/refreshToken*',
+			'/user/activate*',
+			'/heartbeat',
+			'/user/email/available'
 		];
 		server.use(versionControl(versionControlOptions));
 
 		server.on('uncaughtException', function (req, res, route, error) {
-			log.error({exception: {req: req, res: res, route: route, err: error}});
+			log.error({exception: { req, res, route, err: error }});
 			if (!res.statusCode) {
 				res.send(500, {err: 'internal_error', des: 'uncaught exception'});
 			}
@@ -105,25 +103,37 @@ module.exports = function () {
 
 		routes(server);
 
-		var platformsPath = path.join(__dirname, '/platforms/');
+		const platformsPath = path.join(__dirname, '/platforms/');
 		fs.readdirSync(platformsPath).forEach(function (filename) {
 			require(platformsPath + filename).addRoutes(server, passport);
 		});
 
-		server.get(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.post(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.del(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
-		server.put(/(.*)/, checkAccessTokenParam, checkAuthHeader, decodeToken, permissions, findUser, pinValidation, userAppVersion, prepareOptions, platformsSetUp, propagateRequest);
+		const allMiddlewares = [
+			checkAccessTokenParam,
+			checkAuthHeader,
+			decodeToken,
+			permissions,
+			findUser,
+			pinValidation,
+			userAppVersion,
+			prepareOptions,
+			platformsSetUp,
+			propagateRequest
+		];
+		server.get(/(.*)/, allMiddlewares);
+		server.post(/(.*)/, allMiddlewares);
+		server.del(/(.*)/, allMiddlewares);
+		server.put(/(.*)/, allMiddlewares);
 
 		server.listen(publicPort, function () {
-			log.info('PUBLIC SERVICE listening on PORT ' + publicPort);
-			done();
+			log.info(`PUBLIC SERVICE listening on PORT ${publicPort}`);
+			return done();
 		});
 	};
 
 	service.stop = function (done) {
 		server.close(function () {
-			done();
+			return done();
 		});
 	};
 

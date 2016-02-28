@@ -1,15 +1,17 @@
-var assert = require('assert');
-var request = require('request');
-var config = require('../config.json');
+'use strict';
 
-var userDao = require('../src/managers/dao');
-var redisMng = require('../src/managers/redis');
+const assert = require('assert');
+const request = require('request');
+const config = require('../config.json');
+
+const userDao = require('../src/managers/dao');
+const redisMng = require('../src/managers/redis');
 
 describe('Heartbeat (Server status)', function () {
 
 	it('OK', function (done) {
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/heartbeat',
+		const options = {
+			url: `http://localhost:${config.public_port}/heartbeat`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -19,32 +21,32 @@ describe('Heartbeat (Server status)', function () {
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 204, body);
-			done();
+			return done();
 		});
 	});
 
 	it('DAO error', function (done) {
 		userDao.disconnect(function (err) {
 			assert.equal(err, null);
-			var options = {
-				url: 'http://localhost:' + config.public_port + '/heartbeat',
+			const options = {
+				url: `http://localhost:${config.public_port}/heartbeat`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
 				method: 'GET'
 			};
 
-			var expectedResult = {
-				"err": "component_error",
-				"des": "MongoDB component is not available"
+			const expectedResult = {
+				err: 'component_error',
+				des: 'MongoDB component is not available'
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 500);
-				body = JSON.parse(body);
+				const body = JSON.parse(rawBody);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 	});
@@ -52,25 +54,25 @@ describe('Heartbeat (Server status)', function () {
 	it('Redis error', function (done) {
 		redisMng.disconnect(function (err) {
 			assert.equal(err, null);
-			var options = {
-				url: 'http://localhost:' + config.public_port + '/heartbeat',
+			const options = {
+				url: `http://localhost:${config.public_port}/heartbeat`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
 				method: 'GET'
 			};
 
-			var expectedResult = {
-				"err": "component_error",
-				"des": "Redis component is not available"
+			const expectedResult = {
+				err: 'component_error',
+				des: 'Redis component is not available'
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 500);
-				body = JSON.parse(body);
+				const body = JSON.parse(rawBody);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 	});

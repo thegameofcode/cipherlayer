@@ -1,10 +1,12 @@
-var config = require(process.cwd() + '/config.json');
-var _ = require('lodash');
+'use strict';
+
+const config = require('../../config.json');
+const _ = require('lodash');
 
 module.exports = function (middleware) {
 	return function (req, res, next) {
 
-		var useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
+		const useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
 			return req.url.match(new RegExp(pattern, 'g'));
 		});
 
@@ -12,17 +14,14 @@ module.exports = function (middleware) {
 		if (useDirectProxy) {
 			return next();
 		}
-		// else invoke middleware
-		else {
-			// some middleware is an array (ex. bodyParser)
-			if (middleware instanceof Array) {
-				middleware[0](req, res, function () {
-					middleware[1](req, res, next);
-				});
-			}
-			else {
-				middleware(req, res, next);
-			}
+
+		// some middleware is an array (ex. bodyParser)
+		if (middleware instanceof Array) {
+			middleware[0](req, res, function () {
+				middleware[1](req, res, next);
+			});
+		} else {
+			middleware(req, res, next);
 		}
 	};
 };

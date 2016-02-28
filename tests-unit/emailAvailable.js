@@ -1,10 +1,12 @@
-var assert = require('assert');
-var request = require('request');
+'use strict';
 
-var config = require('../config.json');
-var userDao = require('../src/managers/dao');
+const assert = require('assert');
+const request = require('request');
 
-var baseUser = {
+const config = require('../config.json');
+const userDao = require('../src/managers/dao');
+
+const baseUser = {
 	id: 'a1b2c3d4e5f6',
 	username: 'user@example.com',
 	password: 'pass1'
@@ -12,17 +14,12 @@ var baseUser = {
 
 describe('Check Email Available endpoint', function () {
 
-	beforeEach(function (done) {
-		userDao.deleteAllUsers(function (error) {
-			assert.equal(error, null);
-			return done();
-		});
-	});
+	beforeEach(userDao.deleteAllUsers);
 
 	it('should indicate that requested email is available', function (done) {
 
-		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+		const requestOptions = {
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -42,8 +39,8 @@ describe('Check Email Available endpoint', function () {
 	});
 
 	it('should indicate that requested email is unavailable', function (done) {
-		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+		const requestOptions = {
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -54,7 +51,7 @@ describe('Check Email Available endpoint', function () {
 			}
 		};
 
-		userDao.addUser()(baseUser, function (error) {
+		userDao.addUser(baseUser, function (error) {
 
 			assert.equal(error, null);
 
@@ -68,8 +65,8 @@ describe('Check Email Available endpoint', function () {
 	});
 
 	it('should return a BadRequestError on missing email component', function (done) {
-		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+		const requestOptions = {
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},

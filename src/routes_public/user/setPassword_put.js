@@ -1,19 +1,19 @@
 'use strict';
 
-var userMng = require('../../managers/user');
+const userMng = require('../../managers/user');
 
 module.exports = function (req, res, next) {
 	userMng().setPassword(req.user._id, req.body, function (err) {
 		if (err) {
 			if (!err.code) {
 				res.send(500, err);
-				return next(false);
+				return next(err);
 			}
 
-			var errCode = err.code;
+			const errCode = err.code;
 			delete(err.code);
 			res.send(errCode, err);
-			return next(false);
+			return next(err);
 		}
 
 		res.send(204);

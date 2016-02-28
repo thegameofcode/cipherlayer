@@ -1,26 +1,24 @@
 'use strict';
 
-var request = require('request');
-var _ = require('lodash');
-var ciphertoken = require('ciphertoken');
-var crypto = require('crypto');
-var redisMng = require('./redis');
+const request = require('request');
+const ciphertoken = require('ciphertoken');
+const crypto = require('crypto');
 
-var config = require(process.cwd() + '/config.json');
-var log = require('../logger/service');
+const redisMng = require('./redis');
+const log = require('../logger/service');
 
-var _settings = {};
+let _settings = {};
 
-function sendEmailVerification(email, subject, emailBody, cbk) {
-	var notifServiceURL = _settings.externalServices.notifications.base;
-	var emailOptions = {
+function sendEmailVerification(email, subject, html, cbk) {
+	const notifServiceURL = _settings.externalServices.notifications.base;
+	const emailOptions = {
 		to: email,
-		subject: subject,
-		html: emailBody,
+		subject,
+		html,
 		from: _settings.emailVerification.from
 	};
 
-	var options = {
+	const options = {
 		url: notifServiceURL + _settings.externalServices.notifications.pathEmail,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
@@ -31,10 +29,9 @@ function sendEmailVerification(email, subject, emailBody, cbk) {
 
 	request(options, function (err, res, body) {
 		if (res.statusCode === 500) {
-			err = body;
-			return cbk(err);
+			return cbk(body);
 		}
-		cbk();
+		return cbk();
 	});
 }
 
@@ -50,11 +47,10 @@ function emailVerification(email, bodyData, cbk) {
 		});
 	}
 
-	var transactionId = crypto.pseudoRandomBytes(12).toString('hex');
+	const transactionId = crypto.pseudoRandomBytes(12).toString('hex');
 
-	var redisKey = _settings.emailVerification.redis.key;
-	redisKey = redisKey.replace('{username}', bodyData[config.passThroughEndpoint.email || 'email']);
-	var redisExp = _settings.emailVerification.redis.expireInSec;
+	const redisKey = _settings.emailVerification.redis.key.replace('{username}', bodyData[_settings.passThroughEndpoint.email || 'email']);
+	const redisExp = _settings.emailVerification.redis.expireInSec;
 
 	redisMng.insertKeyValue(redisKey, transactionId, redisExp, function (err) {
 		if (err) {
@@ -62,23 +58,23 @@ function emailVerification(email, bodyData, cbk) {
 		}
 		bodyData.transactionId = transactionId;
 
-		//Get the same expiration as the redis Key
-		var tokenSettings = {
+		// Get the same expiration as the redis Key
+		const tokenSettings = {
 			cipherKey: _settings.accessToken.cipherKey,
 			firmKey: _settings.accessToken.signKey,
 			tokenExpirationMinutes: redisExp
 		};
 
-		ciphertoken.createToken(tokenSettings, bodyData[config.passThroughEndpoint.email || 'email'], null, bodyData, function (err, token) {
+		ciphertoken.createToken(tokenSettings, bodyData[_settings.passThroughEndpoint.email || 'email'], null, bodyData, function (err, token) {
 			if (err) {
 				return cbk(err);
 			}
 
-			var link = _settings.public_url + '/user/activate?verifyToken=' + token;
-			var emailText = (_settings.emailVerification.body).replace('{link}', link);
+			const link = `${_settings.public_url}/user/activate?verifyToken=${token}`;
+			const emailText = (_settings.emailVerification.body).replace('{link}', link);
 
-			var subject = _settings.emailVerification.subject;
-			//Send verify email
+			const subject = _settings.emailVerification.subject;
+			// Send verify email
 			sendEmailVerification(email, subject, emailText, function (err) {
 				if (err) {
 					return cbk(err);
@@ -92,15 +88,15 @@ function emailVerification(email, bodyData, cbk) {
 
 function sendEmailForgotPassword(email, passwd, link, cbk) {
 
-	var html = _settings.password.body.replace("__PASSWD__", passwd).replace("__LINK__", link);
+	const html = _settings.password.body.replace('__PASSWD__', passwd).replace('__LINK__', link);
 
-	var body = {
+	const body = {
 		to: email,
 		subject: _settings.password.subject,
-		html: html
+		html
 	};
 
-	var options = {
+	const options = {
 		url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
@@ -111,11 +107,11 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 	request(options, function (err, res, body) {
 		if (err) {
-			log.error(err);
+			log.error({ err });
 			return cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
-			var serviceError = body;
+			const serviceError = body;
 			log.error(serviceError);
 			return cbk(serviceError);
 		}
@@ -126,15 +122,15 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 
 function sendEmailMagicLink(email, link, cbk){
 
-	var html = _settings.magicLink.body.replace("__LINK__", link);
+	const html = _settings.magicLink.body.replace('__LINK__', link);
 
-	var body = {
+	const body = {
 			to: email,
 			subject: _settings.magicLink.subject,
-			html: html
+			html
 	};
 
-	var options = {
+	const options = {
 		url: _settings.externalServices.notifications.base + _settings.externalServices.notifications.pathEmail,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
@@ -143,32 +139,29 @@ function sendEmailMagicLink(email, link, cbk){
 		body: JSON.stringify(body)
 	};
 
-	request(options, function (err, res, body){
+	request(options, function (err, res, resBody){
 		if (err) {
-			log.error(err);
+			log.error({ err });
 			return cbk({err: 'internalError', des: 'Internal server error'});
 		}
 		if (res.statusCode === 500) {
-			var serviceError = body;
-			log.error(serviceError);
+			log.error(resBody);
 			return cbk({
 				err: 'internal_error',
 				des: 'Error calling notifications service for Magic Link email'
 			});
 		}
-		cbk();
+		return cbk();
 	});
 }
 
 module.exports = function (settings) {
-	var config = require(process.cwd() + '/config.json');
-	_settings = _.assign({}, config, settings);
-
-	console.log('--call to real module--');
+	const config = require('../../config.json');
+	_settings = Object.assign({}, config, settings);
 
 	return {
-		emailVerification: emailVerification,
-		sendEmailForgotPassword: sendEmailForgotPassword,
-		sendEmailMagicLink: sendEmailMagicLink
+		emailVerification,
+		sendEmailForgotPassword,
+		sendEmailMagicLink
 	};
 };
