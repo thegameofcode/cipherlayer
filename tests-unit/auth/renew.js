@@ -11,6 +11,22 @@ const cryptoMng = crypto(config.password);
 
 const versionHeader = 'test/1';
 
+const USER = {
+	id: 'a1b2c3d4e5f6',
+	username: `validUser${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+	password: 'validPassword123',
+	deviceId: 1234567890
+};
+
+const OPTIONS_FOR_RENEW = {
+	url: `http://localhost:${config.public_port}/auth/renew`,
+	headers: {
+		[config.version.header]: versionHeader
+	},
+	method: 'POST',
+	json: true
+};
+
 describe('/renew', function () {
 
 	beforeEach(function (done) {
@@ -46,7 +62,7 @@ describe('/renew', function () {
 			const refreshToken = body.refreshToken;
 
 			const options = _.cloneDeep(OPTIONS_FOR_RENEW);
-			options.body = {refreshToken: refreshToken};
+			options.body = { refreshToken };
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
@@ -124,19 +140,3 @@ describe('/renew', function () {
 		});
 	});
 });
-
-const USER = {
-	id: 'a1b2c3d4e5f6',
-	username: 'validUser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
-	password: 'validPassword123',
-	deviceId: 1234567890
-};
-
-const OPTIONS_FOR_RENEW = {
-	url: `http://localhost:${config.public_port}/auth/renew`,
-	headers: {
-		[config.version.header]: versionHeader
-	},
-	method: 'POST',
-	json: true
-};

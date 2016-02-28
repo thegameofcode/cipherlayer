@@ -3,7 +3,7 @@
 const should = require('chai').should();
 const mockery = require('mockery');
 const sinon = require('sinon');
-const config = require(process.cwd() + '/config.json');
+const config = require('../../../config.json');
 
 describe('public routes', function () {
 	describe('/auth', function () {
@@ -23,13 +23,13 @@ describe('public routes', function () {
 				});
 
 				it('204 - send valid email with a magic link', function (done) {
-					var expectedEmail = 'user@email.com';
-					var expectedRefreshToken = 'REFRESH_TOKEN';
-					var expectedLink = config.public_url + '/auth/login/refreshToken?rt=' + expectedRefreshToken;
-					var expectedUserId = 'USER_ID';
+					const expectedEmail = 'user@email.com';
+					const expectedRefreshToken = 'REFRESH_TOKEN';
+					const expectedLink = `${config.public_url}/auth/login/refreshToken?rt=${expectedRefreshToken}`;
+					const expectedUserId = 'USER_ID';
 
-					var daoManagerStub = {
-						getFromUsername: function (email, cbk) {
+					const daoManagerStub = {
+						getFromUsername(email, cbk) {
 							should.exist(email);
 							email.should.equal(expectedEmail);
 							cbk(null, {
@@ -39,8 +39,8 @@ describe('public routes', function () {
 					};
 					mockery.registerMock('../../managers/dao', daoManagerStub);
 
-					var tokenManagerStub = {
-						createRefreshToken: function (userId, data, cbk) {
+					const tokenManagerStub = {
+						createRefreshToken(userId, data, cbk) {
 							should.exist(userId);
 							userId.should.equal(expectedUserId);
 							cbk(null, expectedRefreshToken);
@@ -48,8 +48,8 @@ describe('public routes', function () {
 					};
 					mockery.registerMock('../../managers/token', tokenManagerStub);
 
-					var emailManagerInstanceStub = {
-						sendEmailMagicLink: function (email, link, cbk) {
+					const emailManagerInstanceStub = {
+						sendEmailMagicLink(email, link, cbk) {
 							should.exist(email);
 							email.should.equal(expectedEmail);
 
@@ -59,26 +59,26 @@ describe('public routes', function () {
 							cbk();
 						}
 					};
-					var emailManagerStub = function () {
+					const emailManagerStub = function () {
 						return emailManagerInstanceStub;
 					};
 					mockery.registerMock('../../managers/email', emailManagerStub);
-					var emailManagerSendEmailMagicLinkSpy = sinon.spy(emailManagerInstanceStub, 'sendEmailMagicLink');
+					const emailManagerSendEmailMagicLinkSpy = sinon.spy(emailManagerInstanceStub, 'sendEmailMagicLink');
 
-					var req = {
+					const req = {
 						params: {
 							email: expectedEmail
 						}
 					};
-					var res = {
-						send: function (status) {
+					const res = {
+						send(status) {
 							should.exist(status);
 							status.should.equal(204);
 							sinon.assert.calledOnce(emailManagerSendEmailMagicLinkSpy);
 						}
 					};
-					var responseSendSpy = sinon.spy(res, 'send');
-					var next = function () {
+					const responseSendSpy = sinon.spy(res, 'send');
+					const next = function () {
 						sinon.assert.calledOnce(responseSendSpy);
 						return done();
 					};
@@ -88,11 +88,11 @@ describe('public routes', function () {
 				});
 
 				it('400 - no email on body', function (done) {
-					var req = {
+					const req = {
 						params: {}
 					};
-					var res = {
-						send: function (status, body) {
+					const res = {
+						send(status, body) {
 							sinon.assert.calledOnce(responseSendSpy);
 							sinon.assert.notCalled(nextSpy);
 
@@ -106,10 +106,10 @@ describe('public routes', function () {
 
 						}
 					};
-					var responseSendSpy = sinon.spy(res, 'send');
+					const responseSendSpy = sinon.spy(res, 'send');
 
-					var next = {
-						next: function (status) {
+					const next = {
+						next(status) {
 							sinon.assert.calledOnce(nextSpy);
 							sinon.assert.calledOnce(responseSendSpy);
 
@@ -117,7 +117,7 @@ describe('public routes', function () {
 							return done();
 						}
 					};
-					var nextSpy = sinon.spy(next, 'next');
+					const nextSpy = sinon.spy(next, 'next');
 
 					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
 					loginEmail_post(req, res, next.next);

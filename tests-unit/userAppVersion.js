@@ -6,47 +6,39 @@ const userDao = require('../src/managers/dao');
 
 const config = require('../config.json');
 
-describe('middleware userAppVersion', function () {
-	var settings = {
-		version: {
-			header: config.version.header,
-			platforms: {
-				test: {
-					link: 'http://testLink',
-					'1': true
-				}
-			},
-			installPath: '/install'
-		}
-	};
+const settings = {
+	version: {
+		header: config.version.header,
+		platforms: {
+			test: {
+				link: 'http://testLink',
+				1: true
+			}
+		},
+		installPath: '/install'
+	}
+};
 
-	var baseUser = {
-		id: 'a1b2c3d4e5f6',
-		username: `username${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
-		password: '12345678'
-	};
+const baseUser = {
+	id: 'a1b2c3d4e5f6',
+	username: `username${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+	password: '12345678'
+};
+
+describe('middleware userAppVersion', function () {
 
 	beforeEach(function (done) {
 		async.series([
-			function (done) {
-				userDao.connect(function () {
-					userDao.deleteAllUsers(done);
-				});
-			}
+			userDao.connect,
+			userDao.deleteAllUsers
 		], done);
 	});
 
-	afterEach(function (done) {
-		async.series([
-			function (done) {
-				userDao.disconnect(done);
-			}
-		], done);
-	});
+	afterEach(userDao.disconnect);
 
 	it('update (user has no appVersion)', function (done) {
 		userDao.addUser(baseUser, function (err, createdUser) {
-			var req = {
+			const req = {
 				headers: {},
 				url: '/api/me',
 				method: 'GET',
@@ -55,8 +47,8 @@ describe('middleware userAppVersion', function () {
 
 			req.headers[config.version.header] = 'version 1.0.0';
 
-			var res = {};
-			var next = function (canContinue) {
+			const res = {};
+			const next = function (canContinue) {
 				if (canContinue === undefined || canContinue === true) {
 					userDao.getFromId(createdUser._id, function (err, foundUser) {
 						assert.equal(err, null);
@@ -73,7 +65,7 @@ describe('middleware userAppVersion', function () {
 	it('update (different appVersion)', function (done) {
 		baseUser.appVersion = 'version 1.0.0';
 		userDao.addUser(baseUser, function (err, createdUser) {
-			var req = {
+			const req = {
 				headers: {},
 				url: '/api/me',
 				method: 'GET',
@@ -82,8 +74,8 @@ describe('middleware userAppVersion', function () {
 
 			req.headers[config.version.header] = 'version 2.0.0';
 
-			var res = {};
-			var next = function (canContinue) {
+			const res = {};
+			const next = function (canContinue) {
 				if (canContinue === undefined || canContinue === true) {
 					userDao.getFromId(createdUser._id, function (err, foundUser) {
 						assert.equal(err, null);
@@ -100,7 +92,7 @@ describe('middleware userAppVersion', function () {
 	it('continue (same appVersion)', function (done) {
 		baseUser.appVersion = 'version 1.0.0';
 		userDao.addUser(baseUser, function (err, createdUser) {
-			var req = {
+			const req = {
 				headers: {},
 				url: '/api/me',
 				method: 'GET',
@@ -109,8 +101,8 @@ describe('middleware userAppVersion', function () {
 
 			req.headers[config.version.header] = 'version 1.0.0';
 
-			var res = {};
-			var next = function (canContinue) {
+			const res = {};
+			const next = function (canContinue) {
 				if (canContinue === undefined || canContinue === true) {
 					userDao.getFromId(createdUser._id, function (err, foundUser) {
 						assert.equal(err, null);
@@ -125,15 +117,15 @@ describe('middleware userAppVersion', function () {
 	});
 
 	it('continue (no version header)', function (done) {
-		var req = {
+		const req = {
 			headers: {},
 			url: '/api/me',
 			method: 'GET',
 			user: baseUser
 		};
 
-		var res = {};
-		var next = function (canContinue) {
+		const res = {};
+		const next = function (canContinue) {
 			if (canContinue === undefined || canContinue === true) {
 				return done();
 			}

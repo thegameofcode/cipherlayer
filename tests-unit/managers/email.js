@@ -3,22 +3,22 @@
 const nock = require('nock');
 const should = require('chai').should();
 const emailMng = require('../../src/managers/email')();
-const config = require(process.cwd() + '/config.json');
+const config = require('../../config.json');
 
 describe('managers', function () {
 	describe('email', function () {
 		describe('forgot password email', function () {
 			it('OK', function (done) {
-				var email = 'valid@email.com';
-				var password = '12345678';
-				var link = 'http://link';
+				const email = 'valid@email.com';
+				const password = '12345678';
+				const link = 'http://link';
 
-				var html = config.password.body.replace("__PASSWD__", password).replace("__LINK__", link);
+				const html = config.password.body.replace('__PASSWD__', password).replace('__LINK__', link);
 
-				var nockBody = {
+				const nockBody = {
 					to: email,
 					subject: config.password.subject,
-					html: html
+					html
 				};
 
 				nock(config.externalServices.notifications.base)
@@ -34,18 +34,18 @@ describe('managers', function () {
 
 		describe('magic link', function () {
 			it('OK', function (done) {
-				var expectedEmail = 'user@email.com';
-				var expectedLink = 'http://magic_link';
+				const expectedEmail = 'user@email.com';
+				const expectedLink = 'http://magic_link';
 
-				var html = config.magicLink.body.replace("__LINK__", expectedLink);
+				const html = config.magicLink.body.replace('__LINK__', expectedLink);
 
-				var nockBody = {
+				const nockBody = {
 					to: expectedEmail,
 					subject: config.magicLink.subject,
-					html: html
+					html
 				};
 
-				var nockedEndpoint = nock(config.externalServices.notifications.base)
+				const nockedEndpoint = nock(config.externalServices.notifications.base)
 					.post(config.externalServices.notifications.pathEmail, nockBody)
 					.reply(200, {});
 
@@ -57,18 +57,18 @@ describe('managers', function () {
 			});
 
 			it('FAIL - notifications service failed', function (done) {
-				var expectedEmail = 'user@email.com';
-				var expectedLink = 'http://magic_link';
+				const expectedEmail = 'user@email.com';
+				const expectedLink = 'http://magic_link';
 
-				var html = config.magicLink.body.replace("__LINK__", expectedLink);
+				const html = config.magicLink.body.replace('__LINK__', expectedLink);
 
-				var nockBody = {
+				const nockBody = {
 					to: expectedEmail,
 					subject: config.magicLink.subject,
-					html: html
+					html
 				};
 
-				var nockedEndpoint = nock(config.externalServices.notifications.base)
+				const nockedEndpoint = nock(config.externalServices.notifications.base)
 					.post(config.externalServices.notifications.pathEmail, nockBody)
 					.reply(500, {});
 

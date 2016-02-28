@@ -21,21 +21,21 @@ describe('public routes', function () {
 			});
 
 			it('white box test of forgot password email creation', function (done) {
-				var expectedEmail = 'valid@email.com';
-				var expectedUserId = 'USER_ID';
-				var expectedPassword = 'EXPECTED PASSWORD';
-				var expectedEncryptedPassword = 'EXPECTED ENCRYPTED PASSWORD';
-				var expectedAccessToken = 'ACCESS_TOKEN';
-				var expectedRefreshToken = 'REFRESH_TOKEN';
+				const expectedEmail = 'valid@email.com';
+				const expectedUserId = 'USER_ID';
+				const expectedPassword = 'EXPECTED PASSWORD';
+				const expectedEncryptedPassword = 'EXPECTED ENCRYPTED PASSWORD';
+				const expectedAccessToken = 'ACCESS_TOKEN';
+				const expectedRefreshToken = 'REFRESH_TOKEN';
 
-				var cryptoManagerStub = function () {
+				const cryptoManagerStub = function () {
 					return {
-						randomPassword: function (generationRegex) {
+						randomPassword(generationRegex) {
 							should.exist(generationRegex);
 							generationRegex.should.equal(config.password.generatedRegex);
 							return expectedPassword;
 						},
-						encrypt: function (password, cbk) {
+						encrypt(password, cbk) {
 							password.should.equal(expectedPassword);
 							cbk(expectedEncryptedPassword);
 						}
@@ -43,28 +43,28 @@ describe('public routes', function () {
 				};
 				mockery.registerMock('../../managers/crypto', cryptoManagerStub);
 
-				var daoManagerStub = {
-					getAllUserFields: function (email, cbk) {
+				const daoManagerStub = {
+					getAllUserFields(email, cbk) {
 						email.should.equal(expectedEmail);
-						cbk(null, {
+						return cbk(null, {
 							_id: expectedUserId,
 							password: 'PREVIOUS PASSWORD'
 						});
 					},
-					updateField: function (userId, fieldName, fieldValue, cbk) {
+					updateField(userId, fieldName, fieldValue, cbk) {
 						userId.should.equal(expectedUserId);
 						fieldName.should.equal('password');
 						fieldValue.should.deep.equal(['PREVIOUS PASSWORD', expectedEncryptedPassword]);
 						return cbk();
 					},
-					getRealms: function (cbk) {
+					getRealms(cbk) {
 						return cbk(null, []);
 					}
 				};
 				mockery.registerMock('../../managers/dao', daoManagerStub);
 
-				var tokenManagerStub = {
-					createBothTokens: function (userId, data, cbk) {
+				const tokenManagerStub = {
+					createBothTokens(userId, data, cbk) {
 						cbk(null, {
 							accessToken: expectedAccessToken,
 							refreshToken: expectedRefreshToken
@@ -73,34 +73,34 @@ describe('public routes', function () {
 				};
 				mockery.registerMock('../../managers/token', tokenManagerStub);
 
-				var emailManagerStub = function () {
+				const emailManagerStub = function () {
 					return {
-						sendEmailForgotPassword: function (email, password, link, cbk) {
+						sendEmailForgotPassword(email, password, link, cbk) {
 							should.exist(email);
 							email.should.equal(expectedEmail);
 							should.exist(password);
 							password.should.equal(expectedPassword);
 							should.exist(link);
 							should.exist(config.emailVerification.redirectProtocol);
-							link.should.equal(config.emailVerification.redirectProtocol + '://user/refreshToken/' + expectedRefreshToken);
+							link.should.equal(`${config.emailVerification.redirectProtocol}://user/refreshToken/${expectedRefreshToken}`);
 							cbk();
 						}
 					};
 				};
 				mockery.registerMock('../../managers/email', emailManagerStub);
 
-				var req = {
+				const req = {
 					params: {
 						email: expectedEmail
 					}
 				};
-				var res = {
-					send: function (status) {
+				const res = {
+					send(status) {
 						should.exist(status);
 						status.should.be.equal(204);
 					}
 				};
-				var next = function (status) {
+				const next = function (status) {
 					should.not.exist(status);
 					return done();
 				};

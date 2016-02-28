@@ -17,16 +17,16 @@ const refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 describe('Admin /login', function () {
 	const baseUser = {
 		id: 'a1b2c3d4e5f6',
-		username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+		username: `validuser${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 		password: 'validpassword',
-		roles: ["admin"],
-		deviceId: "0987654321"
+		roles: ['admin'],
+		deviceId: '0987654321'
 	};
 
 	beforeEach(function (done) {
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			var userToCreate = _.clone(baseUser);
+			const userToCreate = _.clone(baseUser);
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
 				dao.addUser(userToCreate, function (err, createdUser) {
@@ -54,10 +54,10 @@ describe('Admin /login', function () {
 			.post('/api/me/session')
 			.reply(204);
 
-		request(options, function (err, res, body) {
+		request(options, function (err, res, rawBody) {
 			assert.equal(err, null);
-			assert.equal(res.statusCode, 200, body);
-			body = JSON.parse(body);
+			assert.equal(res.statusCode, 200, rawBody);
+			const body = JSON.parse(rawBody);
 			assert.notEqual(body.accessToken, undefined);
 			assert.equal(body.expiresIn, accessTokenSettings.tokenExpirationMinutes);
 			ciphertoken.getTokenSet(accessTokenSettings, body.accessToken, function (err, accessTokenInfo) {

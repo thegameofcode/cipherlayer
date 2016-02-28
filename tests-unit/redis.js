@@ -10,8 +10,8 @@ describe('redis', function () {
 
 	beforeEach(redisMng.connect);
 
-	var baseKey = 'key';
-	var baseValue = 'value';
+	const baseKey = 'key';
+	const baseValue = 'value';
 
 	it('insert', function (done) {
 		redisMng.insertKeyValue(baseKey, baseValue, 3, function (err) {
@@ -110,7 +110,7 @@ describe('redis', function () {
 	});
 
 	it('update', function (done) {
-		var val = 'new value';
+		const val = 'new value';
 		async.series([
 			// createKey
 			function (done) {
@@ -146,7 +146,7 @@ describe('redis', function () {
 	});
 
 	it('update - disconnected', function (done) {
-		var val = 'new value';
+		const val = 'new value';
 		async.series([
 			// createKey
 			function (done) {
@@ -215,5 +215,4 @@ describe('redis', function () {
 		], done);
 	});
 
-})
-;
+});

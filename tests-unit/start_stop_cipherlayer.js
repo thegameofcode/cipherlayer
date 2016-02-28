@@ -7,6 +7,4 @@ beforeEach(function (done) {
 	cipherlayer.start(config.public_port, config.internal_port, done);
 });
 
-afterEach(function (done) {
-	cipherlayer.stop(done);
-});
+afterEach(cipherlayer.stop);

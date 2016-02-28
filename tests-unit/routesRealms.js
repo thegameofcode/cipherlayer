@@ -8,7 +8,7 @@ const daoMng = require('../src/managers/dao');
 
 describe('realms', function () {
 
-	var baseRealms = [
+	const baseRealms = [
 		{
 			name: 'default',
 			allowedDomains: [
@@ -42,15 +42,11 @@ describe('realms', function () {
 	];
 
 	beforeEach(function (done) {
+		daoMng.resetRealmsVariables();
 		async.parallel([
+			daoMng.deleteAllRealms,
 			function (finish) {
-				daoMng.resetRealmsVariables();
-				daoMng.deleteAllRealms(finish);
-			},
-			function (finish) {
-				async.eachSeries(_.cloneDeep(baseRealms), function (realm, next) {
-					daoMng.addRealm(realm, next);
-				}, finish);
+				async.eachSeries(_.cloneDeep(baseRealms), daoMng.addRealm, finish);
 			}
 		], done);
 	});
@@ -62,7 +58,7 @@ describe('realms', function () {
 			return done();
 		}
 
-		var options = {
+		const options = {
 			url: `http://localhost:${config.internal_port}/realms`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
@@ -87,7 +83,7 @@ describe('realms', function () {
 		daoMng.deleteAllRealms(function (err) {
 			assert.equal(err, null);
 
-			var options = {
+			const options = {
 				url: `http://localhost:${config.internal_port}/realms`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
@@ -95,10 +91,10 @@ describe('realms', function () {
 				method: 'GET'
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
-				assert.equal(res.statusCode, 200, body);
-				body = JSON.parse(body);
+				assert.equal(res.statusCode, 200, rawBody);
+				const body = JSON.parse(rawBody);
 				assert.deepEqual(body.realms, []);
 				return done();
 			});

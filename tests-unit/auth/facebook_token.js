@@ -1,3 +1,5 @@
+'use strict';
+
 const assert = require('assert');
 const request = require('request');
 const nock = require('nock');
@@ -29,9 +31,9 @@ const baseUser = {
 };
 
 const FB_PROFILE = {
-	name: "Test User",
-	email: "test@a.com",
-	id: "fba1b2c3d4e5f6"
+	name: 'Test User',
+	email: 'test@a.com',
+	id: 'fba1b2c3d4e5f6'
 };
 
 describe('/facebook_token', function () {
@@ -46,10 +48,10 @@ describe('/facebook_token', function () {
 	it('exchanges facebook token for an existing cipherlayer user', function (done) {
 		nockFBGraphCall(FB_PROFILE, OPTIONS.body.accessToken, config.facebook.requestFields);
 
-		var options = _.cloneDeep(OPTIONS);
+		const options = _.cloneDeep(OPTIONS);
 		options.url = `http://localhost:${config.public_port}/auth/login/facebook`;
 
-		var existingUser = _.cloneDeep(baseUser);
+		const existingUser = _.cloneDeep(baseUser);
 		existingUser.username = existingUser.email;
 		delete existingUser.email;
 
@@ -65,7 +67,7 @@ describe('/facebook_token', function () {
 					assert.ok(user);
 					assert.equal(user.username, existingUser.username);
 					assert.ok(user.platforms);
-					var fbPlatform = user.platforms[0];
+					const fbPlatform = user.platforms[0];
 					assert.equal(fbPlatform.platform, 'fb');
 					assert.equal(fbPlatform.accessToken, OPTIONS.body.accessToken);
 					return done();
@@ -78,7 +80,7 @@ describe('/facebook_token', function () {
 		nockFBGraphCall(FB_PROFILE, OPTIONS.body.accessToken, config.facebook.requestFields);
 		nockPrivateCall(config, baseUser.id);
 
-		var options = _.cloneDeep(OPTIONS);
+		const options = _.cloneDeep(OPTIONS);
 		options.url = `http://localhost:${config.public_port}/auth/login/facebook`;
 
 		request(options, function (err, res, body) {
@@ -92,7 +94,7 @@ describe('/facebook_token', function () {
 				assert.ok(foundUser);
 				assert.equal(foundUser.username, baseUser.email);
 				assert.ok(foundUser.platforms);
-				var fbPlatform = foundUser.platforms[0];
+				const fbPlatform = foundUser.platforms[0];
 				assert.equal(fbPlatform.platform, 'fb');
 				assert.equal(fbPlatform.accessToken, OPTIONS.body.accessToken);
 				return done();
@@ -102,18 +104,18 @@ describe('/facebook_token', function () {
 
 	it('creates a user with a facebook domain email when username field is missing', function (done) {
 
-		var noEmailUser = _.cloneDeep(baseUser);
+		const noEmailUser = _.cloneDeep(baseUser);
 		delete noEmailUser.email;
 
-		var madeUpEmailFbProfile = _.cloneDeep(FB_PROFILE);
+		const madeUpEmailFbProfile = _.cloneDeep(FB_PROFILE);
 		delete madeUpEmailFbProfile.email;
 
-		var userEmail = 'fb' + noEmailUser.id + '@facebook.com';
+		const userEmail = `fb${noEmailUser.id}@facebook.com`;
 
 		nockFBGraphCall(madeUpEmailFbProfile, OPTIONS.body.accessToken, config.facebook.requestFields);
 		nockPrivateCall(config, noEmailUser.id);
 
-		var options = _.clone(OPTIONS);
+		const options = _.clone(OPTIONS);
 		options.url = `http://localhost:${config.public_port}/auth/login/facebook`;
 
 		request(options, function (err, res, body) {
@@ -127,7 +129,7 @@ describe('/facebook_token', function () {
 				assert.ok(foundUser);
 				assert.equal(foundUser.username, userEmail);
 				assert.ok(foundUser.platforms);
-				var fbPlatform = foundUser.platforms[0];
+				const fbPlatform = foundUser.platforms[0];
 				assert.equal(fbPlatform.platform, 'fb');
 				assert.equal(fbPlatform.accessToken, OPTIONS.body.accessToken);
 				return done();

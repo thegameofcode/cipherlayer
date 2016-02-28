@@ -1,12 +1,16 @@
+'use strict';
+
 const assert = require('assert');
 const sinon = require('sinon');
-const prepareOptions = require('./../src/middlewares/prepareOptions');
 const _ = require('lodash');
 const fs = require('fs');
-var request;
-var response;
 
-var fsStub;
+const prepareOptions = require('./../src/middlewares/prepareOptions');
+
+let request;
+let response;
+
+let fsStub;
 
 describe('prepareOptions middleware: ', function () {
 
@@ -79,7 +83,7 @@ describe('prepareOptions middleware: ', function () {
 			method: 'GET',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
-				'host': 'localhost:3000'
+				host: 'localhost:3000'
 			},
 			tokenInfo: {
 				userId: '1234567890'
@@ -104,7 +108,7 @@ describe('prepareOptions middleware: ', function () {
 			method: 'DELETE',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
-				'host': 'localhost:3000'
+				host: 'localhost:3000'
 			},
 			tokenInfo: {
 				userId: '1234567890'
@@ -128,7 +132,7 @@ describe('prepareOptions middleware: ', function () {
 		_.extend(request, {
 			headers: {
 				'content-type': 'multipart/form-data',
-				'host': 'localhost:3000'
+				host: 'localhost:3000'
 			},
 			tokenInfo: {
 				userId: '1234567890'

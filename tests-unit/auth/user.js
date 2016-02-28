@@ -13,20 +13,20 @@ const dao = require('../../src/managers/dao');
 
 const redisMng = require('../../src/managers/redis');
 
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 
 // TODO: if config.management does not exist or is incorrect POST and DELETE to /auth/user must return 404
 // for this test config should be edited, doing so a white box unit test or either change way of loading config file
 
-const username = 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
+const username = `validuser${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`;
 const password = 'validpassword';
 const phone = '111111111';
 
 const USER = {
 	id: 'a1b2c3d4e5f6',
-	username: username,
-	password: password,
-	phone: phone
+	username,
+	password,
+	phone
 };
 
 const HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
@@ -36,8 +36,8 @@ const HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 
 const HEADERS_WITH_AUTHORIZATION_BASIC = {
 	'Content-Type': 'application/json; charset=utf-8',
-	'Authorization': 'basic ' + new Buffer(config.management.clientId + ':' + config.management.clientSecret).toString('base64'),
-	'x-example-version': versionHeader
+	Authorization: `basic ${new Buffer(`${config.management.clientId}:${config.management.clientSecret}`).toString('base64')}`,
+	[config.version.header]: versionHeader
 };
 
 describe('Auth /user', function () {
@@ -49,7 +49,7 @@ describe('Auth /user', function () {
 			url: `http://${config.private_host}:${config.internal_port}/auth/user`,
 			headers: _.clone(HEADERS_WITH_AUTHORIZATION_BASIC),
 			method: 'POST',
-			body: JSON.stringify({username: username, password: password, phone: phone})
+			body: JSON.stringify({ username, password, phone })
 		};
 
 		request(options, function (err, res, body) {
@@ -67,7 +67,7 @@ describe('Auth /user', function () {
 			url: `http://${config.private_host}:${config.internal_port}/auth/user`,
 			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
 			method: 'POST',
-			body: JSON.stringify({username: username, password: password})
+			body: JSON.stringify({ username, password })
 		};
 
 		request(options, function (err, res) {
@@ -89,10 +89,10 @@ describe('Auth /user', function () {
 				body: JSON.stringify({username: USER.username, password: USER.password})
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 409);
-				body = JSON.parse(body);
+				const body = JSON.parse(rawBody);
 				assert.equal(body.err, 'username_already_exists');
 				return done();
 			});
@@ -188,12 +188,8 @@ describe('Auth /user', function () {
 
 		beforeEach(function (done) {
 			async.series([
-				function (done) {
-					redisMng.connect(done);
-				},
-				function (done) {
-					redisMng.deleteAllKeys(done);
-				}
+				redisMng.connect,
+				redisMng.deleteAllKeys
 			], done);
 		});
 
@@ -203,11 +199,11 @@ describe('Auth /user', function () {
 			const bodyData = {
 				firstName: 'Firstname',
 				lastName: 'Lastname',
-				password: password,
 				country: 'US',
-				phone: phone,
 				email: username,
-				transactionId: transactionId
+				password,
+				phone,
+				transactionId
 			};
 
 			const redisKey = config.emailVerification.redis.key.replace('{username}', bodyData.email);
@@ -234,7 +230,7 @@ describe('Auth /user', function () {
 					request(options, function (err, res, body) {
 						assert.equal(err, null);
 						assert.equal(res.statusCode, 302, body);
-						assert.notEqual(res.headers.location.indexOf(config.emailVerification.scheme + '://user/refreshToken/'), -1);
+						assert.notEqual(res.headers.location.indexOf(`${config.emailVerification.scheme}://user/refreshToken/`), -1);
 						return done();
 					});
 				});
@@ -248,11 +244,11 @@ describe('Auth /user', function () {
 			const bodyData = {
 				firstName: 'Firstname',
 				lastName: 'Lastname',
-				password: password,
 				country: 'US',
-				phone: phone,
 				email: username,
-				transactionId: transactionId
+				password,
+				phone,
+				transactionId
 			};
 
 			const redisKey = config.emailVerification.redis.key.replace('{username}', bodyData.email);
@@ -295,11 +291,11 @@ describe('Auth /user', function () {
 			const bodyData = {
 				firstName: 'Firstname',
 				lastName: 'Lastname',
-				password: password,
 				country: 'US',
-				phone: phone,
 				email: username,
-				transactionId: transactionId
+				password,
+				phone,
+				transactionId
 			};
 
 			const redisKey = thisConfig.emailVerification.redis.key.replace('{username}', bodyData.email);
@@ -344,11 +340,11 @@ describe('Auth /user', function () {
 			const bodyData = {
 				firstName: 'Firstname',
 				lastName: 'Lastname',
-				password: password,
 				country: 'US',
-				phone: phone,
 				email: username,
-				transactionId: transactionId
+				password,
+				phone,
+				transactionId
 			};
 
 			const redisKey = thisConfig.emailVerification.redis.key.replace('{username}', bodyData.email);
@@ -369,7 +365,7 @@ describe('Auth /user', function () {
 						followRedirect: false
 					};
 
-					nock('http://' + thisConfig.private_host + ':' + thisConfig.private_port)
+					nock(`http://${thisConfig.private_host}:${thisConfig.private_port}`)
 						.post(thisConfig.passThroughEndpoint.path)
 						.reply(201, {id: USER.id});
 
@@ -391,14 +387,14 @@ describe('Auth /user', function () {
 			};
 
 			const options = {
-				url: 'http://' + config.private_host + ':' + config.public_port + '/user/activate',
+				url: `http://${config.private_host}:${config.public_port}/user/activate`,
 				method: 'GET'
 			};
 
-			request(options, function (err, res, body) {
+			request(options, function (err, res, rawBody) {
 				assert.equal(err, null);
-				assert.equal(res.statusCode, 400, body);
-				body = JSON.parse(body);
+				assert.equal(res.statusCode, 400, rawBody);
+				const body = JSON.parse(rawBody);
 				assert.deepEqual(body, expectedResponseBody);
 				return done();
 			});

@@ -1,3 +1,5 @@
+'use strict';
+
 const request = require('request');
 const assert = require('assert');
 const ciphertoken = require('ciphertoken');
@@ -6,7 +8,7 @@ const nock = require('nock');
 const dao = require('../../src/managers/dao');
 const config = require('../../config.json');
 
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 const accessTokenSettings = require('../token_settings').accessTokenSettings;
 
 describe('Protected calls standard', () => {
@@ -19,9 +21,9 @@ describe('Protected calls standard', () => {
 	});
 
 	it('401 Unauthorized', function (done) {
-		var expectedBody = {field1: 'value1', field2: 'value2'};
+		const expectedBody = {field1: 'value1', field2: 'value2'};
 
-		var options = {
+		const options = {
 			url: `http://localhost:${config.public_port}/api/standard`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',
@@ -40,17 +42,17 @@ describe('Protected calls standard', () => {
 	});
 
 	it('200 without platforms', function (done) {
-		var user = {
+		const user = {
 			id: 'a1b2c3d4e5f6',
-			username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
-			password: "12345678"
+			username: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+			password: '12345678'
 		};
 
 		dao.addUser(user, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-				var expectedBody = {field1: 'value1', field2: 'value2'};
+				const expectedBody = {field1: 'value1', field2: 'value2'};
 
 				nock(`http://${config.private_host}:${config.private_port}`, {
 					reqheaders: {
@@ -61,11 +63,11 @@ describe('Protected calls standard', () => {
 					.post('/api/standard', expectedBody)
 					.reply(200, {field3: 'value3'});
 
-				var options = {
+				const options = {
 					url: `http://localhost:${config.public_port}/api/standard`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'Authorization': 'bearer ' + loginToken,
+						Authorization: `bearer ${loginToken}`,
 						[config.version.header]: versionHeader
 					},
 					method: 'POST',
@@ -83,17 +85,17 @@ describe('Protected calls standard', () => {
 	});
 
 	it('body response is not a json', function (done) {
-		var user = {
+		const user = {
 			id: 'a1b2c3d4e5f6',
-			username: "valid" + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
-			password: "12345678"
+			username: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+			password: '12345678'
 		};
 
 		dao.addUser(user, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-				var expectedBody = {field1: 'value1', field2: 'value2'};
+				const expectedBody = {field1: 'value1', field2: 'value2'};
 
 				nock(`http://${config.private_host}:${config.private_port}`, {
 					reqheaders: {
@@ -104,11 +106,11 @@ describe('Protected calls standard', () => {
 					.post('/api/standard', expectedBody)
 					.reply(200, 'not a json');
 
-				var options = {
+				const options = {
 					url: `http://localhost:${config.public_port}/api/standard`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'Authorization': 'bearer ' + loginToken,
+						Authorization: `bearer ${loginToken}`,
 						[config.version.header]: versionHeader
 					},
 					method: 'POST',

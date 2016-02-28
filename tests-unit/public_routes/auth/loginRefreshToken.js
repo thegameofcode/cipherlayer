@@ -3,7 +3,7 @@
 const should = require('chai').should();
 const mockery = require('mockery');
 const sinon = require('sinon');
-const config = require(process.cwd() + '/config.json');
+const config = require('../../../config.json');
 
 describe('public routes', function () {
 	describe('/auth', function () {
@@ -23,9 +23,9 @@ describe('public routes', function () {
 				});
 
 				it('302 - valid redirection', function (done) {
-					var expectedRefreshToken = 'VALID_REFRESH_TOKEN';
-					var tokenManagerStub = {
-						getRefreshTokenInfo: function (refreshToken, cbk) {
+					const expectedRefreshToken = 'VALID_REFRESH_TOKEN';
+					const tokenManagerStub = {
+						getRefreshTokenInfo(refreshToken, cbk) {
 							should.exist(refreshToken);
 							refreshToken.should.equal(expectedRefreshToken);
 							cbk(null, {});
@@ -33,13 +33,13 @@ describe('public routes', function () {
 					};
 					mockery.registerMock('../../managers/token', tokenManagerStub);
 
-					var req = {
+					const req = {
 						params: {
 							rt: expectedRefreshToken
 						}
 					};
-					var res = {
-						send: function (status, body) {
+					const res = {
+						send(status, body) {
 							sinon.assert.notCalled(nextSpy);
 							sinon.assert.calledOnce(sendSpy);
 							should.exist(status);
@@ -47,18 +47,18 @@ describe('public routes', function () {
 
 							should.not.exist(body);
 						},
-						header: function (headerName, headerValue) {
+						header(headerName, headerValue) {
 							should.exist(headerName);
 							headerName.toLowerCase().should.equal('location');
 							should.exist(headerValue);
-							headerValue.should.equal(config.magicLink.scheme + '://user/refreshToken/' + expectedRefreshToken);
+							headerValue.should.equal(`${config.magicLink.scheme}://user/refreshToken/${expectedRefreshToken}`);
 						}
 					};
-					var sendSpy = sinon.spy(res, 'send');
-					var headerSpy = sinon.spy(res, 'header');
+					const sendSpy = sinon.spy(res, 'send');
+					const headerSpy = sinon.spy(res, 'header');
 
-					var next = {
-						next: function (status) {
+					const next = {
+						next(status) {
 							sinon.assert.calledOnce(sendSpy);
 							sinon.assert.calledOnce(nextSpy);
 							sinon.assert.calledOnce(headerSpy);
@@ -66,16 +66,17 @@ describe('public routes', function () {
 							return done();
 						}
 					};
-					var nextSpy = sinon.spy(next, 'next');
+					const nextSpy = sinon.spy(next, 'next');
+
 
 					const loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get');
 					loginRefreshToken_get(req, res, next.next);
 				});
 
 				it('400 - invalid refresh token', function (done) {
-					var expectedRefreshToken = 'INVALID_REFRESH_TOKEN';
-					var tokenManagerStub = {
-						getRefreshTokenInfo: function (refreshToken, cbk) {
+					const expectedRefreshToken = 'INVALID_REFRESH_TOKEN';
+					const tokenManagerStub = {
+						getRefreshTokenInfo(refreshToken, cbk) {
 							should.exist(refreshToken);
 							refreshToken.should.equal(expectedRefreshToken);
 							cbk({err: 'internal_error'});
@@ -83,13 +84,13 @@ describe('public routes', function () {
 					};
 					mockery.registerMock('../../managers/token', tokenManagerStub);
 
-					var req = {
+					const req = {
 						params: {
 							rt: expectedRefreshToken
 						}
 					};
-					var res = {
-						send: function (status, body) {
+					const res = {
+						send(status, body) {
 							sinon.assert.notCalled(nextSpy);
 							sinon.assert.calledOnce(sendSpy);
 							should.exist(status);
@@ -101,28 +102,28 @@ describe('public routes', function () {
 							});
 						}
 					};
-					var sendSpy = sinon.spy(res, 'send');
+					const sendSpy = sinon.spy(res, 'send');
 
-					var next = {
-						next: function (status) {
+					const next = {
+						next(status) {
 							sinon.assert.calledOnce(sendSpy);
 							sinon.assert.calledOnce(nextSpy);
 							should.not.exist(status);
 							return done();
 						}
 					};
-					var nextSpy = sinon.spy(next, 'next');
+					let nextSpy = sinon.spy(next, 'next');
 
 					const loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get');
 					loginRefreshToken_get(req, res, next.next);
 				});
 
 				it('400 - no refresh token', function (done) {
-					var req = {
+					const req = {
 						params: {}
 					};
-					var res = {
-						send: function (status, body) {
+					const res = {
+						send(status, body) {
 							sinon.assert.notCalled(nextSpy);
 							sinon.assert.calledOnce(sendSpy);
 							should.exist(status);
@@ -134,17 +135,17 @@ describe('public routes', function () {
 							});
 						}
 					};
-					var sendSpy = sinon.spy(res, 'send');
+					const sendSpy = sinon.spy(res, 'send');
 
-					var next = {
-						next: function (status) {
+					const next = {
+						next(status) {
 							sinon.assert.calledOnce(sendSpy);
 							sinon.assert.calledOnce(nextSpy);
 							should.not.exist(status);
 							return done();
 						}
 					};
-					var nextSpy = sinon.spy(next, 'next');
+					const nextSpy = sinon.spy(next, 'next');
 
 					const loginRefreshToken_get = require('../../../src/routes_public/auth/loginRefreshToken_get');
 					loginRefreshToken_get(req, res, next.next);

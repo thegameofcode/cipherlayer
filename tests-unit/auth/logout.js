@@ -9,16 +9,16 @@ const should = require('chai').should();
 const nock = require('nock');
 
 const crypto = require('../../src/managers/crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 
 const accessTokenSettings = require('../token_settings').accessTokenSettings;
 
 describe('/logout', function () {
-	var baseUser = {
+	const baseUser = {
 		id: 'a1b2c3d4e5f6',
-		username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+		username: `validuser${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 		password: 'validpassword',
 		deviceId: '1234567890'
 	};
@@ -26,7 +26,7 @@ describe('/logout', function () {
 	beforeEach(function (done) {
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			var userToCreate = _.clone(baseUser);
+			const userToCreate = _.clone(baseUser);
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
 				dao.addUser(userToCreate, function (err, createdUser) {
@@ -40,8 +40,8 @@ describe('/logout', function () {
 
 	function doLogin () {
 		return new Promise(function (ok) {
-			var user = _.clone(baseUser);
-			var options = {
+			const user = _.clone(baseUser);
+			const options = {
 				url: `http://localhost:${config.public_port}/auth/login`,
 				headers: {
 					[config.version.header]: versionHeader
@@ -63,11 +63,11 @@ describe('/logout', function () {
 
 	it('POST 204', function (done) {
 		doLogin().then(function (accessToken) {
-			var options = {
+			const options = {
 				url: `http://localhost:${config.public_port}/auth/logout`,
 				method: 'POST',
 				headers: {
-					'Authorization': 'bearer ' + accessToken,
+					Authorization: `bearer ${accessToken}`,
 					[config.version.header]: versionHeader
 				},
 				json: true
@@ -85,11 +85,11 @@ describe('/logout', function () {
 
 	it('POST 500 no sesion service', function (done) {
 		doLogin().then(function (accessToken) {
-			var options = {
+			const options = {
 				url: `http://localhost:${config.public_port}/auth/logout`,
 				method: 'POST',
 				headers: {
-					'Authorization': 'bearer ' + accessToken,
+					Authorization: `bearer ${accessToken}`,
 					[config.version.header]: versionHeader
 				},
 				json: true
@@ -106,11 +106,11 @@ describe('/logout', function () {
 	});
 
 	it('POST 401 invalid access token', function (done) {
-		var options = {
+		const options = {
 			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
 			headers: {
-				'Authorization': 'bearer INVALID_TOKEN',
+				Authorization: 'bearer INVALID_TOKEN',
 				[config.version.header]: versionHeader
 			},
 			json: true
@@ -126,7 +126,7 @@ describe('/logout', function () {
 	});
 
 	it('POST 401 no authorization header', function (done) {
-		var options = {
+		const options = {
 			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
 			headers: {
@@ -145,11 +145,11 @@ describe('/logout', function () {
 	});
 
 	it('POST 401 invalid authorization header identifier', function (done) {
-		var options = {
+		const options = {
 			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
 			headers: {
-				'Authorization': 'wrong bearer TOKEN',
+				Authorization: 'wrong bearer TOKEN',
 				[config.version.header]: versionHeader
 			},
 			json: true

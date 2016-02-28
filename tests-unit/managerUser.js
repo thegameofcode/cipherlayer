@@ -44,7 +44,7 @@ const configSettings = {
 	},
 	emailVerification: {
 		subject: 'MyContacts email verification',
-		body: `<p>Thanks for register into MyContacts, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@my-comms.com'>support@my-comms.com</a> and we will be pleased to help you.</p>`,
+		body: '<p>Thanks for register into MyContacts, here is a link to activate your account click</p> <p><a href="{link}">here</a></p> <p>If you have any problems on this process, please contact <a href="mailto:support@my-comms.com">support@my-comms.com</a> and we will be pleased to help you.</p>',
 		compatibleEmailDevices: ['*iPhone*', '*iPad*', '*iPod*'],
 		nonCompatibleEmailMsg: 'Your user has been created correctly, try to access to MyContacts app in your device.',
 		redis: {
@@ -54,48 +54,31 @@ const configSettings = {
 	}
 };
 
-describe('user Manager', function () {
+function validatePwd (clear, crypted, cbk) {
+	const cryptoMng = crypto(config.password);
+	cryptoMng.verify(clear, crypted, function (err) {
+		assert.equal(err, undefined);
+		return cbk();
+	});
+}
 
-	function validatePwd (clear, crypted, cbk) {
-		const cryptoMng = crypto(config.password);
-		cryptoMng.verify(clear, crypted, function (err) {
-			assert.equal(err, undefined);
-			return cbk();
-		});
-	}
+describe('user Manager', function () {
 
 	beforeEach(function (done) {
 		async.series([
-			function (done) {
-				userDao.connect(function (err) {
-					assert.equal(err, null);
-					userDao.deleteAllUsers(done);
-				});
-			},
-			function (done) {
-				redisMng.connect(done);
-			},
-			function (done) {
-				redisMng.deleteAllKeys(done);
-			}
+			userDao.connect,
+			userDao.deleteAllUsers,
+			redisMng.connect,
+			redisMng.deleteAllKeys
 		], done);
 
 	});
 
 	afterEach(function (done) {
 		async.series([
-			function (done) {
-				userDao.disconnect(function (err) {
-					assert.equal(err, null);
-					return done();
-				});
-			},
-			function (done) {
-				redisMng.deleteAllKeys(done);
-			},
-			function (done) {
-				redisMng.disconnect(done);
-			}
+			userDao.disconnect,
+			redisMng.deleteAllKeys,
+			redisMng.disconnect
 		], done);
 
 	});
@@ -110,7 +93,7 @@ describe('user Manager', function () {
 
 		const expectedUser = {
 			id: 'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+			username: `username${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 			password: '12345678'
 		};
 
@@ -134,7 +117,7 @@ describe('user Manager', function () {
 
 	describe('Create user', function () {
 		const profileBody = {
-			email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+			email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 			password: 'n3wPas5W0rd',
 			phone: '111111111',
 			country: 'US'
@@ -146,7 +129,7 @@ describe('user Manager', function () {
 
 			const pin = 'xxxx';
 
-			const thisRedisKey = config.phoneVerification.redis.key.replace('{userId}', profileBody.email).replace('{phone}', '+1' + profileBody.phone);
+			const thisRedisKey = config.phoneVerification.redis.key.replace('{userId}', profileBody.email).replace('{phone}', `+1${profileBody.phone}`);
 			const expiration = config.phoneVerification.redis.expireInSec;
 
 			redisMng.insertKeyValue(`${thisRedisKey}.pin`, pin, expiration, function (err) {
@@ -183,7 +166,7 @@ describe('user Manager', function () {
 				code: 200
 			};
 
-			const thisRedisKey = config.phoneVerification.redis.key.replace('{userId}', profileBody.email).replace('{phone}', '+1' + profileBody.phone);
+			const thisRedisKey = config.phoneVerification.redis.key.replace('{userId}', profileBody.email).replace('{phone}', `+1${profileBody.phone}`);
 			const expiration = config.phoneVerification.redis.expireInSec;
 
 			redisMng.insertKeyValue(`${thisRedisKey}.pin`, pin, expiration, function (err) {
@@ -436,7 +419,7 @@ describe('user Manager', function () {
 					assert.equal(tokens, undefined);
 
 					//3rd call must fail (same username with capital letters)
-					profileBody.email = 'VALID' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
+					profileBody.email = `VALID${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`;
 					userMng(configSettings).createUser(profileBody, pin, function (err, tokens) {
 						assert.notEqual(err, null);
 						assert.deepEqual(err, expectedError);
@@ -497,7 +480,7 @@ describe('user Manager', function () {
 				company: '',
 				password: 'valid_password',
 				firstName: 'firstName',
-				email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+				email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 				position: '',
 				transactionId
 			};
@@ -538,7 +521,7 @@ describe('user Manager', function () {
 				company: '',
 				password: 'valid_password',
 				firstName: 'firstName',
-				email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+				email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 				position: '',
 				transactionId
 			};
@@ -580,7 +563,7 @@ describe('user Manager', function () {
 				company: '',
 				password: 'valid_password',
 				firstName: 'firstName',
-				email: 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+				email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 				transactionId: 'abcde'
 			};
 
@@ -669,7 +652,7 @@ describe('user Manager', function () {
 
 		const expectedUser = {
 			id: 'a1b2c3d4e5f6',
-			username: 'username' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
+			username: `username${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 			password: '12345678'
 		};
 

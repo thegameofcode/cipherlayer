@@ -1,10 +1,12 @@
+'use strict';
+
 const assert = require('assert');
 const request = require('request');
 
 const config = require('../config.json');
 const userDao = require('../src/managers/dao');
 
-var baseUser = {
+const baseUser = {
 	id: 'a1b2c3d4e5f6',
 	username: 'user@example.com',
 	password: 'pass1'
@@ -12,16 +14,11 @@ var baseUser = {
 
 describe('Check Email Available endpoint', function () {
 
-	beforeEach(function (done) {
-		userDao.deleteAllUsers(function (error) {
-			assert.equal(error, null);
-			return done();
-		});
-	});
+	beforeEach(userDao.deleteAllUsers);
 
 	it('should indicate that requested email is available', function (done) {
 
-		var requestOptions = {
+		const requestOptions = {
 			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
@@ -42,7 +39,7 @@ describe('Check Email Available endpoint', function () {
 	});
 
 	it('should indicate that requested email is unavailable', function (done) {
-		var requestOptions = {
+		const requestOptions = {
 			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
@@ -68,7 +65,7 @@ describe('Check Email Available endpoint', function () {
 	});
 
 	it('should return a BadRequestError on missing email component', function (done) {
-		var requestOptions = {
+		const requestOptions = {
 			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
