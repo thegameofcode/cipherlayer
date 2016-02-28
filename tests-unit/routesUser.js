@@ -1,11 +1,9 @@
 var assert = require('assert');
-var _ = require('lodash');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var nock = require('nock');
 var fs = require('fs');
 var _ = require('lodash');
-var cipherlayer = require('../src/cipherlayer.js');
 
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 var dao = require('../src/managers/dao.js');
@@ -35,7 +33,7 @@ describe('user', function () {
 		password: 'validpassword'
 	};
 
-	function validatePwd(clear, crypted, cbk) {
+	function validatePwd (clear, crypted, cbk) {
 		var cryptoMng = crypto(config.password);
 		cryptoMng.verify(clear, crypted, function (err) {
 			assert.equal(err, null);
@@ -44,30 +42,23 @@ describe('user', function () {
 	}
 
 	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, function (err) {
+		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			dao.deleteAllUsers(function (err) {
-				assert.equal(err, null);
-				var userToCreate = _.clone(baseUser);
+			var userToCreate = _.clone(baseUser);
 
-				cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
-					userToCreate.password = encryptedPwd;
-					dao.addUser()(userToCreate, function (err, createdUser) {
-						assert.equal(err, null);
-						assert.notEqual(createdUser, undefined);
-						createdUserId = createdUser._id;
-						ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-							AUTHORIZATION = config.authHeaderKey + loginToken;
-							done();
-						});
+			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
+				userToCreate.password = encryptedPwd;
+				dao.addUser()(userToCreate, function (err, createdUser) {
+					assert.equal(err, null);
+					assert.notEqual(createdUser, undefined);
+					createdUserId = createdUser._id;
+					ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+						AUTHORIZATION = config.authHeaderKey + loginToken;
+						return done();
 					});
 				});
 			});
 		});
-	});
-
-	afterEach(function (done) {
-		cipherlayer.stop(done);
 	});
 
 	describe('Forgot Password', function () {

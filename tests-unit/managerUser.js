@@ -54,7 +54,7 @@ var configSettings = {
 
 describe('user Manager', function () {
 
-	function validatePwd(clear, crypted, cbk) {
+	function validatePwd (clear, crypted, cbk) {
 		var cryptoMng = crypto(config.password);
 		cryptoMng.verify(clear, crypted, function (err) {
 			assert.equal(err, null);

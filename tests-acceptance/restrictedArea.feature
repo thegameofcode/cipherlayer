@@ -9,11 +9,10 @@ Feature: client application logs in with admin role
 		And the response body contains json attribute "refreshToken"
 		And the response body contains json attribute "expiresIn"
 
-
 	@service
 	Scenario Outline: A protected admin service needs an accessToken with admin role attribute auth to be called
 		Given a user with role admin and a valid access token
-		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
+		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a responseBody <RESPONSE_PAYLOAD>
 		When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
 		Then the response status code is <STATUS>
 		And the response body must be <RESPONSE_PAYLOAD>
@@ -25,7 +24,7 @@ Feature: client application logs in with admin role
 	@service
 	Scenario Outline: A protected admin service needs an accessToken with admin role attribute auth to be called
 		Given a user with role admin and a valid access token
-		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body ""
+		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a responseBody ""
 		When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
 		Then the response status code is <STATUS>
 		Examples:
@@ -36,7 +35,7 @@ Feature: client application logs in with admin role
 	@service
 	Scenario Outline: Client with no admin role request restricted endpoints
 		Given a user with role user and a valid access token
-		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
+		And a protected service replies to a <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a responseBody <RESPONSE_PAYLOAD>
 		When the application makes a <METHOD> with <REQUEST_PAYLOAD> to a protected <PATH>
 		Then the response status code is <STATUS>
 		And the response body must be <RESPONSE_PAYLOAD>

@@ -6,7 +6,6 @@ var _ = require('lodash');
 var config = require('../config.json');
 
 var dao = require('../src/managers/dao');
-var cipherlayer = require('../src/cipherlayer');
 var redisMng = require('../src/managers/redis');
 
 var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
@@ -15,7 +14,9 @@ var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
 
 var versionHeader = 'test/1';
 
-describe('/api/profile (verify phone)', function () {
+describe.skip('/api/profile (verify phone)', function () {
+
+	this.timeout(10000);
 
 	var notifServiceURL = config.externalServices.notifications.base;
 
@@ -29,9 +30,6 @@ describe('/api/profile (verify phone)', function () {
 	beforeEach(function (done) {
 		async.series([
 			function (done) {
-				cipherlayer.start(config.public_port, config.internal_port, done);
-			},
-			function (done) {
 				redisMng.deleteAllKeys(done);
 			},
 			function (done) {
@@ -40,15 +38,7 @@ describe('/api/profile (verify phone)', function () {
 		], done);
 	});
 
-	afterEach(function (done) {
-		async.series([
-			function (done) {
-				cipherlayer.stop(done);
-			}
-		], done);
-	});
-
-	it.skip('POST empty phone', function (done) {
+	it('POST empty phone', function (done) {
 		var user = _.clone(baseUser);
 		user.phone = null;
 
@@ -73,7 +63,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST empty country', function (done) {
+	it('POST empty country', function (done) {
 		var user = _.clone(baseUser);
 		user.country = '';
 
@@ -98,7 +88,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST phone not verified', function (done) {
+	it('POST phone not verified', function (done) {
 		var user = _.clone(baseUser);
 
 		var options = {
@@ -122,7 +112,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST incorrect PIN sent (1 attempt)', function (done) {
+	it('POST incorrect PIN sent (1 attempt)', function (done) {
 		var user = _.clone(baseUser);
 
 		var options = {
@@ -156,8 +146,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST correct PIN sent', function (done) {
-		this.timeout(10000);
+	it('POST correct PIN sent', function (done) {
 
 		var user = _.clone(baseUser);
 
@@ -212,7 +201,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST incorrect PIN sent (3 attempts)', function (done) {
+	it('POST incorrect PIN sent (3 attempts)', function (done) {
 		var user = _.clone(baseUser);
 
 		var options = {
@@ -309,8 +298,7 @@ describe('/api/profile (verify phone)', function () {
 		});
 	});
 
-	it.skip('POST user already exists', function (done) {
-		this.timeout(10000);
+	it('POST user already exists', function (done) {
 
 		var user = _.clone(baseUser);
 

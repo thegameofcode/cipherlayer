@@ -45,7 +45,7 @@ describe('middleware pinValidation', function () {
 		}
 	};
 
-	function getPinNumber(userId, phone, country, cbk) {
+	function getPinNumber (userId, phone, country, cbk) {
 		countries.countryFromIso(country, function (err, returnedCountry) {
 			assert.equal(err, null);
 			phone = '+' + returnedCountry.Dial + phone;

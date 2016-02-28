@@ -3,7 +3,6 @@ var nock = require('nock');
 var request = require('request');
 var ciphertoken = require('ciphertoken');
 var dao = require('../src/managers/dao.js');
-var cipherlayer = require('../src/cipherlayer');
 var config = require('../config.json');
 
 var accessTokenSettings = {
@@ -16,19 +15,7 @@ var versionHeader = 'test/1';
 
 describe('redirect', function () {
 
-	beforeEach(function (done) {
-		cipherlayer.start(config.public_port, config.internal_port, function (err) {
-			assert.equal(err, null);
-			dao.deleteAllUsers(function (err) {
-				assert.equal(err, null);
-				done();
-			});
-		});
-	});
-
-	afterEach(function (done) {
-		cipherlayer.stop(done);
-	});
+	beforeEach(dao.deleteAllUsers);
 
 	it('OK', function (done) {
 

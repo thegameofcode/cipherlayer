@@ -19,6 +19,11 @@ trim_trailing_whitespace = false
 indent_style = tab
 indent_size = 4
 
+# NPM rewrites package.json after every install with this settings
+[package.json]
+indent_style = space
+indent_size = 2
+
 [*.feature]
 indent_style = tab
 indent_size = 2

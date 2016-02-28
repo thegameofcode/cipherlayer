@@ -6,43 +6,39 @@ var _ = require('lodash');
 
 var versionHeader = 'test/1';
 
-module.exports = {
-	describe: function () {
-		describe('/google', function () {
-			beforeEach(function (done) {
-				OPTIONS.headers[config.version.header] = versionHeader;
-				dao.deleteAllUsers(function (err) {
-					assert.equal(err, null);
-					done();
-				});
-			});
+describe('/google', function () {
+	beforeEach(function (done) {
+		OPTIONS.headers[config.version.header] = versionHeader;
+		dao.deleteAllUsers(function (err) {
+			assert.equal(err, null);
+			done();
+		});
+	});
 
-			it('GET 302', function (done) {
-				var options = _.clone(OPTIONS);
-				options.url = 'http://localhost:' + config.public_port + '/auth/google';
+	it('GET 302', function (done) {
+		var options = _.clone(OPTIONS);
+		options.url = 'http://localhost:' + config.public_port + '/auth/google';
 
-				request(options, function (err, res, body) {
-					assert.equal(err, null);
-					assert.equal(res.statusCode, 302, body);
-					done();
-				});
-			});
+		request(options, function (err, res, body) {
+			assert.equal(err, null);
+			assert.equal(res.statusCode, 302, body);
+			done();
+		});
+	});
 
-			describe('/callback', function () {
-				it('302 invalid data', function (done) {
-					var options = _.clone(OPTIONS);
-					options.url = 'http://localhost:' + config.public_port + '/auth/google/callback';
+	describe('/callback', function () {
+		it('302 invalid data', function (done) {
+			var options = _.clone(OPTIONS);
+			options.url = 'http://localhost:' + config.public_port + '/auth/google/callback';
 
-					request(options, function (err, res, body) {
-						assert.equal(err, null);
-						assert.equal(res.statusCode, 302, body);
-						done();
-					});
-				});
+			request(options, function (err, res, body) {
+				assert.equal(err, null);
+				assert.equal(res.statusCode, 302, body);
+				done();
 			});
 		});
-	}
-};
+	});
+});
 
 var OPTIONS = {
 	headers: {
