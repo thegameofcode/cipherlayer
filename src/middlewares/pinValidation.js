@@ -1,39 +1,41 @@
+'use strict';
+
 const log = require('../logger/service');
 const _ = require('lodash');
 const phoneMng = require('../managers/phone');
 const isValidJSON = require('../managers/json_validator');
 const config = require('../../config.json');
 
-var errInvalidFields = {
+const errInvalidFields = {
 	err: 'auth_proxy_error',
 	des: 'Invalid JSON fields'
 };
 
-var defaultSettings = config;
-var _settings = {};
+let _settings = {};
 
 function pinValidation(req, res, next) {
 	if (!_settings.phoneVerification || !_settings.phoneVerification.pinValidationEndpoints) {
 		return next();
 	}
 
-	var endPoints = _settings.phoneVerification.pinValidationEndpoints;
+	const endPoints = _settings.phoneVerification.pinValidationEndpoints;
 
-	var path = String(req.url);
-	var body = _.clone(req.body);
-	var requiresPinValidation = false;
-	var validBodySchema = false;
-	var pinValidationConfig = {};
+	const path = String(req.url);
+	const body = _.clone(req.body);
+	let requiresPinValidation = false;
+	let validBodySchema = false;
+	let pinValidationConfig = {};
 
-	for (var i = 0; i < endPoints.length; i++) {
-		var exp = endPoints[i].path;
+	// TODO: replace with map() or some()
+	for (let i = 0; i < endPoints.length; i++) {
+		const exp = endPoints[i].path;
 
-		var check = exp.replace(/\*/g, '.*');
+		const check = exp.replace(/\*/g, '.*');
 
-		var match = path.match(check);
+		const match = path.match(check);
 		requiresPinValidation = (match !== null && path === match[0] && req.method.toUpperCase() === endPoints[i].method.toUpperCase());
 		if (requiresPinValidation) {
-			var fieldsSchema = {
+			const fieldsSchema = {
 				id: '/MePhones',
 				type: 'object',
 				properties: {},
@@ -54,22 +56,23 @@ function pinValidation(req, res, next) {
 	if (!requiresPinValidation) {
 		return next();
 	}
-	var user = req.user;
+	const user = req.user;
 	if (!user) {
-		res.send(401, {err: 'invalid_headers', des: 'no user in headers'});
-		return next(false);
+		const err = {err: 'invalid_headers', des: 'no user in headers'};
+		res.send(401, err);
+		return next(err);
 	}
 
 	if (!validBodySchema) {
 		log.warn('Invalid body params when checking for pin validation');
 		res.send(400, errInvalidFields);
-		return next(false);
+		return next(errInvalidFields);
 	}
 
-	var phone = body[pinValidationConfig.fields.phoneNumber];
-	var countryISO = body[pinValidationConfig.fields.countryISO];
+	const phone = body[pinValidationConfig.fields.phoneNumber];
+	const countryISO = body[pinValidationConfig.fields.countryISO];
 
-	var pin = req.headers ? req.headers['x-otp-pin'] : null;
+	const pin = req.headers ? req.headers['x-otp-pin'] : null;
 	log.info({pinValidation: { user: user.id, pin }});
 	phoneMng(_settings).verifyPhone(user.id, phone, countryISO, pin, function (err) {
 		if (err) {
@@ -77,13 +80,13 @@ function pinValidation(req, res, next) {
 
 			if (!err.code) {
 				res.send(500, err);
-				return next(false);
+				return next(err);
 			}
 
-			var errCode = err.code;
+			const errCode = err.code;
 			delete(err.code);
 			res.send(errCode, err);
-			return next(false);
+			return next(err);
 		}
 
 		return next();
@@ -91,7 +94,7 @@ function pinValidation(req, res, next) {
 }
 
 module.exports = function (settings) {
-	_.extend(_settings, defaultSettings, settings);
+	_settings = _.extend({}, config, settings);
 
 	return pinValidation;
 };

@@ -8,11 +8,7 @@ const config = require('../config.json');
 const dao = require('../src/managers/dao');
 const redisMng = require('../src/managers/redis');
 
-var HEADERS_WITHOUT_AUTHORIZATION_BASIC = {
-	'Content-Type': 'application/json; charset=utf-8'
-};
-
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 
 describe.skip('/api/profile (verify phone)', function () {
 
@@ -43,12 +39,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		user.phone = null;
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -59,7 +57,7 @@ describe.skip('/api/profile (verify phone)', function () {
 			assert.equal(res.statusCode, 400, body);
 			body = JSON.parse(body);
 			assert.deepEqual(body, {"err": "auth_proxy_error", "des": "empty phone or country"});
-			done();
+			return done();
 		});
 	});
 
@@ -68,12 +66,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		user.country = '';
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -84,7 +84,7 @@ describe.skip('/api/profile (verify phone)', function () {
 			assert.equal(res.statusCode, 400, body);
 			body = JSON.parse(body);
 			assert.deepEqual(body, {"err": "auth_proxy_error", "des": "empty phone or country"});
-			done();
+			return done();
 		});
 	});
 
@@ -92,12 +92,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		var user = _.clone(baseUser);
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -108,7 +110,7 @@ describe.skip('/api/profile (verify phone)', function () {
 			assert.equal(res.statusCode, 403, body);
 			body = JSON.parse(body);
 			assert.deepEqual(body, {"err": "auth_proxy_verified_error", "des": "User phone not verified"});
-			done();
+			return done();
 		});
 	});
 
@@ -116,12 +118,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		var user = _.clone(baseUser);
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -141,7 +145,7 @@ describe.skip('/api/profile (verify phone)', function () {
 				assert.equal(res.statusCode, 401, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
-				done();
+				return done();
 			});
 		});
 	});
@@ -151,12 +155,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		var user = _.clone(baseUser);
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -170,14 +176,14 @@ describe.skip('/api/profile (verify phone)', function () {
 			var redisKey = config.redisKeys.user_phone_verify.key;
 			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = redisPhonePin;
 
 				var expectedUserId = 'a1b2c3d4e5f6';
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post(config.passThroughEndpoint.path)
 					.reply(201, {id: expectedUserId});
 
@@ -193,7 +199,7 @@ describe.skip('/api/profile (verify phone)', function () {
 					assert.notEqual(body.accessToken, null, body);
 					assert.notEqual(body.refreshToken, null, body);
 					assert.notEqual(body.expiresIn, null, body);
-					done();
+					return done();
 				});
 
 			});
@@ -205,12 +211,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		var user = _.clone(baseUser);
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -226,7 +234,7 @@ describe.skip('/api/profile (verify phone)', function () {
 			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
 
 			//Get the correct PIN
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = 'zzzz';
@@ -262,7 +270,7 @@ describe.skip('/api/profile (verify phone)', function () {
 								assert.deepEqual(body, {"err": "verify_phone_error", "des": "PIN used is not valid."});
 
 								//Get the correct PIN
-								redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+								redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 									assert.equal(err, null);
 
 									options.headers['x-otp-pin'] = redisPhonePin;
@@ -273,7 +281,7 @@ describe.skip('/api/profile (verify phone)', function () {
 
 									var expectedUserId = 'a1b2c3d4e5f6';
 
-									nock('http://' + config.private_host + ':' + config.private_port)
+									nock(`http://${config.private_host}:${config.private_port}`)
 										.post(config.passThroughEndpoint.path)
 										.reply(201, {id: expectedUserId});
 
@@ -285,7 +293,7 @@ describe.skip('/api/profile (verify phone)', function () {
 										assert.notEqual(body.accessToken, null, body);
 										assert.notEqual(body.refreshToken, null, body);
 										assert.notEqual(body.expiresIn, null, body);
-										done();
+										return done();
 									});
 
 								});
@@ -303,12 +311,14 @@ describe.skip('/api/profile (verify phone)', function () {
 		var user = _.clone(baseUser);
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + config.passThroughEndpoint.path,
-			headers: _.clone(HEADERS_WITHOUT_AUTHORIZATION_BASIC),
+			url: `http://localhost:${config.public_port}${config.passThroughEndpoint.path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
+			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		nock(notifServiceURL)
 			.post('/notification/sms')
@@ -322,7 +332,7 @@ describe.skip('/api/profile (verify phone)', function () {
 			var redisKey = config.redisKeys.user_phone_verify.key;
 			redisKey = redisKey.replace('{userId}', user.email).replace('{phone}', '+1' + user.phone);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				assert.equal(err, null);
 
 				options.headers['x-otp-pin'] = redisPhonePin;
@@ -333,7 +343,7 @@ describe.skip('/api/profile (verify phone)', function () {
 
 				var expectedUserId = 'a1b2c3d4e5f6';
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post(config.passThroughEndpoint.path)
 					.reply(201, {id: expectedUserId});
 
@@ -355,7 +365,7 @@ describe.skip('/api/profile (verify phone)', function () {
 						assert.equal(res.statusCode, 403, body);
 						body = JSON.parse(body);
 						assert.deepEqual(body, {"err": "auth_proxy_error", "des": "user already exists"});
-						done();
+						return done();
 					});
 				});
 

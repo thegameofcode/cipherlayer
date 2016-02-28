@@ -14,7 +14,7 @@ describe('Protected calls standard', () => {
 	beforeEach(function (done) {
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			done();
+			return done();
 		});
 	});
 
@@ -22,20 +22,20 @@ describe('Protected calls standard', () => {
 		var expectedBody = {field1: 'value1', field2: 'value2'};
 
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/api/standard',
+			url: `http://localhost:${config.public_port}/api/standard`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(expectedBody)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 401);
 			assert.notEqual(body, undefined);
-			done();
+			return done();
 		});
 	});
 
@@ -46,13 +46,13 @@ describe('Protected calls standard', () => {
 			password: "12345678"
 		};
 
-		dao.addUser()(user, function (err, createdUser) {
+		dao.addUser(user, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
 				var expectedBody = {field1: 'value1', field2: 'value2'};
 
-				nock('http://' + config.private_host + ':' + config.private_port, {
+				nock(`http://${config.private_host}:${config.private_port}`, {
 					reqheaders: {
 						'x-user-id': createdUser._id,
 						'content-type': 'application/json; charset=utf-8'
@@ -62,21 +62,21 @@ describe('Protected calls standard', () => {
 					.reply(200, {field3: 'value3'});
 
 				var options = {
-					url: 'http://localhost:' + config.public_port + '/api/standard',
+					url: `http://localhost:${config.public_port}/api/standard`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'Authorization': 'bearer ' + loginToken
+						'Authorization': 'bearer ' + loginToken,
+						[config.version.header]: versionHeader
 					},
 					method: 'POST',
 					body: JSON.stringify(expectedBody)
 				};
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
 					assert.equal(res.statusCode, 200, body);
 					assert.notEqual(body, undefined);
-					done();
+					return done();
 				});
 			});
 		});
@@ -89,13 +89,13 @@ describe('Protected calls standard', () => {
 			password: "12345678"
 		};
 
-		dao.addUser()(user, function (err, createdUser) {
+		dao.addUser(user, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
 				var expectedBody = {field1: 'value1', field2: 'value2'};
 
-				nock('http://' + config.private_host + ':' + config.private_port, {
+				nock(`http://${config.private_host}:${config.private_port}`, {
 					reqheaders: {
 						'x-user-id': createdUser._id,
 						'content-type': 'application/json; charset=utf-8'
@@ -105,21 +105,21 @@ describe('Protected calls standard', () => {
 					.reply(200, 'not a json');
 
 				var options = {
-					url: 'http://localhost:' + config.public_port + '/api/standard',
+					url: `http://localhost:${config.public_port}/api/standard`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'Authorization': 'bearer ' + loginToken
+						'Authorization': 'bearer ' + loginToken,
+						[config.version.header]: versionHeader
 					},
 					method: 'POST',
 					body: JSON.stringify(expectedBody)
 				};
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
 					assert.equal(res.statusCode, 200, body);
 					assert.notEqual(body, undefined);
-					done();
+					return done();
 				});
 			});
 		});

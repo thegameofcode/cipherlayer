@@ -47,7 +47,7 @@ describe('user', function () {
 
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
-				dao.addUser()(userToCreate, function (err, createdUser) {
+				dao.addUser(userToCreate, function (err, createdUser) {
 					assert.equal(err, null);
 					assert.notEqual(createdUser, undefined);
 					ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
@@ -63,13 +63,14 @@ describe('user', function () {
 
 		it('Send new Password', function (done) {
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/' + baseUser.username + '/password',
+				url: `http://localhost:${config.public_port}/user/${baseUser.username}/password`,
 				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
+					'Content-Type': 'application/json; charset=utf-8',
+					[config.version.header]: versionHeader
+
 				},
 				method: 'GET'
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -86,7 +87,7 @@ describe('user', function () {
 						assert.notEqual(foundUser, null);
 						assert.equal(result.password.length, 2);
 						assert.notEqual(result.password[0], result.password[1]);
-						done();
+						return done();
 					});
 				});
 			});
@@ -94,13 +95,13 @@ describe('user', function () {
 
 		it('Send 2 times new Password', function (done) {
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/' + baseUser.username + '/password',
+				url: `http://localhost:${config.public_port}/user/${baseUser.username}/password`,
 				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
+					'Content-Type': 'application/json; charset=utf-8',
+					[config.version.header]: versionHeader
 				},
 				method: 'GET'
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -120,7 +121,7 @@ describe('user', function () {
 						dao.getAllUserFields(baseUser.username, function (err, result) {
 							assert.equal(err, null);
 							assert.equal(result.password.length, 2);
-							done();
+							return done();
 						});
 					});
 				});
@@ -135,15 +136,15 @@ describe('user', function () {
 			};
 
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/me/password',
+				url: `http://localhost:${config.public_port}/user/me/password`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
-					'Authorization': AUTHORIZATION
+					'Authorization': AUTHORIZATION,
+					[config.version.header]: versionHeader
 				},
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			var clonedUser = _.clone(baseUser);
 			clonedUser.password = newPassword.password;
@@ -161,14 +162,14 @@ describe('user', function () {
 
 		it('400 (no body)', function (done) {
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/me/password',
+				url: `http://localhost:${config.public_port}/user/me/password`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
-					'Authorization': AUTHORIZATION
+					'Authorization': AUTHORIZATION,
+					[config.version.header]: versionHeader
 				},
 				method: 'PUT'
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "invalid_body",
@@ -180,7 +181,7 @@ describe('user', function () {
 				assert.equal(res.statusCode, 400, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 
@@ -188,15 +189,15 @@ describe('user', function () {
 			var newPassword = {};
 
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/me/password',
+				url: `http://localhost:${config.public_port}/user/me/password`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
-					'Authorization': AUTHORIZATION
+					'Authorization': AUTHORIZATION,
+					[config.version.header]: versionHeader
 				},
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "auth_proxy_error",
@@ -208,7 +209,7 @@ describe('user', function () {
 				assert.equal(res.statusCode, 400, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 
@@ -216,14 +217,14 @@ describe('user', function () {
 			var newPassword = {};
 
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/me/password',
+				url: `http://localhost:${config.public_port}/user/me/password`,
 				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
+					'Content-Type': 'application/json; charset=utf-8',
+					[config.version.header]: versionHeader
 				},
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: 'invalid_authorization',
@@ -235,7 +236,7 @@ describe('user', function () {
 				assert.equal(res.statusCode, 401, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 
@@ -245,15 +246,15 @@ describe('user', function () {
 			};
 
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/user/me/password',
+				url: `http://localhost:${config.public_port}/user/me/password`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8',
-					'Authorization': 'bearer INVALID TOKEN'
+					'Authorization': 'bearer INVALID TOKEN',
+					[config.version.header]: versionHeader
 				},
 				method: 'PUT',
 				body: JSON.stringify(newPassword)
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			var expectedResult = {
 				err: "invalid_access_token",
@@ -265,7 +266,7 @@ describe('user', function () {
 				assert.equal(res.statusCode, 401, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 

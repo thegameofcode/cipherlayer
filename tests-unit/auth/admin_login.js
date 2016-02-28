@@ -6,16 +6,16 @@ const dao = require('../../src/managers/dao');
 const nock = require('nock');
 const _ = require('lodash');
 const crypto = require('../../src/managers/crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 
-var versionHeader = 'test/1';
+const versionHeader = 'test/1';
 
 const accessTokenSettings = require('../token_settings').accessTokenSettings;
 const refreshTokenSettings = require('../token_settings').refreshTokenSettings;
 
 
 describe('Admin /login', function () {
-	var baseUser = {
+	const baseUser = {
 		id: 'a1b2c3d4e5f6',
 		username: 'validuser' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 		password: 'validpassword',
@@ -29,27 +29,28 @@ describe('Admin /login', function () {
 			var userToCreate = _.clone(baseUser);
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
-				dao.addUser()(userToCreate, function (err, createdUser) {
+				dao.addUser(userToCreate, function (err, createdUser) {
 					assert.equal(err, null);
 					assert.notEqual(createdUser, undefined);
-					done();
+					return done();
 				});
 			});
 		});
 	});
+
 	it('POST 200', function (done) {
-		var user = _.clone(baseUser);
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
+		const user = _.clone(baseUser);
+		const options = {
+			url: `http://localhost:${config.public_port}/auth/login`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
-		nock('http://localhost:' + config.private_port)
+		nock(`http://localhost:${config.private_port}`)
 			.post('/api/me/session')
 			.reply(204);
 
@@ -69,7 +70,7 @@ describe('Admin /login', function () {
 					assert.equal(err, null);
 					assert.equal(refreshTokenInfo.userId, user.id);
 					assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
-					done();
+					return done();
 				});
 			});
 		});

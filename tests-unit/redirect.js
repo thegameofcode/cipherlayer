@@ -26,24 +26,24 @@ describe('redirect', function () {
 			username: 'user1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''),
 			password: 'pass1'
 		};
-		dao.addUser()(expectedUser, function (err, createdUser) {
+		dao.addUser(expectedUser, function (err, createdUser) {
 			assert.equal(err, null);
 			assert.notEqual(createdUser, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
 
 				var options = {
-					url: 'http://localhost:' + config.public_port + '/whatever',
+					url: `http://localhost:${config.public_port}/whatever`,
 					method: 'POST',
 					followRedirect: false,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'Authorization': 'bearer ' + loginToken
+						'Authorization': 'bearer ' + loginToken,
+						[config.version.header]: versionHeader
 					}
 				};
-				options.headers[config.version.header] = versionHeader;
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post('/whatever')
 					.reply(302, 'Redirecting', {
 						'Location': redirectURL
@@ -53,7 +53,7 @@ describe('redirect', function () {
 					assert.equal(err, null, body);
 					assert.equal(res.statusCode, 302, body);
 					assert.equal(res.headers.location, redirectURL, 'Bad redirect URL');
-					done();
+					return done();
 				});
 			});
 

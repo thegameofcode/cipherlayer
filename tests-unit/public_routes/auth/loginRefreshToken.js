@@ -63,7 +63,7 @@ describe('public routes', function () {
 							sinon.assert.calledOnce(nextSpy);
 							sinon.assert.calledOnce(headerSpy);
 							should.not.exist(status);
-							done();
+							return done();
 						}
 					};
 					var nextSpy = sinon.spy(next, 'next');
@@ -107,9 +107,8 @@ describe('public routes', function () {
 						next: function (status) {
 							sinon.assert.calledOnce(sendSpy);
 							sinon.assert.calledOnce(nextSpy);
-							should.exist(status);
-							status.should.equal(false);
-							done();
+							should.not.exist(status);
+							return done();
 						}
 					};
 					var nextSpy = sinon.spy(next, 'next');
@@ -141,9 +140,8 @@ describe('public routes', function () {
 						next: function (status) {
 							sinon.assert.calledOnce(sendSpy);
 							sinon.assert.calledOnce(nextSpy);
-							should.exist(status);
-							status.should.equal(false);
-							done();
+							should.not.exist(status);
+							return done();
 						}
 					};
 					var nextSpy = sinon.spy(next, 'next');

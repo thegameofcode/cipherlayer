@@ -7,19 +7,19 @@ const daoManager = require('../../managers/dao');
 
 module.exports = function (req, res, next) {
 
-	var email = req.params.email;
+	const email = req.params.email;
 
 	if (!email) {
 		res.send(400, {
 			err: 'invalid_email',
 			des: 'email is required'
 		});
-		return next(false);
+		return next();
 	}
 
 	daoManager.getFromUsername(email, function (err, user) {
 		tokenManager.createRefreshToken(user._id, {}, function (err, refreshToken) {
-			var link = `${config.public_url}/auth/login/refreshToken?rt=${refreshToken}`;
+			const link = `${config.public_url}/auth/login/refreshToken?rt=${refreshToken}`;
 			emailManager.sendEmailMagicLink(email, link, function () {
 				res.send(204);
 				return next();

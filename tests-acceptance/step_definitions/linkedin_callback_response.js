@@ -2,17 +2,17 @@ const world = require('../support/world');
 const request = require('request');
 const config = require('../../config.json');
 
-var myStepDefinitionsWrapper = function () {
+module.exports = function () {
 	this.When(/^the client app receives the Linked in callback response$/, function (callback) {
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/in/callback',
+		const options = {
+			url: `http://localhost:${config.public_port}/auth/in/callback`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: world.versionHeader
 			},
 			method: 'GET',
 			followRedirect: false
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			world.getResponse().err = err;
@@ -20,8 +20,7 @@ var myStepDefinitionsWrapper = function () {
 			if (body) {
 				world.getResponse().body = JSON.parse(body);
 			}
-			callback();
+			return callback();
 		});
 	});
 };
-module.exports = myStepDefinitionsWrapper;

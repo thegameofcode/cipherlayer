@@ -1,12 +1,14 @@
+'use strict';
+
 const AWS = require('aws-sdk');
 const https = require('https');
 const config = require('../../config.json');
 
-var s3;
+let s3;
 
 function initAWS(cbk) {
 	if (!config.aws) {
-		return cbk(false);
+		return cbk();
 	}
 
 	AWS.config.update({
@@ -15,7 +17,7 @@ function initAWS(cbk) {
 		region: config.aws.region
 	});
 	s3 = new AWS.S3();
-	cbk(true);
+	return cbk(true);
 }
 
 function uploadFile(bucket, fileName, binaryFile, cbk) {
@@ -31,12 +33,12 @@ function uploadFile(bucket, fileName, binaryFile, cbk) {
 			return cbk({err: 'invalid_file_data'});
 		}
 
-		var data = {Key: fileName, Body: binaryFile, Bucket: bucket, ACL: 'public-read'};
-		s3.putObject(data, function (err, data) {
+		const data = {Key: fileName, Body: binaryFile, Bucket: bucket, ACL: 'public-read'};
+		s3.putObject(data, function (err, res) {
 			if (err) {
 				return cbk(err);
 			}
-			return cbk(null, data);
+			return cbk(null, res);
 		});
 	});
 }
@@ -53,29 +55,30 @@ function getFileURL(bucket, fileName, cbk) {
 			return cbk({err: 'invalid_file_name'});
 		}
 
-		var urlParams = {Bucket: bucket, Key: fileName};
+		const urlParams = {Bucket: bucket, Key: fileName};
 		s3.getSignedUrl('getObject', urlParams, function (err, url) {
+			let signedUrl = url;
 			if (err) {
 				return cbk(err);
 			}
 			if (url.indexOf('?') > -1) {
-				url = url.substr(0, url.indexOf('?'));
+				signedUrl = url.substr(0, url.indexOf('?'));
 			}
-			return cbk(null, url);
+			return cbk(null, signedUrl);
 		});
 	});
 }
 
 function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 
-	var validBucket = config.aws.buckets.avatars;
+	const validBucket = config.aws.buckets.avatars;
 
 	https.get(httpsAvatarUrl, function (res) {
 		if (res.statusCode !== 200) {
 			return cbk({err: 'avatar_inaccessible'});
 		}
-		var data = [];
-		var dataLen = 0;
+		const data = [];
+		let dataLen = 0;
 
 		res.on('data', function (chunk) {
 			data.push(chunk);
@@ -83,8 +86,11 @@ function uploadAvatarToAWS(httpsAvatarUrl, avatarName, cbk) {
 		});
 
 		res.on('end', function () {
-			var buf = new Buffer(dataLen);
-			for (var i = 0, len = data.length, pos = 0; i < len; i++) {
+			const buf = new Buffer(dataLen);
+
+
+			// TODO: replace for with map()
+			for (let i = 0, len = data.length, pos = 0; i < len; i++) {
 				data[i].copy(buf, pos);
 				pos += data[i].length;
 			}

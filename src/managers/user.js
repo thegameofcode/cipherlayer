@@ -1,3 +1,5 @@
+'use strict';
+
 const request = require('request');
 const _ = require('lodash');
 const ciphertoken = require('ciphertoken');
@@ -9,21 +11,21 @@ const daoMng = require('./dao');
 const tokenMng = require('./token');
 const redisMng = require('./redis');
 const crypto = require('./crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 const phoneMng = require('./phone');
 const emailMng = require('./email');
 
 const isValidJSON = require('./json_validator');
 
-var ERR_INVALID_PWD = {
+const ERR_INVALID_PWD = {
 	err: 'invalid_password_format',
 	code: 400
 };
 
-var _settings = {};
+let _settings = {};
 
-//This is Chris's contribution to the coding of this project!!!
-var ERR_INVALID_USER_DOMAIN = 'Sorry your email domain is not authorised for this service';
+// This is Chris's contribution to the coding of this project!!!
+const ERR_INVALID_USER_DOMAIN = 'Sorry your email domain is not authorised for this service';
 
 function setPlatformData(userId, platform, data, cbk) {
 	daoMng.updateArrayItem(userId, 'platforms', 'platform', data, function (err, updates) {
@@ -35,7 +37,7 @@ function setPlatformData(userId, platform, data, cbk) {
 			return cbk({err: 'platform_not_updated', des: 'updated command worked but no platform were updated'});
 		}
 
-		cbk(null);
+		return cbk();
 	});
 }
 
@@ -51,7 +53,7 @@ function createUser(body, pin, cbk) {
 
 	isValidDomain(body[_settings.passThroughEndpoint.username], function (isValid) {
 		if (!isValid) {
-			var err = {
+			const err = {
 				err: 'user_domain_not_allowed',
 				des: ERR_INVALID_USER_DOMAIN,
 				code: 400
@@ -70,13 +72,13 @@ function createUser(body, pin, cbk) {
 			}
 		} else {
 			if (!validatePwd(body.password, _settings.password.regexValidation)) {
-				ERR_INVALID_PWD.des = _settings.password.message;
-				var invalidPasswordError = ERR_INVALID_PWD;
+				const invalidPasswordError = ERR_INVALID_PWD;
+				invalidPasswordError.des = _settings.password.message;
 				return cbk(invalidPasswordError);
 			}
 		}
 
-		var user = {
+		const user = {
 			username: body[_settings.passThroughEndpoint.username],
 			password: body[_settings.passThroughEndpoint.password]
 		};
@@ -104,8 +106,8 @@ function createUser(body, pin, cbk) {
 				return;
 			}
 
-			var phone = body.phone;
-			var countryISO = body.country;
+			const phone = body.phone;
+			const countryISO = body.country;
 			phoneMng(_settings).verifyPhone(user.username, phone, countryISO, pin, function (err) {
 				if (err) {
 					return cbk(err);
@@ -158,11 +160,11 @@ function createUserByToken(token, cbk) {
 		});
 	}
 
-	//Decipher the body
-	var tokenSettings = {
+	// Decipher the body
+	const tokenSettings = {
 		cipherKey: _settings.accessToken.cipherKey,
 		firmKey: _settings.accessToken.signKey,
-		//Same expiration as the redisKey
+		// Same expiration as the redisKey
 		tokenExpirationMinutes: _settings.emailVerification.redis.expireInSec
 	};
 
@@ -170,8 +172,8 @@ function createUserByToken(token, cbk) {
 		if (err) {
 			return cbk(err);
 		}
-		var body = bodyData.data;
-		var profileSchema;
+		const body = bodyData.data;
+		let profileSchema;
 
 		if (!config.validators) {
 			profileSchema = require('./json_formats/profile_create.json');
@@ -179,7 +181,7 @@ function createUserByToken(token, cbk) {
 			profileSchema = require((config.validators.profile.path ? config.validators.profile.path : './json_formats/') + config.validators.profile.filename);
 		}
 
-		//Validate the current bodyData with the schema profile_create.json
+		// Validate the current bodyData with the schema profile_create.json
 		if (!isValidJSON(body, profileSchema) || !body.transactionId) {
 			return cbk({
 				err: 'invalid_profile_data',
@@ -187,9 +189,8 @@ function createUserByToken(token, cbk) {
 				code: 400
 			});
 		}
-		//Verify the transactionId
-		var redisKey = _settings.emailVerification.redis.key;
-		redisKey = redisKey.replace('{username}', body[config.passThroughEndpoint.email || 'email']);
+		// Verify the transactionId
+		const redisKey = _settings.emailVerification.redis.key.replace('{username}', body[config.passThroughEndpoint.email || 'email']);
 
 		redisMng.getKeyValue(redisKey, function (err, transactionId) {
 			if (err) {
@@ -208,7 +209,7 @@ function createUserByToken(token, cbk) {
 				});
 			}
 
-			var user = {
+			const user = {
 				username: body[_settings.passThroughEndpoint.username],
 				password: body[_settings.passThroughEndpoint.password]
 			};
@@ -216,7 +217,7 @@ function createUserByToken(token, cbk) {
 
 			isValidDomain(user.username, function (isValid) {
 				if (!isValid) {
-					var domainNotAllowedError = {
+					const domainNotAllowedError = {
 						err: 'user_domain_not_allowed',
 						des: ERR_INVALID_USER_DOMAIN,
 						code: 400
@@ -251,9 +252,9 @@ function createUserByToken(token, cbk) {
 }
 
 function createUserPrivateCall(body, user, cbk) {
-	var clonedBody = _.clone(body);
+	const clonedBody = _.clone(body);
 	delete clonedBody.password;
-	var options = {
+	const options = {
 		url: `http://${_settings.private_host}:${_settings.private_port}${_settings.passThroughEndpoint.path}`,
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8'
@@ -284,7 +285,7 @@ function createUserPrivateCall(body, user, cbk) {
 		cryptoMng.encrypt(user.password, function (encrypted) {
 			user.password = encrypted;
 
-			daoMng.addUser()(user, function (err, createdUser) {
+			daoMng.addUser(user, function (err, createdUser) {
 				if (err) {
 					log.error({ err }, 'error adding user to DB');
 					return cbk({
@@ -303,14 +304,14 @@ function createUserPrivateCall(body, user, cbk) {
 						});
 					}
 
-					var data = {};
+					const data = {};
 					if (foundUser.roles) {
 						data.roles = foundUser.roles;
 					}
 
 					async.series([
 						function (done) {
-							//Add "realms" & "capabilities"
+							// Add "realms" & "capabilities"
 							daoMng.getRealms(function (err, realms) {
 								if (err) {
 									log.error({ err }, 'error obtaining user realms');
@@ -327,9 +328,9 @@ function createUserPrivateCall(body, user, cbk) {
 										return next();
 									}
 									async.eachSeries(realm.allowedDomains, function (domain, more) {
-										//wildcard
-										var check = domain.replace(/\*/g, '.*');
-										var match = foundUser.username.match(check);
+										// wildcard
+										const check = domain.replace(/\*/g, '.*');
+										const match = foundUser.username.match(check);
 										if (!match || foundUser.username !== match[0]) {
 											return more();
 										}
@@ -361,7 +362,7 @@ function createUserPrivateCall(body, user, cbk) {
 								});
 							}
 							tokens.expiresIn = _settings.accessToken.expiration * 60;
-							cbk(null, tokens);
+							return cbk(null, tokens);
 						});
 					});
 
@@ -382,8 +383,8 @@ function setPassword(id, body, cbk) {
 	}
 
 	if (!validatePwd(body.password, _settings.password.regexValidation)) {
-		ERR_INVALID_PWD.des = _settings.password.message;
-		var err = ERR_INVALID_PWD;
+		const err = ERR_INVALID_PWD;
+		err.des = _settings.password.message;
 		return cbk(err);
 	}
 	cryptoMng.encrypt(body.password, function (encryptedPwd) {
@@ -415,13 +416,13 @@ function validateOldPassword(username, oldPassword, cbk) {
 }
 
 function isValidDomain(email, cbk) {
-	var validDomain = false;
+	let validDomain = false;
 
-	var domainsInConfig = (_settings.allowedDomains && _settings.allowedDomains.length);
+	const domainsInConfig = (_settings.allowedDomains && _settings.allowedDomains.length);
 
 	daoMng.getRealms(function (err, realms) {
 		if (err) {
-			return cbk(false);
+			return cbk();
 		}
 
 		if ((!realms || !realms.length) && !domainsInConfig) {
@@ -438,21 +439,21 @@ function isValidDomain(email, cbk) {
 					return more();
 				}
 
-				//wildcard
-				var check = domain.replace(/\*/g, '.*');
-				var match = email.match(check);
+				// wildcard
+				const check = domain.replace(/\*/g, '.*');
+				const match = email.match(check);
 				validDomain = (match !== null && email === match[0]);
 				more();
 			}, next);
 		}, function () {
 			if (!validDomain) {
-				//Check domains in config file
-				for (var i = 0; i < _settings.allowedDomains.length; i++) {
-					var domain = _settings.allowedDomains[i];
+				// Check domains in config file
+				for (let i = 0; i < _settings.allowedDomains.length; i++) {
+					const domain = _settings.allowedDomains[i];
 
-					//wildcard
-					var check = domain.replace(/\*/g, '.*');
-					var match = email.match(check);
+					// wildcard
+					const check = domain.replace(/\*/g, '.*');
+					const match = email.match(check);
 					validDomain = (match !== null && email === match[0]);
 					if (validDomain) break;
 				}
@@ -463,8 +464,7 @@ function isValidDomain(email, cbk) {
 }
 
 function validatePwd(pwd, regexp) {
-	var regex = new RegExp(regexp);
-	return regex.test(pwd);
+	return (new RegExp(regexp)).test(pwd);
 }
 
 module.exports = function (settings) {

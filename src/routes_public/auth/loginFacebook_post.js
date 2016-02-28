@@ -9,9 +9,9 @@ const userMng = require('../../managers/user')();
 const tokenMng = require('../../managers/token');
 const config = require('../../../config.json');
 const crypto = require('../../managers/crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 
-var defaultOptions = {
+const defaultOptions = {
 	url: 'https://graph.facebook.com/v2.5/me',
 	json: true,
 	method: 'GET',
@@ -25,28 +25,28 @@ var defaultOptions = {
 };
 
 function mapFacebookData(body, fieldsMap) {
-	var mappedData = {};
+	const mappedData = {};
 
 	if (!fieldsMap) {
 		return mappedData;
 	}
 
-	_.each(_.keys(fieldsMap), function (fb_key) {
-		var profile_key = fieldsMap[fb_key];
-		if (fb_key === 'profile_picture') {
-			mappedData[profile_key] = body.picture ? body.picture.data.url : null;
+	_.each(_.keys(fieldsMap), function (fbKey) {
+		const profileKey = fieldsMap[fbKey];
+		if (fbKey === 'profile_picture') {
+			mappedData[profileKey] = body.picture ? body.picture.data.url : null;
 			return;
 		}
 
-		if (fb_key === 'email' && !body[fb_key]) {
-			body[fb_key] = `${body.id}@facebook.com`;
+		if (fbKey === 'email' && !body[fbKey]) {
+			body[fbKey] = `${body.id}@facebook.com`;
 		}
 
-		if (!body[fb_key]) {
+		if (!body[fbKey]) {
 			return;
 		}
 
-		mappedData[profile_key] = body[fb_key];
+		mappedData[profileKey] = body[fbKey];
 	});
 
 	return mappedData;
@@ -54,7 +54,7 @@ function mapFacebookData(body, fieldsMap) {
 
 module.exports = function postAuthRegisterFacebook(req, res, next) {
 
-	var options = _.clone(defaultOptions);
+	const options = _.clone(defaultOptions);
 	options.qs.access_token = req.body.accessToken;
 
 	if (!config.facebook) {
@@ -62,7 +62,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 			err: 'facebook_login_disabled',
 			des: 'Facebook login is not configured'
 		});
-		return next(false);
+		return next();
 	}
 
 	if (!req.body && !req.body.accessToken) {
@@ -70,7 +70,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 			err: 'missing_facebook_token',
 			des: 'Missing facebook access_token'
 		});
-		return next(false);
+		return next();
 	}
 
 	request(options, function (err, fb_res, fb_body) {
@@ -85,14 +85,14 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 			return next();
 		}
 
-		var fbUserProfile = mapFacebookData(fb_body, config.facebook.fieldsMap);
-		var fbUserProfileUsername = fbUserProfile[config.facebook.fieldsMap.email || 'email'];
+		const fbUserProfile = mapFacebookData(fb_body, config.facebook.fieldsMap);
+		const fbUserProfileUsername = fbUserProfile[config.facebook.fieldsMap.email || 'email'];
 
 		daoMng.getFromUsername(fbUserProfileUsername, function (err, foundUser) {
 			// RETURNING FACEBOOK USER
 
 			if (!err) {
-				var platform = {
+				const platform = {
 					platform: 'fb',
 					accessToken: req.body.accessToken
 				};
@@ -102,7 +102,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 						log.error({ err }, `error updating sf tokens into user ${foundUser._id}`);
 					}
 
-					var data = {};
+					const data = {};
 					if (foundUser.roles) {
 						data.roles = foundUser.roles;
 					}
@@ -118,7 +118,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 							tokens.expiresIn = config.accessToken.expiration * 60;
 							res.send(200, tokens);
 						}
-						return next(false);
+						return next();
 					});
 
 				});
@@ -134,7 +134,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 						err: 'facebook_user_not_registered',
 						des: 'This user need registration before login'
 					});
-					return next(false);
+					return next(true); // TODO: return error
 				}
 
 				fbUserProfile.fb = {
@@ -148,16 +148,16 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 						if (!err.code) {
 							res.send(500, err);
 						} else {
-							var errCode = err.code;
+							const errCode = err.code;
 							delete(err.code);
 							res.send(errCode, err);
 						}
-						return next(false);
+						return next();
 					}
 
 					tokenMng.getRefreshTokenInfo(tokens.refreshToken, function (err, tokenSet) {
-						var userId = tokenSet.userId;
-						var tokenData = tokenSet.data;
+						const userId = tokenSet.userId;
+						const tokenData = tokenSet.data;
 
 						if (config.version) {
 							tokenData.deviceVersion = req.headers[config.version.header];
@@ -177,7 +177,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 
 			if (err) {
 				res.send(500, {err: 'internal_error', des: 'There was an internal error checking facebook profile'});
-				return next(false);
+				return next();
 			}
 
 		});

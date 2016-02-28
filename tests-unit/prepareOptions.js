@@ -45,7 +45,7 @@ describe('prepareOptions middleware: ', function () {
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
-				'host': 'localhost:3000'
+				host: 'localhost:3000'
 			},
 			tokenInfo: {
 				userId: '1234567890'

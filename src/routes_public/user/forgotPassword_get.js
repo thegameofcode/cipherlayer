@@ -5,7 +5,7 @@ const async = require('async');
 const daoMng = require('../../managers/dao');
 const config = require('../../../config.json');
 const crypto = require('../../managers/crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 const emailMng = require('../../managers/email');
 const tokenMng = require('../../managers/token');
 
@@ -17,7 +17,7 @@ module.exports = function (req, res, next) {
 			err: 'auth_proxy_error',
 			des: 'empty email'
 		});
-		return next(false);
+		return next();  // TODO: return error
 	}
 
 	daoMng.getAllUserFields(req.params.email, function (err, foundUser) {
@@ -26,12 +26,12 @@ module.exports = function (req, res, next) {
 				err: 'user_not_found',
 				des: 'email does not exists'
 			});
-			return next(false);
+			return next(); // TODO: return error
 		}
-		var passwd = cryptoMng.randomPassword(config.password.generatedRegex);
+		const passwd = cryptoMng.randomPassword(config.password.generatedRegex);
 
 		cryptoMng.encrypt(passwd, function (encryptedPassword) {
-			var fieldValue = [];
+			let fieldValue = [];
 
 			if (Array.isArray(foundUser.password)) {
 				fieldValue = [foundUser.password[0], encryptedPassword];
@@ -46,10 +46,10 @@ module.exports = function (req, res, next) {
 						des: 'internal error setting a new password'
 					});
 
-					return next(false);
+					return next();
 
 				}
-				var data = {};
+				const data = {};
 				if (foundUser.roles) {
 					data.roles = foundUser.roles;
 				}
@@ -73,8 +73,8 @@ module.exports = function (req, res, next) {
 								}
 								async.eachSeries(realm.allowedDomains, function (domain, nextAllowedDomains) {
 									//wildcard
-									var check = domain.replace(/\*/g, '.*');
-									var match = foundUser.username.match(check);
+									const check = domain.replace(/\*/g, '.*');
+									const match = foundUser.username.match(check);
 									if (!match || foundUser.username !== match[0]) {
 										return nextAllowedDomains();
 									}
@@ -98,11 +98,11 @@ module.exports = function (req, res, next) {
 					}
 				], function () {
 					tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
-						var link = `${config.emailVerification.redirectProtocol}://user/refreshToken/${tokens.refreshToken}`;
+						const link = `${config.emailVerification.redirectProtocol}://user/refreshToken/${tokens.refreshToken}`;
 						emailMng().sendEmailForgotPassword(req.params.email, passwd, link, function (err) {
 							if (err) {
 								res.send(500, {err: 'internalError', des: 'Internal server error'});
-								return next(false);
+								return next();
 							}
 
 							res.send(204);

@@ -1,7 +1,9 @@
+'use strict';
+
 const log = require('../logger/service');
 const userDao = require('../managers/dao');
 
-function findUser(req, res, next) {
+module.exports = function findUser(req, res, next) {
 	userDao.getFromId(req.tokenInfo.userId, function (err, foundUser) {
 		if (err) {
 			log.error({
@@ -9,11 +11,9 @@ function findUser(req, res, next) {
 				des: `invalid_access_token '${req.accessToken}' contains unknown user '${req.tokenInfo.userId}'`
 			});
 			res.send(401, {err: 'invalid_access_token', des: 'unknown user inside token'});
-			return next(false);
+			return next(err);
 		}
 		req.user = foundUser;
 		return next();
 	});
-}
-
-module.exports = findUser;
+};

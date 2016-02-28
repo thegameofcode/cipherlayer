@@ -48,7 +48,7 @@ describe('user dao', function () {
 
 		dao.connect(function (err) {
 			assert.equal(err, null);
-			done();
+			return done();
 		});
 	});
 
@@ -61,7 +61,7 @@ describe('user dao', function () {
 			assert.equal(err, null);
 
 			mongoClient.connect.restore();
-			done();
+			return done();
 		});
 	});
 
@@ -71,7 +71,7 @@ describe('user dao', function () {
 		dao.countUsers(function (err, count) {
 			assert.equal(err, null);
 			assert.equal(count, 0);
-			done();
+			return done();
 		});
 	});
 
@@ -83,12 +83,12 @@ describe('user dao', function () {
 		sinon.stub(fakeCollection, 'count').onCall(0).yields(null, 1);
 
 		var expectedUser = _.assign({}, baseUser);
-		dao.addUser()(expectedUser, function (err, createdUser) {
+		dao.addUser(expectedUser, function (err, createdUser) {
 			assert.equal(err, null);
 			assert.equal(createdUser._id, expectedUser.id);
 			assert.equal(createdUser.username, expectedUser.username);
 			assert.equal(createdUser.password, expectedUser.password);
-			done();
+			return done();
 		});
 	});
 
@@ -103,14 +103,14 @@ describe('user dao', function () {
 			assert.equal(err, null);
 			assert.equal(foundUser.username, expectedUser.username);
 			assert.equal(foundUser.password, undefined);
-			done();
+			return done();
 		});
 	});
 
 	it('getFromUsername - invalid username', function (done) {
 		dao.getFromUsername(null, function (err) {
 			assert.deepEqual(err, {err: 'invalid_username'});
-			done();
+			return done();
 		});
 	});
 
@@ -119,7 +119,7 @@ describe('user dao', function () {
 
 		dao.getFromUsername('username', function (err) {
 			assert.deepEqual(err, {err: 'generic_error'});
-			done();
+			return done();
 		});
 	});
 
@@ -130,7 +130,7 @@ describe('user dao', function () {
 		var expectedUser = _.assign({}, baseUser);
 		dao.getFromUsername(expectedUser.username, function (err) {
 			assert.deepEqual(err, {err: 'generic_error'});
-			done();
+			return done();
 		});
 	});
 
@@ -145,7 +145,7 @@ describe('user dao', function () {
 			assert.equal(err, null);
 			assert.equal(foundUser.username, expectedUser.username);
 			assert.equal(foundUser.password, undefined);
-			done();
+			return done();
 		});
 	});
 
@@ -160,7 +160,7 @@ describe('user dao', function () {
 			assert.equal(err, null);
 			assert.equal(foundUser.username, expectedUser.username);
 			assert.equal(foundUser.password, undefined);
-			done();
+			return done();
 		});
 	});
 
@@ -170,10 +170,10 @@ describe('user dao', function () {
 		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
 
 		var expectedUser = _.assign({}, baseUser);
-		dao.addUser()(expectedUser, function (err, createdUser) {
+		dao.addUser(expectedUser, function (err, createdUser) {
 			assert.equal(err.err, 'username_already_exists');
 			assert.equal(createdUser, null);
-			done();
+			return done();
 		});
 	});
 
@@ -184,10 +184,10 @@ describe('user dao', function () {
 
 		var expectedUser = _.assign({}, baseUser);
 		expectedUser.username = 'UsEr1' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
-		dao.addUser()(expectedUser, function (err, createdUser) {
+		dao.addUser(expectedUser, function (err, createdUser) {
 			assert.equal(err.err, 'username_already_exists');
 			assert.equal(createdUser, null);
-			done();
+			return done();
 		});
 	});
 
@@ -199,7 +199,7 @@ describe('user dao', function () {
 			dao.countUsers(function (err, count) {
 				assert.equal(err, null);
 				assert.equal(count, 0);
-				done();
+				return done();
 			});
 		});
 	});
@@ -218,7 +218,7 @@ describe('user dao', function () {
 		dao.updateField(expectedUser.id, expectedField, expectedValue, function (err, updates) {
 			assert.equal(err, null);
 			assert.equal(updates, 1);
-			done();
+			return done();
 		});
 	});
 
@@ -248,7 +248,7 @@ describe('user dao', function () {
 				assert.equal(err, null);
 				assert.equal(realms.length, 1);
 				assert.deepEqual(realms[0], expectedRealm);
-				done();
+				return done();
 			});
 		});
 	});
@@ -261,32 +261,29 @@ describe('user dao', function () {
 			var expectedValue = {field1: 'value1', field2: 'value2'};
 
 			var callNumber = 0;
-			fakeCollection.update = function (query, update, upsert, cbk) {
+			fakeCollection.update = function (query, update, upsertCbk, cbk) {
 				callNumber++;
 				switch (callNumber) {
 					case 1:
-						cbk({code: 16836});
-						break;
+						return cbk({code: 16836});
 					case 2:
 						assert.deepEqual(query, {_id: expectedUser.id});
 						assert.deepEqual(update, {
-							"$addToSet": {
-								"fieldsArray": {
-									"field1": "value1",
-									"field2": "value2"
+							$addToSet: {
+								fieldsArray: {
+									field1: "value1",
+									field2: "value2"
 								}
 							}
 						});
-						cbk = upsert;
-						cbk(null, 1);
-						break;
+						return upsertCbk(null, 1);
 				}
 			};
 
 			dao.updateArrayItem(expectedUser.id, expectedField, expectedKey, expectedValue, function (err, updates) {
 				assert.equal(err, null);
 				assert.equal(updates, 1, 'incorrect number of objects updated');
-				done();
+				return done();
 			});
 		});
 
@@ -307,7 +304,7 @@ describe('user dao', function () {
 			dao.updateArrayItem(expectedUser.id, expectedField, expectedKey, expectedValue, function (err, updates) {
 				assert.equal(err, null);
 				assert.equal(updates, 1, 'incorrect number of objects updated');
-				done();
+				return done();
 			});
 		});
 
@@ -330,7 +327,7 @@ describe('user dao', function () {
 			dao.updateArrayItem(expectedUser.id, expectedField, expectedKey, expectedNewValue, function (err, updates) {
 				assert.equal(err, null);
 				assert.equal(updates, 1, 'incorrect number of objects updated');
-				done();
+				return done();
 			});
 		});
 	});

@@ -8,33 +8,32 @@ var versionHeader = 'test/1';
 
 describe('/google', function () {
 	beforeEach(function (done) {
-		OPTIONS.headers[config.version.header] = versionHeader;
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			done();
+			return done();
 		});
 	});
 
 	it('GET 302', function (done) {
 		var options = _.clone(OPTIONS);
-		options.url = 'http://localhost:' + config.public_port + '/auth/google';
+		options.url = `http://localhost:${config.public_port}/auth/google`;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 302, body);
-			done();
+			return done();
 		});
 	});
 
 	describe('/callback', function () {
 		it('302 invalid data', function (done) {
 			var options = _.clone(OPTIONS);
-			options.url = 'http://localhost:' + config.public_port + '/auth/google/callback';
+			options.url = `http://localhost:${config.public_port}/auth/google/callback`;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 302, body);
-				done();
+				return done();
 			});
 		});
 	});
@@ -42,7 +41,8 @@ describe('/google', function () {
 
 var OPTIONS = {
 	headers: {
-		'Content-Type': 'application/json; charset=utf-8'
+		'Content-Type': 'application/json; charset=utf-8',
+		[config.version.header]: versionHeader
 	},
 	method: 'GET',
 	followRedirect: false

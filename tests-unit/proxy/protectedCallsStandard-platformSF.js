@@ -35,28 +35,29 @@ var USER = {
 	]
 };
 
-var OPTIONS_STANDARD_CALL = {
-	url: 'http://localhost:' + config.public_port + '/api/standard',
+const versionHeader = 'test/1';
+
+const OPTIONS_STANDARD_CALL = {
+	url: `http://localhost:${config.public_port}/api/standard`,
 	headers: {
-		'Content-Type': 'application/json; charset=utf-8'
+		'Content-Type': 'application/json; charset=utf-8',
+		[config.version.header]: versionHeader
 	},
 	method: 'POST',
 	body: JSON.stringify(expectedBody)
 };
-
-var versionHeader = 'test/1';
 
 describe('Protected calls standard with SF', () => {
 
 	beforeEach(function (done) {
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			done();
+			return done();
 		});
 	});
 
 	it('200 with salesforce', function (done) {
-		dao.addUser()(USER, function (err, createdUser) {
+		dao.addUser(USER, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
@@ -64,13 +65,12 @@ describe('Protected calls standard with SF', () => {
 
 				var options = _.clone(OPTIONS_STANDARD_CALL);
 				options.headers.Authorization = 'bearer ' + loginToken;
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
 					assert.equal(res.statusCode, 200, body);
 					assert.notEqual(body, undefined);
-					done();
+					return done();
 				});
 			});
 		});
@@ -80,7 +80,7 @@ describe('Protected calls standard with SF', () => {
 		var userWithSoonExpiry = _.clone(USER);
 		userWithSoonExpiry.platforms[0].expiry = new Date().getTime() + 0.9 * config.salesforce.renewWhenLessThan * 60 * 1000; // expire in less than a minute
 
-		dao.addUser()(userWithSoonExpiry, function (err, createdUser) {
+		dao.addUser(userWithSoonExpiry, function (err, createdUser) {
 			assert.equal(err, null);
 
 			ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
@@ -107,7 +107,6 @@ describe('Protected calls standard with SF', () => {
 
 				var options = _.clone(OPTIONS_STANDARD_CALL);
 				options.headers.Authorization = 'bearer ' + loginToken;
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -125,7 +124,7 @@ describe('Protected calls standard with SF', () => {
 
 						assert.equal(roundedUpdatedExpiry, roundedExpectedExpiry);
 						assert.notEqual(oldAccessToken, foundUser.platforms[0].accessToken.params.access_token);
-						done();
+						return done();
 					});
 				});
 			});
@@ -135,7 +134,7 @@ describe('Protected calls standard with SF', () => {
 });
 
 function nockProtectedStandartCall (id, expectedSfData, expectedBody) {
-	nock('http://' + config.private_host + ':' + config.private_port, {
+	nock(`http://${config.private_host}:${config.private_port}`, {
 		reqheaders: {
 			'x-user-id': id,
 			'x-sf-data': JSON.stringify(expectedSfData),
@@ -148,6 +147,6 @@ function nockProtectedStandartCall (id, expectedSfData, expectedBody) {
 
 function nockSFRenewToken (queryParams, bodyToReturn) {
 	nock('https://login.salesforce.com', {})
-		.post('/services/oauth2/token' + '?' + queryParams)
+		.post(`/services/oauth2/token?${queryParams}`)
 		.reply(200, bodyToReturn);
 }

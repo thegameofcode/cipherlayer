@@ -14,7 +14,7 @@ describe('token manager', function () {
 				ciphertoken.getTokenSet(accessTokenSettings, accessToken, function (err, accessTokenInfo) {
 					assert.equal(err, null);
 					assert.equal(accessTokenInfo.userId, expectedUserId);
-					done();
+					return done();
 				});
 			});
 		});
@@ -32,7 +32,7 @@ describe('token manager', function () {
 					assert.equal(accessTokenInfo.userId, expectedUserId);
 					assert.deepEqual(accessTokenInfo.data, expectedData);
 
-					done();
+					return done();
 				});
 			});
 		});
@@ -48,7 +48,7 @@ describe('token manager', function () {
 				assert.equal(err, null);
 				assert.equal(accessTokenInfo.userId, expectedUserId);
 
-				done();
+				return done();
 			});
 		});
 	});
@@ -64,7 +64,7 @@ describe('token manager', function () {
 					assert.equal(err, null);
 					assert.equal(refreshTokenInfo.userId, expectedUserId);
 
-					done();
+					return done();
 				});
 			});
 		});
@@ -81,7 +81,7 @@ describe('token manager', function () {
 					assert.equal(refreshTokenInfo.userId, expectedUserId);
 					assert.deepEqual(refreshTokenInfo.data, expectedData);
 
-					done();
+					return done();
 				});
 			});
 		});
@@ -102,7 +102,7 @@ describe('token manager', function () {
 						assert.equal(err, null);
 						assert.equal(refreshTokenInfo.userId, expectedUserId);
 
-						done();
+						return done();
 					});
 				});
 			});

@@ -16,11 +16,10 @@ var versionHeader = 'test/1';
 
 describe('/sf', function () {
 	beforeEach(function (done) {
-		OPTIONS.headers[config.version.header] = versionHeader;
 
 		dao.deleteAllUsers(function (err) {
 			assert.equal(err, null);
-			done();
+			return done();
 		});
 	});
 
@@ -30,19 +29,19 @@ describe('/sf', function () {
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 302, body);
-			done();
+			return done();
 		});
 	});
 
 	describe('/callback', function () {
 		it('302 invalid data', function (done) {
 			var options = _.clone(OPTIONS);
-			options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback';
+			options.url = `http://localhost:${config.public_port}/auth/sf/callback`;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
 				assert.equal(res.statusCode, 302, body);
-				done();
+				return done();
 			});
 		});
 	});
@@ -53,7 +52,7 @@ describe('/sf', function () {
 		nockSFGetOptInfo();
 
 		var options = _.clone(OPTIONS);
-		options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
+		options.url = `http://localhost:${config.public_port}/auth/sf/callback?code=a1b2c3d4e5f6`;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
@@ -77,7 +76,7 @@ describe('/sf', function () {
 				assert.equal(sfTokenInfo.userId, '00De00000004cdeEAA/005e0000001uNIyAAM');
 				assert.notEqual(sfTokenInfo.data.accessToken, undefined);
 				assert.notEqual(sfTokenInfo.data.refreshToken, undefined);
-				done();
+				return done();
 			});
 		});
 	});
@@ -108,22 +107,22 @@ describe('/sf', function () {
 			assert.notEqual(config.aws.buckets.avatars, 'undefined', msg);
 
 			configAWSParam = true;
-			done();
+			return done();
 		});
 
 		it.skip('203 not exists (valid avatar)', function (done) {
 			if (!configAWSParam) return done();
 
 			var sfProfile = _.clone(SF_PROFILE);
-			sfProfile.photos.picture = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
-			sfProfile.photos.thumbnail = "https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg";
+			sfProfile.photos.picture = 'https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg';
+			sfProfile.photos.thumbnail = 'https://es.gravatar.com/userimage/75402146/7781b7690113cedf43ba98c75b08cea0.jpeg';
 
 			nockSFLoginCall();
 			nockSFGetProfileCall(sfProfile);
 			nockSFGetOptInfo();
 
 			var options = _.clone(OPTIONS);
-			options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
+			options.url = `http://localhost:${config.public_port}/auth/sf/callback?code=a1b2c3d4e5f6`;
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);
@@ -138,7 +137,7 @@ describe('/sf', function () {
 				assert.equal(body.phone, '000000000');
 				assert.equal(body.country, 'ES');
 				assert.notEqual(body.sf, undefined);
-				done();
+				return done();
 			});
 		});
 	});
@@ -150,7 +149,7 @@ describe('/sf', function () {
 			password: '12345678'
 		};
 
-		dao.addUser()(user, function (err, createdUser) {
+		dao.addUser(user, function (err, createdUser) {
 			assert.equal(err, null);
 			assert.notEqual(createdUser, undefined);
 
@@ -158,7 +157,7 @@ describe('/sf', function () {
 			nockSFGetProfileCall(SF_PROFILE);
 
 			var options = _.clone(OPTIONS);
-			options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?code=a1b2c3d4e5f6';
+			options.url = `http://localhost:${config.public_port}/auth/sf/callback?code=a1b2c3d4e5f6`;
 			options.followAllRedirects = true;
 
 			request(options, function (err, res, body) {
@@ -181,7 +180,7 @@ describe('/sf', function () {
 						ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, tokenInfo) {
 							assert.equal(err, null);
 							assert.equal(tokenInfo.userId, createdUser._id, 'bad refreshToken userId');
-							done();
+							return done();
 						});
 					});
 				});
@@ -192,22 +191,23 @@ describe('/sf', function () {
 
 	it('401 deny permissions to SF', function (done) {
 		var options = _.clone(OPTIONS);
-		options.url = 'http://localhost:' + config.public_port + '/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization';
+		options.url = `http://localhost:${config.public_port}/auth/sf/callback?error=access_denied&error_description=end-user+denied+authorization`;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 401, body);
 			body = JSON.parse(body);
-			assert.deepEqual(body, {"err": "access_denied", "des": "end-user denied authorization"});
-			done();
+			assert.deepEqual(body, {'err': 'access_denied', 'des': 'end-user denied authorization'});
+			return done();
 		});
 	});
 });
 
 var OPTIONS = {
-	url: 'http://localhost:' + config.public_port + '/auth/sf',
+	url: `http://localhost:${config.public_port}/auth/sf`,
 	headers: {
-		'Content-Type': 'application/json; charset=utf-8'
+		'Content-Type': 'application/json; charset=utf-8',
+		[config.version.header]: versionHeader
 	},
 	method: 'GET',
 	followRedirect: false
@@ -218,9 +218,8 @@ function nockSFLoginCall () {
 		.filteringPath(function (path) {
 			if (path.indexOf('/services/oauth2/authorize') > -1) {
 				return '/services/oauth2/authorize';
-			} else {
-				return path;
 			}
+			return path;
 		})
 		.get('/services/oauth2/authorize')
 		.reply(302, {accessToken: 'sf1234'})

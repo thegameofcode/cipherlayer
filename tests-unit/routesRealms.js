@@ -10,33 +10,33 @@ describe('realms', function () {
 
 	var baseRealms = [
 		{
-			"name": "default",
-			"allowedDomains": [
-				"*@a.com",
-				"*@b.com"
+			name: 'default',
+			allowedDomains: [
+				'*@a.com',
+				'*@b.com'
 			],
-			"capabilities": {
-				"news": true,
-				"chat": true,
-				"call": true
+			capabilities: {
+				news: true,
+				chat: true,
+				call: true
 			}
 		},
 		{
-			"name": "test",
-			"allowedDomains": [
-				"*@a.com"
+			name: 'test',
+			allowedDomains: [
+				'*@a.com'
 			],
-			"capabilities": {
-				"test": true
+			capabilities: {
+				test: true
 			}
 		},
 		{
-			"name": "valid",
-			"allowedDomains": [
-				"valid@a.com"
+			name: 'valid',
+			allowedDomains: [
+				'valid@a.com'
 			],
-			"capabilities": {
-				"valid": true
+			capabilities: {
+				valid: true
 			}
 		}
 	];
@@ -63,7 +63,7 @@ describe('realms', function () {
 		}
 
 		var options = {
-			url: 'http://localhost:' + config.internal_port + '/realms',
+			url: `http://localhost:${config.internal_port}/realms`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -75,7 +75,7 @@ describe('realms', function () {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 200, body);
 			assert.deepEqual(body.realms, baseRealms);
-			done();
+			return done();
 		});
 	});
 
@@ -88,7 +88,7 @@ describe('realms', function () {
 			assert.equal(err, null);
 
 			var options = {
-				url: 'http://localhost:' + config.internal_port + '/realms',
+				url: `http://localhost:${config.internal_port}/realms`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
@@ -100,7 +100,7 @@ describe('realms', function () {
 				assert.equal(res.statusCode, 200, body);
 				body = JSON.parse(body);
 				assert.deepEqual(body.realms, []);
-				done();
+				return done();
 			});
 		});
 	});

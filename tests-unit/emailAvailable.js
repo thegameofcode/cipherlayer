@@ -22,7 +22,7 @@ describe('Check Email Available endpoint', function () {
 	it('should indicate that requested email is available', function (done) {
 
 		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -43,7 +43,7 @@ describe('Check Email Available endpoint', function () {
 
 	it('should indicate that requested email is unavailable', function (done) {
 		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -54,7 +54,7 @@ describe('Check Email Available endpoint', function () {
 			}
 		};
 
-		userDao.addUser()(baseUser, function (error) {
+		userDao.addUser(baseUser, function (error) {
 
 			assert.equal(error, null);
 
@@ -69,7 +69,7 @@ describe('Check Email Available endpoint', function () {
 
 	it('should return a BadRequestError on missing email component', function (done) {
 		var requestOptions = {
-			url: 'http://localhost:' + config.public_port + '/user/email/available',
+			url: `http://localhost:${config.public_port}/user/email/available`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},

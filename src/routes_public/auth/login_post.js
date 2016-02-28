@@ -5,18 +5,18 @@ const log = require('../../logger/service');
 const daoMng = require('../../managers/dao');
 const crypto = require('../../managers/crypto');
 const config = require('../../../config.json');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 const sessionRequest = require('./session');
 const tokenMng = require('../../managers/token');
 
 module.exports = function (req, res, next) {
-	var userAgent = String(req.headers['user-agent']);
+	const userAgent = String(req.headers['user-agent']);
 
 	cryptoMng.encrypt(req.body.password, function (encryptedPwd) {
 		daoMng.getFromUsernamePassword(req.body.username, encryptedPwd, function (err, foundUser) {
 			if (err) {
 				res.send(409, {err: err.message});
-				return next(false);
+				return next(err);
 			}
 
 			daoMng.getAllUserFields(foundUser.username, function (err, result) {
@@ -27,7 +27,7 @@ module.exports = function (req, res, next) {
 				}
 			});
 
-			var data = {};
+			const data = {};
 			if (foundUser.signUpDate) {
 				data.signUpDate = foundUser.signUpDate;
 			}
@@ -63,8 +63,8 @@ module.exports = function (req, res, next) {
 							}
 							async.eachSeries(realm.allowedDomains, function (domain, more) {
 								//wildcard
-								var check = domain.replace(/\*/g, '.*');
-								var match = foundUser.username.match(check);
+								const check = domain.replace(/\*/g, '.*');
+								const match = foundUser.username.match(check);
 								if (!match || foundUser.username !== match[0]) {
 									return more();
 								}
@@ -94,11 +94,11 @@ module.exports = function (req, res, next) {
 					tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
 						if (err) {
 							res.send(409, {err: err.message});
-						} else {
-							tokens.expiresIn = config.accessToken.expiration;
-							res.send(200, tokens);
+							return next(err);
 						}
-						next(false);
+						tokens.expiresIn = config.accessToken.expiration;
+						res.send(200, tokens);
+						return next();
 					});
 				});
 			});

@@ -9,21 +9,21 @@ module.exports = function (req, res, next) {
 		if (error) {
 			if (!error.code) {
 				res.send(500, error);
-				return next(false);
+				return next();
 			}
-			var errCode = error.code;
+			const errCode = error.code;
 			res.send(errCode, {err: error.err, des: error.des});
-			return next(false);
+			return next();
 		}
 
 		tokenMng.getRefreshTokenInfo(tokens.refreshToken, function (err, tokenSet) {
 			if (err) {
 				res.send(500, {err: 'internal_error', des: 'error creating user tokens'});
-				return next(false);
+				return next();
 			}
 
-			var userId = tokenSet.userId;
-			var tokenData = tokenSet.data;
+			const userId = tokenSet.userId;
+			const tokenData = tokenSet.data;
 
 			if (config.version) {
 				tokenData.deviceVersion = req.headers[config.version.header];

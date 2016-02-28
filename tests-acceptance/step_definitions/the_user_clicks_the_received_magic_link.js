@@ -9,15 +9,14 @@ module.exports = function () {
 		world.should.have.property('magicLinkEmail');
 		world.magicLinkEmail.should.have.property('html');
 
-		var html = world.magicLinkEmail.html;
-		var match = html.match(/https?:\/\/.+\/auth\/login\/refreshToken\?rt=[^']+/);
+		const html = world.magicLinkEmail.html;
+		const match = html.match(/https?:\/\/.+\/auth\/login\/refreshToken\?rt=[^']+/);
 		should.exist(match);
-		var magicLink = match[0];
+		const magicLink = match[0];
 		should.exist(magicLink);
-		magicLink = magicLink.replace(config.public_url, 'http://localhost:' + config.public_port);
 
-		var options = {
-			url: magicLink,
+		const options = {
+			url: magicLink.replace(config.public_url, `http://localhost:${config.public_port}`),
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
@@ -32,7 +31,7 @@ module.exports = function () {
 			world.getResponse().statusCode = res.statusCode;
 			world.getResponse().body = body;
 			world.getResponse().headers = res.headers;
-			callback();
+			return callback();
 		});
 	});
 };

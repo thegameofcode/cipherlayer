@@ -1,25 +1,29 @@
+'use strict';
+
 const _ = require('lodash');
 const config = require('../../config.json');
 
-function checkPermissions(req, res, next) {
+module.exports = function checkPermissions(req, res, next) {
 	if (!config.endpoints) {
 		return next();
 	}
 
-	var roles = req.tokenInfo.data.roles || ['user'];
-	var path = req._url.pathname;
-	var method = req.method;
+	const roles = req.tokenInfo.data.roles || ['user'];
+	const path = req._url.pathname;
+	const method = req.method;
 
-	var hasPermissions = false;
+	let hasPermissions = false;
 
-	for (var i = 0; i < config.endpoints.length; i++) {
-		var matchPath = path.match(new RegExp(config.endpoints[i].path, 'g'));
-		var matchMethod = _.includes(config.endpoints[i].methods, method);
+	//TODO: replace with map() or some()
+	for (let i = 0; i < config.endpoints.length; i++) {
+		const matchPath = path.match(new RegExp(config.endpoints[i].path, 'g'));
+		const matchMethod = _.includes(config.endpoints[i].methods, method);
 
 		if (matchPath && matchMethod) {
-			var matchRole;
-			for (var j = 0; j < roles.length; j++) {
-				matchRole = _.includes(config.endpoints[i].roles, roles[j]);
+
+			// TODO; replace with map() or some()
+			for (let j = 0; j < roles.length; j++) {
+				const matchRole = _.includes(config.endpoints[i].roles, roles[j]);
 				if (matchRole) {
 					hasPermissions = true;
 					break;
@@ -31,9 +35,7 @@ function checkPermissions(req, res, next) {
 
 	if (!hasPermissions) {
 		res.send(401, {err: 'unauthorized'});
-		return next(false);
+		return next({err: 'unauthorized'});
 	}
 	return next();
-}
-
-module.exports = checkPermissions;
+};

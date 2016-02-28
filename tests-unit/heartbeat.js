@@ -9,7 +9,7 @@ describe('Heartbeat (Server status)', function () {
 
 	it('OK', function (done) {
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/heartbeat',
+			url: `http://localhost:${config.public_port}/heartbeat`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
@@ -19,7 +19,7 @@ describe('Heartbeat (Server status)', function () {
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 204, body);
-			done();
+			return done();
 		});
 	});
 
@@ -27,7 +27,7 @@ describe('Heartbeat (Server status)', function () {
 		userDao.disconnect(function (err) {
 			assert.equal(err, null);
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/heartbeat',
+				url: `http://localhost:${config.public_port}/heartbeat`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
@@ -44,7 +44,7 @@ describe('Heartbeat (Server status)', function () {
 				assert.equal(res.statusCode, 500);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 	});
@@ -53,7 +53,7 @@ describe('Heartbeat (Server status)', function () {
 		redisMng.disconnect(function (err) {
 			assert.equal(err, null);
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/heartbeat',
+				url: `http://localhost:${config.public_port}/heartbeat`,
 				headers: {
 					'Content-Type': 'application/json; charset=utf-8'
 				},
@@ -70,7 +70,7 @@ describe('Heartbeat (Server status)', function () {
 				assert.equal(res.statusCode, 500);
 				body = JSON.parse(body);
 				assert.deepEqual(body, expectedResult);
-				done();
+				return done();
 			});
 		});
 	});

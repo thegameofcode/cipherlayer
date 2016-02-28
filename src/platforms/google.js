@@ -1,3 +1,5 @@
+'use strict';
+
 const async = require('async');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
@@ -24,37 +26,37 @@ function createGoogleStrategy() {
 }
 
 function googleCallback(req, res, next) {
-	var googleData = req.user;
-	var profile = googleData.profile;
+	const googleData = req.user;
+	const profile = googleData.profile;
 
 	daoMng.getFromUsername(profile.email, function (err, foundUser) {
 		if (err) {
 			if (err.message === daoMng.ERROR_USER_NOT_FOUND) {
-				var tokenData = {
+				const tokenData = {
 					accessToken: googleData.accessToken,
 					refreshToken: googleData.refreshToken
 				};
 				tokenMng.createAccessToken(profile.id, tokenData, function (err, token) {
 					if (err) {
 						log.error({ err },'error creating google profile token');
-						return next(false);
+						return next(err);
 					}
-					var returnProfile = {
+					const returnProfile = {
 						name: profile.name.givenName,
 						lastname: profile.name.familyName,
 						email: profile.email,
 						google: token
 					};
 					res.send(203, returnProfile);
-					return next(false);
+					return next();
 				});
 			}
 
 			res.send(500, {err: 'internal_error', des: 'There was an internal error matching google profile'});
-			return next(false);
+			return next(err);
 		}
 
-		var platform = {
+		const platform = {
 			platform: 'google',
 			accessToken: googleData.accessToken
 		};
@@ -70,7 +72,7 @@ function googleCallback(req, res, next) {
 			if (err) {
 				log.error({ err }, `error updating google tokens into user ${foundUser._id}`);
 			}
-			var data = {};
+			let data = {};
 			if (foundUser.roles) {
 				data = { roles: foundUser.roles };
 			}
@@ -94,8 +96,8 @@ function googleCallback(req, res, next) {
 							}
 							async.eachSeries(realm.allowedDomains, function (domain, more) {
 								//wildcard
-								var check = domain.replace(/\*/g, '.*');
-								var match = foundUser.username.match(check);
+								const check = domain.replace(/\*/g, '.*');
+								const match = foundUser.username.match(check);
 								if (!match || foundUser.username !== match[0]) {
 									return more();
 								}
@@ -138,7 +140,7 @@ function addRoutes(server, passport) {
 	}
 
 	log.info('Adding Google routes');
-	var googleStrategy = createGoogleStrategy();
+	const googleStrategy = createGoogleStrategy();
 	passport.use(googleStrategy);
 	server.get('/auth/google', passport.authenticate('google', {
 		scope: config.google.scope,

@@ -11,7 +11,7 @@ describe('managers', function () {
 				var newPassword = cryptoManager.randomPassword(config.password.generatedRegex);
 				var match = newPassword.match(config.password.regexValidation);
 				should.exist(match);
-				done();
+				return done();
 			});
 		});
 	});

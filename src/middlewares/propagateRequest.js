@@ -6,7 +6,7 @@ const request = require('request');
 const httpProxy = require('http-proxy');
 const _ = require('lodash');
 
-var proxy = httpProxy.createProxyServer({});
+const proxy = httpProxy.createProxyServer({});
 
 proxy.on('proxyReq', function () {
 	log.info('> http-proxy request received');
@@ -25,9 +25,9 @@ proxy.on('error', function (err, req, res) {
 });
 
 function propagateRequest(req, res, next) {
-	var start = Date.now();
+	const start = Date.now();
 
-	var useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
+	const useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
 		return req.url.match(new RegExp(pattern, 'g'));
 	});
 
@@ -46,21 +46,22 @@ function propagateRequest(req, res, next) {
 
 	// This are the normal requests
 	req.options.headers['user-agent'] = req.headers['user-agent'];
-	request(req.options, function (err, private_res, body) {
-		var end = Date.now();
+	request(req.options, function (err, private_res, rawBody) {
+		const end = Date.now();
 		if (err) {
-			log.error({ err, res: private_res, body });
+			log.error({ err, res: private_res, rawBody });
 			res.send(500, {
 				err: ' auth_proxy_error',
 				des: 'there was an internal error when redirecting the call to protected service'
 			});
-			return next();
+			return next(err);
 		}
 
+		let body;
 		try {
-			body = JSON.parse(body);
-		} catch (ex) {
-			log.error({err: 'json_parse_error', des: 'error parsing body from response'});
+			body = JSON.parse(rawBody);
+		} catch (parseError) {
+			log.error({err: 'json_parse_error', des: 'error parsing body from response'}, parseError);
 		}
 
 		log.info({

@@ -11,34 +11,34 @@ var notifServiceURL = config.externalServices.notifications.base;
 describe('middleware pinValidation', function () {
 
 	var settings = {
-		"phoneVerification": {
-			"pinSize": 4,
-			"attempts": 3,
-			"redis": {
-				"key": "user.{userId}.phone.{phone}",
-				"expireInSec": 300
+		phoneVerification: {
+			pinSize: 4,
+			attempts: 3,
+			redis: {
+				key: 'user.{userId}.phone.{phone}',
+				expireInSec: 300
 			},
-			"pinValidationEndpoints": [
+			pinValidationEndpoints: [
 				{
-					"path": "/api/me/phones",
-					"method": "post",
-					"fields": {
-						"phoneNumber": "phone"
+					path: '/api/me/phones',
+					method: 'post',
+					fields: {
+						phoneNumber: 'phone'
 					}
 				},
 				{
-					"path": "/api/me/phones",
-					"method": "post",
-					"fields": {
-						"countryISO": "country",
-						"phoneNumber": "phone"
+					path: '/api/me/phones',
+					method: 'post',
+					fields: {
+						countryISO: 'country',
+						phoneNumber: 'phone'
 					}
 				},
 				{
-					"path": "/api/me/phones",
-					"method": "post",
-					"fields": {
-						"countryISO": "country"
+					path: '/api/me/phones',
+					method: 'post',
+					fields: {
+						countryISO: 'country'
 					}
 				}
 			]
@@ -48,11 +48,11 @@ describe('middleware pinValidation', function () {
 	function getPinNumber (userId, phone, country, cbk) {
 		countries.countryFromIso(country, function (err, returnedCountry) {
 			assert.equal(err, null);
-			phone = '+' + returnedCountry.Dial + phone;
+			phone = `+${returnedCountry.Dial}${phone}`;
 			var redisKey = settings.phoneVerification.redis.key;
 			redisKey = redisKey.replace('{userId}', userId).replace('{phone}', phone);
 
-			redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				cbk(err, redisPhonePin);
 			});
 		});
@@ -70,11 +70,13 @@ describe('middleware pinValidation', function () {
 
 	it('no pin validation', function (done) {
 		var req = {
-			url: "http://www.google.es"
+			url: 'http://www.google.es'
 		};
 		var res = {};
 		var next = function (canContinue) {
-			if (canContinue === undefined || canContinue === true) done();
+			if (canContinue === undefined || canContinue === true) {
+				return done();
+			}
 		};
 
 		var noPhone = _.cloneDeep(settings);
@@ -84,11 +86,13 @@ describe('middleware pinValidation', function () {
 
 	it('continue if the url does not need pin validation', function (done) {
 		var req = {
-			url: "http://www.google.es"
+			url: 'http://www.google.es'
 		};
 		var res = {};
 		var next = function (canContinue) {
-			if (canContinue === undefined || canContinue === true) done();
+			if (canContinue === undefined || canContinue === true) {
+				return done();
+			}
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -103,23 +107,25 @@ describe('middleware pinValidation', function () {
 		var validResponse = false;
 
 		var req = {
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES"
+				country: 'ES'
 			},
-			method: "POST"
+			method: 'POST'
 		};
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 				validResponse = true;
 			}
 		};
 
-		var next = function (canContinue) {
-			if (canContinue === false && validResponse) done();
+		var next = function (err) {
+			if (err && validResponse) {
+				return done();
+			}
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -134,26 +140,28 @@ describe('middleware pinValidation', function () {
 		var validResponse = false;
 
 		var req = {
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES"
+				country: 'ES'
 			},
 			user: {
-				id: "1a2b3c4d5e6f"
+				id: '1a2b3c4d5e6f'
 			},
-			method: "POST"
+			method: 'POST'
 		};
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 				validResponse = true;
 			}
 		};
 
-		var next = function (canContinue) {
-			if (canContinue === false && validResponse) done();
+		var next = function (err) {
+			if (err && validResponse) {
+				return done();
+			}
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -168,27 +176,29 @@ describe('middleware pinValidation', function () {
 		var validResponse = false;
 
 		var req = {
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "--",
-				"phone": "666666666"
+				country: '--',
+				phone: '666666666'
 			},
 			user: {
-				id: "1a2b3c4d5e6f"
+				id: '1a2b3c4d5e6f'
 			},
-			method: "POST"
+			method: 'POST'
 		};
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 				validResponse = true;
 			}
 		};
 
-		var next = function (canContinue) {
-			if (canContinue === false && validResponse) done();
+		var next = function (err) {
+			if (err && validResponse) {
+				return done();
+			}
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -203,14 +213,14 @@ describe('middleware pinValidation', function () {
 		var validResponse = false;
 
 		var req = {
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES",
-				"phone": "666666666"
+				country: 'ES',
+				phone: '666666666'
 			},
-			method: "POST",
+			method: 'POST',
 			user: {
-				id: "mc_1a2b3c4d5e6f"
+				id: 'mc_1a2b3c4d5e6f'
 			}
 		};
 
@@ -219,19 +229,19 @@ describe('middleware pinValidation', function () {
 			.reply(204);
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 				validResponse = true;
 			}
 		};
 
-		var next = function (canContinue) {
-			if (canContinue === false && validResponse) {
+		var next = function (err) {
+			if (err && validResponse) {
 				getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
 					assert.equal(err, null);
 					assert.notEqual(returnedPin, null, 'invalid or not created pin');
-					done();
+					return done();
 				});
 			}
 		};
@@ -249,14 +259,14 @@ describe('middleware pinValidation', function () {
 
 		var req = {
 			headers: {},
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES",
-				"phone": "666666666"
+				country: 'ES',
+				phone: '666666666'
 			},
-			method: "POST",
+			method: 'POST',
 			user: {
-				id: "default@user.com"
+				id: 'default@user.com'
 			}
 		};
 
@@ -266,28 +276,27 @@ describe('middleware pinValidation', function () {
 			.reply(204);
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 			}
 		};
 
-		var next = function (canContinue) {
-			if (canContinue === false && validResponse) {
-				done();
-			} else {
-				req.headers['x-otp-pin'] = 'zzzz';
-
-				expectedCode = 401;
-				expectedError = {
-					err: 'verify_phone_error',
-					des: 'PIN used is not valid.'
-				};
-
-				validResponse = true;
-
-				pinValidation(settings)(req, res, next);
+		var next = function (err) {
+			if (err && validResponse) {
+				return done();
 			}
+			req.headers['x-otp-pin'] = 'zzzz';
+
+			expectedCode = 401;
+			expectedError = {
+				err: 'verify_phone_error',
+				des: 'PIN used is not valid.'
+			};
+
+			validResponse = true;
+
+			pinValidation(settings)(req, res, next);
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -303,14 +312,14 @@ describe('middleware pinValidation', function () {
 
 		var req = {
 			headers: {},
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES",
-				"phone": "666666666"
+				country: 'ES',
+				phone: '666666666'
 			},
-			method: "POST",
+			method: 'POST',
 			user: {
-				id: "default@user.com"
+				id: 'default@user.com'
 			}
 		};
 
@@ -319,7 +328,7 @@ describe('middleware pinValidation', function () {
 			.reply(204);
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 			}
@@ -327,18 +336,17 @@ describe('middleware pinValidation', function () {
 
 		var next = function (canContinue) {
 			if (!canContinue && validResponse) {
-				done();
-			} else {
-				getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
-					assert.equal(err, null);
-					assert.notEqual(returnedPin, null, 'invalid or not created pin');
-					req.headers['x-otp-pin'] = returnedPin;
-
-					validResponse = true;
-
-					pinValidation(settings)(req, res, next);
-				});
+				return done();
 			}
+			getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
+				assert.equal(err, null);
+				assert.notEqual(returnedPin, null, 'invalid or not created pin');
+				req.headers['x-otp-pin'] = returnedPin;
+
+				validResponse = true;
+
+				pinValidation(settings)(req, res, next);
+			});
 		};
 
 		pinValidation(settings)(req, res, next);
@@ -356,14 +364,14 @@ describe('middleware pinValidation', function () {
 
 		var req = {
 			headers: {},
-			url: "/api/me/phones",
+			url: '/api/me/phones',
 			body: {
-				"country": "ES",
-				"phone": "666666666"
+				country: 'ES',
+				phone: '666666666'
 			},
-			method: "POST",
+			method: 'POST',
 			user: {
-				id: "default@user.com"
+				id: 'default@user.com'
 			}
 		};
 
@@ -373,7 +381,7 @@ describe('middleware pinValidation', function () {
 			.reply(204);
 
 		var res = {
-			send: function (code, body) {
+			send: (code, body) => {
 				assert.equal(code, expectedCode, 'invalid response code');
 				assert.deepEqual(body, expectedError, 'invalid response body');
 			}
@@ -382,52 +390,51 @@ describe('middleware pinValidation', function () {
 		var next = function (canContinue) {
 			invalidResponseAttemps++;
 			if (!canContinue && validResponse) {
-				done();
-			} else {
-				expectedCode = 401;
-				expectedError = {
-					err: 'verify_phone_error',
-					des: 'PIN used is not valid.'
-				};
+				return done();
+			}
+			expectedCode = 401;
+			expectedError = {
+				err: 'verify_phone_error',
+				des: 'PIN used is not valid.'
+			};
 
-				req.headers['x-otp-pin'] = 'zzzz';
+			req.headers['x-otp-pin'] = 'zzzz';
 
-				//1st attempt store the pin to check expiration at 3 attempts
-				if (invalidResponseAttemps === 1) {
-					getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
-						assert.equal(err, null);
-						assert.notEqual(returnedPin, null, 'invalid or not created pin');
-						firstValidPin = returnedPin;
-
-						pinValidation(settings)(req, res, next);
-					});
-				}
-				//At this attempt pin must EXPIRE
-				else if (invalidResponseAttemps === settings.phoneVerification.attempts) {
-					expectedError.des = 'PIN used has expired.';
+			//1st attempt store the pin to check expiration at 3 attempts
+			if (invalidResponseAttemps === 1) {
+				getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
+					assert.equal(err, null);
+					assert.notEqual(returnedPin, null, 'invalid or not created pin');
+					firstValidPin = returnedPin;
 
 					pinValidation(settings)(req, res, next);
-				}
-				//This attempt is to check the expiration of the 1st pin
-				else if (invalidResponseAttemps === settings.phoneVerification.attempts + 1) {
-					req.headers['x-otp-pin'] = firstValidPin;
+				});
+			}
+			//At this attempt pin must EXPIRE
+			else if (invalidResponseAttemps === settings.phoneVerification.attempts) {
+				expectedError.des = 'PIN used has expired.';
+
+				pinValidation(settings)(req, res, next);
+			}
+			//This attempt is to check the expiration of the 1st pin
+			else if (invalidResponseAttemps === settings.phoneVerification.attempts + 1) {
+				req.headers['x-otp-pin'] = firstValidPin;
+
+				pinValidation(settings)(req, res, next);
+			}
+			//This attempt is to check that the new generated pin is correct
+			else if (invalidResponseAttemps > settings.phoneVerification.attempts + 1) {
+				getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
+					assert.notEqual(returnedPin, null, 'invalid or not created pin');
+
+					req.headers['x-otp-pin'] = returnedPin;
+					validResponse = true;
 
 					pinValidation(settings)(req, res, next);
-				}
-				//This attempt is to check that the new generated pin is correct
-				else if (invalidResponseAttemps > settings.phoneVerification.attempts + 1) {
-					getPinNumber(req.user.id, req.body.phone, req.body.country, function (err, returnedPin) {
-						assert.notEqual(returnedPin, null, 'invalid or not created pin');
-
-						req.headers['x-otp-pin'] = returnedPin;
-						validResponse = true;
-
-						pinValidation(settings)(req, res, next);
-					});
-				}
-				else {
-					pinValidation(settings)(req, res, next);
-				}
+				});
+			}
+			else {
+				pinValidation(settings)(req, res, next);
 			}
 		};
 

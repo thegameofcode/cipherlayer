@@ -32,7 +32,7 @@ describe('Protected calls passThrough', () => {
 		var expectedPrivateResponse = _.clone(expectedPublicRequest);
 		delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-		nock('http://' + config.private_host + ':' + config.private_port)
+		nock(`http://${config.private_host}:${config.private_port}`)
 			.post(config.passThroughEndpoint.path, expectedPrivateResponse)
 			.reply(201, {id: expectedUserId});
 
@@ -41,25 +41,25 @@ describe('Protected calls passThrough', () => {
 
 		var pin = 'xxxx';
 
-		redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+		redisMng.insertKeyValue(`${redisKey}.pin`, pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 			assert.equal(err, null);
-			redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+			redisMng.insertKeyValue(`${redisKey}.attempts`, config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 				assert.equal(err, null);
 
-				nock('http://' + config.private_host + ':' + config.private_port)
+				nock(`http://${config.private_host}:${config.private_port}`)
 					.post(config.passThroughEndpoint.path, expectedPrivateResponse)
 					.reply(201, {id: expectedUserId});
 
 				var options = {
-					url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
+					url: `http://${config.private_host}:${config.public_port}${config.passThroughEndpoint.path}`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'x-otp-pin': pin
+						'x-otp-pin': pin,
+						[config.version.header]: versionHeader
 					},
 					method: 'POST',
 					body: JSON.stringify(expectedPublicRequest)
 				};
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -80,7 +80,7 @@ describe('Protected calls passThrough', () => {
 							dao.getFromUsername(expectedUsername, function (err, foundUser) {
 								assert.equal(err, null);
 								assert.equal(foundUser.platforms, undefined);
-								done();
+								return done();
 							});
 						});
 					});
@@ -111,7 +111,7 @@ describe('Protected calls passThrough', () => {
 			var expectedPrivateResponse = _.clone(expectedPublicRequest);
 			delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-			nock('http://' + config.private_host + ':' + config.private_port)
+			nock(`http://${config.private_host}:${config.private_port}`)
 				.post(config.passThroughEndpoint.path, expectedPrivateResponse)
 				.reply(203, {id: expectedUserId});
 
@@ -120,21 +120,21 @@ describe('Protected calls passThrough', () => {
 
 			var pin = 'xxxx';
 
-			redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+			redisMng.insertKeyValue(`${redisKey}.pin`, pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 				assert.equal(err, null);
-				redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+				redisMng.insertKeyValue(`${redisKey}.attempts`, config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 					assert.equal(err, null);
 
 					var options = {
-						url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
+						url: `http://${config.private_host}:${config.public_port}${config.passThroughEndpoint.path}`,
 						headers: {
 							'Content-Type': 'application/json; charset=utf-8',
-							'x-otp-pin': pin
+							'x-otp-pin': pin,
+							[config.version.header]: versionHeader
 						},
 						method: 'POST',
 						body: JSON.stringify(expectedPublicRequest)
 					};
-					options.headers[config.version.header] = versionHeader;
 
 					nock(notificationsServiceURL)
 						.post('/notification/email')
@@ -164,7 +164,7 @@ describe('Protected calls passThrough', () => {
 									assert.equal(foundUser.platforms[0].accessToken, 'acc');
 									assert.equal(foundUser.platforms[0].refreshToken, 'ref');
 									assert.notEqual(foundUser.platforms[0].expiry, undefined);
-									done();
+									return done();
 								});
 							});
 						});
@@ -189,7 +189,7 @@ describe('Protected calls passThrough', () => {
 		var expectedPrivateResponse = _.clone(expectedPublicRequest);
 		delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-		nock('http://' + config.private_host + ':' + config.private_port)
+		nock(`http://${config.private_host}:${config.private_port}`)
 			.post(config.passThroughEndpoint.path, expectedPrivateResponse)
 			.reply(201, {id: expectedUserId});
 
@@ -198,21 +198,21 @@ describe('Protected calls passThrough', () => {
 
 		var pin = 'xxxx';
 
-		redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+		redisMng.insertKeyValue(`${redisKey}.pin`, pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 			assert.equal(err, null);
-			redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+			redisMng.insertKeyValue(`${redisKey}.attempts`, config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 				assert.equal(err, null);
 
 				var options = {
-					url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
+					url: `http://${config.private_host}:${config.public_port}${config.passThroughEndpoint.path}`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'x-otp-pin': pin
+						'x-otp-pin': pin,
+						[config.version.header]: versionHeader
 					},
 					method: 'POST',
 					body: JSON.stringify(expectedPublicRequest)
 				};
-				options.headers[config.version.header] = versionHeader;
 
 				nock(notificationsServiceURL)
 					.post('/notification/email')
@@ -233,7 +233,7 @@ describe('Protected calls passThrough', () => {
 						ciphertoken.getTokenSet(refreshTokenSettings, body.refreshToken, function (err, refreshTokenInfo) {
 							assert.equal(err, null);
 							assert.equal(refreshTokenInfo.userId, expectedUserId);
-							done();
+							return done();
 						});
 					});
 				});
@@ -246,14 +246,14 @@ describe('Protected calls passThrough', () => {
 		expectedPublicRequest[config.passThroughEndpoint.username] = 'valid' + (config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : '');
 
 		var options = {
-			url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
+			url: `http://${config.private_host}:${config.public_port}${config.passThroughEndpoint.path}`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(expectedPublicRequest)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
@@ -261,7 +261,7 @@ describe('Protected calls passThrough', () => {
 			body = JSON.parse(body);
 			assert.equal(body.err, 'invalid_security_token');
 			assert.equal(body.des, 'you must provide a password or a salesforce token to create the user');
-			done();
+			return done();
 		});
 	});
 
@@ -279,7 +279,7 @@ describe('Protected calls passThrough', () => {
 		var expectedPrivateResponse = _.clone(expectedPublicRequest);
 		delete(expectedPrivateResponse[config.passThroughEndpoint.password]);
 
-		nock('http://' + config.private_host + ':' + config.private_port)
+		nock(`http://${config.private_host}:${config.private_port}`)
 			.post(config.passThroughEndpoint.path, expectedPrivateResponse)
 			.times(2)
 			.reply(201, {id: expectedUserId});
@@ -293,21 +293,21 @@ describe('Protected calls passThrough', () => {
 
 		var pin = 'xxxx';
 
-		redisMng.insertKeyValue(redisKey + '.pin', pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+		redisMng.insertKeyValue(`${redisKey}.pin`, pin, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 			assert.equal(err, null);
-			redisMng.insertKeyValue(redisKey + '.attempts', config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
+			redisMng.insertKeyValue(`${redisKey}.attempts`, config.userPIN.attempts, config.redisKeys.user_phone_verify.expireInSec, function (err) {
 				assert.equal(err, null);
 
 				var options = {
-					url: 'http://' + config.private_host + ':' + config.public_port + config.passThroughEndpoint.path,
+					url: `http://${config.private_host}:${config.public_port}${config.passThroughEndpoint.path}`,
 					headers: {
 						'Content-Type': 'application/json; charset=utf-8',
-						'x-otp-pin': pin
+						'x-otp-pin': pin,
+						[config.version.header]: versionHeader
 					},
 					method: 'POST',
 					body: JSON.stringify(expectedPublicRequest)
 				};
-				options.headers[config.version.header] = versionHeader;
 
 				request(options, function (err, res, body) {
 					assert.equal(err, null);
@@ -323,7 +323,7 @@ describe('Protected calls passThrough', () => {
 						assert.equal(err, null);
 						assert.notEqual(transactionId, null);
 						assert.equal(transactionId.length, 24);
-						done();
+						return done();
 					});
 				});
 

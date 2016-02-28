@@ -6,7 +6,7 @@ module.exports = function (req, res, next) {
 	daoMng.deleteAllUsers(function (err) {
 		if (err) {
 			res.send(500, {err: err.message});
-			return next(false);
+			return next(err);
 		}
 
 		res.send(204);

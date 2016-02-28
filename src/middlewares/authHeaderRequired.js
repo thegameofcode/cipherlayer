@@ -1,27 +1,28 @@
+'use strict';
+
 const _ = require('lodash');
 const config = require('../../config.json');
 
-function checkAuthHeader(req, res, next) {
-	var authHeader = req.header('Authorization');
+module.exports = function checkAuthHeader(req, res, next) {
+	const authHeader = req.header('Authorization');
 	if (!authHeader) {
-		res.send(401, {err: 'invalid_authorization', des: 'required authorization header'});
-		return next(false);
+		const err = {err: 'invalid_authorization', des: 'required authorization header'};
+		res.send(401, err);
+		return next(err);
 	}
 
-	var authType = authHeader.split(' ')[0].toLowerCase();
+	const authType = authHeader.split(' ')[0].toLowerCase();
 	if (authType !== _.trim(config.authHeaderKey).toLowerCase()) {
 		res.send(401, {err: 'invalid_authorization', des: 'invalid authorization type'});
-		return next(false);
+		return next(true); // TODO: return error
 	}
 
-	var authValue = authHeader.split(' ')[1];
+	const authValue = authHeader.split(' ')[1];
 	if (!authValue) {
 		res.send(401, {err: 'invalid_authorization', des: 'no authorization value'});
-		return next(false);
+		return next(true); // TODO: return error
 	}
 
 	req.auth = `${authType} ${authValue}`;
 	return next();
-}
-
-module.exports = checkAuthHeader;
+};

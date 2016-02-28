@@ -1,3 +1,5 @@
+'use strict';
+
 var config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
 
 var SF_PROFILE = {

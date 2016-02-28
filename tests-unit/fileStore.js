@@ -1,3 +1,5 @@
+'use strict'; 
+
 const fileStoreMng = require('../src/managers/file_store');
 const assert = require('assert');
 const fs = require('fs');
@@ -50,7 +52,7 @@ describe('AWS', function () {
 		validBucket = config.aws.buckets.avatars;
 
 		configAWSParam = true;
-		done();
+		return done();
 	});
 
 	it('upload invalid bucket', function (done) {
@@ -61,7 +63,7 @@ describe('AWS', function () {
 			var file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile('hola', uploadImage.name, file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -74,7 +76,7 @@ describe('AWS', function () {
 			var file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, '', file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -87,7 +89,7 @@ describe('AWS', function () {
 			var file = new Buffer(data, 'binary');
 			fileStoreMng.uploadFile(validBucket, emptyImage.name, file, function (err) {
 				assert.notEqual(err, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -101,7 +103,7 @@ describe('AWS', function () {
 			fileStoreMng.uploadFile(validBucket, uploadImage.name, file, function (err, file) {
 				assert.equal(err, null);
 				assert.notEqual(file, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -115,7 +117,7 @@ describe('AWS', function () {
 			fileStoreMng.uploadFile(validBucket, uploadZip.name, file, function (err, file) {
 				assert.equal(err, null);
 				assert.notEqual(file, null);
-				done();
+				return done();
 			});
 		});
 	});
@@ -126,7 +128,7 @@ describe('AWS', function () {
 		fileStoreMng.getFileURL(validBucket, uploadImage.name, function (err, fileURL) {
 			assert.equal(err, null);
 			assert.notEqual(fileURL, null);
-			done();
+			return done();
 		});
 	});
 });

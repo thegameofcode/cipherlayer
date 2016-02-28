@@ -7,13 +7,13 @@ describe('jsonValidator', function () {
 	it('no json', function (done) {
 		var result = isValidJSON(null, null);
 		assert.equal(result, false);
-		done();
+		return done();
 	});
 
 	it('no schema', function (done) {
 		var result = isValidJSON({isJson: true}, null);
 		assert.equal(result, true);
-		done();
+		return done();
 	});
 
 	it('valid json', function (done) {
@@ -27,6 +27,6 @@ describe('jsonValidator', function () {
 			"additionalProperties": true
 		});
 		assert.equal(result, true);
-		done();
+		return done();
 	});
 });

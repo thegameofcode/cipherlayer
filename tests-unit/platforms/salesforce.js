@@ -22,7 +22,7 @@ describe('inject expiresAtTimestamp whit refresh token', function () {
 			var roundedExpiresAt = (data.expiry / 10000).toFixed();
 			var roundedExpectedTimestamp = ((new Date().getTime() + config.salesforce.expiration * 60 * 1000) / 10000).toFixed();
 			assert.equal(roundedExpiresAt, roundedExpectedTimestamp);
-			done();
+			return done();
 		});
 	});
 });

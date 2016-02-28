@@ -1,5 +1,6 @@
 'use strict';
 
+const assert = require('assert');
 const should = require('chai').should();
 const ciphertoken = require('ciphertoken');
 const config = require('../../config.json');
@@ -32,7 +33,7 @@ describe('middleware', function () {
 					should.not.exist(value);
 					req.should.have.property('tokenInfo');
 					req.tokenInfo.should.have.property('userId').to.be.equal(userId);
-					done();
+					return done();
 				};
 
 				decodeToken(req, res, next);
@@ -58,7 +59,7 @@ describe('middleware', function () {
 					should.not.exist(value);
 					req.should.have.property('tokenInfo');
 					req.tokenInfo.should.have.property('userId').to.be.equal(userId);
-					done();
+					return done();
 				};
 
 				decodeToken(req, res, next);
@@ -75,10 +76,11 @@ describe('middleware', function () {
 					sendOk = true;
 				}
 			};
-			var next = function (value) {
-				value.should.be.equal(false);
+			var next = function (err) {
+				should.exist(err);
+				assert.equal(err.err, 'invalid_access_token');
 				sendOk.should.be.equal(true);
-				done();
+				return done();
 			};
 
 			decodeToken(req, res, next);
@@ -96,10 +98,11 @@ describe('middleware', function () {
 					sendOk = true;
 				}
 			};
-			var next = function (value) {
-				value.should.be.equal(false);
+			var next = function (err) {
+				should.exist(err);
+				assert.equal(err.err, 'Bad token');
 				sendOk.should.be.equal(true);
-				done();
+				return done();
 			};
 
 			decodeToken(req, res, next);

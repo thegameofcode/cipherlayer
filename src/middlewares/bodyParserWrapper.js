@@ -1,10 +1,12 @@
+'use strict';
+
 const config = require('../../config.json');
 const _ = require('lodash');
 
 module.exports = function (middleware) {
 	return function (req, res, next) {
 
-		var useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
+		const useDirectProxy = _.some(config.directProxyUrls, function (pattern) {
 			return req.url.match(new RegExp(pattern, 'g'));
 		});
 

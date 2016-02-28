@@ -25,7 +25,7 @@ describe('middleware', function () {
 			var next = function (value) {
 				should.not.exist(value);
 				req.should.have.property('auth').to.equal(config.authHeaderKey.toLowerCase() + accessToken);
-				done();
+				return done();
 			};
 
 			authHeaderRequired(req, res, next);
@@ -49,7 +49,7 @@ describe('middleware', function () {
 			var next = function (value) {
 				should.not.exist(value);
 				req.should.have.property('auth').to.equal(config.authHeaderKey.toLowerCase() + accessToken);
-				done();
+				return done();
 			};
 
 			authHeaderRequired(req, res, next);
@@ -70,10 +70,11 @@ describe('middleware', function () {
 					});
 				}
 			};
-			var next = function (value) {
-				value.should.be.equal(false);
+			var next = function (err) {
+				should.exist(err);
+				should.equal(err.err, 'invalid_authorization');
 				should.not.exist(req.auth);
-				done();
+				return done();
 			};
 
 			authHeaderRequired(req, res, next);
@@ -99,11 +100,10 @@ describe('middleware', function () {
 					});
 				}
 			};
-			var next = function (value) {
-				should.exist(value);
-				value.should.be.equal(false);
+			var next = function (err) {
+				should.exist(err);
 				should.not.exist(req.auth);
-				done();
+				return done();
 			};
 
 			authHeaderRequired(req, res, next);
@@ -128,9 +128,8 @@ describe('middleware', function () {
 			};
 			var next = function (value) {
 				should.exist(value);
-				value.should.be.equal(false);
 				should.not.exist(req.auth);
-				done();
+				return done();
 			};
 
 			authHeaderRequired(req, res, next);

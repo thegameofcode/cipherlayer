@@ -7,18 +7,9 @@ const redisMng = require('../../managers/redis');
 
 function getStatus(cbk) {
 	async.series([
-		function (done) {
-			userDao.getStatus(done);
-		},
-		function (done) {
-			redisMng.getStatus(done);
-		}
-	], function (err) {
-		if (err) {
-			return cbk(err);
-		}
-		cbk();
-	});
+		userDao.getStatus,
+		redisMng.getStatus
+	], cbk);
 }
 
 module.exports = function (req, res, next) {

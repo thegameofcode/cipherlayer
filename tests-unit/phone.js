@@ -56,7 +56,7 @@ describe('phone', function () {
 		phoneMng(phoneSettings).createPIN(baseUser.username, basePhone, function (err, createdPin) {
 			assert.equal(err, null);
 			assert.notEqual(createdPin, null);
-			done();
+			return done();
 		});
 	});
 
@@ -76,7 +76,7 @@ describe('phone', function () {
 				phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, createdPIN, function (err, verified) {
 					assert.equal(err, null);
 					assert.equal(verified, true);
-					done();
+					return done();
 				});
 			});
 		});
@@ -97,7 +97,7 @@ describe('phone', function () {
 					assert.notEqual(err, null);
 					assert.equal(err.err, 'verify_phone_error');
 					assert.equal(verified, false);
-					done();
+					return done();
 				});
 			});
 		});
@@ -121,7 +121,7 @@ describe('phone', function () {
 					assert.notEqual(err, null);
 					assert.equal(err.err, 'verify_phone_error');
 					assert.equal(verified, false);
-					done();
+					return done();
 				});
 			});
 		});
@@ -169,14 +169,14 @@ describe('phone', function () {
 								redisKey = redisKey.replace('{userId}', baseUser.username).replace('{phone}', '+1' + basePhone);
 
 								//5th attempt, new correct PIN
-								redisMng.getKeyValue(redisKey + '.pin', function (err, redisPhonePin) {
+								redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 									assert.equal(err, null);
 									assert.notEqual(createdPIN, redisPhonePin);
 
 									phoneMng(phoneSettings).verifyPhone(baseUser.username, basePhone, baseCountry, redisPhonePin, function (err, verified) {
 										assert.equal(err, null);
 										assert.equal(verified, true);
-										done();
+										return done();
 									});
 								});
 							});

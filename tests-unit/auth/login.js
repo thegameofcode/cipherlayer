@@ -27,10 +27,10 @@ describe('/login', function () {
 			var userToCreate = _.clone(baseUser);
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
-				dao.addUser()(userToCreate, function (err, createdUser) {
+				dao.addUser(userToCreate, function (err, createdUser) {
 					assert.equal(err, null);
 					assert.notEqual(createdUser, undefined);
-					done();
+					return done();
 				});
 			});
 		});
@@ -38,16 +38,16 @@ describe('/login', function () {
 	it('POST 200', function (done) {
 		var user = _.clone(baseUser);
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
+			url: `http://localhost:${config.public_port}/auth/login`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
-		nock('http://localhost:' + config.private_port)
+		nock(`http://localhost:${config.private_port}`)
 			.post('/api/me/session')
 			.reply(204);
 
@@ -66,7 +66,7 @@ describe('/login', function () {
 					assert.equal(err, null);
 					assert.equal(refreshTokenInfo.userId, user.id);
 					assert.equal(accessTokenInfo.data.deviceId, user.deviceId);
-					done();
+					return done();
 				});
 			});
 		});
@@ -75,21 +75,21 @@ describe('/login', function () {
 		var user = _.clone(baseUser);
 		user.password = 'invalidpassword';
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
+			url: `http://localhost:${config.public_port}/auth/login`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 409);
 			body = JSON.parse(body);
 			assert.notEqual(body.err, 'invalid_credentials');
-			done();
+			return done();
 		});
 	});
 
@@ -98,21 +98,21 @@ describe('/login', function () {
 		var username = user.username;
 		user.username = username.slice(0, username.length / 2);
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login',
+			url: `http://localhost:${config.public_port}/auth/login`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: versionHeader
 			},
 			method: 'POST',
 			body: JSON.stringify(user)
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 409);
 			body = JSON.parse(body);
 			assert.notEqual(body.err, 'invalid_credentials');
-			done();
+			return done();
 		});
 	});
 });

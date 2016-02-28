@@ -2,18 +2,18 @@ const world = require('../../support/world');
 const request = require('request');
 const config = require('../../../config.json');
 
-var myStepDefinitionsWrapper = function () {
+module.exports = function () {
 	this.When(/^a user request login with Google account$/, function (callback) {
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/google',
+		const options = {
+			url: `http://localhost:${config.public_port}/auth/google`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: world.versionHeader
 			},
 			method: 'GET',
 			followRedirect: false
 		};
-		options.headers[config.version.header] = world.versionHeader;
 
 		request(options, function (err, res, body) {
 			world.getResponse().err = err;
@@ -21,8 +21,7 @@ var myStepDefinitionsWrapper = function () {
 			if (body) {
 				world.getResponse().body = JSON.parse(body);
 			}
-			callback();
+			return callback();
 		});
 	});
 };
-module.exports = myStepDefinitionsWrapper;

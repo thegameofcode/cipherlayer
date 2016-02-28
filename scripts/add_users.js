@@ -1,5 +1,7 @@
+'use strict';
+
+/* eslint-disable no-console, no-process-env */
 const async = require('async');
-const fs = require('fs');
 const nock = require('nock');
 const userMng = require('../src/managers/user');
 const config = require('../config.json');
@@ -11,22 +13,22 @@ const userDao = require('../src/managers/dao');
 // Function to apply to each fixture
 const addFixture = function (fixture, callback) {
 
-	var data = fixture;
+	const data = fixture;
 
 	// Define user object to be passed to userMng
-	var pin = null;
-	var profileBody = {
+	const pin = null;
+	const profileBody = {
 		id: data._id.$oid || data._id,
 		email: data.email,
-		password: data.password || (process.env.DEFAULT_PASS ? process.env.DEFAULT_PASS : "qwerty")
+		password: data.password || (process.env.DEFAULT_PASS ? process.env.DEFAULT_PASS : 'qwerty')
 	};
 
 	if (!profileBody.id || !profileBody.email || !profileBody.password) {
-		console.log("Missing mandatory parameter(s)");
+		console.log('Missing mandatory parameter(s)');
 		return callback();
 	}
 	// Nock the createUser URL
-	nock('http://' + config.private_host + ':' + config.private_port + config.passThroughEndpoint.path, {
+	nock(`http://${config.private_host}:${config.private_port}${config.passThroughEndpoint.path}`, {
 		reqheaders: {
 			'Content-Type': 'application/json; charset=utf-8'
 		}
@@ -35,16 +37,16 @@ const addFixture = function (fixture, callback) {
 		.reply(201, profileBody);
 
 	// Save user data to database
-	userMng().createUser(profileBody, pin, function (err) {
+	return userMng().createUser(profileBody, pin, err => {
 		if (err) {
 
 			if (err.err === 'auth_proxy_user_error') {
-				console.log(profileBody.email + " " + err.des);
+				console.log(`${profileBody.email} ${err.des}`);
 				return callback();
 			}
 			return callback(err);
 		}
-		console.log(profileBody.email + " added");
+		console.log(`${profileBody.email} added`);
 		return callback();
 	});
 
@@ -55,38 +57,35 @@ const addFixture = function (fixture, callback) {
  *  - Exports the function, or
  *  - Executes the function if running from CLI
  */
-var runLoadFixtures = module.exports = function (fixtureFile, callback) {
-
-	console.log("running Load Fixtures");
-
+const runLoadFixtures = function (fixtureFile, callback) {
+	console.log('running Load Fixtures');
 	async.eachSeries(fixtureFile, addFixture, callback);
-
 };
+
+module.exports = runLoadFixtures;
 
 if (!module.parent) { // Run as CLI command exec
 	async.series([
 
 		// Start cipherLayer components (mongodb, redis...)
-		function connect(done) {
-			userDao.connect(done);
-		},
+		userDao.connect,
 
 		function drop(done) {
-			if (!process.env.DROP_DB) return done();
-			console.log("Dropping database");
-			userDao.deleteAllUsers(done);
+			if (!process.env.DROP_DB) {
+				return done();
+			}
+			console.log('Dropping database');
+			return userDao.deleteAllUsers(done);
 		},
 
 		function load(done) {
-			fixtureFile = require(__dirname + '/' + '../tests/fixtures/' + 'User.json');
+			const fixtureFile = require(`${__dirname}/../tests/fixtures/User.json`);
 			runLoadFixtures(fixtureFile, done);
 		},
 
-		function disconnect(done) {
-			userDao.disconnect(done);
-		}
+		userDao.disconnect
 
-	], function (err) {
+	], err => {
 		if (err) {
 			console.error(err);
 			process.exit(1);

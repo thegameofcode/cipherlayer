@@ -1,19 +1,22 @@
+'use strict';
+
 const redis = require('redis');
 const config = require('../../config.json');
 
-var redisClient;
+const REDIS_HOST = config.redis.host || 'localhost';
+const REDIS_PORT = config.redis.port || 6379;
 
-var isConnected;
+let redisClient;
+let isConnected;
 
 function connect(cbk) {
-	var host = config.redis.host || 'localhost';
-	var port = config.redis.port || 6379;
-
-	redisClient = redis.createClient(port, host, {});
+	redisClient = redis.createClient(REDIS_PORT, REDIS_HOST, {});
 	redisClient.on('connect', function (err) {
-		if (err) return cbk(err);
+		if (err) {
+			return cbk(err);
+		}
 		isConnected = true;
-		cbk(null, true);
+		return cbk(null, true);
 	});
 }
 
@@ -24,7 +27,7 @@ function disconnect(cbk) {
 
 	redisClient.end();
 	isConnected = false;
-	cbk(null, false);
+	return cbk(null, false);
 }
 
 function insertKeyValue(key, value, expSeconds, cbk) {
@@ -37,14 +40,14 @@ function insertKeyValue(key, value, expSeconds, cbk) {
 			return cbk(err);
 		}
 
-		getKeyValue(key, function (err, value) {
-			if (err) {
-				return cbk(err);
+		getKeyValue(key, function (getErr, resValue) {
+			if (getErr) {
+				return cbk(getErr);
 			}
 			if (expSeconds) {
 				redisClient.expire(key, expSeconds);
 			}
-			return cbk(null, value);
+			return cbk(null, resValue);
 		});
 	});
 }

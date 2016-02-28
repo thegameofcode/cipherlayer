@@ -8,8 +8,8 @@ const config = require('../../../config.json');
 const sessionRequest = require('./../auth/session');
 
 module.exports = function (req, res, next) {
-	var refreshToken = req.body.refreshToken;
-	var data = {};
+	const refreshToken = req.body.refreshToken;
+	const data = {};
 
 	if (req.body.deviceId) {
 		data.deviceId = req.body.deviceId;
@@ -20,10 +20,10 @@ module.exports = function (req, res, next) {
 	}
 
 	tokenMng.getRefreshTokenInfo(refreshToken, function (err, tokenSet) {
-		var userAgent = String(req.headers['user-agent']);
+		const userAgent = String(req.headers['user-agent']);
 
 		if (err) {
-			var errInvalidToken = {
+			const errInvalidToken = {
 				err: 'invalid_token',
 				des: 'Invalid token'
 			};
@@ -31,7 +31,7 @@ module.exports = function (req, res, next) {
 			return next();
 		}
 		if (new Date().getTime() > tokenSet.expiresAtTimestamp) {
-			var errExpiredToken = {
+			const errExpiredToken = {
 				err: 'expired_token',
 				des: 'Expired token'
 			};
@@ -41,7 +41,7 @@ module.exports = function (req, res, next) {
 
 		daoMng.getFromId(tokenSet.userId, function (err, foundUser) {
 			if (err) {
-				var errInvalidToken = {
+				const errInvalidToken = {
 					err: 'invalid_token',
 					des: 'Invalid token'
 				};
@@ -55,7 +55,7 @@ module.exports = function (req, res, next) {
 					des: `invalid_refresh_token '${refreshToken}' contains unknown user '${tokenSet.userId}'`
 				});
 				res.send(401, {err: 'invalid_refresh_token', des: 'unknown user inside token'});
-				return next(false);
+				return next();
 			}
 
 			async.series([
@@ -77,8 +77,8 @@ module.exports = function (req, res, next) {
 							}
 							async.eachSeries(realm.allowedDomains, function (domain, more) {
 								//wildcard
-								var check = domain.replace(/\*/g, '.*');
-								var match = foundUser.username.match(check);
+								const check = domain.replace(/\*/g, '.*');
+								const match = foundUser.username.match(check);
 								if (!match || foundUser.username !== match[0]) {
 									return more();
 								}
@@ -109,7 +109,7 @@ module.exports = function (req, res, next) {
 						if (err) {
 							log.error({ err });
 						}
-						var body = {
+						const body = {
 							accessToken: newToken,
 							expiresIn: config.accessToken.expiration
 						};

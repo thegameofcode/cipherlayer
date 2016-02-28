@@ -19,7 +19,7 @@ describe('crypto', function () {
 			var expectedValue = cipher.update(value, 'utf8', 'hex');
 			expectedValue += cipher.final('hex');
 			assert.equal(cryptedResult, expectedValue);
-			done();
+			return done();
 		});
 	});
 

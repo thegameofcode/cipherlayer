@@ -5,7 +5,7 @@ const config = require('../../../config.json');
 
 module.exports = function sessionRequest(deviceId, userId, method, userAgent, cbk) {
 	if (deviceId) {
-		var options = {
+		const options = {
 			url: `http://${config.private_host}:${config.private_port}/api/me/session`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8',

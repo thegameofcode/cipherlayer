@@ -1,20 +1,22 @@
+'use strict';
+
 const request = require('request');
 const _ = require('lodash');
 const countries = require('countries-info');
 const redisMng = require('./redis');
 
-var _settings = {};
+let _settings = {};
 
 function createPIN(redisKeyId, phone, cbk) {
-	var redisKey = _settings.phoneVerification.redis.key;
-	redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', phone);
-	var expires = _settings.phoneVerification.redis.expireInSec;
-	var pinAttempts = _settings.phoneVerification.attempts;
+	const redisKey = _settings.phoneVerification.redis.key.replace('{userId}', redisKeyId).replace('{phone}', phone);
+	const expires = _settings.phoneVerification.redis.expireInSec;
+	const pinAttempts = _settings.phoneVerification.attempts;
 
-	var pin = '';
-	for (var i = 0; i < _settings.phoneVerification.pinSize; i++) {
-		var randomNum = Math.floor(Math.random() * 9);
-		pin += randomNum.toString();
+	let pin = '';
+
+	// TODO: replace with map()
+	for (let i = 0; i < _settings.phoneVerification.pinSize; i++) {
+		pin += Math.floor(Math.random() * 9).toString();
 	}
 
 	redisMng.insertKeyValue(`${redisKey}.pin`, pin, expires, function (err, pin) {
@@ -25,8 +27,8 @@ function createPIN(redisKeyId, phone, cbk) {
 			if (err) {
 				return cbk(err);
 			}
-			sendPIN(phone, pin, function (err) {
-				cbk(err, pin);
+			sendPIN(phone, pin, function (pinErr) {
+				cbk(pinErr, pin);
 			});
 		});
 	});
@@ -87,8 +89,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 				});
 			});
 		} else {
-			var redisKey = _settings.phoneVerification.redis.key;
-			redisKey = redisKey.replace('{userId}', redisKeyId).replace('{phone}', formattedPhone);
+			const redisKey = _settings.phoneVerification.redis.key.replace('{userId}', redisKeyId).replace('{phone}', formattedPhone);
 
 			redisMng.getKeyValue(`${redisKey}.pin`, function (err, redisPhonePin) {
 				if (err) return cbk(err);
@@ -122,7 +123,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 							if (pin === redisPhonePin) {
 								return cbk(null, true);
 							}
-							//Last attempt
+							// Last attempt
 							if (redisPinAttempts === '1') {
 								createPIN(redisKeyId, formattedPhone, function (err) {
 									if (err) {

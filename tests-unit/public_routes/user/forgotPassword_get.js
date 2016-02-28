@@ -55,10 +55,10 @@ describe('public routes', function () {
 						userId.should.equal(expectedUserId);
 						fieldName.should.equal('password');
 						fieldValue.should.deep.equal(['PREVIOUS PASSWORD', expectedEncryptedPassword]);
-						cbk(null);
+						return cbk();
 					},
 					getRealms: function (cbk) {
-						cbk(null, []);
+						return cbk(null, []);
 					}
 				};
 				mockery.registerMock('../../managers/dao', daoManagerStub);
@@ -102,7 +102,7 @@ describe('public routes', function () {
 				};
 				var next = function (status) {
 					should.not.exist(status);
-					done();
+					return done();
 				};
 
 				const forgotPassword_get = require('../../../src/routes_public/user/forgotPassword_get');

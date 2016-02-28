@@ -15,10 +15,11 @@ module.exports = function () {
 			.post(config.externalServices.notifications.pathEmail)
 			.reply(200, {});
 
-		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/login/email',
+		const options = {
+			url: `http://localhost:${config.public_port}/auth/login/email`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				[config.version.header]: world.versionHeader
 			},
 			method: 'POST',
 			json: true,
@@ -27,13 +28,11 @@ module.exports = function () {
 			}
 		};
 
-		options.headers[config.version.header] = world.versionHeader;
-
 		request(options, function (err, res, body) {
 			assert.equal(err, null);
 			world.getResponse().statusCode = res.statusCode;
 			world.getResponse().body = body;
-			callback();
+			return callback();
 		});
 	});
 };

@@ -80,7 +80,7 @@ describe('public routes', function () {
 					var responseSendSpy = sinon.spy(res, 'send');
 					var next = function () {
 						sinon.assert.calledOnce(responseSendSpy);
-						done();
+						return done();
 					};
 
 					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
@@ -113,9 +113,8 @@ describe('public routes', function () {
 							sinon.assert.calledOnce(nextSpy);
 							sinon.assert.calledOnce(responseSendSpy);
 
-							should.exist(status);
-							status.should.equal(false);
-							done();
+							should.not.exist(status);
+							return done();
 						}
 					};
 					var nextSpy = sinon.spy(next, 'next');

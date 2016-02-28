@@ -1,3 +1,5 @@
+'use strict';
+
 const SFPlatform = require('../platforms/salesforce');
 
 function platformsSetUp(req, res, next) {
@@ -12,7 +14,7 @@ function platformsSetUp(req, res, next) {
 						err: 'Could not renew SF token',
 						des: `Unable to renew sales force access token, got error: ${err}`
 					});
-					return next(false);
+					return next(err);
 				}
 				req.options.headers['x-sf-data'] = JSON.stringify({
 					userId: platform.accessToken.params.id,

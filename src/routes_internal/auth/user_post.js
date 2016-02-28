@@ -4,10 +4,10 @@ const daoMng = require('../../managers/dao');
 const config = require('../../../config.json');
 const ObjectID = require('mongodb').ObjectID;
 const crypto = require('../../managers/crypto');
-var cryptoMng = crypto(config.password);
+const cryptoMng = crypto(config.password);
 
 module.exports = function postAuthUser(req, res, next) {
-	var user = {
+	const user = {
 		id: req.body.id,
 		username: req.body.username,
 		password: req.body.password
@@ -26,16 +26,15 @@ module.exports = function postAuthUser(req, res, next) {
 	cryptoMng.encrypt(user.password, function (encryptedPwd) {
 		user.password = encryptedPwd;
 
-		daoMng.addUser()(user, function (err, createdUser) {
+		daoMng.addUser(user, function (err, createdUser) {
 			if (err) {
 				res.send(409, err);
-			} else {
-				var responseUser = {
-					username: createdUser.username
-				};
-				res.send(201, responseUser);
+				return next(err);
 			}
-			return next(false);
+			res.send(201, {
+				username: createdUser.username
+			});
+			return next();
 		});
 	});
 };

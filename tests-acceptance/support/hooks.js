@@ -1,4 +1,4 @@
-var _= require('lodash');
+const _= require('lodash');
 
 const world = require('./world');
 const config = require('../../config.json');

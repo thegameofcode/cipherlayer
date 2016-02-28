@@ -29,10 +29,10 @@ describe('/logout', function () {
 			var userToCreate = _.clone(baseUser);
 			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
 				userToCreate.password = encryptedPwd;
-				dao.addUser()(userToCreate, function (err, createdUser) {
+				dao.addUser(userToCreate, function (err, createdUser) {
 					assert.equal(err, null);
 					assert.notEqual(createdUser, undefined);
-					done();
+					return done();
 				});
 			});
 		});
@@ -42,13 +42,14 @@ describe('/logout', function () {
 		return new Promise(function (ok) {
 			var user = _.clone(baseUser);
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/auth/login',
-				headers: {},
+				url: `http://localhost:${config.public_port}/auth/login`,
+				headers: {
+					[config.version.header]: versionHeader
+				},
 				method: 'POST',
 				body: user,
 				json: true
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			request(options, function (err, res, body) {
 				should.not.exist(err);
@@ -63,21 +64,21 @@ describe('/logout', function () {
 	it('POST 204', function (done) {
 		doLogin().then(function (accessToken) {
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/auth/logout',
+				url: `http://localhost:${config.public_port}/auth/logout`,
 				method: 'POST',
 				headers: {
-					'Authorization': 'bearer ' + accessToken
+					'Authorization': 'bearer ' + accessToken,
+					[config.version.header]: versionHeader
 				},
 				json: true
 			};
-			options.headers[config.version.header] = versionHeader;
 
-			nock('http://' + config.private_host + ':' + config.private_port).delete('/api/me/session').reply(200);
+			nock(`http://${config.private_host}:${config.private_port}`).delete('/api/me/session').reply(200);
 
 			request(options, function (err, res, body) {
 				should.not.exist(err);
 				res.statusCode.should.equal(204, body);
-				done();
+				return done();
 			});
 		});
 	});
@@ -85,80 +86,81 @@ describe('/logout', function () {
 	it('POST 500 no sesion service', function (done) {
 		doLogin().then(function (accessToken) {
 			var options = {
-				url: 'http://localhost:' + config.public_port + '/auth/logout',
+				url: `http://localhost:${config.public_port}/auth/logout`,
 				method: 'POST',
 				headers: {
-					'Authorization': 'bearer ' + accessToken
+					'Authorization': 'bearer ' + accessToken,
+					[config.version.header]: versionHeader
 				},
 				json: true
 			};
-			options.headers[config.version.header] = versionHeader;
 
 			request(options, function (err, res, body) {
 				should.not.exist(err);
 				res.statusCode.should.equal(500);
 				body.should.have.property('err').to.be.equal('internal_session_error');
 				body.should.have.property('des').to.be.equal('unable to close session');
-				done();
+				return done();
 			});
 		});
 	});
 
 	it('POST 401 invalid access token', function (done) {
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/logout',
+			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
 			headers: {
-				'Authorization': 'bearer INVALID_TOKEN'
+				'Authorization': 'bearer INVALID_TOKEN',
+				[config.version.header]: versionHeader
 			},
 			json: true
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			should.not.exist(err);
 			res.statusCode.should.equal(401);
 			body.should.have.property('err').to.be.equal('invalid_access_token');
 			body.should.have.property('des').to.be.equal('unable to read token info');
-			done();
+			return done();
 		});
 	});
 
 	it('POST 401 no authorization header', function (done) {
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/logout',
+			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
-			headers: {},
+			headers: {
+				[config.version.header]: versionHeader
+			},
 			json: true
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			should.not.exist(err);
 			res.statusCode.should.equal(401);
 			body.should.have.property('err').to.be.equal('invalid_authorization');
 			body.should.have.property('des').to.be.equal('required authorization header');
-			done();
+			return done();
 		});
 	});
 
 	it('POST 401 invalid authorization header identifier', function (done) {
 		var options = {
-			url: 'http://localhost:' + config.public_port + '/auth/logout',
+			url: `http://localhost:${config.public_port}/auth/logout`,
 			method: 'POST',
 			headers: {
-				'Authorization': 'wrong bearer TOKEN'
+				'Authorization': 'wrong bearer TOKEN',
+				[config.version.header]: versionHeader
 			},
 			json: true
 		};
-		options.headers[config.version.header] = versionHeader;
 
 		request(options, function (err, res, body) {
 			should.not.exist(err);
 			res.statusCode.should.equal(401);
 			body.should.have.property('err').to.be.equal('invalid_authorization');
 			body.should.have.property('des').to.be.equal('invalid authorization type');
-			done();
+			return done();
 		});
 	});
 });

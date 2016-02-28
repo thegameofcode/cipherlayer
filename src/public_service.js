@@ -23,9 +23,10 @@ const userAppVersion = require('./middlewares/userAppVersion')();
 
 const routes = require('./routes_public/routes');
 
+const service = {};
+let server;
+
 module.exports = function () {
-	var service = {};
-	var server;
 
 	service.start = function (publicPort, done) {
 		server = restify.createServer({
@@ -36,7 +37,7 @@ module.exports = function () {
 		log.info(`PUBLIC SERVICE starting on PORT ${publicPort}`);
 
 		server.on('after', function (req, res) {
-			var logInfo = {
+			const logInfo = {
 				request: {
 					method: req.method,
 					headers: req.headers,
@@ -78,7 +79,7 @@ module.exports = function () {
 		server.use(restify.queryParser());
 		server.use(bodyParserWrapper(restify.bodyParser({maxBodySize: 1024 * 1024 * 3})));
 
-		var versionControlOptions = _.clone(config.version);
+		const versionControlOptions = _.clone(config.version);
 		versionControlOptions.public = [
 			'/auth/sf',
 			'/auth/sf/*',
@@ -102,7 +103,7 @@ module.exports = function () {
 
 		routes(server);
 
-		var platformsPath = path.join(__dirname, '/platforms/');
+		const platformsPath = path.join(__dirname, '/platforms/');
 		fs.readdirSync(platformsPath).forEach(function (filename) {
 			require(platformsPath + filename).addRoutes(server, passport);
 		});

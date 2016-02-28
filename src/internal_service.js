@@ -9,9 +9,9 @@ const bodyParserWrapper = require('./middlewares/bodyParserWrapper');
 const routes = require('./routes_internal/routes');
 
 module.exports = function () {
-	var service = {};
+	const service = {};
 
-	var server;
+	let server;
 	service.start = function (internalPort, done) {
 		if (!internalPort) {
 			log.info('INTERNAL SERVICE not started because there is no internal_port in config');
@@ -26,7 +26,7 @@ module.exports = function () {
 		});
 
 		server.on('after', function (req, res) {
-			var logInfo = {
+			const logInfo = {
 				request: {
 					method: req.method,
 					headers: req.headers,

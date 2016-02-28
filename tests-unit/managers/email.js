@@ -27,7 +27,7 @@ describe('managers', function () {
 
 				emailMng.sendEmailForgotPassword(email, password, link, function (err) {
 					should.not.exist(err);
-					done();
+					return done();
 				});
 			});
 		});
@@ -52,7 +52,7 @@ describe('managers', function () {
 				emailMng.sendEmailMagicLink(expectedEmail, expectedLink, function (err) {
 					should.not.exist(err);
 					nockedEndpoint.isDone().should.equal(true);
-					done();
+					return done();
 				});
 			});
 
@@ -79,7 +79,7 @@ describe('managers', function () {
 						des: 'Error calling notifications service for Magic Link email'
 					});
 					nockedEndpoint.isDone().should.equal(true);
-					done();
+					return done();
 				});
 			});
 		});
