@@ -8,13 +8,16 @@
     "test-unit": "mocha tests-unit --recursive",
     "test-acceptance": "cucumber.js tests-acceptance -f pretty --tags ~@ignore",
     "test-acceptance-only": "cucumber.js tests-acceptance -f pretty --tags @only",
-    "lint": "jshint ./src ./tests-unit ./tests-acceptance main.js",
+    "lint": "jshint src tests-unit tests-acceptance main.js",
     "coverage-unit": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/unit _mocha -- tests-unit --recursive --reporter mocha-lcov-reporter",
     "coverage-acceptance": "istanbul cover --root src --include-all-sources --lcovonly --dir ./coverage/acceptance cucumber.js -- tests-acceptance --tags ~@ignore --format json",
     "coverage-merge": "istanbul-combine coverage/**/coverage.json",
     "coverage": "npm run coverage-unit && npm run coverage-acceptance && npm run coverage-merge",
     "coveralls": "istanbul-coveralls",
-    "codeclimate": "codeclimate-test-reporter < ./coverage/lcov.info"
+    "codeclimate": "codeclimate-test-reporter < ./coverage/lcov.info",
+    "test-ci": "npm run lint && npm run test-unit-ci && npm run test-acceptance-ci",
+    "test-unit-ci": "mocha tests-unit --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=$CIRCLE_TEST_REPORTS/mocha/junit.xml",
+    "test-acceptance-ci": "cucumber.js tests-acceptance --tags ~@ignore  --format json --out $CIRCLE_TEST_REPORTS/cucumber/tests.cucumber"
   },
   "dependencies": {
     "async": "^1.5.2",
@@ -48,6 +51,7 @@
     "istanbul-coveralls": "^1.0.3",
     "jshint": "^2.8.0",
     "mocha": "^2.0.1",
+    "mocha-junit-reporter": "^1.9.1",
     "mocha-lcov-reporter": "^1.2.0",
     "mockery": "^1.4.0",
     "nock": "^7.2.2",

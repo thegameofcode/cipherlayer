@@ -12,17 +12,17 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-# NPM rewrites package.json after every install with this settings
-[package.json]
-indent_style = space
-indent_size = 2
-
 [*.md]
 trim_trailing_whitespace = false
 
 [{*.json,*.yml}]
 indent_style = tab
 indent_size = 4
+
+# NPM rewrites package.json after every install with this settings
+[package.json]
+indent_style = space
+indent_size = 2
 
 [*.feature]
 indent_style = tab
