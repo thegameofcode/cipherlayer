@@ -27,14 +27,12 @@ function prepareOptions(req, res, next) {
 	}
 
 	if (req.header('Content-Type') && req.header('Content-Type').indexOf('multipart/form-data') > -1) {
-		const formData = {};
+		const formData = Object.assign({}, req.body);
 		const files = req.files;
 
-		// TODO: replace with map()
-		for (const fileKey in files) {
-			const file = files[fileKey];
-			formData[fileKey] = fs.createReadStream(file.path);
-		}
+		Object.keys(files).forEach( function (filekey){
+			formData[filekey] = fs.createReadStream(files[filekey].path);
+		});
 		options.formData = formData;
 	} else {
 		options.headers['Content-Type'] = req.header('Content-Type');

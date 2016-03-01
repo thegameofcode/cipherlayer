@@ -2,50 +2,28 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const _ = require('lodash');
-const fs = require('fs');
+const mockery = require('mockery');
 
-const prepareOptions = require('./../src/middlewares/prepareOptions');
-
-let request;
-let response;
-
-let fsStub;
+require('chai').should();
 
 describe('prepareOptions middleware: ', function () {
 
-	before(function (done) {
-		fsStub = sinon.stub(fs, 'createReadStream');
-		return done();
-	});
-
-	after(function (done) {
-		fsStub.restore();
-		return done();
-	});
-
 	beforeEach(function (done) {
+		mockery.enable({
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		});
+		return done();
+	});
 
-		request = {
-			headers: {}
-		};
-		response = {};
-		response.body = {};
-		response.send = function (status, message) {
-			response.body.status = status;
-			response.body.message = message;
-			return;
-		};
-		request.header = function (item) {
-			return request.headers[item.toLowerCase()];
-		};
-
+	afterEach(function (done) {
+		mockery.disable();
 		return done();
 	});
 
 	it('POST request content type is application/json', function (done) {
-
-		_.extend(request, {
+		const request = {
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
@@ -61,12 +39,20 @@ describe('prepareOptions middleware: ', function () {
 				item1: 'value1',
 				item2: 'value2'
 			},
-			files: {
-				file1: 'stuff',
-				file2: 'moreStuff'
+			header: item => {
+				return request.headers[item.toLowerCase()];
 			}
-		});
+		};
 
+		const response = {
+			body: {},
+			send: (status, message) => {
+				response.body.status = status;
+				response.body.message = message;
+			}
+		};
+
+		const prepareOptions = require('./../src/middlewares/prepareOptions');
 		prepareOptions(request, response, function (error) {
 			assert.equal(error, undefined);
 			assert.notEqual(request.options, undefined);
@@ -78,8 +64,7 @@ describe('prepareOptions middleware: ', function () {
 	});
 
 	it('GET request with content type application/json does not have a body in options', function (done) {
-
-		_.extend(request, {
+		const request = {
 			method: 'GET',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
@@ -90,9 +75,21 @@ describe('prepareOptions middleware: ', function () {
 			},
 			connection: {
 				remoteAddress: '::ffff:127.0.0.1'
+			},
+			header: item => {
+				return request.headers[item.toLowerCase()];
 			}
-		});
+		};
 
+		const response = {
+			body: {},
+			send: (status, message) => {
+				response.body.status = status;
+				response.body.message = message;
+			}
+		};
+
+		const prepareOptions = require('./../src/middlewares/prepareOptions');
 		prepareOptions(request, response, function (error) {
 			assert.equal(error, undefined);
 			assert.notEqual(request.options, undefined);
@@ -103,8 +100,7 @@ describe('prepareOptions middleware: ', function () {
 	});
 
 	it('DELETE request with content type application/json does not have a body in options', function (done) {
-
-		_.extend(request, {
+		const request = {
 			method: 'DELETE',
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
@@ -115,9 +111,21 @@ describe('prepareOptions middleware: ', function () {
 			},
 			connection: {
 				remoteAddress: '::ffff:127.0.0.1'
+			},
+			header: item => {
+				return request.headers[item.toLowerCase()];
 			}
-		});
+		};
 
+		const response = {
+			body: {},
+			send: (status, message) => {
+				response.body.status = status;
+				response.body.message = message;
+			}
+		};
+
+		const prepareOptions = require('./../src/middlewares/prepareOptions');
 		prepareOptions(request, response, function (error) {
 			assert.equal(error, undefined);
 			assert.notEqual(request.options, undefined);
@@ -128,8 +136,7 @@ describe('prepareOptions middleware: ', function () {
 	});
 
 	it('request content type is multipart/form-data', function (done) {
-
-		_.extend(request, {
+		const request = {
 			headers: {
 				'content-type': 'multipart/form-data',
 				host: 'localhost:3000'
@@ -145,17 +152,47 @@ describe('prepareOptions middleware: ', function () {
 				item2: 'value2'
 			},
 			files: {
-				file1: 'stuff',
-				file2: 'moreStuff'
+				file1: {
+					path: '/path/to/file/1'
+				},
+				file2: {
+					path: '/path/to/file/2'
+				}
+			},
+			header: item => {
+				return request.headers[item.toLowerCase()];
 			}
-		});
+		};
 
+		const response = {
+			body: {},
+			send: (status, message) => {
+				response.body.status = status;
+				response.body.message = message;
+			}
+		};
+
+		const fsStub = {
+			createReadStream: path => {
+				return `STREAM FOR PATH ${path}`;
+			}
+		};
+
+		const createReadStreamSpy = sinon.spy(fsStub, 'createReadStream');
+		mockery.registerMock('fs', fsStub);
+
+		const prepareOptions = require('./../src/middlewares/prepareOptions');
 		prepareOptions(request, response, function (error) {
 			assert.equal(error, undefined);
 			assert.notEqual(request.options, undefined);
-			assert.notEqual(request.options.formData, undefined);
-			assert.equal(fsStub.calledTwice, true);
+
+			request.options.formData.should.have.property('item1').to.equal('value1');
+			request.options.formData.should.have.property('item2').to.equal('value2');
+			request.options.formData.should.have.property('file1').to.equal('STREAM FOR PATH /path/to/file/1');
+			request.options.formData.should.have.property('file2').to.equal('STREAM FOR PATH /path/to/file/2');
+			createReadStreamSpy.callCount.should.equal(2);
 			return done();
 		});
 	});
+
 });
