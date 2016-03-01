@@ -30,9 +30,11 @@ function prepareOptions(req, res, next) {
 		const formData = Object.assign({}, req.body);
 		const files = req.files;
 
-		Object.keys(files).forEach( function (filekey){
-			formData[filekey] = fs.createReadStream(files[filekey].path);
-		});
+		if(files){
+			Object.keys(files).forEach( function (filekey){
+				formData[filekey] = fs.createReadStream(files[filekey].path);
+			});
+		}
 		options.formData = formData;
 	} else {
 		options.headers['Content-Type'] = req.header('Content-Type');
