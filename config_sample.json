@@ -150,7 +150,8 @@
 			}
 		},
 		"installPath": "/install",
-		"db": "mongodb://localhost/versionControl?w=1"
+		"db": "mongodb://localhost/versionControl?w=1",
+		"errorStatusCode": 400
 	},
 	"allowedDomains": [
 		"*@a.com",
