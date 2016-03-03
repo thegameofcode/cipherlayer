@@ -1,7 +1,6 @@
 const request = require('request');
 const assert = require('assert');
 const world = require('../support/world');
-const nock = require('nock');
 const config = require('../../config.json');
 
 module.exports = function () {
@@ -20,10 +19,6 @@ module.exports = function () {
 				method: METHOD,
 				body: PUBLIC_PAYLOAD
 			};
-
-			nock(`http://localhost:${config.private_port}${config.private_port}`)
-				.post(config.passThroughEndpoint.path)
-				.reply(201, {id: 'a1b2c3d4e5f6'});
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null);

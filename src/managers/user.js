@@ -84,7 +84,7 @@ function createUser(body, pin, cbk) {
 		};
 
 		daoMng.getFromUsername(user.username, function (err, foundUser) {
-			if(err && err.message !== daoMng.ERROR_USER_NOT_FOUND){
+			if (err && err.message !== daoMng.ERROR_USER_NOT_FOUND) {
 				return cbk(err);
 			}
 
@@ -130,7 +130,7 @@ function createUser(body, pin, cbk) {
 							refreshToken: tokenInfo.data.refreshToken,
 							expiry: new Date().getTime() + _settings.salesforce.expiration * 60 * 1000
 						}];
-						createUserPrivateCall(body, user, cbk);
+						return createUserPrivateCall(body, user, cbk);
 					});
 				} else {
 					emailMng(_settings).emailVerification(body[_settings.passThroughEndpoint.email || 'email'], body, function (err, destinationEmail) {
@@ -143,7 +143,7 @@ function createUser(body, pin, cbk) {
 								code: 200
 							});
 						}
-						createUserPrivateCall(body, user, cbk);
+						return createUserPrivateCall(body, user, cbk);
 					});
 				}
 			});
@@ -227,7 +227,7 @@ function createUserByToken(token, cbk) {
 				}
 
 				daoMng.getFromUsername(user.username, function (err, foundUser) {
-					if(err && err.message !== daoMng.ERROR_USER_NOT_FOUND){
+					if (err && err.message !== daoMng.ERROR_USER_NOT_FOUND) {
 						return cbk({
 							err: 'auth_proxy_error',
 							des: 'error checking user from db',
@@ -264,7 +264,7 @@ function createUserPrivateCall(body, user, cbk) {
 		json: true
 	};
 
-	log.info(`=> POST ${options.url}`);
+	log.info({url: options.url}, '=> POST');
 	request(options, function (err, private_res, body) {
 		if (err) {
 			log.error(`<= error: ${err}`);
@@ -272,6 +272,22 @@ function createUserPrivateCall(body, user, cbk) {
 				err: 'auth_proxy_error',
 				des: 'there was an internal error when redirecting the call to protected service',
 				code: 500
+			});
+		}
+
+		if (private_res.statusCode !== 201) {
+			log.warn({request_body: options.body, response_body: body}, 'user creation attempt failed');
+			if (body.err && body.des) {
+				return cbk({
+					err: body.err,
+					des: body.des,
+					code: private_res.statusCode
+				});
+			}
+			return cbk({
+				err: 'user_creation_failed',
+				des: body,
+				code: 400
 			});
 		}
 
@@ -287,7 +303,7 @@ function createUserPrivateCall(body, user, cbk) {
 
 			daoMng.addUser(user, function (err, createdUser) {
 				if (err) {
-					log.error({ err }, 'error adding user to DB');
+					log.error({err}, 'error adding user to DB');
 					return cbk({
 						err: err.err,
 						des: 'error adding user to DB',
@@ -297,7 +313,7 @@ function createUserPrivateCall(body, user, cbk) {
 
 				daoMng.getFromUsernamePassword(createdUser.username, createdUser.password, function (err, foundUser) {
 					if (err) {
-						log.error({ err }, 'error obtaining user');
+						log.error({err}, 'error obtaining user');
 						return cbk({
 							err: err.message,
 							code: 409
@@ -314,7 +330,7 @@ function createUserPrivateCall(body, user, cbk) {
 							// Add "realms" & "capabilities"
 							daoMng.getRealms(function (err, realms) {
 								if (err) {
-									log.error({ err }, 'error obtaining user realms');
+									log.error({err}, 'error obtaining user realms');
 									return done();
 								}
 
@@ -355,7 +371,7 @@ function createUserPrivateCall(body, user, cbk) {
 					], function () {
 						tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
 							if (err) {
-								log.error({ err }, 'error creating tokens');
+								log.error({err}, 'error creating tokens');
 								return cbk({
 									err: err.message,
 									code: 409
