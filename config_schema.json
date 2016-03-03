@@ -196,32 +196,6 @@
 			"type": "string",
 			"required": true
 		},
-		"linkedin": {
-			"type": "object",
-			"properties": {
-				"scope": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"required": true
-				},
-				"consumerKey": {
-					"type": "string",
-					"required": true
-				},
-				"consumerSecret": {
-					"type": "string",
-					"required": true
-				},
-				"callbackURL": {
-					"type": "string",
-					"format": "uri",
-					"required": true
-				}
-			},
-			"required": true
-		},
 		"aws": {
 			"type": "object",
 			"properties": {

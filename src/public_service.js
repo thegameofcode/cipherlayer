@@ -83,10 +83,6 @@ module.exports = function () {
 		versionControlOptions.public = [
 			'/auth/sf',
 			'/auth/sf/*',
-			'/auth/in',
-			'/auth/in/*',
-			'/auth/google',
-			'/auth/google/*',
 			'/auth/login/refreshToken*',
 			'/user/activate*',
 			'/heartbeat',
