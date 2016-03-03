@@ -35,7 +35,6 @@ Feature: client application logs in into a protected backend
 		When the client app requests a magic link for a valid user
 		Then the user receives a magic link email
 
-	@only
 	@service
 	Scenario: user clicks the magic link
 		Given a user with valid credentials
