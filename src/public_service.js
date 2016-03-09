@@ -88,10 +88,13 @@ module.exports = function () {
 			'/heartbeat',
 			'/user/email/available'
 		];
+		if (config.version.public) {
+			versionControlOptions.public = versionControlOptions.public.concat(config.version.public);
+		}
 		server.use(versionControl(versionControlOptions));
 
 		server.on('uncaughtException', function (req, res, route, error) {
-			log.error({exception: { req, res, route, err: error }});
+			log.error({exception: {req, res, route, err: error}});
 			if (!res.statusCode) {
 				res.send(500, {err: 'internal_error', des: 'uncaught exception'});
 			}
@@ -116,6 +119,15 @@ module.exports = function () {
 			platformsSetUp,
 			propagateRequest
 		];
+
+		if (config.publicEndpoints) {
+			config.publicEndpoints.forEach(publicEndpoint => {
+				publicEndpoint.replace('*','.*');
+				const regEx = new RegExp(publicEndpoint);
+				server.get(regEx, prepareOptions,propagateRequest);
+			});
+		}
+
 		server.get(/(.*)/, allMiddlewares);
 		server.post(/(.*)/, allMiddlewares);
 		server.del(/(.*)/, allMiddlewares);

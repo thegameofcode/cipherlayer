@@ -130,7 +130,11 @@
 		},
 		"installPath": "/install",
 		"db": "mongodb://localhost/versionControl?w=1",
-		"errorStatusCode": 400
+		"errorStatusCode": 400,
+		"public": [
+			"/public/*"
+		]
+
 	},
 	"allowedDomains": [
 		"*@a.com",
@@ -190,5 +194,8 @@
 	],
 	"allowedHeaders": [
 		"x-custom-header"
+	],
+	"publicEndpoints": [
+		"/public/*"
 	]
 }
