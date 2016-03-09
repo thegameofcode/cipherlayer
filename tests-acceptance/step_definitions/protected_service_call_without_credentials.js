@@ -4,11 +4,13 @@ const assert = require('assert');
 const config = require('../../config.json');
 
 module.exports = function () {
-	this.When(/^the application makes a (.*) without credentials (.*) to a protected (.*)$/, function (METHOD, PAYLOAD, PATH, callback) {
+	this.When(/^the application makes a (.*) with (.*) to a protected (.*)$/, function (METHOD, PAYLOAD, PATH, callback) {
 		const options = {
 			url: `http://localhost:${config.public_port}${PATH}`,
 			headers: {
-				'Content-Type': 'application/json; charset=utf-8'
+				'Content-Type': 'application/json; charset=utf-8',
+				Authorization: `bearer ${world.getTokens().accessToken}`,
+				[config.version.header]: world.versionHeader
 			},
 			method: METHOD
 		};

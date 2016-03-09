@@ -23,3 +23,14 @@ Feature: reverse proxy protects an applicacion behind cipherlayer
 		Examples:
 			| PATH         | METHOD | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD       | ALLOWED_HEADER  | HEADER_VALUE |
 			| /test/get200 | GET    | 200    |                 | {"m":"GET", "s":"200"} | x-custom-header | test         |
+
+	@only
+	@service
+	Scenario Outline: A call to a public endpoint set on config is allowed to pass
+		Given a protected service replies to a public <METHOD> request with <REQUEST_PAYLOAD> to <PATH> with status <STATUS> and a body <RESPONSE_PAYLOAD>
+		When the application makes a <METHOD> without credentials <REQUEST_PAYLOAD> to a protected <PATH>
+		Then the response status code is <STATUS>
+		And the response body must be <RESPONSE_PAYLOAD>
+		Examples:
+			| PATH         | METHOD | STATUS | REQUEST_PAYLOAD | RESPONSE_PAYLOAD       |
+			| /public/path | GET    | 200    |                 | {"m":"GET", "s":"200"} |
