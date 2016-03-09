@@ -24,12 +24,6 @@ function platformsSetUp(req, res, next) {
 				return next();
 			});
 		}
-		if (platform.platform === 'in') {
-			req.options.headers['x-in-data'] = JSON.stringify({
-				accessToken: platform.accessToken
-			});
-			return next();
-		}
 	});
 }
 
