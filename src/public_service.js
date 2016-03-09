@@ -92,10 +92,13 @@ module.exports = function () {
 			'/heartbeat',
 			'/user/email/available'
 		];
+		if (config.version.public) {
+			versionControlOptions.public = versionControlOptions.public.concat(config.version.public);
+		}
 		server.use(versionControl(versionControlOptions));
 
 		server.on('uncaughtException', function (req, res, route, error) {
-			log.error({exception: { req, res, route, err: error }});
+			log.error({exception: {req, res, route, err: error}});
 			if (!res.statusCode) {
 				res.send(500, {err: 'internal_error', des: 'uncaught exception'});
 			}
