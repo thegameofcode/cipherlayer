@@ -4,11 +4,11 @@ const config = require('../../config.json');
 const fs = require('fs');
 
 function prepareOptions(req, res, next) {
+
 	const options = {
 		url: `http://${config.private_host}:${config.private_port}${req.url}`,
 		headers: {
 			'Content-Type': req.header('Content-Type'),
-			'x-user-id': req.tokenInfo.userId,
 			Host: req.headers.host,
 			'X-Real-IP': req.connection.remoteAddress,
 			'X-Forwarded-For': req.header('X-Forwarded-For') || req.connection.remoteAddress
@@ -17,12 +17,15 @@ function prepareOptions(req, res, next) {
 		followRedirect: false
 	};
 
-	if (req.tokenInfo.data) {
-		if (req.tokenInfo.data.realms) {
-			options.headers['x-user-realms'] = req.tokenInfo.data.realms.join(',');
-		}
-		if (req.tokenInfo.data.capabilities) {
-			options.headers['x-user-capabilities'] = JSON.stringify(req.tokenInfo.data.capabilities);
+	if(req.tokenInfo){
+		options.headers['x-user-id'] = req.tokenInfo.userId;
+		if (req.tokenInfo.data) {
+			if (req.tokenInfo.data.realms) {
+				options.headers['x-user-realms'] = req.tokenInfo.data.realms.join(',');
+			}
+			if (req.tokenInfo.data.capabilities) {
+				options.headers['x-user-capabilities'] = JSON.stringify(req.tokenInfo.data.capabilities);
+			}
 		}
 	}
 
