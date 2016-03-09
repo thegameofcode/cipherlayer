@@ -123,6 +123,15 @@ module.exports = function () {
 			platformsSetUp,
 			propagateRequest
 		];
+
+		if (config.publicEndpoints) {
+			config.publicEndpoints.forEach(publicEndpoint => {
+				publicEndpoint.replace('*','.*');
+				const regEx = new RegExp(publicEndpoint);
+				server.get(regEx, prepareOptions,propagateRequest);
+			});
+		}
+
 		server.get(/(.*)/, allMiddlewares);
 		server.post(/(.*)/, allMiddlewares);
 		server.del(/(.*)/, allMiddlewares);
