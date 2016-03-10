@@ -56,27 +56,6 @@
 			"replacementAvatar": "https://_default_avatar.png"
 		}
 	},
-	"linkedin": {
-		"scope": [
-			"r_network",
-			"r_emailaddress",
-			"r_basicprofile",
-			"r_contactinfo",
-			"r_fullprofile"
-		],
-		"consumerKey": "{{LINKEDIN_CONSUMER_KEY}}",
-		"consumerSecret": "{{LINKEDIN_CONSUMER_SECRET}}",
-		"callbackURL": "http://localhost:3000/auth/in/callback"
-	},
-	"google": {
-		"scope": [
-			"profile",
-			"https://www.googleapis.com/auth/plus.login"
-		],
-		"clientId": "{{GOOGLE_CLIENT_ID}}",
-		"clientSecret": "{{GOOGLE_CLIENT_SECRET}}",
-		"callbackURL": "http://localhost:3000/auth/google/callback"
-	},
 	"facebook": {
 		"registerByToken": true,
 		"requestFields": "name,email,picture",
@@ -151,7 +130,11 @@
 		},
 		"installPath": "/install",
 		"db": "mongodb://localhost/versionControl?w=1",
-		"errorStatusCode": 400
+		"errorStatusCode": 400,
+		"public": [
+			"/public/*"
+		]
+
 	},
 	"allowedDomains": [
 		"*@a.com",
@@ -211,5 +194,8 @@
 	],
 	"allowedHeaders": [
 		"x-custom-header"
+	],
+	"publicEndpoints": [
+		"/public/*"
 	]
 }
