@@ -293,6 +293,7 @@ function createUserPrivateCall(body, user, cbk) {
 
 		log.info(`<= ${private_res.statusCode}`);
 		user.id = body.id;
+		user.roles = body.roles || [];
 
 		if (!user.password) {
 			user.password = cryptoMng.randomPassword(config.password.regexValidation);
