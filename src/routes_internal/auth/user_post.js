@@ -1,7 +1,7 @@
 'use strict';
 
 const daoMng = require('../../managers/dao');
-const config = require('../../../config.json');
+const config = require('../../../config');
 const ObjectID = require('mongodb').ObjectID;
 const crypto = require('../../managers/crypto');
 const cryptoMng = crypto(config.password);

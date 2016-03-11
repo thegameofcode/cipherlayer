@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const request = require('request');
-const config = require('../config.json');
+const config = require('../config');
 
 const userDao = require('../src/managers/dao');
 const redisMng = require('../src/managers/redis');

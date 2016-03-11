@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const crypto = require('crypto');
-const config = require('../config.json');
+const config = require('../config');
 
 const defaultSettings = {
 	algorithm: config.password.algorithm || 'aes-256-ctr',

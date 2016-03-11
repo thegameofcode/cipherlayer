@@ -1,6 +1,6 @@
 'use strict';
 
-const config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
+const config = require('../../config');
 
 const SF_PROFILE = {
 	id: 'https://login.salesforce.com/id/00De00000004cdeEAA/005e0000001uNIyAAM',

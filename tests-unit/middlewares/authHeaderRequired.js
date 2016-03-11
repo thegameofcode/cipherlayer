@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const should = require('chai').should();
-const config = require('../../config.json');
+const config = require('../../config');
 const authHeaderRequired = require('../../src/middlewares/authHeaderRequired');
 
 describe('middleware', function () {

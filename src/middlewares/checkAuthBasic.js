@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../../config.json');
+const config = require('../../config');
 
 const expectedAuthorizationBasic = `basic ${new Buffer(`${config.management.clientId}:${config.management.clientSecret}`).toString('base64')}`;
 

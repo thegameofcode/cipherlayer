@@ -1,7 +1,7 @@
 'use strict';
 
 const redis = require('redis');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const REDIS_HOST = config.redis.host || 'localhost';
 const REDIS_PORT = config.redis.port || 6379;

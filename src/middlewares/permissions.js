@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const config = require('../../config.json');
+const config = require('../../config');
 
 module.exports = function checkPermissions(req, res, next) {
 	if (!config.endpoints) {

@@ -8,7 +8,7 @@ const assert = require('assert');
 const redisMng = require('../../src/managers/redis');
 
 const dao = require('../../src/managers/dao');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const notificationsServiceURL = config.externalServices.notifications.base;
 

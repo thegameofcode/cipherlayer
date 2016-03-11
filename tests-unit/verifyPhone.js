@@ -3,7 +3,7 @@ const async = require('async');
 const request = require('request');
 const nock = require('nock');
 const _ = require('lodash');
-const config = require('../config.json');
+const config = require('../config');
 
 const dao = require('../src/managers/dao');
 const redisMng = require('../src/managers/redis');

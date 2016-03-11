@@ -3,7 +3,7 @@
 const assert = require('assert');
 const ciphertoken = require('ciphertoken');
 const tokenManager = require('../src/managers/token');
-const config = require('../config.json');
+const config = require('../config');
 
 const accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,

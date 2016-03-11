@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../../../config.json');
+const config = require('../../../config');
 const should = require('chai').should();
 const mockery = require('mockery');
 

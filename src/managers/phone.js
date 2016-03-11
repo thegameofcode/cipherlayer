@@ -154,7 +154,7 @@ function verifyPhone(redisKeyId, phone, country, pin, cbk) {
 }
 
 module.exports = function (settings) {
-	const config = require('../../config.json');
+	const config = require('../../config');
 	_settings = _.assign({}, config, settings);
 
 	return {

@@ -1,7 +1,7 @@
 'use strict';
 
 const should = require('chai').should();
-const config = require('../../config.json');
+const config = require('../../config');
 const cryptoManager = require('../../src/managers/crypto')();
 
 describe('managers', function () {

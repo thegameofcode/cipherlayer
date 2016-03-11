@@ -1,7 +1,7 @@
 'use strict';
 const world = require('../support/world');
 const should = require('chai').should();
-const config = require('../../config.json');
+const config = require('../../config');
 const request = require('request');
 
 module.exports = function () {

@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../../config.json');
+const config = require('../../config');
 
 const authHeaderRequired = require('../middlewares/authHeaderRequired');
 const decodeAccessToken = require('../middlewares/decodeToken');
