@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const _ = require('lodash');
-const config = require('../config.json');
+const config = require('../config');
 const dao = require('../src/managers/dao');
 const sinon = require('sinon');
 

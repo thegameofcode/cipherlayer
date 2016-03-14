@@ -1,7 +1,7 @@
 const world = require('../../support/world');
 const request = require('request');
 const assert = require('assert');
-const config = require('../../../config.json');
+const config = require('../../../config');
 const nock = require('nock');
 const url = require('url');
 

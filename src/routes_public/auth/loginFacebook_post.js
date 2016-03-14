@@ -7,7 +7,7 @@ const log = require('../../logger/service');
 const daoMng = require('../../managers/dao');
 const userMng = require('../../managers/user')();
 const tokenMng = require('../../managers/token');
-const config = require('../../../config.json');
+const config = require('../../../config');
 const crypto = require('../../managers/crypto');
 const cryptoMng = crypto(config.password);
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../../../config.json');
+const config = require('../../../config');
 const userMng = require('../../managers/user');
 
 module.exports = function validateOldPassword(req, res, next) {

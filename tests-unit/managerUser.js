@@ -10,7 +10,7 @@ const redisMng = require('../src/managers/redis');
 const userMng = require('../src/managers/user');
 const crypto = require('../src/managers/crypto');
 
-const config = require('../config.json');
+const config = require('../config');
 
 const notifServiceURL = config.externalServices.notifications.base;
 const notifServicePath = config.externalServices.notifications.pathEmail;

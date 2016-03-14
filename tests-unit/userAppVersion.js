@@ -4,7 +4,7 @@ const async = require('async');
 const userAppVersion = require('../src/middlewares/userAppVersion');
 const userDao = require('../src/managers/dao');
 
-const config = require('../config.json');
+const config = require('../config');
 
 const settings = {
 	version: {

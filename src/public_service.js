@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const versionControl = require('version-control');
 
-const config = require('../config.json');
+const config = require('../config');
 const log = require('./logger/service');
 const checkAccessTokenParam = require('./middlewares/accessTokenParam');
 const checkAuthHeader = require('./middlewares/authHeaderRequired');

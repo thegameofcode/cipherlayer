@@ -1,7 +1,7 @@
 const world = require('../../support/world');
 const request = require('request');
 const assert = require('assert');
-const config = require('../../../config.json');
+const config = require('../../../config');
 
 module.exports = function () {
 	this.Given(/^a user with valid credentials in SalesForce linked to SalesForce$/, function (callback) {

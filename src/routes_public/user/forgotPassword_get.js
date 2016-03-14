@@ -3,7 +3,7 @@
 const async = require('async');
 
 const daoMng = require('../../managers/dao');
-const config = require('../../../config.json');
+const config = require('../../../config');
 const crypto = require('../../managers/crypto');
 const cryptoMng = crypto(config.password);
 const emailMng = require('../../managers/email');

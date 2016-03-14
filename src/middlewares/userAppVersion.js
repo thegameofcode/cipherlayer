@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const log = require('../logger/service');
 const userDao = require('../managers/dao');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const updatingUserError = {
 	err: 'proxy_error',

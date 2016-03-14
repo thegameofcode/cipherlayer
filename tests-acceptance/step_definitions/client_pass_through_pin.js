@@ -1,7 +1,7 @@
 const request = require('request');
 const assert = require('assert');
 const world = require('../support/world');
-const config = require('../../config.json');
+const config = require('../../config');
 
 module.exports = function () {
 	this.When(/^the client makes a pass through (.*) with the following (.*) in the body with a pin header$/, function (METHOD, PUBLIC_PAYLOAD, callback) {

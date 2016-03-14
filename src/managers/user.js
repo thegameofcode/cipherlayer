@@ -5,7 +5,7 @@ const _ = require('lodash');
 const ciphertoken = require('ciphertoken');
 const async = require('async');
 
-const config = require('../../config.json');
+const config = require('../../config');
 const log = require('../logger/service');
 const daoMng = require('./dao');
 const tokenMng = require('./token');

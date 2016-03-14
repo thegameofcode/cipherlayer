@@ -4,7 +4,7 @@ const async = require('async');
 const log = require('../../logger/service');
 const daoMng = require('../../managers/dao');
 const tokenMng = require('../../managers/token');
-const config = require('../../../config.json');
+const config = require('../../../config');
 const sessionRequest = require('./../auth/session');
 
 module.exports = function (req, res, next) {
