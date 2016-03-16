@@ -481,7 +481,7 @@ function isValidDomain(email, cbk) {
 }
 
 function removeRealmFromUser(userId, name, cbk) {
-	daoMng.removeFromArrayFieldById(userId, 'realms', name, function (err, removed) {
+	daoMng.removeFromArrayFieldById(userId, 'realms', name, function (err) {
 		if (err) {
 			return cbk(err);
 		}

@@ -5,7 +5,6 @@ const async = require('async');
 const escapeRegexp = require('escape-regexp');
 const config = require('../../config.json');
 const MongoClient = require('mongodb').MongoClient;
-const ObjectID = require('mongodb').ObjectID;
 const _ = require('lodash');
 
 const TIME_TO_REFRESH = 1000 * 60 * 60;

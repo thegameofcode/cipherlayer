@@ -151,7 +151,143 @@ describe('user', function () {
 		});
 	});
 
-	describe('User realm', function(){
+	describe('User internal services realm', function() {
+		it('gives error on invalid realm name', function (done) {
+			const newRealm = {
+				name: 'notvalid'
+			};
+
+			const options = {
+				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8'
+				},
+				method: 'POST',
+				body: JSON.stringify(newRealm)
+			};
+
+			request(options, function (err, res, body) {
+				assert.equal(err, null, body);
+				assert.equal(res.statusCode, 400, body);
+				return done();
+			});
+		});
+
+		it('adds valid realms to users', function (done) {
+			const userRealm = {
+				name: 'default'
+			};
+
+			const options = {
+				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8'
+				},
+				method: 'POST',
+				body: JSON.stringify(userRealm)
+			};
+
+			request(options, function (err, res, body) {
+				assert.equal(err, null, body);
+				assert.equal(res.statusCode, 204, body);
+				dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+					assert.equal(err, null);
+					assert.notEqual(foundUser, null);
+					assert.deepEqual(foundUser.realms, [userRealm.name]);
+					return done();
+				});
+			});
+		});
+
+		it('can add multiple realms', function (done) {
+			const firstRealm = {
+				name: 'default'
+			};
+
+			const secondRealm = {
+				name: 'default2'
+			};
+
+			const options = {
+				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8'
+				},
+				method: 'POST'
+			};
+
+			async.series([
+				function(next){
+					dao.addRealm(secondRealm, function (err, createdRealm) {
+						assert.equal(err, null);
+						assert.notEqual(createdRealm, undefined);
+						return next();
+					});
+				},
+				function(next) {
+					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
+						assert.equal(err, null);
+						assert.ok(added === 1);
+						return next();
+					});
+				},
+				function(next){
+					options.body = JSON.stringify(secondRealm);
+
+					request(options, function (err, res, body) {
+						assert.equal(err, null, body);
+						assert.equal(res.statusCode, 204, body);
+						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+							assert.equal(err, null);
+							assert.notEqual(foundUser, null);
+							assert.deepEqual(foundUser.realms, [firstRealm.name, secondRealm.name]);
+							return next();
+						});
+					});
+				}
+			], done);
+		});
+
+		it('can delete realms', function (done) {
+			const firstRealm = {
+				name: 'default'
+			};
+
+			async.series([
+				function(next) {
+					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
+						assert.equal(err, null);
+						assert.ok(added === 1);
+						return next();
+					});
+				},
+				function(next){
+
+					const options = {
+						url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
+						headers: {
+							'Content-Type': 'application/json; charset=utf-8'
+						},
+						method: 'DELETE',
+						body : JSON.stringify(firstRealm)
+					};
+
+					request(options, function (err, res, body) {
+						assert.equal(err, null, body);
+						assert.equal(res.statusCode, 200, body);
+						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+							assert.equal(err, null);
+							assert.notEqual(foundUser, null);
+							assert.deepEqual(foundUser.realms, []);
+							return next();
+						});
+					});
+				}
+			], done);
+		});
+	});
+
+	describe('User public services realm', function(){
 		it('gives error on invalid realm name', function (done) {
 			const newRealm = {
 				name: 'notvalid'

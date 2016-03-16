@@ -221,6 +221,42 @@ describe('user dao', function () {
 		});
 	});
 
+	it('removeFromArrayFieldById', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = ['value1', 'value2'];
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.deepEqual(update.$pull[expectedField], expectedValue);
+			cbk(null, 1);
+		};
+
+		dao.removeFromArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
+			assert.equal(err, null);
+			assert.equal(added, 1);
+			return done();
+		});
+	});
+
+	it('addToArrayFieldById', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = ['value1', 'value2'];
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.deepEqual(update.$push[expectedField], {$each: [expectedValue]});
+			cbk(null, 1);
+		};
+
+		dao.addToArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
+			assert.equal(err, null);
+			assert.equal(added, 1);
+			return done();
+		});
+	});
+
 	it('getRealms', function (done) {
 		const fakeRealm = {
 			name: 'default',
