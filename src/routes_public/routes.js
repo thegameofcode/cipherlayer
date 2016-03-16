@@ -29,6 +29,8 @@ const createUser_post = require('./user/createUser_post');
 
 const validateOldPassword = require('./user/validateOldPassword_put');
 const setPassword = require('./user/setPassword_put');
+const addUserRealm = require('./user/addUserRealm_post');
+const removeUserRealm = require('./user/removeUserRealm_del');
 
 module.exports = function(server){
 	server.post('/auth/login', login_post);
@@ -44,4 +46,6 @@ module.exports = function(server){
 	server.post('/user/activate', activateUser_post);
 	server.post('/user/email/available', checkEmailAvailability_post);
 	server.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, validateOldPassword, setPassword);
+	server.post('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, addUserRealm);
+	server.del('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, removeUserRealm);
 };

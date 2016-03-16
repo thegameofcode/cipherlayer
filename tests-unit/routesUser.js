@@ -6,6 +6,7 @@ const ciphertoken = require('ciphertoken');
 const nock = require('nock');
 const fs = require('fs');
 const _ = require('lodash');
+const async = require('async');
 
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const dao = require('../src/managers/dao');
@@ -25,6 +26,7 @@ const NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pa
 
 
 const versionHeader = 'test/1';
+let authorizedUserId;
 
 describe('user', function () {
 
@@ -32,6 +34,10 @@ describe('user', function () {
 		id: 'a1b2c3d4e5f6',
 		username: `jie.lee${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
 		password: 'validpassword'
+	};
+
+	const realm = {
+		name: 'default'
 	};
 
 	function validatePwd (clear, crypted, cbk) {
@@ -43,22 +49,36 @@ describe('user', function () {
 	}
 
 	beforeEach(function (done) {
-		dao.deleteAllUsers(function (err) {
-			assert.equal(err, null);
-			const userToCreate = _.clone(baseUser);
-
-			cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
-				userToCreate.password = encryptedPwd;
-				dao.addUser(userToCreate, function (err, createdUser) {
+		async.parallel([
+			function(done){
+				dao.deleteAllUsers(function (err) {
 					assert.equal(err, null);
-					assert.notEqual(createdUser, undefined);
-					ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
-						AUTHORIZATION = config.authHeaderKey + loginToken;
+					const userToCreate = _.clone(baseUser);
+					cryptoMng.encrypt(userToCreate.password, function (encryptedPwd) {
+						userToCreate.password = encryptedPwd;
+						dao.addUser(userToCreate, function (err, createdUser) {
+							assert.equal(err, null);
+							assert.notEqual(createdUser, undefined);
+							authorizedUserId = createdUser._id;
+							ciphertoken.createToken(accessTokenSettings, createdUser._id, null, {}, function (err, loginToken) {
+								AUTHORIZATION = config.authHeaderKey + loginToken;
+								return done();
+							});
+						});
+					});
+				});
+			},
+			function(done){
+				dao.deleteAllRealms(function(err){
+					assert.equal(err, null);
+					dao.addRealm(realm, function (err, createdRealm) {
+						assert.equal(err, null);
+						assert.notEqual(createdRealm, undefined);
 						return done();
 					});
 				});
-			});
-		});
+			}
+		], done);
 	});
 
 	describe('Forgot Password', function () {
@@ -128,6 +148,150 @@ describe('user', function () {
 					});
 				});
 			});
+		});
+	});
+
+	describe('User realm', function(){
+		it('gives error on invalid realm name', function (done) {
+			const newRealm = {
+				name: 'notvalid'
+			};
+
+			const options = {
+				url: `http://localhost:${config.public_port}/user/me/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8',
+					Authorization: AUTHORIZATION,
+					[config.version.header]: versionHeader
+				},
+				method: 'POST',
+				body: JSON.stringify(newRealm)
+			};
+
+			request(options, function (err, res, body) {
+				assert.equal(err, null, body);
+				assert.equal(res.statusCode, 400, body);
+				return done();
+			});
+		});
+
+		it('adds valid realms to users', function (done) {
+			const userRealm = {
+				name: 'default'
+			};
+
+			const options = {
+				url: `http://localhost:${config.public_port}/user/me/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8',
+					Authorization: AUTHORIZATION,
+					[config.version.header]: versionHeader
+				},
+				method: 'POST',
+				body: JSON.stringify(userRealm)
+			};
+
+			request(options, function (err, res, body) {
+				assert.equal(err, null, body);
+				assert.equal(res.statusCode, 204, body);
+				dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+					assert.equal(err, null);
+					assert.notEqual(foundUser, null);
+					assert.deepEqual(foundUser.realms, [userRealm.name]);
+					return done();
+				});
+			});
+		});
+
+		it('can add multiple realms', function (done) {
+			const firstRealm = {
+				name: 'default'
+			};
+
+			const secondRealm = {
+				name: 'default2'
+			};
+
+			const options = {
+				url: `http://localhost:${config.public_port}/user/me/realms`,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8',
+					Authorization: AUTHORIZATION,
+					[config.version.header]: versionHeader
+				},
+				method: 'POST'
+			};
+
+			async.series([
+				function(next){
+					dao.addRealm(secondRealm, function (err, createdRealm) {
+						assert.equal(err, null);
+						assert.notEqual(createdRealm, undefined);
+						return next();
+					});
+				},
+				function(next) {
+					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
+						assert.equal(err, null);
+						assert.ok(added === 1);
+						return next();
+					});
+				},
+				function(next){
+					options.body = JSON.stringify(secondRealm);
+
+					request(options, function (err, res, body) {
+						assert.equal(err, null, body);
+						assert.equal(res.statusCode, 204, body);
+						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+							assert.equal(err, null);
+							assert.notEqual(foundUser, null);
+							assert.deepEqual(foundUser.realms, [firstRealm.name, secondRealm.name]);
+							return next();
+						});
+					});
+				}
+			], done);
+		});
+
+		it('can delete realms', function (done) {
+			const firstRealm = {
+				name: 'default'
+			};
+
+			async.series([
+				function(next) {
+					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
+						assert.equal(err, null);
+						assert.ok(added === 1);
+						return next();
+					});
+				},
+				function(next){
+
+					const options = {
+						url: `http://localhost:${config.public_port}/user/me/realms`,
+						headers: {
+							'Content-Type': 'application/json; charset=utf-8',
+							Authorization: AUTHORIZATION,
+							[config.version.header]: versionHeader
+						},
+						method: 'DELETE',
+						body : JSON.stringify(firstRealm)
+					};
+
+					request(options, function (err, res, body) {
+						assert.equal(err, null, body);
+						assert.equal(res.statusCode, 200, body);
+						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+							assert.equal(err, null);
+							assert.notEqual(foundUser, null);
+							assert.deepEqual(foundUser.realms, []);
+							return next();
+						});
+					});
+				}
+			], done);
 		});
 	});
 
