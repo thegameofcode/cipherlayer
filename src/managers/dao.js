@@ -395,6 +395,7 @@ module.exports = {
 	getFromId,
 
 	updateField,
+	updateFieldWithMethod,
 	updateArrayItem,
 	addToArrayFieldById,
 	removeFromArrayFieldById,

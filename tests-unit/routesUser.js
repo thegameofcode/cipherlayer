@@ -199,7 +199,7 @@ describe('user', function () {
 		});
 	}
 
-	describe.only('User internal services realm', function () {
+	describe('User internal services realm', function () {
 		it('gives error on invalid realm name', function (done) {
 			const newRealm = {
 				name: 'notvalid'
