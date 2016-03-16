@@ -25,7 +25,7 @@ function disconnect(cbk) {
 		return cbk();
 	}
 
-	redisClient.end(false);
+	redisClient.end();
 	isConnected = false;
 	return cbk(null, false);
 }
