@@ -81,6 +81,32 @@ describe('user', function () {
 		});
 	}
 
+	function addRealmAndAssert(realm, next){
+		dao.addRealm(realm, function (err, createdRealm) {
+			assert.equal(err, null);
+			assert.notEqual(createdRealm, undefined);
+			return next();
+		});
+	}
+
+	function requestAndAssertBody(options, status, expectedBody, done){
+		request(options, function (err, res, rawBody) {
+			assert.equal(err, null, rawBody);
+			assert.equal(res.statusCode, status, rawBody);
+			const body = JSON.parse(rawBody);
+			assert.deepEqual(body, expectedBody);
+			return done();
+		});
+	}
+
+	function addToArrayFieldByIdAndAssert(authorizedUserId, field, fieldValue, next){
+		dao.addToArrayFieldById(authorizedUserId, field, fieldValue, function (err, added) {
+			assert.equal(err, null);
+			assert.ok(added === 1);
+			return next();
+		});
+	}
+
 	beforeEach(function (done) {
 		async.parallel([
 			function (done) {
@@ -104,11 +130,7 @@ describe('user', function () {
 			function (done) {
 				dao.deleteAllRealms(function (err) {
 					assert.equal(err, null);
-					dao.addRealm(realm, function (err, createdRealm) {
-						assert.equal(err, null);
-						assert.notEqual(createdRealm, undefined);
-						return done();
-					});
+					addRealmAndAssert(realm, done);
 				});
 			}
 		], done);
@@ -169,19 +191,22 @@ describe('user', function () {
 		});
 	});
 
-	describe('User internal services realm', function () {
+	function requestAndAssertStatus(options, status, done){
+		request(options, function (err, res, body) {
+			assert.equal(err, null, body);
+			assert.equal(res.statusCode, status, body);
+			return done();
+		});
+	}
+
+	describe.only('User internal services realm', function () {
 		it('gives error on invalid realm name', function (done) {
 			const newRealm = {
 				name: 'notvalid'
 			};
 
 			const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', newRealm);
-
-			request(options, function (err, res, body) {
-				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 400, body);
-				return done();
-			});
+			requestAndAssertStatus(options, 400, done);
 		});
 
 		it('adds valid realms to users', function (done) {
@@ -202,18 +227,10 @@ describe('user', function () {
 
 			async.series([
 				function (next) {
-					dao.addRealm(secondRealm, function (err, createdRealm) {
-						assert.equal(err, null);
-						assert.notEqual(createdRealm, undefined);
-						return next();
-					});
+					addRealmAndAssert(secondRealm, next);
 				},
 				function (next) {
-					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
-						assert.equal(err, null);
-						assert.ok(added === 1);
-						return next();
-					});
+					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
 					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', secondRealm);
@@ -229,11 +246,7 @@ describe('user', function () {
 
 			async.series([
 				function (next) {
-					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
-						assert.equal(err, null);
-						assert.ok(added === 1);
-						return next();
-					});
+					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
 					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'DELETE', firstRealm);
@@ -250,12 +263,7 @@ describe('user', function () {
 			};
 
 			const options = configOptions(config.public_port, '/user/me/realms', 'POST', newRealm, true, true);
-
-			request(options, function (err, res, body) {
-				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 400, body);
-				return done();
-			});
+			requestAndAssertStatus(options, 400, done);
 		});
 
 		it('adds valid realms to users', function (done) {
@@ -285,11 +293,7 @@ describe('user', function () {
 					});
 				},
 				function (next) {
-					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
-						assert.equal(err, null);
-						assert.ok(added === 1);
-						return next();
-					});
+					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
 					const options = configOptions(config.public_port, '/user/me/realms', 'POST', secondRealm, true, true);
@@ -305,11 +309,7 @@ describe('user', function () {
 
 			async.series([
 				function (next) {
-					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
-						assert.equal(err, null);
-						assert.ok(added === 1);
-						return next();
-					});
+					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
 					const options = configOptions(config.public_port, '/user/me/realms', 'DELETE', firstRealm, true, true);
@@ -367,13 +367,7 @@ describe('user', function () {
 				des: 'invalid body request'
 			};
 
-			request(options, function (err, res, rawBody) {
-				assert.equal(err, null, rawBody);
-				assert.equal(res.statusCode, 400, rawBody);
-				const body = JSON.parse(rawBody);
-				assert.deepEqual(body, expectedResult);
-				return done();
-			});
+			requestAndAssertBody(options, 400, expectedResult, done);
 		});
 
 		it('400 (no authorization)', function (done) {
@@ -385,13 +379,7 @@ describe('user', function () {
 				des: 'required authorization header'
 			};
 
-			request(options, function (err, res, rawBody) {
-				assert.equal(err, null, rawBody);
-				assert.equal(res.statusCode, 401, rawBody);
-				const body = JSON.parse(rawBody);
-				assert.deepEqual(body, expectedResult);
-				return done();
-			});
+			requestAndAssertBody(options, 401, expectedResult, done);
 		});
 
 		it('403 (invalid authorization)', function (done) {

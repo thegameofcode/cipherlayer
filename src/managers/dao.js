@@ -232,9 +232,9 @@ function getFromId(id, cbk) {
 	});
 }
 
-function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
+function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
 	const data = {
-		$pull: {
+		[method]: {
 			[fieldName]: fieldValue
 		}
 	};
@@ -245,6 +245,10 @@ function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
 		}
 		return cbk(null, updatedProfiles);
 	});
+}
+
+function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
+	updateFieldWithMethod(userId, '$pull', fieldName, fieldValue, cbk);
 }
 
 function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
@@ -265,18 +269,7 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 }
 
 function updateField(userId, fieldName, fieldValue, cbk) {
-	const data = {
-		$set: {
-			[fieldName]: fieldValue
-		}
-	};
-
-	usersCollection.update({_id: userId}, data, function (err, updatedUsers) {
-		if (err) {
-			return cbk(err, null);
-		}
-		return cbk(null, updatedUsers);
-	});
+	updateFieldWithMethod(userId, '$set', fieldName, fieldValue, cbk);
 }
 
 function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
