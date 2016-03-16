@@ -2,7 +2,7 @@
 
 module.exports = function (err, res, next) {
 	if (!err.code) {
-		res.send(500, err);
+		res.send(500, err.des ? err : {des:err});
 		return next(err);
 	}
 
@@ -10,5 +10,5 @@ module.exports = function (err, res, next) {
 	delete(err.code);
 	res.send(errCode, err);
 	return next(err);
-	
+
 };
