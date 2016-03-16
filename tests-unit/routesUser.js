@@ -40,7 +40,7 @@ describe('user', function () {
 		name: 'default'
 	};
 
-	function validatePwd (clear, crypted, cbk) {
+	function validatePwd(clear, crypted, cbk) {
 		const cryptoMng = crypto(config.password);
 		cryptoMng.verify(clear, crypted, function (err) {
 			assert.equal(err, null);
@@ -48,9 +48,42 @@ describe('user', function () {
 		});
 	}
 
+	function configOptions(port, path, method, body, auth, version) {
+		const options = {
+			url: `http://localhost:${port}${path}`,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8'
+			},
+			method
+		};
+		if (auth === true) {
+			options.headers['Authorization'] = AUTHORIZATION;
+		}
+		if (version === true) {
+			options.headers[config.version.header] = versionHeader;
+		}
+		if (body) {
+			options.body = JSON.stringify(body);
+		}
+		return options;
+	}
+
+	function makeRequestAndAssertUserField(options, status, userField, actual, next) {
+		request(options, function (err, res, body) {
+			assert.equal(err, null, body);
+			assert.equal(res.statusCode, status, body);
+			dao.getAllUserFields(baseUser.username, function (err, foundUser) {
+				assert.equal(err, null);
+				assert.notEqual(foundUser, null);
+				assert.deepEqual(foundUser[userField], actual);
+				return next();
+			});
+		});
+	}
+
 	beforeEach(function (done) {
 		async.parallel([
-			function(done){
+			function (done) {
 				dao.deleteAllUsers(function (err) {
 					assert.equal(err, null);
 					const userToCreate = _.clone(baseUser);
@@ -68,8 +101,8 @@ describe('user', function () {
 					});
 				});
 			},
-			function(done){
-				dao.deleteAllRealms(function(err){
+			function (done) {
+				dao.deleteAllRealms(function (err) {
 					assert.equal(err, null);
 					dao.addRealm(realm, function (err, createdRealm) {
 						assert.equal(err, null);
@@ -84,15 +117,7 @@ describe('user', function () {
 	describe('Forgot Password', function () {
 
 		it('Send new Password', function (done) {
-			const options = {
-				url: `http://localhost:${config.public_port}/user/${baseUser.username}/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					[config.version.header]: versionHeader
-
-				},
-				method: 'GET'
-			};
+			const options = configOptions(config.public_port, `/user/${baseUser.username}/password`, 'GET', null, false, true);
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -116,14 +141,7 @@ describe('user', function () {
 		});
 
 		it('Send 2 times new Password', function (done) {
-			const options = {
-				url: `http://localhost:${config.public_port}/user/${baseUser.username}/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					[config.version.header]: versionHeader
-				},
-				method: 'GET'
-			};
+			const options = configOptions(config.public_port, `/user/${baseUser.username}/password`, 'GET', null, false, true);
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -151,20 +169,13 @@ describe('user', function () {
 		});
 	});
 
-	describe('User internal services realm', function() {
+	describe('User internal services realm', function () {
 		it('gives error on invalid realm name', function (done) {
 			const newRealm = {
 				name: 'notvalid'
 			};
 
-			const options = {
-				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
-				},
-				method: 'POST',
-				body: JSON.stringify(newRealm)
-			};
+			const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', newRealm);
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null, body);
@@ -177,73 +188,36 @@ describe('user', function () {
 			const userRealm = {
 				name: 'default'
 			};
-
-			const options = {
-				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
-				},
-				method: 'POST',
-				body: JSON.stringify(userRealm)
-			};
-
-			request(options, function (err, res, body) {
-				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 204, body);
-				dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-					assert.equal(err, null);
-					assert.notEqual(foundUser, null);
-					assert.deepEqual(foundUser.realms, [userRealm.name]);
-					return done();
-				});
-			});
+			const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', userRealm);
+			makeRequestAndAssertUserField(options, 204, 'realms', [userRealm.name], done);
 		});
 
 		it('can add multiple realms', function (done) {
 			const firstRealm = {
 				name: 'default'
 			};
-
 			const secondRealm = {
 				name: 'default2'
 			};
 
-			const options = {
-				url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8'
-				},
-				method: 'POST'
-			};
-
 			async.series([
-				function(next){
+				function (next) {
 					dao.addRealm(secondRealm, function (err, createdRealm) {
 						assert.equal(err, null);
 						assert.notEqual(createdRealm, undefined);
 						return next();
 					});
 				},
-				function(next) {
+				function (next) {
 					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
 						assert.equal(err, null);
 						assert.ok(added === 1);
 						return next();
 					});
 				},
-				function(next){
-					options.body = JSON.stringify(secondRealm);
-
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 204, body);
-						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-							assert.equal(err, null);
-							assert.notEqual(foundUser, null);
-							assert.deepEqual(foundUser.realms, [firstRealm.name, secondRealm.name]);
-							return next();
-						});
-					});
+				function (next) {
+					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', secondRealm);
+					makeRequestAndAssertUserField(options, 204, 'realms', [firstRealm.name, secondRealm.name], next);
 				}
 			], done);
 		});
@@ -254,55 +228,28 @@ describe('user', function () {
 			};
 
 			async.series([
-				function(next) {
+				function (next) {
 					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
 						assert.equal(err, null);
 						assert.ok(added === 1);
 						return next();
 					});
 				},
-				function(next){
-
-					const options = {
-						url: `http://localhost:${config.internal_port}/user/${baseUser.id}/realms`,
-						headers: {
-							'Content-Type': 'application/json; charset=utf-8'
-						},
-						method: 'DELETE',
-						body : JSON.stringify(firstRealm)
-					};
-
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 200, body);
-						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-							assert.equal(err, null);
-							assert.notEqual(foundUser, null);
-							assert.deepEqual(foundUser.realms, []);
-							return next();
-						});
-					});
+				function (next) {
+					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'DELETE', firstRealm);
+					makeRequestAndAssertUserField(options, 200, 'realms', [], next);
 				}
 			], done);
 		});
 	});
 
-	describe('User public services realm', function(){
+	describe('User public services realm', function () {
 		it('gives error on invalid realm name', function (done) {
 			const newRealm = {
 				name: 'notvalid'
 			};
 
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'POST',
-				body: JSON.stringify(newRealm)
-			};
+			const options = configOptions(config.public_port, '/user/me/realms', 'POST', newRealm, true, true);
 
 			request(options, function (err, res, body) {
 				assert.equal(err, null, body);
@@ -316,27 +263,8 @@ describe('user', function () {
 				name: 'default'
 			};
 
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'POST',
-				body: JSON.stringify(userRealm)
-			};
-
-			request(options, function (err, res, body) {
-				assert.equal(err, null, body);
-				assert.equal(res.statusCode, 204, body);
-				dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-					assert.equal(err, null);
-					assert.notEqual(foundUser, null);
-					assert.deepEqual(foundUser.realms, [userRealm.name]);
-					return done();
-				});
-			});
+			const options = configOptions(config.public_port, '/user/me/realms', 'POST', userRealm, true, true);
+			makeRequestAndAssertUserField(options, 204, 'realms', [userRealm.name], done);
 		});
 
 		it('can add multiple realms', function (done) {
@@ -348,44 +276,24 @@ describe('user', function () {
 				name: 'default2'
 			};
 
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/realms`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'POST'
-			};
-
 			async.series([
-				function(next){
+				function (next) {
 					dao.addRealm(secondRealm, function (err, createdRealm) {
 						assert.equal(err, null);
 						assert.notEqual(createdRealm, undefined);
 						return next();
 					});
 				},
-				function(next) {
+				function (next) {
 					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
 						assert.equal(err, null);
 						assert.ok(added === 1);
 						return next();
 					});
 				},
-				function(next){
-					options.body = JSON.stringify(secondRealm);
-
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 204, body);
-						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-							assert.equal(err, null);
-							assert.notEqual(foundUser, null);
-							assert.deepEqual(foundUser.realms, [firstRealm.name, secondRealm.name]);
-							return next();
-						});
-					});
+				function (next) {
+					const options = configOptions(config.public_port, '/user/me/realms', 'POST', secondRealm, true, true);
+					makeRequestAndAssertUserField(options, 204, 'realms', [firstRealm.name, secondRealm.name], next);
 				}
 			], done);
 		});
@@ -396,36 +304,16 @@ describe('user', function () {
 			};
 
 			async.series([
-				function(next) {
+				function (next) {
 					dao.addToArrayFieldById(authorizedUserId, 'realms', firstRealm.name, function (err, added) {
 						assert.equal(err, null);
 						assert.ok(added === 1);
 						return next();
 					});
 				},
-				function(next){
-
-					const options = {
-						url: `http://localhost:${config.public_port}/user/me/realms`,
-						headers: {
-							'Content-Type': 'application/json; charset=utf-8',
-							Authorization: AUTHORIZATION,
-							[config.version.header]: versionHeader
-						},
-						method: 'DELETE',
-						body : JSON.stringify(firstRealm)
-					};
-
-					request(options, function (err, res, body) {
-						assert.equal(err, null, body);
-						assert.equal(res.statusCode, 200, body);
-						dao.getAllUserFields(baseUser.username, function (err, foundUser) {
-							assert.equal(err, null);
-							assert.notEqual(foundUser, null);
-							assert.deepEqual(foundUser.realms, []);
-							return next();
-						});
-					});
+				function (next) {
+					const options = configOptions(config.public_port, '/user/me/realms', 'DELETE', firstRealm, true, true);
+					makeRequestAndAssertUserField(options, 200, 'realms', [], next);
 				}
 			], done);
 		});
@@ -437,16 +325,7 @@ describe('user', function () {
 				password: 'n3wPas5W0rd'
 			};
 
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'PUT',
-				body: JSON.stringify(newPassword)
-			};
+			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, true, true);
 
 			const clonedUser = _.clone(baseUser);
 			clonedUser.password = newPassword.password;
@@ -463,15 +342,7 @@ describe('user', function () {
 		});
 
 		it('400 (no body)', function (done) {
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'PUT'
-			};
+			const options = configOptions(config.public_port, '/user/me/password', 'PUT', null, true, true);
 
 			const expectedResult = {
 				err: 'invalid_body',
@@ -489,17 +360,7 @@ describe('user', function () {
 
 		it('400 (no password)', function (done) {
 			const newPassword = {};
-
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					Authorization: AUTHORIZATION,
-					[config.version.header]: versionHeader
-				},
-				method: 'PUT',
-				body: JSON.stringify(newPassword)
-			};
+			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, true, true);
 
 			const expectedResult = {
 				err: 'auth_proxy_error',
@@ -517,16 +378,7 @@ describe('user', function () {
 
 		it('400 (no authorization)', function (done) {
 			const newPassword = {};
-
-			const options = {
-				url: `http://localhost:${config.public_port}/user/me/password`,
-				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
-					[config.version.header]: versionHeader
-				},
-				method: 'PUT',
-				body: JSON.stringify(newPassword)
-			};
+			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, false, true);
 
 			const expectedResult = {
 				err: 'invalid_authorization',
