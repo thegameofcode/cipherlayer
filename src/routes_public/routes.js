@@ -20,6 +20,7 @@ const checkAuthHeader = require('../middlewares/authHeaderRequired');
 const decodeToken = require('../middlewares/decodeToken');
 const findUser = require('../middlewares/findUser');
 const bodyRequired = require('../middlewares/bodyRequired');
+const requiredBodyParams = require('../middlewares/requiredBodyParams');
 
 const forgotPassword_get = require('./user/forgotPassword_get');
 const activateUser_get = require('./user/activateUser_get');
@@ -46,6 +47,6 @@ module.exports = function(server){
 	server.post('/user/activate', activateUser_post);
 	server.post('/user/email/available', checkEmailAvailability_post);
 	server.put('/user/me/password', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, validateOldPassword, setPassword);
-	server.post('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, addUserRealm);
-	server.del('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, removeUserRealm);
+	server.post('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, requiredBodyParams(['name']), addUserRealm);
+	server.del('/user/me/realms', checkAccessTokenParam, checkAuthHeader, decodeToken, bodyRequired, findUser, requiredBodyParams(['name']), removeUserRealm);
 };
