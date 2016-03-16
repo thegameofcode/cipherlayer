@@ -30,8 +30,8 @@ const createUser_post = require('./user/createUser_post');
 
 const validateOldPassword = require('./user/validateOldPassword_put');
 const setPassword = require('./user/setPassword_put');
-const addUserRealm = require('./user/addUserRealm_post');
-const removeUserRealm = require('./user/removeUserRealm_del');
+const addUserRealm = require('../routes_internal/user/addUserRealm_post');
+const removeUserRealm = require('../routes_internal/user/removeUserRealm_del');
 
 module.exports = function(server){
 	server.post('/auth/login', login_post);
