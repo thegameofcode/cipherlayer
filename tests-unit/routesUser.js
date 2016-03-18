@@ -28,7 +28,7 @@ const NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pa
 const versionHeader = 'test/1';
 let authorizedUserId;
 
-describe('user', function () {
+describe.only('user', function () {
 
 	const baseUser = {
 		id: 'a1b2c3d4e5f6',
@@ -48,22 +48,23 @@ describe('user', function () {
 		});
 	}
 
-	function configOptions(port, path, method, body, auth, version) {
+	function configOptions(optionsConfig) {
+
 		const options = {
-			url: `http://localhost:${port}${path}`,
+			url: `http://localhost:${optionsConfig.port}${optionsConfig.path}`,
 			headers: {
 				'Content-Type': 'application/json; charset=utf-8'
 			},
-			method
+			method: optionsConfig.method
 		};
-		if (auth === true) {
+		if (optionsConfig.auth === true) {
 			options.headers['Authorization'] = AUTHORIZATION;
 		}
-		if (version === true) {
+		if (optionsConfig.version === true) {
 			options.headers[config.version.header] = versionHeader;
 		}
-		if (body) {
-			options.body = JSON.stringify(body);
+		if (optionsConfig.body && optionsConfig.body !== '' ) {
+			options.body = JSON.stringify(optionsConfig.body);
 		}
 		return options;
 	}
@@ -139,7 +140,13 @@ describe('user', function () {
 	describe('Forgot Password', function () {
 
 		it('Send new Password', function (done) {
-			const options = configOptions(config.public_port, `/user/${baseUser.username}/password`, 'GET', null, false, true);
+			const options = configOptions({
+				port:config.public_port
+				, path:`/user/${baseUser.username}/password`
+				, method : 'GET'
+				, body : ''
+				, auth : false
+				, version : true});
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -163,7 +170,13 @@ describe('user', function () {
 		});
 
 		it('Send 2 times new Password', function (done) {
-			const options = configOptions(config.public_port, `/user/${baseUser.username}/password`, 'GET', null, false, true);
+			const options = configOptions({
+				port:config.public_port
+				, path:`/user/${baseUser.username}/password`
+				, method : 'GET'
+				, body : ''
+				, auth : false
+				, version : true});
 
 			nock(NOTIFICATION_SERVICE_URL)
 				.post(NOTIFICATION_EMAIL_SERVICE_PATH)
@@ -204,8 +217,13 @@ describe('user', function () {
 			const newRealm = {
 				name: 'notvalid'
 			};
-
-			const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', newRealm);
+			const options = configOptions({
+				port:config.internal_port
+				, path:`/user/${baseUser.id}/realms`
+				, method : 'POST'
+				, body : newRealm
+				, auth : false
+				, version : false});
 			requestAndAssertStatus(options, 400, done);
 		});
 
@@ -213,7 +231,13 @@ describe('user', function () {
 			const userRealm = {
 				name: 'default'
 			};
-			const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', userRealm);
+			const options = configOptions({
+				port:config.internal_port
+				, path:`/user/${baseUser.id}/realms`
+				, method : 'POST'
+				, body : userRealm
+				, auth : false
+				, version : false});
 			makeRequestAndAssertUserField(options, 204, 'realms', [userRealm.name], done);
 		});
 
@@ -233,7 +257,14 @@ describe('user', function () {
 					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
-					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'POST', secondRealm);
+					const options = configOptions({
+						port:config.internal_port
+						, path:`/user/${baseUser.id}/realms`
+						, method : 'POST'
+						, body : secondRealm
+						, auth : false
+						, version : false});
+
 					makeRequestAndAssertUserField(options, 204, 'realms', [firstRealm.name, secondRealm.name], next);
 				}
 			], done);
@@ -249,7 +280,14 @@ describe('user', function () {
 					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
-					const options = configOptions(config.internal_port, `/user/${baseUser.id}/realms`, 'DELETE', firstRealm);
+					const options = configOptions({
+						port:config.internal_port
+						, path:`/user/${baseUser.id}/realms`
+						, method : 'DELETE'
+						, body : firstRealm
+						, auth : false
+						, version : false});
+
 					makeRequestAndAssertUserField(options, 200, 'realms', [], next);
 				}
 			], done);
@@ -261,8 +299,14 @@ describe('user', function () {
 			const newRealm = {
 				name: 'notvalid'
 			};
+			const options = configOptions({
+				port:config.internal_port
+				, path:'/user/me/realms'
+				, method : 'POST'
+				, body : newRealm
+				, auth : true
+				, version : true});
 
-			const options = configOptions(config.public_port, '/user/me/realms', 'POST', newRealm, true, true);
 			requestAndAssertStatus(options, 400, done);
 		});
 
@@ -270,8 +314,14 @@ describe('user', function () {
 			const userRealm = {
 				name: 'default'
 			};
+			const options = configOptions({
+				port:config.public_port
+				, path:'/user/me/realms'
+				, method : 'POST'
+				, body : userRealm
+				, auth : true
+				, version : true});
 
-			const options = configOptions(config.public_port, '/user/me/realms', 'POST', userRealm, true, true);
 			makeRequestAndAssertUserField(options, 204, 'realms', [userRealm.name], done);
 		});
 
@@ -296,7 +346,14 @@ describe('user', function () {
 					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
-					const options = configOptions(config.public_port, '/user/me/realms', 'POST', secondRealm, true, true);
+					const options = configOptions({
+						port:config.public_port
+						, path:'/user/me/realms'
+						, method : 'POST'
+						, body : secondRealm
+						, auth : true
+						, version : true});
+
 					makeRequestAndAssertUserField(options, 204, 'realms', [firstRealm.name, secondRealm.name], next);
 				}
 			], done);
@@ -312,7 +369,14 @@ describe('user', function () {
 					addToArrayFieldByIdAndAssert(authorizedUserId, 'realms', firstRealm.name, next);
 				},
 				function (next) {
-					const options = configOptions(config.public_port, '/user/me/realms', 'DELETE', firstRealm, true, true);
+					const options = configOptions({
+						port:config.public_port
+						, path:'/user/me/realms'
+						, method : 'DELETE'
+						, body : firstRealm
+						, auth : true
+						, version : true});
+
 					makeRequestAndAssertUserField(options, 200, 'realms', [], next);
 				}
 			], done);
@@ -325,7 +389,13 @@ describe('user', function () {
 				password: 'n3wPas5W0rd'
 			};
 
-			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, true, true);
+			const options = configOptions({
+				port:config.public_port
+				, path:'/user/me/password'
+				, method : 'PUT'
+				, body : newPassword
+				, auth : true
+				, version : true});
 
 			const clonedUser = _.clone(baseUser);
 			clonedUser.password = newPassword.password;
@@ -342,7 +412,14 @@ describe('user', function () {
 		});
 
 		it('400 (no body)', function (done) {
-			const options = configOptions(config.public_port, '/user/me/password', 'PUT', null, true, true);
+
+			const options = configOptions({
+				port:config.public_port
+				, path:'/user/me/password'
+				, method : 'PUT'
+				, body : ''
+				, auth : true
+				, version : true});
 
 			const expectedResult = {
 				err: 'invalid_body',
@@ -360,7 +437,14 @@ describe('user', function () {
 
 		it('400 (no password)', function (done) {
 			const newPassword = {};
-			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, true, true);
+
+			const options = configOptions({
+				port:config.public_port
+				, path:'/user/me/password'
+				, method : 'PUT'
+				, body : newPassword
+				, auth : true
+				, version : true});
 
 			const expectedResult = {
 				err: 'auth_proxy_error',
@@ -372,7 +456,14 @@ describe('user', function () {
 
 		it('400 (no authorization)', function (done) {
 			const newPassword = {};
-			const options = configOptions(config.public_port, '/user/me/password', 'PUT', newPassword, false, true);
+
+			const options = configOptions({
+				port:config.public_port
+				, path:'/user/me/password'
+				, method : 'PUT'
+				, body : newPassword
+				, auth : false
+				, version : true});
 
 			const expectedResult = {
 				err: 'invalid_authorization',
