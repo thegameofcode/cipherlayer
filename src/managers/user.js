@@ -480,6 +480,48 @@ function isValidDomain(email, cbk) {
 	});
 }
 
+function removeRealmFromUser(userId, name, cbk) {
+	daoMng.removeFromArrayFieldById(userId, 'realms', name, function (err) {
+		if (err) {
+			return cbk(err);
+		}
+		return cbk();
+	});
+}
+
+function addRealmToUser(userId, name, cbk) {
+	async.waterfall([
+		function (done) {
+			daoMng.getRealmFromName(name, function (err, realm) {
+				if (err) {
+					return done(err);
+				}
+				return done(null, realm);
+			});
+		},
+		function (realm, done) {
+			daoMng.addToArrayFieldById(userId, 'realms', realm.name, function (err, added) {
+				if (err) {
+					return done(err);
+				}
+				if (added !== 1) {
+					return done({
+						err: 'realm not added to user',
+						code: 400
+					});
+				}
+				return done();
+			});
+		}
+	], function (err) {
+		if (err) {
+			log.error({err});
+			return cbk(err);
+		}
+		return cbk();
+	});
+}
+
 function validatePwd(pwd, regexp) {
 	return (new RegExp(regexp)).test(pwd);
 }
@@ -492,6 +534,8 @@ module.exports = function (settings) {
 		createUser,
 		createUserByToken,
 		setPassword,
-		validateOldPassword
+		validateOldPassword,
+		removeRealmFromUser,
+		addRealmToUser
 	};
 };
