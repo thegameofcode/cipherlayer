@@ -28,7 +28,7 @@ const NOTIFICATION_EMAIL_SERVICE_PATH = config.externalServices.notifications.pa
 const versionHeader = 'test/1';
 let authorizedUserId;
 
-describe.only('user', function () {
+describe('user', function () {
 
 	const baseUser = {
 		id: 'a1b2c3d4e5f6',
