@@ -192,11 +192,11 @@ function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
 		}
 	};
 
-	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
+	usersCollection.updateOne({ _id: userId }, data, function (err, res) {
 		if (err) {
 			return cbk(err, null);
 		}
-		return cbk(null, updatedProfiles);
+		return cbk(null, res.modifiedCount);
 	});
 }
 
@@ -213,11 +213,11 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 			}
 		}
 	};
-	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err) {
+	usersCollection.updateOne({ _id: userId }, data, function (err, res) {
 		if (err) {
 			return cbk(err, null);
 		}
-		return cbk(null, 1);
+		return cbk(null, res.modifiedCount);
 	});
 }
 
