@@ -27,9 +27,8 @@ describe('user dao', function () {
 			count: noop,
 			find: noop,
 			insertOne: noop,
-			update: noop,
-			ensureIndex: noop,
-			toArray: noop
+			updateOne: noop,
+			ensureIndex: noop
 		};
 
 		fakeDb = {
@@ -43,7 +42,8 @@ describe('user dao', function () {
 			},
 			next(cbk) {
 				return cbk(null, null);
-			}
+			},
+			toArray: noop
 		};
 
 		sinon.stub(fakeCollection, 'deleteMany').yields();
@@ -213,15 +213,15 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = 'value1';
 
-		fakeCollection.update = function (query, update, cbk) {
+		fakeCollection.findOneAndUpdate = function (query, update, options, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.equal(update.$set[expectedField], expectedValue);
-			cbk(null, 1);
+			cbk(null, expectedUser);
 		};
 
 		dao.updateFieldWithMethod(expectedUser.id, '$set', expectedField, expectedValue, function (err, updates) {
 			assert.equal(err, null);
-			assert.equal(updates, 1);
+			assert.deepEqual(updates, expectedUser);
 			return done();
 		});
 	});
@@ -231,15 +231,15 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = ['value1', 'value2'];
 
-		fakeCollection.update = function (query, update, cbk) {
+		fakeCollection.findOneAndUpdate = function (query, update, options, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.equal(update.$pull[expectedField], expectedValue);
-			cbk(null, 1);
+			cbk(null, expectedUser);
 		};
 
 		dao.updateFieldWithMethod(expectedUser.id, '$pull', expectedField, expectedValue, function (err, updates) {
 			assert.equal(err, null);
-			assert.equal(updates, 1);
+			assert.equal(updates, expectedUser);
 			return done();
 		});
 	});
@@ -249,15 +249,15 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = 'value1';
 
-		fakeCollection.updateOne = function (query, update, cbk) {
+		fakeCollection.findOneAndUpdate = function (query, update, options, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.equal(update.$set[expectedField], expectedValue);
-			cbk(null, { modifiedCount: 1});
+			cbk(null, expectedUser);
 		};
 
 		dao.updateField(expectedUser.id, expectedField, expectedValue, function (err, updates) {
 			assert.equal(err, null);
-			assert.equal(updates, 1);
+			assert.equal(updates, expectedUser);
 			return done();
 		});
 	});
@@ -267,15 +267,15 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = ['value1', 'value2'];
 
-		fakeCollection.update = function (query, update, cbk) {
+		fakeCollection.findOneAndUpdate = function (query, update, options, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.deepEqual(update.$pull[expectedField], expectedValue);
-			cbk(null, 1);
+			cbk(null, expectedUser);
 		};
 
 		dao.removeFromArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
 			assert.equal(err, null);
-			assert.equal(added, 1);
+			assert.equal(added, expectedUser);
 			return done();
 		});
 	});
@@ -285,10 +285,10 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = ['value1', 'value2'];
 
-		fakeCollection.update = function (query, update, cbk) {
+		fakeCollection.findOneAndUpdate = function (query, update, options, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.deepEqual(update.$push[expectedField], {$each: [expectedValue]});
-			cbk(null, 1);
+			cbk(null, expectedUser);
 		};
 
 		dao.addToArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
@@ -311,8 +311,8 @@ describe('user dao', function () {
 				call: true
 			}
 		};
-		sinon.stub(fakeCollection, 'find').returns(fakeCollection);
-		sinon.stub(fakeCollection, 'toArray').onCall(0).yields(null, [fakeRealm]);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'toArray').onCall(0).yields(null, [fakeRealm]);
 
 		const expectedRealm = _.assign({}, fakeRealm);
 		dao.getRealms(function (err, realms) {
@@ -337,7 +337,7 @@ describe('user dao', function () {
 			const expectedValue = {field1: 'value1', field2: 'value2'};
 
 			let callNumber = 0;
-			fakeCollection.update = function (query, update, upsertCbk, cbk) {
+			fakeCollection.updateOne = function (query, update, cbk) {
 				callNumber++;
 				switch (callNumber) {
 					case 1:
@@ -352,7 +352,7 @@ describe('user dao', function () {
 								}
 							}
 						});
-						return upsertCbk(null, 1);
+						return cbk(null, { modifiedCount: 1 });
 				}
 			};
 
@@ -370,11 +370,11 @@ describe('user dao', function () {
 			const expectedValue = {field1: 'value1', field2: 'value2'};
 			expectedUser[expectedField] = [];
 
-			fakeCollection.update = function (query, update, upsert, cbk) {
+			fakeCollection.updateOne = function (query, update, upsert, cbk) {
 				assert.deepEqual(query, {_id: expectedUser.id, 'fieldsArray.field1': 'value1'});
 				assert.deepEqual(update, {$set: {'fieldsArray.$': expectedValue}});
 				assert.deepEqual(upsert, {upsert: true});
-				cbk(null, 1);
+				cbk(null, { modifiedCount: 1});
 			};
 
 			dao.updateArrayItem(expectedUser.id, expectedField, expectedKey, expectedValue, function (err, updates) {
@@ -393,11 +393,11 @@ describe('user dao', function () {
 			expectedUser[expectedField] = [expectedValue1, expectedValue2];
 			const expectedNewValue = {key: 'value2', field2: 'newvalue2'};
 
-			fakeCollection.update = function (query, update, upsert, cbk) {
+			fakeCollection.updateOne = function (query, update, upsert, cbk) {
 				assert.deepEqual(query, {_id: expectedUser.id, 'fieldsArray.key': 'value2'});
 				assert.deepEqual(update, {$set: {'fieldsArray.$': expectedNewValue}});
 				assert.deepEqual(upsert, {upsert: true});
-				cbk(null, 1);
+				cbk(null, { modifiedCount: 1});
 			};
 
 			dao.updateArrayItem(expectedUser.id, expectedField, expectedKey, expectedNewValue, function (err, updates) {

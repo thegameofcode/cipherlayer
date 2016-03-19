@@ -405,8 +405,8 @@ function setPassword(id, body, cbk) {
 		return cbk(err);
 	}
 	cryptoMng.encrypt(body.password, function (encryptedPwd) {
-		daoMng.updateField(id, 'password', encryptedPwd, function (err, result) {
-			return cbk(err, result);
+		daoMng.updateField(id, 'password', encryptedPwd, function (err) {
+			return cbk(err, 1);
 		});
 	});
 }

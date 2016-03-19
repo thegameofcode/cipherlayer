@@ -192,7 +192,7 @@ function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
 		}
 	};
 
-	usersCollection.findOneAndUpdate({ _id }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
+	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
 		if (err) {
 			return cbk(err, null);
 		}
@@ -213,11 +213,11 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 			}
 		}
 	};
-	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
+	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err) {
 		if (err) {
 			return cbk(err, null);
 		}
-		return cbk(null, updatedProfiles);
+		return cbk(null, 1);
 	});
 }
 
@@ -279,7 +279,7 @@ function getRealmFromName(name, cbk) {
 		return cbk({err: 'invalid_realm_name', code: 400});
 	}
 	const nameRe = makeRegEx(name);
-	realmsCollection.find({name: nameRe}, {_id: 0}).limit(1).next(function (err, realms) {
+	realmsCollection.find({name: nameRe}, {_id: 0}).limit(1).next(function (err, realm) {
 		if (err) {
 			return cbk(err);
 		}

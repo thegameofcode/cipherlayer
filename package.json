@@ -70,5 +70,7 @@
     "url": "https://github.com/thegameofcode/cipherlayer/issues"
   },
   "homepage": "https://github.com/thegameofcode/cipherlayer",
-  "pre-commit": [ ]
+  "pre-commit": [
+    "lint"
+  ]
 }
