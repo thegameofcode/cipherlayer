@@ -144,7 +144,7 @@ function findByEmail(email, callback) {
 	});
 }
 
-function findOne(criteria, options, cbk) {
+function findOneUser(criteria, options, cbk) {
 	usersCollection.find(criteria, options || {}).limit(1).next(function (err, user) {
 		if (err) {
 			return cbk(err);
@@ -157,22 +157,32 @@ function findOne(criteria, options, cbk) {
 	});
 }
 
+function updateOne(coll, criteria, update, cbk) {
+
+	coll.updateOne(criteria, update, function (err, res) {
+		if (err) {
+			return cbk(err, null);
+		}
+		return cbk(null, res.modifiedCount);
+	});
+}
+
 function getFromUsername(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'});
 	}
-	findOne({ username: makeRegEx(username) }, {password: 0}, cbk);
+	findOneUser({ username: makeRegEx(username) }, {password: 0}, cbk);
 }
 
 function getFromUsernamePassword(username, password, cbk) {
-	findOne({ username:  makeRegEx(username), password }, {password: 0}, cbk);
+	findOneUser({ username:  makeRegEx(username), password }, {password: 0}, cbk);
 }
 
 function getAllUserFields(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'}, null);
 	}
-	findOne({ username: makeRegEx(username) }, {}, cbk);
+	findOneUser({ username: makeRegEx(username) }, {}, cbk);
 }
 
 function deleteAllUsers(cbk) {
@@ -182,22 +192,15 @@ function deleteAllUsers(cbk) {
 }
 
 function getFromId(id, cbk) {
-	findOne({_id: id}, {password: 0}, cbk);
+	findOneUser({_id: id}, {password: 0}, cbk);
 }
 
 function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
-	const data = {
+	updateOne(usersCollection, { _id: userId }, {
 		[method]: {
 			[fieldName]: fieldValue
 		}
-	};
-
-	usersCollection.updateOne({ _id: userId }, data, function (err, res) {
-		if (err) {
-			return cbk(err, null);
-		}
-		return cbk(null, res.modifiedCount);
-	});
+	}, cbk);
 }
 
 function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
@@ -205,20 +208,13 @@ function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
 }
 
 function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
-
-	const data = {
+	updateOne(usersCollection, { _id: userId }, {
 		$push: {
 			[fieldName]: {
 				$each: [fieldValue]
 			}
 		}
-	};
-	usersCollection.updateOne({ _id: userId }, data, function (err, res) {
-		if (err) {
-			return cbk(err, null);
-		}
-		return cbk(null, res.modifiedCount);
-	});
+	}, cbk);
 }
 
 function updateField(userId, fieldName, fieldValue, cbk) {
@@ -226,9 +222,8 @@ function updateField(userId, fieldName, fieldValue, cbk) {
 }
 
 function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
-	const _id = userId;
 	const query = {
-		_id,
+		_id: userId,
 		[`${arrayName}.${itemKey}`]: itemValue[itemKey]
 	};
 
@@ -244,23 +239,14 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
 			return cbk(err, null);
 		}
 
-		if (updateResult.modifiedCount === 0) {
-			const update = {
-				$push: {
-					[arrayName]: itemValue
-				}
-			};
-
-			usersCollection.updateOne({ _id }, update, function (err, updateResult) {
-				if (err) {
-					return cbk(err, null);
-				}
-				return cbk(null, updateResult.modifiedCount);
-			});
-			return;
+		if (updateResult.modifiedCount !== 0) {
+			return cbk(null, updateResult.modifiedCount);
 		}
-
-		return cbk(null, updateResult.modifiedCount);
+		updateOne(usersCollection, { _id: userId }, {
+			$push: {
+				[arrayName]: itemValue
+			}
+		}, cbk);
 	});
 }
 
