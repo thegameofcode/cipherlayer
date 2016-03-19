@@ -5,7 +5,6 @@ const async = require('async');
 const escapeRegexp = require('escape-regexp');
 const config = require('../../config');
 const MongoClient = require('mongodb').MongoClient;
-const ObjectID = require('mongodb').ObjectID;
 const _ = require('lodash');
 
 const TIME_TO_REFRESH = 1000 * 60 * 60;
@@ -96,12 +95,14 @@ function addUser(userToAdd, cbk) {
 					user.roles = ['user'];
 				}
 
-				return usersCollection.insert(user, function (err, result) {
+				return usersCollection.insertOne(user, function (err, insertResult) {
 					if (err) {
 						return cbk(err, null);
 					}
 
-					return cbk(null, result[0]);
+					user._id = insertResult.insertedId;
+
+					return cbk(null, user);
 				});
 			}
 			return cbk(err);
@@ -123,7 +124,7 @@ function findByEmail(email, callback) {
 
 	const targetEmail = makeRegEx(email);
 
-	usersCollection.find({username: targetEmail}, {password: 0}).toArray(function (error, foundUsers) {
+	usersCollection.count({username: targetEmail}, function (error, totalCount) {
 
 		if (error) {
 			return callback({
@@ -135,11 +136,24 @@ function findByEmail(email, callback) {
 			});
 		}
 
-		if (_.isEmpty(foundUsers)) {
-			return callback(null, {available: true});
+		if (totalCount) {
+			return callback(null, {available: false});
 		}
 
-		return callback(null, {available: false});
+		return callback(null, {available: true});
+	});
+}
+
+function findOne(criteria, options, cbk) {
+	usersCollection.find(criteria, options || {}).limit(1).next(function (err, user) {
+		if (err) {
+			return cbk(err);
+		}
+
+		if (!user) {
+			return cbk(new Error(ERROR_USER_NOT_FOUND));
+		}
+		return cbk(null, user);
 	});
 }
 
@@ -147,94 +161,50 @@ function getFromUsername(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'});
 	}
-	const usernameRe = makeRegEx(username);
-	usersCollection.find({ username: usernameRe }, {password: 0}, function (err, users) {
-		if (err) {
-			return cbk(err);
-		}
-
-		users.nextObject(function (err, user) {
-			if (err) {
-				return cbk(err);
-			}
-			if (!user) {
-				return cbk(new Error(ERROR_USER_NOT_FOUND));
-			}
-			return cbk(null, user);
-		});
-	});
+	findOne({ username: makeRegEx(username) }, {password: 0}, cbk);
 }
 
 function getFromUsernamePassword(username, password, cbk) {
-	const usernameRE = makeRegEx(username);
-
-	usersCollection.find({ username: usernameRE, password }, {password: 0}, function (err, users) {
-		if (err) {
-			return cbk(err, null);
-		}
-
-		users.nextObject(function (nextErr, user) {
-			if (nextErr) {
-				return cbk(nextErr);
-			}
-			if (!user) {
-				return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-			}
-			return cbk(null, user);
-		});
-	});
+	findOne({ username:  makeRegEx(username), password }, {password: 0}, cbk);
 }
 
 function getAllUserFields(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'}, null);
 	}
-	const usernameRE = makeRegEx(username);
-	usersCollection.find({ username: usernameRE }, function (err, users) {
-		if (err) {
-			return cbk(err, null);
-		}
-
-		users.nextObject(function (nextErr, user) {
-			if (nextErr) {
-				return cbk(nextErr);
-			}
-			if (!user) {
-				return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-			}
-			return cbk(null, user);
-		});
-	});
+	findOne({ username: makeRegEx(username) }, {}, cbk);
 }
 
 function deleteAllUsers(cbk) {
-	usersCollection.remove({}, function (err) {
+	usersCollection.deleteMany({}, function (err) {
 		return cbk(err);
 	});
 }
 
 function getFromId(id, cbk) {
-	usersCollection.find({_id: id}, {password: 0}, function (err, users) {
+	findOne({_id: id}, {password: 0}, cbk);
+}
+
+function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
+	const data = {
+		[method]: {
+			[fieldName]: fieldValue
+		}
+	};
+
+	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
 		if (err) {
 			return cbk(err, null);
 		}
-
-		users.nextObject(function (err, user) {
-			if (err) {
-				return cbk(err);
-			}
-			if (!user) {
-				return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-			}
-			if (user._id === id) {
-				return cbk(null, user);
-			}
-		});
+		return cbk(null, updatedProfiles);
 	});
 }
 
+function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
+	updateFieldWithMethod(userId, '$pull', fieldName, fieldValue, cbk);
+}
+
 function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
-	const _id = new ObjectID(userId);
 
 	const data = {
 		$push: {
@@ -243,32 +213,22 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 			}
 		}
 	};
-	usersCollection.update({ _id }, data, function (err, updatedProfiles) {
+	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err) {
 		if (err) {
 			return cbk(err, null);
 		}
-		return cbk(null, updatedProfiles);
+		return cbk(null, 1);
 	});
 }
 
 function updateField(userId, fieldName, fieldValue, cbk) {
-	const data = {
-		$set: {
-			[fieldName]: fieldValue
-		}
-	};
-
-	usersCollection.update({_id: userId}, data, function (err, updatedUsers) {
-		if (err) {
-			return cbk(err, null);
-		}
-		return cbk(null, updatedUsers);
-	});
+	updateFieldWithMethod(userId, '$set', fieldName, fieldValue, cbk);
 }
 
 function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
+	const _id = userId;
 	const query = {
-		_id: userId,
+		_id,
 		[`${arrayName}.${itemKey}`]: itemValue[itemKey]
 	};
 
@@ -279,38 +239,55 @@ function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
 	};
 
 	// first tries to update array item if already exists
-	usersCollection.update(query, update, function (err, updatedUsers) {
+	usersCollection.updateOne(query, update, function (err, updateResult) {
 		if (err) {
 			return cbk(err, null);
 		}
 
-		if (updatedUsers === 0) {
+		if (updateResult.modifiedCount === 0) {
 			const update = {
 				$push: {
 					[arrayName]: itemValue
 				}
 			};
 
-			usersCollection.update({_id: userId}, update, function (err, updatedUsers) {
+			usersCollection.updateOne({ _id }, update, function (err, updateResult) {
 				if (err) {
 					return cbk(err, null);
 				}
-				return cbk(null, updatedUsers);
+				return cbk(null, updateResult.modifiedCount);
 			});
 			return;
 		}
 
-		return cbk(null, updatedUsers);
+		return cbk(null, updateResult.modifiedCount);
 	});
 }
 
 function addRealm(realmToAdd, cbk) {
-	realmsCollection.insert(realmToAdd, function (err, result) {
+	realmsCollection.insertOne(realmToAdd, function (err, result) {
 		if (err) {
 			return cbk(err, null);
 		}
 
-		return cbk(null, result[0]);
+		return cbk(null, result);
+	});
+}
+
+function getRealmFromName(name, cbk) {
+	if (!name) {
+		return cbk({err: 'invalid_realm_name', code: 400});
+	}
+	const nameRe = makeRegEx(name);
+	realmsCollection.find({name: nameRe}, {_id: 0}).limit(1).next(function (err, realm) {
+		if (err) {
+			return cbk(err);
+		}
+
+		if (!realm) {
+			return cbk({err: 'realm_not_found', code: 400});
+		}
+		return cbk(null, realm);
 	});
 }
 
@@ -339,7 +316,7 @@ function resetRealmsVariables() {
 }
 
 function deleteAllRealms(cbk) {
-	realmsCollection.remove({}, function (err) {
+	realmsCollection.deleteMany({}, function (err) {
 		return cbk(err);
 	});
 }
@@ -348,7 +325,7 @@ function getStatus(cbk) {
 	if (!db || !usersCollection) {
 		return cbk(MONGO_ERR);
 	}
-	usersCollection.count(function (err) {
+	usersCollection.count({}, function (err) {
 		if (err) {
 			return cbk(MONGO_ERR);
 		}
@@ -367,8 +344,10 @@ module.exports = {
 	getFromId,
 
 	updateField,
+	updateFieldWithMethod,
 	updateArrayItem,
 	addToArrayFieldById,
+	removeFromArrayFieldById,
 	getAllUserFields,
 
 	ERROR_USER_NOT_FOUND,
@@ -376,6 +355,7 @@ module.exports = {
 
 	addRealm,
 	getRealms,
+	getRealmFromName,
 	resetRealmsVariables,
 	deleteAllRealms,
 	findByEmail,
