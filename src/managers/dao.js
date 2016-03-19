@@ -5,7 +5,6 @@ const async = require('async');
 const escapeRegexp = require('escape-regexp');
 const config = require('../../config.json');
 const MongoClient = require('mongodb').MongoClient;
-const ObjectID = require('mongodb').ObjectID;
 const _ = require('lodash');
 
 const TIME_TO_REFRESH = 1000 * 60 * 60;
@@ -186,16 +185,13 @@ function getFromId(id, cbk) {
 	findOne({_id: id}, {password: 0}, cbk);
 }
 
-function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
-	const _id = new ObjectID(userId);
-
+function updateFieldWithMethod(userId, method, fieldName, fieldValue, cbk){
 	const data = {
-		$push: {
-			[fieldName]: {
-				$each: [fieldValue]
-			}
+		[method]: {
+			[fieldName]: fieldValue
 		}
 	};
+
 	usersCollection.findOneAndUpdate({ _id }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
 		if (err) {
 			return cbk(err, null);
@@ -204,19 +200,29 @@ function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
 	});
 }
 
-function updateField(userId, fieldName, fieldValue, cbk) {
+function removeFromArrayFieldById(userId, fieldName, fieldValue, cbk) {
+	updateFieldWithMethod(userId, '$pull', fieldName, fieldValue, cbk);
+}
+
+function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
+
 	const data = {
-		$set: {
-			[fieldName]: fieldValue
+		$push: {
+			[fieldName]: {
+				$each: [fieldValue]
+			}
 		}
 	};
-
-	usersCollection.updateOne({ _id: userId }, data, function (err, updateResult) {
+	usersCollection.findOneAndUpdate({ _id: userId }, data, { returnOriginal: false, projection: { password: 0 }}, function (err, updatedProfiles) {
 		if (err) {
 			return cbk(err, null);
 		}
-		return cbk(null, updateResult.modifiedCount);
+		return cbk(null, updatedProfiles);
 	});
+}
+
+function updateField(userId, fieldName, fieldValue, cbk) {
+	updateFieldWithMethod(userId, '$set', fieldName, fieldValue, cbk);
 }
 
 function updateArrayItem(userId, arrayName, itemKey, itemValue, cbk) {
@@ -265,6 +271,23 @@ function addRealm(realmToAdd, cbk) {
 		}
 
 		return cbk(null, result);
+	});
+}
+
+function getRealmFromName(name, cbk) {
+	if (!name) {
+		return cbk({err: 'invalid_realm_name', code: 400});
+	}
+	const nameRe = makeRegEx(name);
+	realmsCollection.find({name: nameRe}, {_id: 0}).limit(1).next(function (err, realms) {
+		if (err) {
+			return cbk(err);
+		}
+
+		if (!realm) {
+			return cbk({err: 'realm_not_found', code: 400});
+		}
+		return cbk(null, realm);
 	});
 }
 
@@ -321,8 +344,10 @@ module.exports = {
 	getFromId,
 
 	updateField,
+	updateFieldWithMethod,
 	updateArrayItem,
 	addToArrayFieldById,
+	removeFromArrayFieldById,
 	getAllUserFields,
 
 	ERROR_USER_NOT_FOUND,
@@ -330,6 +355,7 @@ module.exports = {
 
 	addRealm,
 	getRealms,
+	getRealmFromName,
 	resetRealmsVariables,
 	deleteAllRealms,
 	findByEmail,

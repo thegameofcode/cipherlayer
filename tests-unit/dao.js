@@ -208,6 +208,42 @@ describe('user dao', function () {
 		});
 	});
 
+	it('updateFieldWithMethod $set', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = 'value1';
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.equal(update.$set[expectedField], expectedValue);
+			cbk(null, 1);
+		};
+
+		dao.updateFieldWithMethod(expectedUser.id, '$set', expectedField, expectedValue, function (err, updates) {
+			assert.equal(err, null);
+			assert.equal(updates, 1);
+			return done();
+		});
+	});
+
+	it('updateFieldWithMethod $pull', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = ['value1', 'value2'];
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.equal(update.$pull[expectedField], expectedValue);
+			cbk(null, 1);
+		};
+
+		dao.updateFieldWithMethod(expectedUser.id, '$pull', expectedField, expectedValue, function (err, updates) {
+			assert.equal(err, null);
+			assert.equal(updates, 1);
+			return done();
+		});
+	});
+
 	it('updateField', function (done) {
 		const expectedUser = _.assign({}, baseUser);
 		const expectedField = 'field1';
@@ -222,6 +258,42 @@ describe('user dao', function () {
 		dao.updateField(expectedUser.id, expectedField, expectedValue, function (err, updates) {
 			assert.equal(err, null);
 			assert.equal(updates, 1);
+			return done();
+		});
+	});
+
+	it('removeFromArrayFieldById', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = ['value1', 'value2'];
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.deepEqual(update.$pull[expectedField], expectedValue);
+			cbk(null, 1);
+		};
+
+		dao.removeFromArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
+			assert.equal(err, null);
+			assert.equal(added, 1);
+			return done();
+		});
+	});
+
+	it('addToArrayFieldById', function (done) {
+		const expectedUser = _.assign({}, baseUser);
+		const expectedField = 'field1';
+		const expectedValue = ['value1', 'value2'];
+
+		fakeCollection.update = function (query, update, cbk) {
+			assert.equal(query._id, expectedUser.id);
+			assert.deepEqual(update.$push[expectedField], {$each: [expectedValue]});
+			cbk(null, 1);
+		};
+
+		dao.addToArrayFieldById(expectedUser.id, expectedField, expectedValue, function (err, added) {
+			assert.equal(err, null);
+			assert.equal(added, 1);
 			return done();
 		});
 	});
