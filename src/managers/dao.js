@@ -145,12 +145,8 @@ function findByEmail(email, callback) {
 	});
 }
 
-function getFromUsername(username, cbk) {
-	if (!username) {
-		return cbk({err: 'invalid_username'});
-	}
-	const usernameRe = makeRegEx(username);
-	usersCollection.find({ username: usernameRe }, {password: 0}).limit(1).next(function (err, user) {
+function findOne(criteria, options, cbk) {
+	usersCollection.find(criteria, options || {}).limit(1).next(function (err, user) {
 		if (err) {
 			return cbk(err);
 		}
@@ -162,36 +158,22 @@ function getFromUsername(username, cbk) {
 	});
 }
 
+function getFromUsername(username, cbk) {
+	if (!username) {
+		return cbk({err: 'invalid_username'});
+	}
+	findOne({ username: makeRegEx(username) }, {password: 0}, cbk);
+}
+
 function getFromUsernamePassword(username, password, cbk) {
-	const usernameRE = makeRegEx(username);
-
-	usersCollection.find({ username: usernameRE, password }, {password: 0}).limit(1).next(function (err, user) {
-		if (err) {
-			return cbk(err, null);
-		}
-
-		if (!user) {
-			return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-		}
-		return cbk(null, user);
-	});
+	findOne({ username:  makeRegEx(username), password }, {password: 0}, cbk);
 }
 
 function getAllUserFields(username, cbk) {
 	if (!username) {
 		return cbk({err: 'invalid_username'}, null);
 	}
-	const usernameRE = makeRegEx(username);
-	usersCollection.find({ username: usernameRE }).limit(1).next(function (err, user) {
-		if (err) {
-			return cbk(err, null);
-		}
-
-		if (!user) {
-			return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-		}
-		return cbk(null, user);
-	});
+	findOne({ username: makeRegEx(username) }, {}, cbk);
 }
 
 function deleteAllUsers(cbk) {
@@ -201,18 +183,7 @@ function deleteAllUsers(cbk) {
 }
 
 function getFromId(id, cbk) {
-	usersCollection.find({_id: id}, {password: 0}).limit(1).next(function (err, user) {
-		if (err) {
-			return cbk(err, null);
-		}
-
-		if (!user) {
-			return cbk(new Error(ERROR_USER_NOT_FOUND), null);
-		}
-		if (user._id === id) {
-			return cbk(null, user);
-		}
-	});
+	findOne({_id: id}, {password: 0}, cbk);
 }
 
 function addToArrayFieldById(userId, fieldName, fieldValue, cbk) {
