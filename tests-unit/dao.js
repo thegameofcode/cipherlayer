@@ -23,10 +23,10 @@ describe('user dao', function () {
 
 	beforeEach(function (done) {
 		fakeCollection = {
-			remove: noop,
+			deleteMany: noop,
 			count: noop,
 			find: noop,
-			insert: noop,
+			insertOne: noop,
 			update: noop,
 			ensureIndex: noop,
 			toArray: noop
@@ -38,10 +38,15 @@ describe('user dao', function () {
 		};
 
 		fakeFind = {
-			nextObject: noop
+			limit() {
+				return this;
+			},
+			next(cbk) {
+				return cbk(null, null);
+			}
 		};
 
-		sinon.stub(fakeCollection, 'remove').yields();
+		sinon.stub(fakeCollection, 'deleteMany').yields();
 		sinon.stub(fakeCollection, 'ensureIndex').yields();
 		sinon.stub(fakeDb, 'collection').returns(fakeCollection);
 		sinon.stub(mongoClient, 'connect').yields(null, fakeDb);
@@ -76,9 +81,8 @@ describe('user dao', function () {
 
 	it('add', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').onCall(0).yields(null, null);
-		sinon.stub(fakeCollection, 'insert').onCall(0).yields(null, [fakeUser]);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeCollection, 'insertOne').onCall(0).yields(null, {insertedId: fakeUser._id});
 		sinon.stub(fakeCollection, 'count').onCall(0).yields(null, 1);
 
 		const expectedUser = _.assign({}, baseUser);
@@ -94,8 +98,8 @@ describe('user dao', function () {
 	it('getFromUsername', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
 		delete(fakeUser.password);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields(null, fakeUser);
 
 		const expectedUser = _.assign({}, baseUser);
 		dao.getFromUsername(expectedUser.username, function (err, foundUser) {
@@ -114,7 +118,8 @@ describe('user dao', function () {
 	});
 
 	it('getFromUsername - error 1', function (done) {
-		sinon.stub(fakeCollection, 'find').yields({err: 'generic_error'}, null);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields({err: 'generic_error'}, null);
 
 		dao.getFromUsername('username', function (err) {
 			assert.deepEqual(err, {err: 'generic_error'});
@@ -123,8 +128,8 @@ describe('user dao', function () {
 	});
 
 	it('getFromUsername - error 2', function (done) {
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields({err: 'generic_error'}, null);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields({err: 'generic_error'}, null);
 
 		const expectedUser = _.assign({}, baseUser);
 		dao.getFromUsername(expectedUser.username, function (err) {
@@ -136,8 +141,8 @@ describe('user dao', function () {
 	it('getFromUsernamePassword', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
 		delete(fakeUser.password);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields(null, fakeUser);
 
 		const expectedUser = _.assign({}, baseUser);
 		dao.getFromUsernamePassword(expectedUser.username, expectedUser.password, function (err, foundUser) {
@@ -151,8 +156,8 @@ describe('user dao', function () {
 	it('getFromId', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
 		delete(fakeUser.password);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields(null, fakeUser);
 
 		const expectedUser = _.assign({}, baseUser);
 		dao.getFromId(expectedUser.id, function (err, foundUser) {
@@ -165,8 +170,8 @@ describe('user dao', function () {
 
 	it('already exists', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields(null, fakeUser);
 
 		const expectedUser = _.assign({}, baseUser);
 		dao.addUser(expectedUser, function (err, createdUser) {
@@ -178,8 +183,8 @@ describe('user dao', function () {
 
 	it('already exists (capitalized username)', function (done) {
 		const fakeUser = _.assign({_id: baseUser.id}, baseUser);
-		sinon.stub(fakeCollection, 'find').yields(null, fakeFind);
-		sinon.stub(fakeFind, 'nextObject').yields(null, fakeUser);
+		sinon.stub(fakeCollection, 'find').onCall(0).returns(fakeFind);
+		sinon.stub(fakeFind, 'next').yields(null, fakeUser);
 
 		const expectedUser = _.assign({}, baseUser);
 		expectedUser.username = `UsEr1${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`;
@@ -208,10 +213,10 @@ describe('user dao', function () {
 		const expectedField = 'field1';
 		const expectedValue = 'value1';
 
-		fakeCollection.update = function (query, update, cbk) {
+		fakeCollection.updateOne = function (query, update, cbk) {
 			assert.equal(query._id, expectedUser.id);
 			assert.equal(update.$set[expectedField], expectedValue);
-			cbk(null, 1);
+			cbk(null, { modifiedCount: 1});
 		};
 
 		dao.updateField(expectedUser.id, expectedField, expectedValue, function (err, updates) {
