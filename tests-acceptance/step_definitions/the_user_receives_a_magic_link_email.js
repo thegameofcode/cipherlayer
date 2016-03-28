@@ -2,7 +2,7 @@
 
 require('chai').should();
 const world = require('../support/world');
-const config = require('../../config.json');
+const config = require('../../config');
 
 module.exports = function () {
 	this.Then(/^the user receives a magic link email$/, function (callback) {

@@ -7,7 +7,7 @@ const nock = require('nock');
 const phoneMng = require('../src/managers/phone');
 const redisMng = require('../src/managers/redis');
 
-const config = require('../config.json');
+const config = require('../config');
 
 const phoneSettings = {
 	phoneVerification: {

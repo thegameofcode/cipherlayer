@@ -1,7 +1,7 @@
 'use strict';
 
 const log = require('../logger/service');
-const config = require('../../config.json');
+const config = require('../../config');
 const request = require('request');
 const httpProxy = require('http-proxy');
 const _ = require('lodash');

@@ -156,7 +156,7 @@ function sendEmailMagicLink(email, link, cbk){
 }
 
 module.exports = function (settings) {
-	const config = require('../../config.json');
+	const config = require('../../config');
 	_settings = Object.assign({}, config, settings);
 
 	return {

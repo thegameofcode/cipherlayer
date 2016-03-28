@@ -6,7 +6,7 @@ const ciphertoken = require('ciphertoken');
 const nock = require('nock');
 
 const dao = require('../../src/managers/dao');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const versionHeader = 'test/1';
 const accessTokenSettings = require('../token_settings').accessTokenSettings;

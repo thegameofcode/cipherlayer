@@ -2,7 +2,7 @@ const world = require('../support/world');
 const request = require('request');
 const assert = require('assert');
 const async = require('async');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const dao = require('../../src/managers/dao');
 const _ = require('lodash');

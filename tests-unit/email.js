@@ -4,7 +4,7 @@ const nock = require('nock');
 
 const redisMng = require('../src/managers/redis');
 
-const config = require('../config.json');
+const config = require('../config');
 const notifServiceURL = config.externalServices.notifications.base;
 const notifServicePath = config.externalServices.notifications.pathEmail;
 

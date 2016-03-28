@@ -3,7 +3,7 @@
 const async = require('async');
 const isFunction = require('lodash/isFunction');
 const ciphertoken = require('ciphertoken');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,

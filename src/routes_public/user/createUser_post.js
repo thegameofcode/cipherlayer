@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../../../config.json');
+const config = require('../../../config');
 const tokenMng = require('../../managers/token');
 const userMng = require('../../managers/user');
 

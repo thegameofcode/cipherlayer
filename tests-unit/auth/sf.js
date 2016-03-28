@@ -6,7 +6,7 @@ const ciphertoken = require('ciphertoken');
 const nock = require('nock');
 const _ = require('lodash');
 
-const config = require('../../config.json');
+const config = require('../../config');
 const dao = require('../../src/managers/dao');
 
 const SF_PROFILE = require('../resources/sfProfileTemplate');

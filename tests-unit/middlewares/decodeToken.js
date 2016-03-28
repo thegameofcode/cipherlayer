@@ -3,7 +3,7 @@
 const assert = require('assert');
 const should = require('chai').should();
 const ciphertoken = require('ciphertoken');
-const config = require('../../config.json');
+const config = require('../../config');
 const decodeToken = require('../../src/middlewares/decodeToken');
 
 const accessTokenSettings = {

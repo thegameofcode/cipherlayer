@@ -3,7 +3,7 @@ const nock = require('nock');
 const request = require('request');
 const ciphertoken = require('ciphertoken');
 const dao = require('../src/managers/dao');
-const config = require('../config.json');
+const config = require('../config');
 
 const accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,
