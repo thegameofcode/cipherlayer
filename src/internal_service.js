@@ -45,7 +45,10 @@ module.exports = function () {
 				user: req.user,
 				tokenInfo: req.tokenInfo
 			};
-			delete(logInfo.request.params.password);
+
+			if (logInfo.request.params && logInfo.request.params.password) {
+				delete(logInfo.request.params.password);
+			}
 
 			req.log.info(logInfo, 'response');
 		});
