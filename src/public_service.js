@@ -94,7 +94,7 @@ module.exports = function () {
 		server.use(versionControl(versionControlOptions));
 
 		server.on('uncaughtException', function (req, res, route, error) {
-			log.error({exception: {req, res, route, err: error}});
+			log.error({exception: {req, res, route, err: error}}, 'uncaught exception');
 			if (!res.statusCode) {
 				res.send(500, {err: 'internal_error', des: 'uncaught exception'});
 			}
