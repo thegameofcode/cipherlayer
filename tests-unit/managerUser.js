@@ -459,7 +459,7 @@ describe('user Manager', function () {
 		});
 	});
 
-	describe.only('Create user DIRECT LOGIN', function () {
+	describe('Create user DIRECT LOGIN', function () {
 		const redisKey = config.emailVerification.redis.key;
 		const redisExp = config.emailVerification.redis.expireInSec;
 

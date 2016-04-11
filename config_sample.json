@@ -113,7 +113,7 @@
 		},
 		"scheme": "my-scheme",
 		"redirectProtocol": "https",
-		"errOnUserDup" : true
+		"errOnUserExists" : true
 	},
 	"externalServices": {
 		"notifications": {
