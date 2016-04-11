@@ -5,7 +5,7 @@ const request = require('request');
 const nock = require('nock');
 const _ = require('lodash');
 
-const config = require('../../config.json');
+const config = require('../../config');
 const userDao = require('../../src/managers/dao');
 
 const versionHeader = 'test/1';

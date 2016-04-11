@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 const sfPlatform = require('../../src/platforms/salesforce');
-const config = require('../../config.json');
+const config = require('../../config');
 const SF_PROFILE = require('../resources/sfProfileTemplate');
 
 const sfAccessToken = {

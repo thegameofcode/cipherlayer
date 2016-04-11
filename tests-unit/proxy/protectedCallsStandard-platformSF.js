@@ -7,7 +7,7 @@ const _ = require('lodash');
 const nock = require('nock');
 
 const dao = require('../../src/managers/dao');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const accessTokenSettings = require('../token_settings').accessTokenSettings;
 

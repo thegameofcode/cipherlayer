@@ -1,6 +1,6 @@
 'use strict';
 
-let config = require('../../config.json'); // eslint-disable-line prefer-const
+let config = require('../../config'); // eslint-disable-line prefer-const
 
 module.exports = function () {
 	this.Given(/^config has no param emailverification$/, function (callback) {

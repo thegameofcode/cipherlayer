@@ -1,7 +1,7 @@
 const world = require('../support/world');
 const request = require('request');
 const assert = require('assert');
-const config = require('../../config.json');
+const config = require('../../config');
 
 module.exports = function () {
 	this.When(/^the application makes a (.*) without credentials (.*) to a protected (.*)$/, function (METHOD, PAYLOAD, PATH, callback) {

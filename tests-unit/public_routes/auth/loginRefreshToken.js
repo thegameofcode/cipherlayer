@@ -3,7 +3,7 @@
 const should = require('chai').should();
 const mockery = require('mockery');
 const sinon = require('sinon');
-const config = require('../../../config.json');
+const config = require('../../../config');
 
 describe('public routes', function () {
 	describe('/auth', function () {

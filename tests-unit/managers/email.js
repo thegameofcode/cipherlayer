@@ -3,7 +3,7 @@
 const nock = require('nock');
 const should = require('chai').should();
 const emailMng = require('../../src/managers/email')();
-const config = require('../../config.json');
+const config = require('../../config');
 
 describe('managers', function () {
 	describe('email', function () {

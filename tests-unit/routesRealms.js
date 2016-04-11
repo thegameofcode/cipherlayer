@@ -3,7 +3,7 @@ const request = require('request');
 const async = require('async');
 const _ = require('lodash');
 
-const config = require('../config.json');
+const config = require('../config');
 const daoMng = require('../src/managers/dao');
 
 describe('realms', function () {

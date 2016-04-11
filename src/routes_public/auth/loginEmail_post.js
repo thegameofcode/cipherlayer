@@ -1,7 +1,7 @@
 'use strict';
 
 const emailManager = require('../../managers/email')();
-const config = require('../../../config.json');
+const config = require('../../../config');
 const tokenManager = require('../../managers/token');
 const daoManager = require('../../managers/dao');
 

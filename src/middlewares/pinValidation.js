@@ -4,7 +4,7 @@ const log = require('../logger/service');
 const _ = require('lodash');
 const phoneMng = require('../managers/phone');
 const isValidJSON = require('../managers/json_validator');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const errInvalidFields = {
 	err: 'auth_proxy_error',

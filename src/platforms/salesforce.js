@@ -9,7 +9,7 @@ const daoMng = require('../managers/dao');
 const userMng = require('../managers/user')();
 const tokenMng = require('../managers/token');
 const fileStoreMng = require('../managers/file_store');
-const config = require('../../config.json');
+const config = require('../../config');
 
 const forcedotcomStrategy = require('passport-forcedotcom').Strategy;
 
