@@ -459,7 +459,7 @@ describe('user Manager', function () {
 		});
 	});
 
-	describe('Create user DIRECT LOGIN', function () {
+	describe.only('Create user DIRECT LOGIN', function () {
 		const redisKey = config.emailVerification.redis.key;
 		const redisExp = config.emailVerification.redis.expireInSec;
 
@@ -640,6 +640,51 @@ describe('user Manager', function () {
 							assert.notEqual(err, null);
 							assert.deepEqual(err, expectedError);
 							assert.equal(tokens, undefined);
+							return done();
+						});
+					});
+				});
+			});
+		});
+
+		it('Call sent 2 times with error on user exists deactivated', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification.errOnUserExists = false;
+
+			const transactionId = '1a2b3c4d5e6f';
+
+			const bodyData = {
+				country: 'US',
+				lastName: 'lastName',
+				phone: '111111111',
+				company: '',
+				password: 'valid_password',
+				firstName: 'firstName',
+				email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+				transactionId
+			};
+
+			redisMng.insertKeyValue(redisKey.replace('{username}', bodyData.email), transactionId, redisExp, function (err, value) {
+				assert.equal(err, null);
+				assert.equal(value, transactionId);
+
+				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+					if (err) {
+						return done(err);
+					}
+
+					nock(`http://${config.private_host}:${config.private_port}`)
+						.post(config.passThroughEndpoint.path)
+						.reply(201, {id: expectedUserId});
+
+					userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
+						assert.equal(err, null);
+						assert.notEqual(tokens, null);
+
+						userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
+							assert.equal(err, null);
+							assert.notEqual(tokens, null);
 							return done();
 						});
 					});

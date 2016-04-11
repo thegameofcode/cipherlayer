@@ -235,16 +235,38 @@ function createUserByToken(token, cbk) {
 						});
 					}
 
-					if (foundUser) {
-						return cbk({
-							err: 'auth_proxy_error',
-							des: 'user already exists',
-							code: 403
-						});
-					}
+					if ( foundUser ) {
+						if( _settings.emailVerification.errOnUserExists === false ){
+							//do not return an error when the user already exists
+							//this allow the redirect flow for user activation to continue properly
+							//insted of returning a JSON error
+							const data = {};
+							if (foundUser.roles) {
+								data.roles = foundUser.roles;
+							}
 
-					delete(body[_settings.passThroughEndpoint.password]);
-					createUserPrivateCall(body, user, cbk);
+							tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
+								if (err) {
+									log.error({err}, 'error creating tokens');
+									return cbk({
+										err: err.message,
+										code: 409
+									});
+								}
+								tokens.expiresIn = _settings.accessToken.expiration * 60;
+								return cbk(null, tokens);
+							});
+						} else {
+							return cbk({
+								err: 'auth_proxy_error',
+								des: 'user already exists',
+								code: 403
+							});
+						}
+					} else {
+						delete(body[_settings.passThroughEndpoint.password]);
+						createUserPrivateCall(body, user, cbk);
+					}
 				});
 			});
 		});

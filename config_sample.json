@@ -112,7 +112,8 @@
 			"expireInSec": 86400
 		},
 		"scheme": "my-scheme",
-		"redirectProtocol": "https"
+		"redirectProtocol": "https",
+		"errOnUserDup" : true
 	},
 	"externalServices": {
 		"notifications": {
