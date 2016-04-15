@@ -54,7 +54,7 @@ const configSettings = {
 	}
 };
 
-function validatePwd (clear, crypted, cbk) {
+function validatePwd(clear, crypted, cbk) {
 	const cryptoMng = crypto(config.password);
 	cryptoMng.verify(clear, crypted, function (err) {
 		assert.equal(err, undefined);
@@ -731,66 +731,66 @@ describe('user Manager', function () {
 
 			userDao.addUser(expectedUser, function (err, createdUser) {
 				async.series([
-						function (next) {
-							const newPassword = {
-								password: 'newpassword'
-							};
+					function (next) {
+						const newPassword = {
+							password: 'newpassword'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'newPASSWORD'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'newPASSWORD'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'new111111'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'new111111'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'NEWPA55W0RD'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'NEWPA55W0RD'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'n3wPas5W0rd'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'n3wPas5W0rd'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.equal(err, null);
-								assert.equal(result, 1);
-								return next();
-							});
-						}
-					], done);
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.equal(err, null);
+							assert.equal(result, 1);
+							return next();
+						});
+					}
+				], done);
 			});
 		});
 	});

@@ -478,7 +478,7 @@ function isValidDomain(email, cbk) {
 		}
 
 		if ((!realms || !realms.length)) {
-			return cbk(true);
+			return cbk(false);
 		}
 
 		for (let realm in realms) {
