@@ -235,8 +235,8 @@ function createUserByToken(token, cbk) {
 						});
 					}
 
-					if ( foundUser ) {
-						if( _settings.emailVerification.errOnUserExists === false ){
+					if (foundUser) {
+						if (_settings.emailVerification.errOnUserExists === false) {
 							//do not return an error when the user already exists
 							//this allow the redirect flow for user activation to continue properly
 							//insted of returning a JSON error
@@ -455,50 +455,47 @@ function validateOldPassword(username, oldPassword, cbk) {
 }
 
 function isValidDomain(email, cbk) {
-	let validDomain = false;
 
-	const domainsInConfig = (_settings.allowedDomains && _settings.allowedDomains.length);
+	// settings overrides realms configuration
+	if (_settings.allowedDomains) {
+		for (let i = 0; i < _settings.allowedDomains.length; i++) {
+			const domain = _settings.allowedDomains[i];
 
+			// wildcard
+			const check = domain.replace(/\*/g, '.*');
+			const match = email.match(check);
+			if ((match !== null && email === match[0])) {
+				return cbk(true);
+			}
+		}
+	}
+
+	// if domain is not override on settings, we look for db realms
 	daoMng.getRealms(function (err, realms) {
 		if (err) {
-			return cbk();
+			log.error({err}, 'error finding realms in db');
+			return cbk(false);
 		}
 
-		if ((!realms || !realms.length) && !domainsInConfig) {
+		if ((!realms || !realms.length)) {
 			return cbk(true);
 		}
 
-		async.eachSeries(realms, function (realm, next) {
-			if (validDomain || !realm.allowedDomains || !realm.allowedDomains.length) {
-				return next();
+		for (let realm in realms) {
+			if (!realm.allowedDomains || !realm.allowedDomains.length) {
+				continue;
 			}
 
-			async.eachSeries(realm.allowedDomains, function (domain, more) {
-				if (validDomain) {
-					return more();
-				}
-
+			for (let domain in realm.allowedDomains) {
 				// wildcard
 				const check = domain.replace(/\*/g, '.*');
 				const match = email.match(check);
-				validDomain = (match !== null && email === match[0]);
-				more();
-			}, next);
-		}, function () {
-			if (!validDomain) {
-				// Check domains in config file
-				for (let i = 0; i < _settings.allowedDomains.length; i++) {
-					const domain = _settings.allowedDomains[i];
-
-					// wildcard
-					const check = domain.replace(/\*/g, '.*');
-					const match = email.match(check);
-					validDomain = (match !== null && email === match[0]);
-					if (validDomain) break;
+				if (match !== null && email === match[0]) {
+					return cbk(true);
 				}
 			}
-			return cbk(validDomain);
-		});
+		}
+		return cbk(false);
 	});
 }
 
