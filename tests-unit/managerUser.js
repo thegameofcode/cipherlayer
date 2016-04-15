@@ -54,7 +54,7 @@ const configSettings = {
 	}
 };
 
-function validatePwd (clear, crypted, cbk) {
+function validatePwd(clear, crypted, cbk) {
 	const cryptoMng = crypto(config.password);
 	cryptoMng.verify(clear, crypted, function (err) {
 		assert.equal(err, undefined);
@@ -646,6 +646,51 @@ describe('user Manager', function () {
 				});
 			});
 		});
+
+		it('Call sent 2 times with error on user exists deactivated', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification.errOnUserExists = false;
+
+			const transactionId = '1a2b3c4d5e6f';
+
+			const bodyData = {
+				country: 'US',
+				lastName: 'lastName',
+				phone: '111111111',
+				company: '',
+				password: 'valid_password',
+				firstName: 'firstName',
+				email: `valid${config.allowedDomains && config.allowedDomains[0] ? config.allowedDomains[0].replace('*', '') : ''}`,
+				transactionId
+			};
+
+			redisMng.insertKeyValue(redisKey.replace('{username}', bodyData.email), transactionId, redisExp, function (err, value) {
+				assert.equal(err, null);
+				assert.equal(value, transactionId);
+
+				ciphertoken.createToken(tokenSettings, bodyData.email, null, bodyData, function (err, token) {
+					if (err) {
+						return done(err);
+					}
+
+					nock(`http://${config.private_host}:${config.private_port}`)
+						.post(config.passThroughEndpoint.path)
+						.reply(201, {id: expectedUserId});
+
+					userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
+						assert.equal(err, null);
+						assert.notEqual(tokens, null);
+
+						userMng(testsConfigSettings).createUserByToken(token, function (err, tokens) {
+							assert.equal(err, null);
+							assert.notEqual(tokens, null);
+							return done();
+						});
+					});
+				});
+			});
+		});
 	});
 
 	describe('Set user password', function () {
@@ -686,66 +731,66 @@ describe('user Manager', function () {
 
 			userDao.addUser(expectedUser, function (err, createdUser) {
 				async.series([
-						function (next) {
-							const newPassword = {
-								password: 'newpassword'
-							};
+					function (next) {
+						const newPassword = {
+							password: 'newpassword'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'newPASSWORD'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'newPASSWORD'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'new111111'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'new111111'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'NEWPA55W0RD'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'NEWPA55W0RD'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.notEqual(err, null);
-								assert.deepEqual(err, expectedError);
-								assert.equal(result, undefined);
-								return next();
-							});
-						},
-						function (next) {
-							const newPassword = {
-								password: 'n3wPas5W0rd'
-							};
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.notEqual(err, null);
+							assert.deepEqual(err, expectedError);
+							assert.equal(result, undefined);
+							return next();
+						});
+					},
+					function (next) {
+						const newPassword = {
+							password: 'n3wPas5W0rd'
+						};
 
-							userMng().setPassword(createdUser._id, newPassword, function (err, result) {
-								assert.equal(err, null);
-								assert.equal(result, 1);
-								return next();
-							});
-						}
-					], done);
+						userMng().setPassword(createdUser._id, newPassword, function (err, result) {
+							assert.equal(err, null);
+							assert.equal(result, 1);
+							return next();
+						});
+					}
+				], done);
 			});
 		});
 	});

@@ -236,15 +236,37 @@ function createUserByToken(token, cbk) {
 					}
 
 					if (foundUser) {
-						return cbk({
-							err: 'auth_proxy_error',
-							des: 'user already exists',
-							code: 403
-						});
-					}
+						if (_settings.emailVerification.errOnUserExists === false) {
+							//do not return an error when the user already exists
+							//this allow the redirect flow for user activation to continue properly
+							//insted of returning a JSON error
+							const data = {};
+							if (foundUser.roles) {
+								data.roles = foundUser.roles;
+							}
 
-					delete(body[_settings.passThroughEndpoint.password]);
-					createUserPrivateCall(body, user, cbk);
+							tokenMng.createBothTokens(foundUser._id, data, function (err, tokens) {
+								if (err) {
+									log.error({err}, 'error creating tokens');
+									return cbk({
+										err: err.message,
+										code: 409
+									});
+								}
+								tokens.expiresIn = _settings.accessToken.expiration * 60;
+								return cbk(null, tokens);
+							});
+						} else {
+							return cbk({
+								err: 'auth_proxy_error',
+								des: 'user already exists',
+								code: 403
+							});
+						}
+					} else {
+						delete(body[_settings.passThroughEndpoint.password]);
+						createUserPrivateCall(body, user, cbk);
+					}
 				});
 			});
 		});
@@ -433,50 +455,47 @@ function validateOldPassword(username, oldPassword, cbk) {
 }
 
 function isValidDomain(email, cbk) {
-	let validDomain = false;
 
-	const domainsInConfig = (_settings.allowedDomains && _settings.allowedDomains.length);
+	// settings overrides realms configuration
+	if (_settings.allowedDomains) {
+		for (let i = 0; i < _settings.allowedDomains.length; i++) {
+			const domain = _settings.allowedDomains[i];
 
+			// wildcard
+			const check = domain.replace(/\*/g, '.*');
+			const match = email.match(check);
+			if ((match !== null && email === match[0])) {
+				return cbk(true);
+			}
+		}
+	}
+
+	// if domain is not override on settings, we look for db realms
 	daoMng.getRealms(function (err, realms) {
 		if (err) {
-			return cbk();
+			log.error({err}, 'error finding realms in db');
+			return cbk(false);
 		}
 
-		if ((!realms || !realms.length) && !domainsInConfig) {
-			return cbk(true);
+		if ((!realms || !realms.length)) {
+			return cbk(false);
 		}
 
-		async.eachSeries(realms, function (realm, next) {
-			if (validDomain || !realm.allowedDomains || !realm.allowedDomains.length) {
-				return next();
+		for (let realm in realms) {
+			if (!realm.allowedDomains || !realm.allowedDomains.length) {
+				continue;
 			}
 
-			async.eachSeries(realm.allowedDomains, function (domain, more) {
-				if (validDomain) {
-					return more();
-				}
-
+			for (let domain in realm.allowedDomains) {
 				// wildcard
 				const check = domain.replace(/\*/g, '.*');
 				const match = email.match(check);
-				validDomain = (match !== null && email === match[0]);
-				more();
-			}, next);
-		}, function () {
-			if (!validDomain) {
-				// Check domains in config file
-				for (let i = 0; i < _settings.allowedDomains.length; i++) {
-					const domain = _settings.allowedDomains[i];
-
-					// wildcard
-					const check = domain.replace(/\*/g, '.*');
-					const match = email.match(check);
-					validDomain = (match !== null && email === match[0]);
-					if (validDomain) break;
+				if (match !== null && email === match[0]) {
+					return cbk(true);
 				}
 			}
-			return cbk(validDomain);
-		});
+		}
+		return cbk(false);
 	});
 }
 
