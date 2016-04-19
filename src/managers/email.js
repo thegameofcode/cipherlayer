@@ -15,7 +15,7 @@ function sendEmailVerification(email, subject, html, cbk) {
 		to: email,
 		subject,
 		html,
-		from: _settings.emailVerification.from
+		from: _settings.emailVerification.from || _settings.defaultEmailSender
 	};
 
 	const options = {
@@ -93,7 +93,8 @@ function sendEmailForgotPassword(email, passwd, link, cbk) {
 	const body = {
 		to: email,
 		subject: _settings.password.subject,
-		html
+		html,
+		from: _settings.password.from || _settings.defaultEmailSender
 	};
 
 	const options = {
@@ -125,9 +126,10 @@ function sendEmailMagicLink(email, link, cbk){
 	const html = _settings.magicLink.body.replace('__LINK__', link);
 
 	const body = {
-			to: email,
-			subject: _settings.magicLink.subject,
-			html
+		to: email,
+		subject: _settings.magicLink.subject,
+		html,
+		from: _settings.magicLink.from || _settings.defaultEmailSender
 	};
 
 	const options = {
