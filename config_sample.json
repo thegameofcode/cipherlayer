@@ -26,6 +26,7 @@
 		"host": "127.0.0.1",
 		"port": 6379
 	},
+	"defaultEmailSender": "hello@example.com",
 	"passThroughEndpoint": {
 		"path": "/api/profile",
 		"recoverPath": "/api/user/:email/password",
@@ -97,8 +98,8 @@
 		]
 	},
 	"emailVerification": {
-		"subject": "Example email verification",
 		"from": "hello@example.com",
+		"subject": "Example email verification",
 		"body": "<p>Thanks for register into Example, here is a link to activate your account click</p> <p><a href='{link}' >here</a></p> <p>If you have any problems on this process, please contact <a href='mailto:support@example.com'>support@example.com</a> and we will be pleased to help you.</p>",
 		"compatibleEmailDevices": [
 			"*iPhone*",
@@ -148,10 +149,12 @@
 		"regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
 		"message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
 		"generatedRegex": "([a-z][\\d][A-Z]){3,4}",
+		"from": "hello@example.com",
 		"subject": "Recover Example User Password",
 		"body": "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
 	},
 	"magicLink": {
+		"from": "hello@example.com",
 		"subject": "Cipherlayer Magic Login",
 		"body": "Here is your magic link, please click <a href='__LINK__' >here</a>",
 		"scheme": "my-scheme"
