@@ -5,7 +5,7 @@ const ciphertoken = require('ciphertoken');
 const async = require('async');
 const nock = require('nock');
 const _ = require('lodash');
-const userDao = require('../src/managers/dao');
+const daoMng = require('../src/managers/dao');
 const redisMng = require('../src/managers/redis');
 const userMng = require('../src/managers/user');
 const crypto = require('../src/managers/crypto');
@@ -66,8 +66,8 @@ describe('user Manager', function () {
 
 	beforeEach(function (done) {
 		async.series([
-			userDao.connect,
-			userDao.deleteAllUsers,
+			daoMng.connect,
+			daoMng.deleteAllUsers,
 			redisMng.connect,
 			redisMng.deleteAllKeys
 		], done);
@@ -76,7 +76,7 @@ describe('user Manager', function () {
 
 	afterEach(function (done) {
 		async.series([
-			userDao.disconnect,
+			daoMng.disconnect,
 			redisMng.deleteAllKeys,
 			redisMng.disconnect
 		], done);
@@ -97,13 +97,13 @@ describe('user Manager', function () {
 			password: '12345678'
 		};
 
-		userDao.addUser(expectedUser, function (err, createdUser) {
+		daoMng.addUser(expectedUser, function (err, createdUser) {
 			assert.equal(err, null);
 			assert.notEqual(createdUser, null);
 
 			userMng().setPlatformData(expectedUser.id, 'sf', expectedPlatformData, function (err) {
 				assert.equal(err, null);
-				userDao.getFromId(expectedUser.id, function (err, foundUser) {
+				daoMng.getFromId(expectedUser.id, function (err, foundUser) {
 					assert.equal(err, null);
 					assert.notEqual(foundUser, null);
 					assert.notEqual(foundUser.platforms, null, 'must create an array of platforms');
@@ -457,6 +457,208 @@ describe('user Manager', function () {
 				return done();
 			});
 		});
+
+		it('No domains in config - some domains in DB', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification = null;
+			delete testsConfigSettings.allowedDomains;
+
+
+			const baseRealms = [
+				{
+					name: 'default',
+					allowedDomains: [
+						'*@a.com',
+						'*@b.com'
+					],
+					capabilities: {
+						news: true,
+						chat: true,
+						call: true
+					}
+				},
+				{
+					name: 'test',
+					allowedDomains: [
+						'*@a.com'
+					],
+					capabilities: {
+						test: true
+					}
+				},
+				{
+					name: 'valid',
+					allowedDomains: [
+						'valid@domain.com'
+					],
+					capabilities: {
+						valid: true
+					}
+				}
+			];
+
+			async.series([
+				function(cbk){
+					daoMng.resetRealmsVariables();
+					cbk();
+				},
+				daoMng.deleteAllRealms,
+				function(cbk){
+					async.each(baseRealms, daoMng.addRealm, cbk);
+				}
+			], function(){
+				const pin = null;
+
+				profileBody.email = 'valid@domain.com';
+
+				nock(`http://${config.private_host}:${config.private_port}`)
+					.post(config.passThroughEndpoint.path)
+					.reply(201, {id: expectedUserId});
+
+				userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
+					assert.equal(err, null);
+					assert.notEqual(tokens, null);
+					return done();
+				});
+			});
+		});
+
+		it('Domains in config & DB (DB valid)', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification = null;
+
+			const baseRealms = [
+				{
+					name: 'valid',
+					allowedDomains: [
+						'valid@domain.com'
+					],
+					capabilities: {
+						valid: true
+					}
+				}
+			];
+
+			async.series([
+				function(cbk){
+					daoMng.resetRealmsVariables();
+					cbk();
+				},
+				daoMng.deleteAllRealms,
+				function(cbk){
+					async.each(baseRealms, daoMng.addRealm, cbk);
+				}
+			], function(){
+				const pin = null;
+
+				profileBody.email = 'valid@domain.com';
+
+				nock(`http://${config.private_host}:${config.private_port}`)
+					.post(config.passThroughEndpoint.path)
+					.reply(201, {id: expectedUserId});
+
+				userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
+					assert.equal(err, null);
+					assert.notEqual(tokens, null);
+					return done();
+				});
+			});
+		});
+
+		it('Domains in config & DB (config valid)', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification = null;
+
+			const baseRealms = [
+				{
+					name: 'valid',
+					allowedDomains: [
+						'valid@domain.com'
+					],
+					capabilities: {
+						valid: true
+					}
+				}
+			];
+
+			async.series([
+				function(cbk){
+					daoMng.resetRealmsVariables();
+					cbk();
+				},
+				daoMng.deleteAllRealms,
+				function(cbk){
+					async.each(baseRealms, daoMng.addRealm, cbk);
+				}
+			], function(){
+				const pin = null;
+
+				profileBody.email = 'valid@a.com';
+
+				nock(`http://${config.private_host}:${config.private_port}`)
+					.post(config.passThroughEndpoint.path)
+					.reply(201, {id: expectedUserId});
+
+				userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
+					assert.equal(err, null);
+					assert.notEqual(tokens, null);
+					return done();
+				});
+			});
+		});
+
+		it('Domains in config & DB (no valid domain)', function (done) {
+			const testsConfigSettings = _.clone(configSettings);
+			testsConfigSettings.phoneVerification = null;
+			testsConfigSettings.emailVerification = null;
+
+			const baseRealms = [
+				{
+					name: 'valid',
+					allowedDomains: [
+						'valid@domain.com'
+					],
+					capabilities: {
+						valid: true
+					}
+				}
+			];
+
+			async.series([
+				function(cbk){
+					daoMng.resetRealmsVariables();
+					cbk();
+				},
+				daoMng.deleteAllRealms,
+				function(cbk){
+					async.each(baseRealms, daoMng.addRealm, cbk);
+				}
+			], function(){
+				const pin = null;
+
+				profileBody.email = 'valid@b.com';
+
+				const expectedError = {
+					err: 'user_domain_not_allowed',
+					des: 'Sorry your email domain is not authorised for this service',
+					code: 400
+				};
+
+				nock(`http://${config.private_host}:${config.private_port}`)
+					.post(config.passThroughEndpoint.path)
+					.reply(201, {id: expectedUserId});
+
+				userMng(testsConfigSettings).createUser(profileBody, pin, function (err, tokens) {
+					assert.notEqual(err, null);
+					assert.deepEqual(err, expectedError);
+					assert.equal(tokens, undefined);
+					return done();
+				});
+			});
+		});
 	});
 
 	describe('Create user DIRECT LOGIN', function () {
@@ -706,13 +908,13 @@ describe('user Manager', function () {
 				password: 'n3wPas5W0rd'
 			};
 
-			userDao.addUser(expectedUser, function (err, createdUser) {
+			daoMng.addUser(expectedUser, function (err, createdUser) {
 				userMng().setPassword(createdUser._id, newPassword, function (err, result) {
 					const clonedUser = _.clone(expectedUser);
 					clonedUser.password = newPassword.password;
 					assert.equal(err, null);
 					assert.equal(result, 1);
-					userDao.getAllUserFields(createdUser.username, function (err, foundUser) {
+					daoMng.getAllUserFields(createdUser.username, function (err, foundUser) {
 						assert.equal(err, null);
 						assert.notEqual(foundUser, null);
 						validatePwd(clonedUser.password, foundUser.password, done);
@@ -729,7 +931,7 @@ describe('user Manager', function () {
 				code: 400
 			};
 
-			userDao.addUser(expectedUser, function (err, createdUser) {
+			daoMng.addUser(expectedUser, function (err, createdUser) {
 				async.series([
 					function (next) {
 						const newPassword = {
