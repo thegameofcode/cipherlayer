@@ -455,7 +455,6 @@ function validateOldPassword(username, oldPassword, cbk) {
 }
 
 function isValidDomain(email, cbk) {
-
 	// settings overrides realms configuration
 	if (_settings.allowedDomains) {
 		for (let i = 0; i < _settings.allowedDomains.length; i++) {
@@ -481,15 +480,18 @@ function isValidDomain(email, cbk) {
 			return cbk(false);
 		}
 
-		for (let realm in realms) {
+		for (let i in realms) {
+			const realm = realms[i];
 			if (!realm.allowedDomains || !realm.allowedDomains.length) {
 				continue;
 			}
 
-			for (let domain in realm.allowedDomains) {
+			for (let j in realm.allowedDomains) {
 				// wildcard
+				const domain = realm.allowedDomains[j];
 				const check = domain.replace(/\*/g, '.*');
 				const match = email.match(check);
+
 				if (match !== null && email === match[0]) {
 					return cbk(true);
 				}
