@@ -1,6 +1,8 @@
 'use strict';
 
 const config = require('../../config');
+const logger = require('../logger/service');
+
 const redirectOnErrorEnabled = () => config.redirectOnError && config.redirectOnError.enabled;
 const redirectOnError = (err, req, res, next) => {
 
@@ -12,6 +14,7 @@ const redirectOnError = (err, req, res, next) => {
 
 	url = config.redirectOnError[err.err];
 
+	logger.info(`Redirecting to ${url} after error`, err, err.err);
 	res.redirect(url, next);
 };
 
