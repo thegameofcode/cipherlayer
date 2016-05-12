@@ -16,8 +16,8 @@ module.exports = function (req, res, next) {
 	userMng().createUserByToken(req.params.verifyToken, function (err, tokens) {
 		if (err) {
 
-			if (config.redirectOnError) {
-				redirectOnError(err, req, res, next);
+			if (redirectOnError.enabled()) {
+				redirectOnError.redirect(err, req, res, next);
 				return;
 			}
 

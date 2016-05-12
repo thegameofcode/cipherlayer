@@ -1,20 +1,22 @@
 'use strict';
 
 const config = require('../../config');
+const redirectOnErrorEnabled = () => config.redirectOnError && config.redirectOnError.enabled;
+const redirectOnError = (err, req, res, next) => {
 
-module.exports = (err, req, res, next) => {
-	//const msg = err.des || err.message || 'Internal error';
-
-	const defaultUrl = config.redirectOnError.defaultUrl;
+	let url = config.redirectOnError.default_url;
 
 	if (!err.code || !config.redirectOnError[err.err]) {
-		const url = config.redirectOnError.internal_error || defaultUrl;
-		res.redirect(url, next);
-		return;
+		url = config.redirectOnError.internal_error || url;
 	}
 
-	const url = config.redirectOnError[err.err];
+	url = config.redirectOnError[err.err];
 
 	res.redirect(url, next);
+};
+
+module.exports = {
+	enabled: redirectOnErrorEnabled,
+	redirect: redirectOnError
 };
 
