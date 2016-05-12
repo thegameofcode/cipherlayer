@@ -2,6 +2,7 @@
 
 const config = require('../../../config');
 const userMng = require('../../managers/user');
+const redirectOnError = require('../../util/redirectOnError');
 
 module.exports = function (req, res, next) {
 	if (!req.params) {
@@ -14,13 +15,20 @@ module.exports = function (req, res, next) {
 
 	userMng().createUserByToken(req.params.verifyToken, function (err, tokens) {
 		if (err) {
+
+			if (config.redirectOnError) {
+				redirectOnError(err, req, res, next);
+				return;
+			}
+
 			if (!err.code) {
 				res.send(500, err);
-			} else {
-				const errCode = err.code;
-				delete(err.code);
-				res.send(errCode, err);
+				return next();
 			}
+
+			const errCode = err.code;
+			delete(err.code);
+			res.send(errCode, err);
 			return next();
 		}
 

@@ -201,5 +201,11 @@
 	],
 	"publicEndpoints": [
 		"/public/*"
-	]
+	],
+	"redirectOnError": {
+		"internal_error": "/errors/internal_error.html",
+		"invalid_profile_data": "/errors/invalid_profile.html",
+		"user_creation_failed": "/errors/user_creation_failed.html"
+	}
+
 }
