@@ -2,7 +2,7 @@
 
 const config = require('../../../config');
 const userMng = require('../../managers/user');
-const redirectOnError = require('../../util/redirectOnError');
+const redirectOnError = require('../../util/redirectOnError')(config);
 
 module.exports = function (req, res, next) {
 	if (!req.params) {

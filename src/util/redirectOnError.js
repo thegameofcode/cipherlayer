@@ -1,10 +1,9 @@
 'use strict';
 
-const config = require('../../config');
 const logger = require('../logger/service');
 
-const redirectOnErrorEnabled = () => config.redirectOnError && config.redirectOnError.enabled;
-const redirectOnError = (err, req, res, next) => {
+const redirectOnErrorEnabled = config => () => config.redirectOnError && config.redirectOnError.enabled;
+const redirectOnError = config => (err, req, res, next) => {
 
 	let url = config.redirectOnError.default_url || '/error';
 
@@ -22,8 +21,8 @@ const redirectOnError = (err, req, res, next) => {
 	res.redirect(302, url, next);
 };
 
-module.exports = {
-	enabled: redirectOnErrorEnabled,
-	redirect: redirectOnError
-};
+module.exports = config => ({
+	enabled: redirectOnErrorEnabled(config),
+	redirect: redirectOnError(config)
+});
 
