@@ -30,6 +30,11 @@ Feature: client application logs in into a protected backend
 		Then the response status code is 204
 
 	@service
+	Scenario: client app requests a magic link with an invalid email
+		When the client app requests a magic link for an invalid user
+		Then the response status code is 400
+
+	@service
 	Scenario: user receives the magic link
 		Given a user with valid credentials
 		When the client app requests a magic link for a valid user

@@ -122,6 +122,44 @@ describe('public routes', function () {
 					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
 					loginEmail_post(req, res, next.next);
 				});
+
+				it('400 - invalid email on body', function (done) {
+					const expectedEmail = 'unknown@email.com';
+
+					const daoManagerStub = {
+						getFromUsername(email, cbk) {
+							should.exist(email);
+							email.should.equal(expectedEmail);
+							cbk({err: 'user does not exists'});
+						}
+					};
+					mockery.registerMock('../../managers/dao', daoManagerStub);
+
+					const req = {
+						params: {
+							email: expectedEmail
+						}
+					};
+					const res = {
+						send(status, body) {
+							should.exist(status);
+							status.should.equal(400);
+							should.exist(body);
+							body.should.deep.equal({
+								err: 'invalid_email',
+								des: 'email is not valid'
+							});
+						}
+					};
+					const responseSendSpy = sinon.spy(res, 'send');
+					const next = function () {
+						sinon.assert.calledOnce(responseSendSpy);
+						return done();
+					};
+
+					const loginEmail_post = require('../../../src/routes_public/auth/loginEmail_post');
+					loginEmail_post(req, res, next);
+				});
 			});
 		});
 	});

@@ -18,6 +18,7 @@ describe('prepareOptions middleware: ', function () {
 	});
 
 	afterEach(function (done) {
+		mockery.deregisterAll();
 		mockery.disable();
 		return done();
 	});
