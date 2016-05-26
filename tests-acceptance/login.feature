@@ -29,7 +29,6 @@ Feature: client application logs in into a protected backend
 		When the client app requests a magic link for a valid user
 		Then the response status code is 204
 
-		@only
 	@service
 	Scenario: client app requests a magic link with an invalid email
 		When the client app requests a magic link for an invalid user
