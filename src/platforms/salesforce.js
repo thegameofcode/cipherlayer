@@ -280,10 +280,19 @@ function renewSFAccessTokenIfNecessary(user, platform, cbk) {
 		method: 'POST'
 	};
 
+	log.info({
+		sf_options: optionsForSFRenew
+	}, 'SF renew request');
+
 	request(optionsForSFRenew, function (err, res, rawBody) {
 		if (err) {
 			return cbk(err);
 		}
+
+		log.info({
+			sf_body: rawBody
+		}, 'SF renew response');
+
 		const body = JSON.parse(rawBody);
 		const newAccessToken = body.access_token;
 
