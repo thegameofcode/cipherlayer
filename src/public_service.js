@@ -128,6 +128,7 @@ module.exports = function () {
 				publicEndpoint.replace('*','.*');
 				const regEx = new RegExp(publicEndpoint);
 				server.get(regEx, prepareOptions,propagateRequest);
+				server.post(regEx, prepareOptions,propagateRequest);
 			});
 		}
 
