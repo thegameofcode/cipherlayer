@@ -3,13 +3,21 @@ const nock = require('nock');
 const config = require('../../config');
 
 module.exports = function(){
-	this.Given(/^a protected service replies to a public GET request with (.*) to (.*) with status (.*) and a body (.*)$/, function (REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
-		nock(`http://localhost:${config.private_port}`, {
-			reqheaders: {
-				'Content-Type': 'application/json; charset=utf-8'
-			}
-		}).get(PATH).reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
+	this.Given(/^a protected service replies to a public (.*) request with (.*) to (.*) with status (.*) and a body (.*)$/, function (METHOD, REQUEST_PAYLOAD, PATH, STATUS, RESPONSE_PAYLOAD, callback){
 
+		if(METHOD === 'GET'){
+			nock(`http://localhost:${config.private_port}`, {
+				reqheaders: {
+					'Content-Type': 'application/json; charset=utf-8'
+				}
+			}).get(PATH).reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
+		} else {
+			nock(`http://localhost:${config.private_port}`, {
+				reqheaders: {
+					'Content-Type': 'application/json; charset=utf-8'
+				}
+			}).post(PATH).reply(Number(STATUS), JSON.parse(RESPONSE_PAYLOAD));
+		}
 		callback();
 	});
 
