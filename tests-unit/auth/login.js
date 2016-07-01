@@ -73,7 +73,7 @@ describe('/login', function () {
 			});
 		});
 	});
-	it('POST 409 invalid credentials', function (done) {
+	it('POST 409 user not found', function (done) {
 		const user = _.clone(baseUser);
 		user.password = 'invalidpassword';
 		const options = {
@@ -90,7 +90,7 @@ describe('/login', function () {
 			assert.equal(err, null);
 			assert.equal(res.statusCode, 409);
 			const body = JSON.parse(rawBody);
-			assert.notEqual(body.err, 'invalid_credentials');
+			assert.equal(body.err, 'user_not_found');
 			return done();
 		});
 	});
