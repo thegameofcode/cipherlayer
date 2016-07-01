@@ -5,6 +5,8 @@ const isFunction = require('lodash/isFunction');
 const ciphertoken = require('ciphertoken');
 const config = require('../../config');
 
+const log = require('../logger/service');
+
 const accessTokenSettings = {
 	cipherKey: config.accessToken.cipherKey,
 	firmKey: config.accessToken.signKey,
@@ -29,11 +31,22 @@ function createAccessToken(userId, dataIn, cbkIn) {
 }
 
 function getAccessTokenInfo(accessToken, cbk) {
-	ciphertoken.getTokenSet(accessTokenSettings, accessToken, cbk);
+	try {
+		ciphertoken.getTokenSet(accessTokenSettings, accessToken, cbk);
+	} catch(err) {
+		log.error({err_info: err, access_token: accessToken}, 'error getting accessToken info');
+		return cbk(err);
+	}
+
 }
 
 function getRefreshTokenInfo(refreshToken, cbk) {
-	ciphertoken.getTokenSet(refreshTokenSettings, refreshToken, cbk);
+	try {
+		ciphertoken.getTokenSet(refreshTokenSettings, refreshToken, cbk);
+	} catch (err){
+		log.error({err_info: err, refresh_token: refreshToken}, 'error getting refreshToken info');
+		return cbk(err);
+	}
 }
 
 function createRefreshToken(userId, dataIn, cbkIn) {
