@@ -318,7 +318,7 @@ function createUserPrivateCall(body, user, cbk) {
 		user.roles = body.roles || [];
 
 		if (!user.password) {
-			user.password = cryptoMng.randomPassword(config.password.regexValidation);
+			user.password = cryptoMng.randomPassword(config.password.generatedRegex);
 		}
 
 		cryptoMng.encrypt(user.password, function (encrypted) {

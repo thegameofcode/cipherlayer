@@ -6,11 +6,6 @@ const log = require('../logger/service');
 const userDao = require('../managers/dao');
 const config = require('../../config');
 
-const updatingUserError = {
-	err: 'proxy_error',
-	des: 'error updating user appVersion'
-};
-
 let _settings = {};
 
 function storeUserAppVersion(req, res, next) {
@@ -20,8 +15,7 @@ function storeUserAppVersion(req, res, next) {
 	userDao.updateField(req.user._id, 'appVersion', req.headers[_settings.version.header], function (err) {
 		if (err) {
 			log.error({ err });
-			res.send(500, updatingUserError);
-			return next(err);
+			return next(false);
 		}
 		return next();
 	});

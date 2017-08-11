@@ -13,7 +13,7 @@ module.exports = function findUser(req, res, next) {
 			};
 			log.error(error);
 			res.send(400, error);
-			return next(err);
+			return next(false);
 		}
 		req.user = foundUser;
 		return next();

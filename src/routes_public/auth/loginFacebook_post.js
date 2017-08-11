@@ -141,7 +141,7 @@ module.exports = function postAuthRegisterFacebook(req, res, next) {
 					accessToken: req.body.accessToken
 				};
 
-				fbUserProfile.password = cryptoMng.randomPassword(config.password.regexValidation);
+				fbUserProfile.password = cryptoMng.randomPassword(config.password.generatedRegex);
 
 				userMng.createUser(fbUserProfile, null, function (err, tokens) {
 					if (err) {

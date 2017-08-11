@@ -16,7 +16,7 @@ module.exports = function (req, res, next) {
 		daoMng.getFromUsernamePassword(req.body.username, encryptedPwd, function (err, foundUser) {
 			if (err) {
 				res.send(409, {err: err.message});
-				return next(err);
+				return next(false);
 			}
 
 			daoMng.getAllUserFields(foundUser.username, function (err, result) {

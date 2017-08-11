@@ -147,7 +147,7 @@
 		"validateOldPassword": false,
 		"regexValidation": "(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8}",
 		"message": "Your password must be at least 8 characters and must contain at least one capital, one lower and one number.",
-		"generatedRegex": "([a-z][\\d][A-Z]){3,4}",
+		"generatedRegex": "([a-z]{2})([0-9]{2})([A-Z]{4})",
 		"from": "hello@example.com",
 		"subject": "Recover Example User Password",
 		"body": "Here is your new password for accessing to your Example account, if you want, you can update it anytime from your edit profile screen. <p> __PASSWD__ <p> you can also click <a href='__LINK__' >here</a> from your mobile device to get in. If you receiver this email by error or you are sure you didn't requested it, please contact support@example.com"
