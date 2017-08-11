@@ -158,7 +158,6 @@ function findOneUser(criteria, options, cbk) {
 }
 
 function updateOne(coll, criteria, update, cbk) {
-
 	coll.updateOne(criteria, update, function (err, res) {
 		if (err) {
 			return cbk(err, null);
