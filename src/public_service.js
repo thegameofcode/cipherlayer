@@ -74,7 +74,9 @@ module.exports = function () {
 			server.opts(/.*/, function (req, res, next) {
 				res.header('Access-Control-Allow-Methods', req.header('Access-Control-Request-Methods'));
 				res.header('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers'));
-				res.header('Access-Control-Allow-Origin', config.accessControlAllow.origins);
+				if(req.header('Access-Control-Allow-Origin') === config.accessControlAllow.origins){
+					res.header('Access-Control-Allow-Origin', config.accessControlAllow.origins);
+				}
 				res.send(200);
 				return next();
 			});
