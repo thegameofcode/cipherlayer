@@ -30,7 +30,7 @@ describe('crypto', function () {
 		const crypto = require('../src/managers/crypto');
 		const cryptoMng = crypto(config.password);
 
-		const newRandomPassword = cryptoMng.randomPassword(config.password.regexValidation);
+		const newRandomPassword = cryptoMng.randomPassword(config.password.generatedRegex);
 		const testRe = new RegExp(config.password.regexValidation);
 
 		assert.ok(newRandomPassword.match(testRe), 'Random password does not match with config regexp');
