@@ -27,13 +27,13 @@ const OPTIONS = {
 const baseUser = {
 	id: 'a1b2c3d4e5f6',
 	email: 'test@a.com',
-	password: 'pass1'
+	password: 'P4ssw0rd'
 };
 
 const FB_PROFILE = {
 	name: 'Test User',
 	email: 'test@a.com',
-	id: 'fba1b2c3d4e5f6'
+	id: 'Fba1b2c3d4e5f6'
 };
 
 describe('/facebook_token', function () {
