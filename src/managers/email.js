@@ -28,6 +28,14 @@ function sendEmailVerification(email, subject, html, cbk) {
 	};
 
 	request(options, function (err, res, body) {
+		if (err) {
+			log.error({err, des: 'can´t connect with notification service'});
+			return cbk({
+				err: 'invalid_notification_service',
+				des: 'you must define a valid external service for notifications',
+				code: 500
+			});
+		}
 		if (res.statusCode === 500) {
 			return cbk(body);
 		}
